@@ -26,6 +26,12 @@ const router = new VueRouter({
       name: 'form-table',
       // 按需引入FormTable演示页面
       component: () => import('../views/FormTableView.vue')
+    },
+    {
+      path: '/form-table-v2',
+      name: 'form-table-v2',
+      // 按需引入FormTableV2演示页面
+      component: () => import('../views/FormTableV2View.vue')
     }
   ]
 })
