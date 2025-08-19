@@ -14,22 +14,41 @@
       placement="top-start" 
       v-bind="tooltipProps"
     >
-      <component-wrapper />
+      <component-wrapper 
+        :type="config.type"
+        :field-key="config.key"
+        :row="row"
+        :slot-name="config.slotName"
+        :placeholder="config.placeholder"
+        :clearable="config.clearable"
+        :disabled="config.disabled"
+        :readonly="config.readonly"
+        :min="config.min"
+        :max="config.max"
+        v-bind="config.bind"
+      />
     </el-tooltip>
     
     <!-- 不使用Tooltip -->
-    <component-wrapper v-else />
+    <component-wrapper 
+      :type="config.type"
+      :field-key="config.key"
+      :row="row"
+      :slot-name="config.slotName"
+      :placeholder="config.placeholder"
+      :clearable="config.clearable"
+      :disabled="config.disabled"
+      :readonly="config.readonly"
+      :min="config.min"
+      :max="config.max"
+      v-bind="config.bind"
+    />
   </el-form-item>
 </template>
 
 <script lang="ts" setup>
 import { computed } from 'vue'
 import ComponentWrapper from './ComponentWrapper.vue'
-
-// 定义插槽
-defineSlots<{
-  [key: string]: (props: { row: any; index: number }) => any
-}>()
 
 const props = defineProps({
   propPath: {

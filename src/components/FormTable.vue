@@ -45,23 +45,16 @@
     import { ref, defineProps, defineEmits, watch } from 'vue'
 
     // 定义props
-    const props = defineProps({
-        tableData: {
-            type: Array,
-            default: () => []
-        },
-        columns: {
-            type: Array,
-            default: () => []
-        },
-        rules: {
-            type: Object,
-            default: () => ({})
-        },
-        formData: {
-            type: Object,
-            default: () => ({})
-        }
+    const props = withDefaults(defineProps<{
+        tableData?: any[]
+        columns?: any[]
+        rules?: Record<string, any>
+        formData?: Record<string, any>
+    }>(), {
+        tableData: () => [],
+        columns: () => [],
+        rules: () => ({}),
+        formData: () => ({})
     })
 
     // 定义事件

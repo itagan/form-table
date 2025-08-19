@@ -22,16 +22,16 @@
         :config="colItem"
       >
         <!-- 自定义插槽 -->
-        <template 
+        <div 
           v-if="colItem.type === 'slotComponent' && colItem.slotName"
-          #[colItem.slotName]="{ row: slotRow, index: slotIndex }"
+          :key="colItem.slotName"
         >
           <slot 
             :name="colItem.slotName" 
-            :row="slotRow" 
-            :index="slotIndex"
+            :row="row" 
+            :index="rowIndex"
           />
-        </template>
+        </div>
       </FormTableItem>
     </el-col>
   </el-row>
@@ -52,7 +52,7 @@ const props = defineProps<Props>()
 
 // 计算属性
 const gutter = computed(() => {
-  return props.rowConfig.bind?.gutter || 10
+  return props.rowConfig.gutter || props.rowConfig.bind?.gutter || 10
 })
 
 const rowBind = computed(() => {

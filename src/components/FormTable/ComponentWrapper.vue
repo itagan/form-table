@@ -13,9 +13,15 @@ import { computed } from 'vue'
 
 interface Props {
   type: string
-  key: string
+  fieldKey: string
   row: Record<string, any>
   slotName?: string
+  placeholder?: string
+  clearable?: boolean
+  disabled?: boolean
+  readonly?: boolean
+  min?: number
+  max?: number
   [key: string]: any
 }
 
@@ -39,14 +45,16 @@ const componentMap = {
 
 // 计算组件类型
 const componentType = computed(() => {
-  return componentMap[props.type] || 'el-input'
+  return componentMap[props.type as keyof typeof componentMap] || 'el-input'
 })
 
 // 计算组件属性
 const componentProps = computed(() => {
   const baseProps = {
-    placeholder: '请输入',
-    clearable: true,
+    placeholder: props.placeholder || '请输入',
+    clearable: props.clearable !== false,
+    disabled: props.disabled,
+    readonly: props.readonly,
     ...props
   }
 
@@ -61,7 +69,13 @@ const componentProps = computed(() => {
     case 'time':
       return { ...baseProps, format: 'HH:mm:ss' }
     case 'number':
-      return { ...baseProps, type: 'number', min: 0 }
+      return { 
+        ...baseProps, 
+        min: props.min || 0,
+        max: props.max
+      }
+    case 'switch':
+      return { ...baseProps, clearable: undefined }
     case 'text':
       return {}
     default:
@@ -71,18 +85,18 @@ const componentProps = computed(() => {
 
 // 双向绑定
 const modelValue = computed({
-  get: () => props.row[props.key],
+  get: () => props.row[props.fieldKey],
   set: (value) => {
-    props.row[props.key] = value
+    props.row[props.fieldKey] = value
   }
 })
 
 // 事件处理
 const handleInput = (value: any) => {
-  props.row[props.key] = value
+  props.row[props.fieldKey] = value
 }
 
 const handleChange = (value: any) => {
-  props.row[props.key] = value
+  props.row[props.fieldKey] = value
 }
 </script>

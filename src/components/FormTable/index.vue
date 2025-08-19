@@ -1,10 +1,5 @@
 <template>
   <div class="form-table-container">
-    <!-- 加载状态 -->
-    <div v-if="loading" class="loading-overlay">
-      <el-loading-spinner />
-    </div>
-    
     <el-form 
       ref="formRef" 
       :model="formData" 
@@ -22,9 +17,6 @@
         :row-key="rowKey"
         :default-sort="defaultSort"
         v-loading="loading"
-        element-loading-text="加载中..."
-        element-loading-spinner="el-icon-loading"
-        element-loading-background="rgba(0, 0, 0, 0.8)"
       >
         <FormTableColumn
           v-for="(column, columnIndex) in columns"
@@ -46,12 +38,30 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, nextTick, computed } from 'vue'
+import { ref, watch, computed } from 'vue'
 import FormTableColumn from './FormTableColumn.vue'
-import type { FormTableProps, FormTableEmits, TableRow } from './types'
+import type { FormTableProps, FormTableEmits, TableRow, ColumnConfig, ValidationRule } from './types'
 
 // Props定义
-const props = withDefaults(defineProps<FormTableProps>(), {
+const props = withDefaults(defineProps<{
+  tableData: TableRow[]
+  columns: ColumnConfig[]
+  rules: Record<string, ValidationRule[]>
+  formData: Record<string, any>
+  loading?: boolean
+  border?: boolean
+  stripe?: boolean
+  size?: 'medium' | 'small' | 'mini'
+  showHeader?: boolean
+  highlightCurrentRow?: boolean
+  rowKey?: string
+  defaultSort?: {
+    prop: string
+    order: 'ascending' | 'descending'
+  }
+  labelWidth?: string
+  labelPosition?: 'left' | 'right' | 'top'
+}>(), {
   tableData: () => [],
   columns: () => [],
   rules: () => ({}),
@@ -68,7 +78,14 @@ const props = withDefaults(defineProps<FormTableProps>(), {
 })
 
 // 事件定义
-const emit = defineEmits<FormTableEmits>()
+const emit = defineEmits([
+  'update:tableData',
+  'update:formData',
+  'row-change',
+  'row-add',
+  'row-remove',
+  'validate'
+])
 
 // 表单引用
 const formRef = ref<any>(null)
@@ -87,23 +104,18 @@ watch(() => props.formData, (newVal) => {
   emit('update:formData', newVal)
 }, { deep: true })
 
-// 监听行数据变化
-const handleRowChange = (row: TableRow, index: number) => {
-  emit('row-change', row, index)
-}
-
 // 暴露方法
 defineExpose({
   // 表单验证
   validate: async (callback?: (valid: boolean, errors: any[]) => void) => {
     try {
       const valid = await formRef.value?.validate()
-      const errors = []
+      const errors: any[] = []
       emit('validate', valid, errors)
       callback?.(valid, errors)
       return valid
     } catch (error) {
-      const errors = Array.isArray(error) ? error : [error]
+      const errors: any[] = Array.isArray(error) ? error : [error]
       emit('validate', false, errors)
       callback?.(false, errors)
       return false
@@ -156,21 +168,6 @@ defineExpose({
 
 <style lang="less" scoped>
 .form-table-container {
-  position: relative;
-  
-  .loading-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-  }
-  
   :deep(.el-table) {
     .el-table__body-wrapper {
       .el-table__row {

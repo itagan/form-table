@@ -1,10 +1,10 @@
 <template>
   <div class="form-table-v2-demo">
-    <h1>FormTable V2 优化版本演示</h1>
+    <h1>FormTable 优化版本演示</h1>
     
     <div class="demo-section">
       <h2>基础用法</h2>
-      <FormTableV2
+      <FormTable
         ref="formTableRef"
         :table-data="tableData"
         :columns="columns"
@@ -32,7 +32,8 @@
 
 <script lang="ts" setup>
 import { ref, reactive } from 'vue'
-import FormTableV2 from '@/components/FormTableV2.vue'
+import FormTable from '@/components/FormTable/index.vue'
+import type { ColumnConfig } from '@/components/FormTable/types'
 
 const tableData = ref([
   { name: '张三', age: 25, department: '技术部', status: true },
@@ -53,7 +54,7 @@ const rules = ref({
   ]
 })
 
-const columns = ref([
+const columns = ref<ColumnConfig[]>([
   {
     name: '基本信息',
     props: { width: '400px' },

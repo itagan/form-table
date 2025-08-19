@@ -18,6 +18,8 @@ export interface FormItemConfig {
   clearable?: boolean
   disabled?: boolean
   readonly?: boolean
+  min?: number
+  max?: number
   [key: string]: any
 }
 
@@ -25,6 +27,7 @@ export interface FormItemConfig {
 export interface RowConfig {
   bind?: Record<string, any>
   props?: Record<string, any>
+  gutter?: number
   children: FormItemConfig[]
 }
 
@@ -64,6 +67,8 @@ export interface FormTableProps {
     prop: string
     order: 'ascending' | 'descending'
   }
+  labelWidth?: string
+  labelPosition?: 'left' | 'right' | 'top'
 }
 
 // 组件事件
