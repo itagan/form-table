@@ -19,6 +19,8 @@
         :field-key="config.key"
         :row="row"
         :slot-name="config.slotName"
+        :custom-component="config.customComponent"
+        :custom-components="customComponents"
         :placeholder="config.placeholder"
         :clearable="config.clearable"
         :disabled="config.disabled"
@@ -35,6 +37,8 @@
       :field-key="config.key"
       :row="row"
       :slot-name="config.slotName"
+      :custom-component="config.customComponent"
+      :custom-components="customComponents"
       :placeholder="config.placeholder"
       :clearable="config.clearable"
       :disabled="config.disabled"
@@ -47,8 +51,11 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import ComponentWrapper from './ComponentWrapper.vue'
+
+// 注入自定义组件
+const customComponents = inject('customComponents', {} as Record<string, any>)
 
 const props = defineProps({
   propPath: {

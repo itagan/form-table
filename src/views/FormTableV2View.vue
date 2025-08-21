@@ -4,6 +4,14 @@
     
     <div class="demo-section">
       <h2>基础用法</h2>
+      
+      <!-- 直接测试自定义组件 -->
+      <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ccc;">
+        <h3>直接测试自定义组件</h3>
+        <SimpleTest v-model="tableData[0].simpleTest" />
+        <p>当前值: {{ tableData[0].simpleTest }}</p>
+      </div>
+      
       <FormTable
         ref="formTableRef"
         :table-data="tableData"
@@ -11,6 +19,7 @@
         :rules="rules"
         :form-data="formData"
         :loading="loading"
+        :custom-components="customComponents"
         @update:table-data="handleTableDataUpdate"
       />
       
@@ -33,11 +42,33 @@
 <script lang="ts" setup>
 import { ref, reactive } from 'vue'
 import FormTable from '@/components/FormTable/index.vue'
+import PhoneInput from '@/components/CustomComponents/PhoneInput.vue'
+import StatusTag from '@/components/CustomComponents/StatusTag.vue'
+import TestComponent from '@/components/CustomComponents/TestComponent.vue'
+import SimpleTest from '@/components/CustomComponents/SimpleTest.vue'
 import type { ColumnConfig } from '@/components/FormTable/types'
 
 const tableData = ref([
-  { name: '张三', age: 25, department: '技术部', status: true },
-  { name: '李四', age: 30, department: '产品部', status: true }
+  { 
+    name: '张三', 
+    age: 25, 
+    department: '技术部', 
+    status: true,
+    phone: '13800138000',
+    workStatus: 'processing',
+    testValue: 'test',
+    simpleTest: '默认值'
+  },
+  { 
+    name: '李四', 
+    age: 30, 
+    department: '产品部', 
+    status: false,
+    phone: '13900139000',
+    workStatus: 'pending',
+    testValue: 'success',
+    simpleTest: '新值'
+  }
 ])
 
 const formData = reactive({
@@ -46,11 +77,39 @@ const formData = reactive({
 
 const loading = ref(false)
 
+// 自定义组件配置
+const customComponents = ref([
+  {
+    name: 'PhoneInput',
+    component: PhoneInput
+  },
+  {
+    name: 'StatusTag',
+    component: StatusTag
+  },
+  {
+    name: 'TestComponent',
+    component: TestComponent
+  },
+  {
+    name: 'SimpleTest',
+    component: SimpleTest
+  }
+])
+
+
+
+
+
 const rules = ref({
   'tableData.*.name': [{ required: true, message: '请输入姓名', trigger: 'blur' }],
   'tableData.*.age': [
     { required: true, message: '请输入年龄', trigger: 'blur' },
     { type: 'number', min: 18, max: 65, message: '年龄必须在18-65之间', trigger: 'blur' }
+  ],
+  'tableData.*.phone': [
+    { required: true, message: '请输入手机号', trigger: 'blur' },
+    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号格式', trigger: 'blur' }
   ]
 })
 
@@ -77,6 +136,21 @@ const columns = ref<ColumnConfig[]>([
     }]
   },
   {
+    name: '联系方式',
+    props: { width: '300px' },
+    children: [{
+      children: [
+        {
+          key: 'phone',
+          type: 'custom',
+          customComponent: 'PhoneInput',
+          colSpan: 24,
+          placeholder: '请输入手机号'
+        }
+      ]
+    }]
+  },
+  {
     name: '工作信息',
     props: { width: '300px' },
     children: [{
@@ -91,6 +165,54 @@ const columns = ref<ColumnConfig[]>([
           key: 'status',
           type: 'switch',
           colSpan: 12
+        }
+      ]
+    }]
+  },
+  {
+    name: '工作状态',
+    props: { width: '200px' },
+    children: [{
+      children: [
+        {
+          key: 'workStatus',
+          type: 'custom',
+          customComponent: 'StatusTag',
+          colSpan: 24,
+          options: [
+            { value: 'processing', label: '处理中', type: 'info' },
+            { value: 'pending', label: '待处理', type: 'warning' },
+            { value: 'completed', label: '已完成', type: 'success' },
+            { value: 'failed', label: '失败', type: 'danger' }
+          ]
+        }
+      ]
+    }]
+  },
+  {
+    name: '测试组件',
+    props: { width: '150px' },
+    children: [{
+      children: [
+        {
+          key: 'testValue',
+          type: 'custom',
+          customComponent: 'TestComponent',
+          colSpan: 24
+        }
+      ]
+    }]
+  },
+  {
+    name: '简单测试',
+    props: { width: '200px' },
+    children: [{
+      children: [
+        {
+          key: 'simpleTest',
+          type: 'custom',
+          customComponent: 'SimpleTest',
+          colSpan: 24
         }
       ]
     }]

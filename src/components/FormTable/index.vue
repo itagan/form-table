@@ -38,9 +38,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, provide } from 'vue'
 import FormTableColumn from './FormTableColumn.vue'
-import type { FormTableProps, FormTableEmits, TableRow, ColumnConfig, ValidationRule } from './types'
+import type { FormTableProps, FormTableEmits, TableRow, ColumnConfig, ValidationRule, CustomComponentConfig } from './types'
 
 // Props定义
 const props = withDefaults(defineProps<{
@@ -61,6 +61,17 @@ const props = withDefaults(defineProps<{
   }
   labelWidth?: string
   labelPosition?: 'left' | 'right' | 'top'
+  customComponents?: CustomComponentConfig[]
+  showRowActions?: boolean
+  rowActions?: {
+    add?: boolean
+    remove?: boolean
+    copy?: boolean
+    moveUp?: boolean
+    moveDown?: boolean
+  }
+  actionColumnWidth?: string
+  actionColumnLabel?: string
 }>(), {
   tableData: () => [],
   columns: () => [],
@@ -74,7 +85,18 @@ const props = withDefaults(defineProps<{
   highlightCurrentRow: false,
   rowKey: 'id',
   labelWidth: 'auto',
-  labelPosition: 'right'
+  labelPosition: 'right',
+  customComponents: () => [],
+  showRowActions: false,
+  rowActions: () => ({
+    add: true,
+    remove: true,
+    copy: false,
+    moveUp: false,
+    moveDown: false
+  }),
+  actionColumnWidth: '120px',
+  actionColumnLabel: '操作'
 })
 
 // 事件定义
@@ -89,6 +111,18 @@ const emit = defineEmits([
 
 // 表单引用
 const formRef = ref<any>(null)
+
+// 提供自定义组件给子组件
+const customComponentsMap = computed(() => {
+  const map: Record<string, any> = {}
+  props.customComponents?.forEach(comp => {
+    map[comp.name] = comp.component
+  })
+  return map
+})
+
+// Vue 2 的 provide/inject
+provide('customComponents', customComponentsMap)
 
 // 计算属性
 const tableData = computed(() => {
