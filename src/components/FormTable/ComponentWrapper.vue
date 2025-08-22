@@ -268,7 +268,7 @@ const componentProps = computed(() => {
   }
 })
 
-// 双向绑定 (Vue 2 兼容)
+// 双向绑定
 const modelValue = computed({
   get: () => props.row[props.fieldKey],
   set: (value) => {

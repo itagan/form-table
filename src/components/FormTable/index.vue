@@ -169,14 +169,16 @@ defineExpose({
   // 添加行
   addRow: (rowData?: Partial<TableRow>) => {
     const newRow = { ...rowData }
-    const newTableData = [...tableData.value, newRow]
+    const currentData = props.formData.tableData || props.tableData
+    const newTableData = [...currentData, newRow]
     emit('update:tableData', newTableData)
     emit('row-add', newRow, newTableData.length - 1)
   },
   
   // 删除行
   removeRow: (index: number) => {
-    const newTableData = [...tableData.value]
+    const currentData = props.formData.tableData || props.tableData
+    const newTableData = [...currentData]
     const removedRow = newTableData.splice(index, 1)[0]
     emit('update:tableData', newTableData)
     emit('row-remove', removedRow, index)
@@ -185,7 +187,7 @@ defineExpose({
   // 获取表单数据
   getFormData: () => {
     return {
-      tableData: tableData.value,
+      tableData: props.formData.tableData || props.tableData,
       ...props.formData
     }
   },

@@ -20,7 +20,7 @@
         :form-data="formData"
         :loading="loading"
         :custom-components="customComponents"
-        @update:table-data="handleTableDataUpdate"
+        @update:tableData="handleTableDataUpdate"
       />
       
       <div class="actions">
@@ -40,7 +40,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import FormTable from '@/components/FormTable/index.vue'
 import PhoneInput from '@/components/CustomComponents/PhoneInput.vue'
 import StatusTag from '@/components/CustomComponents/StatusTag.vue'
@@ -74,6 +74,11 @@ const tableData = ref([
 const formData = reactive({
   tableData: tableData.value
 })
+
+// 监听 tableData 变化，同步更新 formData
+watch(tableData, (newData: any[]) => {
+  formData.tableData = newData
+}, { deep: true, immediate: true })
 
 const loading = ref(false)
 
@@ -244,7 +249,11 @@ const handleAddRow = () => {
     name: '',
     age: 0,
     department: '',
-    status: true
+    status: true,
+    phone: '',
+    workStatus: 'processing',
+    testValue: '',
+    simpleTest: ''
   })
 }
 
