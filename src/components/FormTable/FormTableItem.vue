@@ -33,6 +33,7 @@
     
     <!-- 不使用Tooltip -->
     <component-wrapper 
+      v-if="config.type !== 'slotComponent'"
       :type="config.type"
       :field-key="config.key"
       :row="row"
@@ -47,6 +48,36 @@
       :max="config.max"
       v-bind="config.bind"
     />
+    
+    <!-- 插槽组件 -->
+    <div v-else-if="config.type === 'slotComponent' && config.slotName">
+
+      <slot 
+        :name="config.slotName" 
+        :row="row" 
+        :index="index"
+      />
+
+    </div>
+    
+    <!-- 默认内容 -->
+    <div v-else>
+      <component-wrapper 
+        :type="config.type"
+        :field-key="config.key"
+        :row="row"
+        :slot-name="config.slotName"
+        :custom-component="config.customComponent"
+        :custom-components="customComponents"
+        :placeholder="config.placeholder"
+        :clearable="config.clearable"
+        :disabled="config.disabled"
+        :readonly="config.readonly"
+        :min="config.min"
+        :max="config.max"
+        v-bind="config.bind"
+      />
+    </div>
   </el-form-item>
 </template>
 

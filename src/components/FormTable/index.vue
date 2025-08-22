@@ -24,12 +24,16 @@
           :column="column"
           :column-index="columnIndex"
         >
-          <!-- 传递所有插槽 -->
-          <template
-            v-for="(_, slotName) in $slots"
-            #[slotName]="slotProps"
-          >
-            <slot :name="slotName" v-bind="slotProps" />
+
+          <!-- 直接传递具名插槽 -->
+          <template #table-school="slotProps">
+            <slot name="table-school" v-bind="slotProps" />
+          </template>
+          <template #table-gender="slotProps">
+            <slot name="table-gender" v-bind="slotProps" />
+          </template>
+          <template #table-actions="slotProps">
+            <slot name="table-actions" v-bind="slotProps" />
           </template>
         </FormTableColumn>
       </el-table>

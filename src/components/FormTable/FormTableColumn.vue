@@ -5,6 +5,7 @@
     v-bind="column.props"
   >
     <template v-slot="scope">
+
       <FormTableRow
         v-for="(rowItem, rowIndex) in column.children"
         :key="rowIndex"
@@ -12,12 +13,15 @@
         :row-index="scope.$index"
         :row-config="rowItem"
       >
-        <!-- 传递所有插槽 -->
-        <template
-          v-for="(_, slotName) in $slots"
-          #[slotName]="slotProps"
-        >
-          <slot :name="slotName" v-bind="slotProps" />
+        <!-- 直接传递具名插槽 -->
+        <template #table-school="slotProps">
+          <slot name="table-school" v-bind="slotProps" />
+        </template>
+        <template #table-gender="slotProps">
+          <slot name="table-gender" v-bind="slotProps" />
+        </template>
+        <template #table-actions="slotProps">
+          <slot name="table-actions" v-bind="slotProps" />
         </template>
       </FormTableRow>
     </template>

@@ -10,7 +10,26 @@
       :span="colItem.colSpan || 24"
       v-bind="colItem.bind"
     >
+      <!-- 直接在这里处理插槽组件 -->
+      <el-form-item 
+        v-if="colItem.type === 'slotComponent' && colItem.slotName"
+        :prop="`tableData.${rowIndex}.${colItem.key}`"
+        :rules="colItem.rules"
+        :label="colItem.label"
+        :label-width="colItem.labelWidth"
+      >
+
+        <slot 
+          :name="colItem.slotName" 
+          :row="row" 
+          :index="rowIndex"
+        />
+
+      </el-form-item>
+      
+      <!-- 非插槽组件使用 FormTableItem -->
       <FormTableItem
+        v-else
         :prop-path="`tableData.${rowIndex}.${colItem.key}`"
         :rules="colItem.rules"
         :label="colItem.label"
@@ -21,17 +40,16 @@
         :index="rowIndex"
         :config="colItem"
       >
-        <!-- 自定义插槽 -->
-        <div 
-          v-if="colItem.type === 'slotComponent' && colItem.slotName"
-          :key="colItem.slotName"
-        >
-          <slot 
-            :name="colItem.slotName" 
-            :row="row" 
-            :index="rowIndex"
-          />
-        </div>
+        <!-- 直接传递具名插槽 -->
+        <template #table-school="slotProps">
+          <slot name="table-school" v-bind="slotProps" />
+        </template>
+        <template #table-gender="slotProps">
+          <slot name="table-gender" v-bind="slotProps" />
+        </template>
+        <template #table-actions="slotProps">
+          <slot name="table-actions" v-bind="slotProps" />
+        </template>
       </FormTableItem>
     </el-col>
   </el-row>

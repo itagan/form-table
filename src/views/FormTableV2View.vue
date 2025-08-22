@@ -3,6 +3,17 @@
     <h1>FormTable 优化版本演示</h1>
     
     <div class="demo-section">
+      <h2>Slot 插槽使用说明</h2>
+      <p>本示例展示了如何使用 slot 插槽来自定义表格列的内容：</p>
+      <ul>
+        <li><strong>学校选择插槽 (#table-school)</strong>: 使用 el-select 组件进行学校选择</li>
+        <li><strong>性别选择插槽 (#table-gender)</strong>: 使用 el-radio-group 组件进行性别选择</li>
+        <li><strong>操作按钮插槽 (#table-actions)</strong>: 使用自定义按钮进行行操作</li>
+      </ul>
+      <p>在 columns 配置中，使用 <code>type: 'slotComponent'</code> 和 <code>slotName: 'table-xxx'</code> 来指定插槽。</p>
+    </div>
+    
+    <div class="demo-section">
       <h2>基础用法</h2>
       
       <!-- 直接测试自定义组件 -->
@@ -21,7 +32,31 @@
         :loading="loading"
         :custom-components="customComponents"
         @update:tableData="handleTableDataUpdate"
-      />
+      >
+        <!-- 学校选择插槽 -->
+        <template #table-school="{ row, index }">
+          <el-select v-model="row.school" placeholder="请选择学校">
+            <el-option label="县一小" value="县一小"></el-option>
+            <el-option label="县二中" value="县二中"></el-option>
+            <el-option label="市一中" value="市一中"></el-option>
+            <el-option label="省实验中学" value="省实验中学"></el-option>
+          </el-select>
+        </template>
+        
+        <!-- 性别选择插槽 -->
+        <template #table-gender="{ row, index }">
+          <el-radio-group v-model="row.gender">
+            <el-radio label="男">男</el-radio>
+            <el-radio label="女">女</el-radio>
+          </el-radio-group>
+        </template>
+        
+        <!-- 操作按钮插槽 -->
+        <template #table-actions="{ row, index }">
+          <el-button size="small" type="primary" @click="handleEditRow(index)">编辑</el-button>
+          <el-button size="small" type="danger" @click="handleDeleteRow(index)">删除</el-button>
+        </template>
+      </FormTable>
       
       <div class="actions">
         <el-button type="primary" @click="handleSubmit">提交表单</el-button>
@@ -57,7 +92,9 @@ const tableData = ref([
     phone: '13800138000',
     workStatus: 'processing',
     testValue: 'test',
-    simpleTest: '默认值'
+    simpleTest: '默认值',
+    school: '县一小',
+    gender: '男'
   },
   { 
     name: '李四', 
@@ -67,7 +104,9 @@ const tableData = ref([
     phone: '13900139000',
     workStatus: 'pending',
     testValue: 'success',
-    simpleTest: '新值'
+    simpleTest: '新值',
+    school: '市一中',
+    gender: '女'
   }
 ])
 
@@ -115,7 +154,9 @@ const rules = ref({
   'tableData.*.phone': [
     { required: true, message: '请输入手机号', trigger: 'blur' },
     { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号格式', trigger: 'blur' }
-  ]
+  ],
+  'tableData.*.school': [{ required: true, message: '请选择学校', trigger: 'change' }],
+  'tableData.*.gender': [{ required: true, message: '请选择性别', trigger: 'change' }]
 })
 
 const columns = ref<ColumnConfig[]>([
@@ -221,6 +262,48 @@ const columns = ref<ColumnConfig[]>([
         }
       ]
     }]
+  },
+  {
+    name: '学校',
+    props: { width: '200px' },
+    children: [{
+      children: [
+        {
+          key: 'school',
+          type: 'slotComponent',
+          slotName: 'table-school',
+          colSpan: 24
+        }
+      ]
+    }]
+  },
+  {
+    name: '性别',
+    props: { width: '150px' },
+    children: [{
+      children: [
+        {
+          key: 'gender',
+          type: 'slotComponent',
+          slotName: 'table-gender',
+          colSpan: 24
+        }
+      ]
+    }]
+  },
+  {
+    name: '操作',
+    props: { width: '150px' },
+    children: [{
+      children: [
+        {
+          key: 'actions',
+          type: 'slotComponent',
+          slotName: 'table-actions',
+          colSpan: 24
+        }
+      ]
+    }]
   }
 ])
 
@@ -253,13 +336,26 @@ const handleAddRow = () => {
     phone: '',
     workStatus: 'processing',
     testValue: '',
-    simpleTest: ''
+    simpleTest: '',
+    school: '',
+    gender: '男'
   })
 }
 
 const handleRemoveRow = () => {
   if (tableData.value.length > 1) {
     formTableRef.value?.removeRow(tableData.value.length - 1)
+  }
+}
+
+const handleEditRow = (index: number) => {
+  console.log('编辑行:', index, tableData.value[index])
+  // 这里可以添加编辑逻辑，比如打开编辑对话框
+}
+
+const handleDeleteRow = (index: number) => {
+  if (tableData.value.length > 1) {
+    formTableRef.value?.removeRow(index)
   }
 }
 
