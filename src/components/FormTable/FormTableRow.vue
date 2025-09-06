@@ -40,15 +40,9 @@
         :index="rowIndex"
         :config="colItem"
       >
-        <!-- 直接传递具名插槽 -->
-        <template #table-school="slotProps">
-          <slot name="table-school" v-bind="slotProps" />
-        </template>
-        <template #table-gender="slotProps">
-          <slot name="table-gender" v-bind="slotProps" />
-        </template>
-        <template #table-actions="slotProps">
-          <slot name="table-actions" v-bind="slotProps" />
+        <!-- 动态传递所有具名插槽 -->
+        <template v-for="(_, slotName) in $slots" v-slot:[slotName]="slotProps">
+          <slot :name="slotName" v-bind="slotProps" />
         </template>
       </FormTableItem>
     </el-col>

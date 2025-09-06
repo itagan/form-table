@@ -11,11 +11,18 @@ export interface CustomComponentConfig {
   events?: Record<string, string>
 }
 
+// 插槽配置
+export interface SlotConfig {
+  name: string
+  scope?: Record<string, any>
+}
+
 // 表单项配置
 export interface FormItemConfig {
   key: string
   type: 'input' | 'select' | 'date' | 'datetime' | 'time' | 'textarea' | 'number' | 'switch' | 'radio' | 'checkbox' | 'text' | 'slotComponent' | 'custom' | 'rate' | 'slider' | 'color' | 'upload' | 'cascader' | 'tree-select' | 'autocomplete' | 'tag-input'
-  slotName?: string
+  slotName?: string // 兼容旧版本，建议使用 slot 配置
+  slot?: SlotConfig // 新的插槽配置方式
   customComponent?: string // 自定义组件名称
   colSpan?: number | string
   bind?: Record<string, any>
