@@ -4,18 +4,11 @@
       ref="formRef" 
       :model="formData" 
       :rules="rules"
-      :label-width="labelWidth"
-      :label-position="labelPosition"
+      v-bind="formAttrs"
     >
       <el-table
         :data="tableData"
-        :border="border"
-        :stripe="stripe"
-        :size="size"
-        :show-header="showHeader"
-        :highlight-current-row="highlightCurrentRow"
-        :row-key="rowKey"
-        :default-sort="defaultSort"
+        v-bind="tableAttrs"
         v-loading="loading"
       >
         <FormTableColumn
@@ -24,10 +17,8 @@
           :column="column"
           :column-index="columnIndex"
         >
-          <!-- 动态传递所有具名插槽 -->
-          <template v-for="(_, slotName) in $slots" v-slot:[slotName]="slotProps">
-            <slot :name="slotName" v-bind="slotProps" />
-          </template>
+          <!-- 简化的插槽传递 -->
+          <slot v-bind="slotProps" />
         </FormTableColumn>
       </el-table>
     </el-form>
@@ -35,65 +26,29 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, computed, provide } from 'vue'
+import { ref, watch, computed, provide, useAttrs } from 'vue'
 import FormTableColumn from './FormTableColumn.vue'
+import { extractFormAttrs, extractTableAttrs } from './utils/attrs'
 import type { FormTableProps, FormTableEmits, TableRow, ColumnConfig, ValidationRule, CustomComponentConfig } from './types'
 
-// Props定义
+// 获取所有属性
+const attrs = useAttrs()
+
+// 只定义FormTable特有的props
 const props = withDefaults(defineProps<{
   tableData: TableRow[]
   columns: ColumnConfig[]
   rules: Record<string, ValidationRule[]>
   formData: Record<string, any>
-  loading?: boolean
-  border?: boolean
-  stripe?: boolean
-  size?: 'medium' | 'small' | 'mini'
-  showHeader?: boolean
-  highlightCurrentRow?: boolean
-  rowKey?: string
-  defaultSort?: {
-    prop: string
-    order: 'ascending' | 'descending'
-  }
-  labelWidth?: string
-  labelPosition?: 'left' | 'right' | 'top'
   customComponents?: CustomComponentConfig[]
-  showRowActions?: boolean
-  rowActions?: {
-    add?: boolean
-    remove?: boolean
-    copy?: boolean
-    moveUp?: boolean
-    moveDown?: boolean
-  }
-  actionColumnWidth?: string
-  actionColumnLabel?: string
+  loading?: boolean
 }>(), {
   tableData: () => [],
   columns: () => [],
   rules: () => ({}),
   formData: () => ({}),
-  loading: false,
-  border: true,
-  stripe: false,
-  size: 'medium',
-  showHeader: true,
-  highlightCurrentRow: false,
-  rowKey: 'id',
-  labelWidth: 'auto',
-  labelPosition: 'right',
   customComponents: () => [],
-  showRowActions: false,
-  rowActions: () => ({
-    add: true,
-    remove: true,
-    copy: false,
-    moveUp: false,
-    moveDown: false
-  }),
-  actionColumnWidth: '120px',
-  actionColumnLabel: '操作'
+  loading: false
 })
 
 // 事件定义
@@ -109,6 +64,22 @@ const emit = defineEmits([
 // 表单引用
 const formRef = ref<any>(null)
 
+// 提取el-form相关的属性
+const formAttrs = computed(() => {
+  return extractFormAttrs(attrs)
+})
+
+// 提取el-table相关的属性
+const tableAttrs = computed(() => {
+  return extractTableAttrs(attrs)
+})
+
+// 简化的插槽props
+const slotProps = computed(() => ({
+  row: null, // 在FormTableColumn中动态设置
+  index: null // 在FormTableColumn中动态设置
+}))
+
 // 提供自定义组件给子组件
 const customComponentsMap = computed(() => {
   const map: Record<string, any> = {}
@@ -121,10 +92,8 @@ const customComponentsMap = computed(() => {
 // Vue 2 的 provide/inject
 provide('customComponents', customComponentsMap)
 
-// 计算属性
-const tableData = computed(() => {
-  return props.formData.tableData || props.tableData
-})
+// 直接使用props中的tableData
+const tableData = computed(() => props.tableData)
 
 // 监听数据变化
 watch(() => props.tableData, (newVal) => {
@@ -166,16 +135,14 @@ defineExpose({
   // 添加行
   addRow: (rowData?: Partial<TableRow>) => {
     const newRow = { ...rowData }
-    const currentData = props.formData.tableData || props.tableData
-    const newTableData = [...currentData, newRow]
+    const newTableData = [...props.tableData, newRow]
     emit('update:tableData', newTableData)
     emit('row-add', newRow, newTableData.length - 1)
   },
   
   // 删除行
   removeRow: (index: number) => {
-    const currentData = props.formData.tableData || props.tableData
-    const newTableData = [...currentData]
+    const newTableData = [...props.tableData]
     const removedRow = newTableData.splice(index, 1)[0]
     emit('update:tableData', newTableData)
     emit('row-remove', removedRow, index)
@@ -184,7 +151,7 @@ defineExpose({
   // 获取表单数据
   getFormData: () => {
     return {
-      tableData: props.formData.tableData || props.tableData,
+      tableData: props.tableData,
       ...props.formData
     }
   },

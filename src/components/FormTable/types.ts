@@ -227,36 +227,15 @@ export interface ValidationRule {
   [key: string]: any
 }
 
-// 组件Props
+// 组件Props - 只定义FormTable特有的props
 export interface FormTableProps {
   tableData: TableRow[]
   columns: ColumnConfig[]
   rules: Record<string, ValidationRule[]>
   formData: Record<string, any>
-  loading?: boolean
-  border?: boolean
-  stripe?: boolean
-  size?: 'medium' | 'small' | 'mini'
-  showHeader?: boolean
-  highlightCurrentRow?: boolean
-  rowKey?: string
-  defaultSort?: {
-    prop: string
-    order: 'ascending' | 'descending'
-  }
-  labelWidth?: string
-  labelPosition?: 'left' | 'right' | 'top'
   customComponents?: CustomComponentConfig[]
-  showRowActions?: boolean
-  rowActions?: {
-    add?: boolean
-    remove?: boolean
-    copy?: boolean
-    moveUp?: boolean
-    moveDown?: boolean
-  }
-  actionColumnWidth?: string
-  actionColumnLabel?: string
+  loading?: boolean
+  // 其他props通过$attrs传递给el-table和el-form
 }
 
 // 组件事件
