@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, computed, provide, useAttrs } from 'vue'
+import { ref, watch, computed, provide, useAttrs, shallowRef, triggerRef, watchEffect } from 'vue'
 import FormTableColumn from './FormTableColumn.vue'
 import { extractFormAttrs, extractTableAttrs } from './utils/attrs'
 import type { FormTableProps, FormTableEmits, TableRow, ColumnConfig, ValidationRule, CustomComponentConfig } from './types'
@@ -92,17 +92,24 @@ const customComponentsMap = computed(() => {
 // Vue 2 的 provide/inject
 provide('customComponents', customComponentsMap)
 
-// 直接使用props中的tableData
-const tableData = computed(() => props.tableData)
+// 使用shallowRef优化性能，避免深度监听
+const tableData = shallowRef(props.tableData)
+const formData = shallowRef(props.formData)
 
-// 监听数据变化
-watch(() => props.tableData, (newVal) => {
-  emit('update:tableData', newVal)
-}, { deep: true })
+// 使用watchEffect替代深度监听，性能更好
+watchEffect(() => {
+  if (tableData.value !== props.tableData) {
+    tableData.value = props.tableData
+    triggerRef(tableData)
+  }
+})
 
-watch(() => props.formData, (newVal) => {
-  emit('update:formData', newVal)
-}, { deep: true })
+watchEffect(() => {
+  if (formData.value !== props.formData) {
+    formData.value = props.formData
+    triggerRef(formData)
+  }
+})
 
 // 暴露方法
 defineExpose({
@@ -135,14 +142,14 @@ defineExpose({
   // 添加行
   addRow: (rowData?: Partial<TableRow>) => {
     const newRow = { ...rowData }
-    const newTableData = [...props.tableData, newRow]
+    const newTableData = [...tableData.value, newRow]
     emit('update:tableData', newTableData)
     emit('row-add', newRow, newTableData.length - 1)
   },
   
   // 删除行
   removeRow: (index: number) => {
-    const newTableData = [...props.tableData]
+    const newTableData = [...tableData.value]
     const removedRow = newTableData.splice(index, 1)[0]
     emit('update:tableData', newTableData)
     emit('row-remove', removedRow, index)
@@ -151,8 +158,8 @@ defineExpose({
   // 获取表单数据
   getFormData: () => {
     return {
-      tableData: props.tableData,
-      ...props.formData
+      tableData: tableData.value,
+      ...formData.value
     }
   },
   
