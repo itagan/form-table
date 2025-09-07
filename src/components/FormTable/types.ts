@@ -17,13 +17,34 @@ export interface SlotConfig {
   scope?: Record<string, any>
 }
 
-// 表单项配置
-export interface FormItemConfig {
+// 组件类型定义
+export type FormItemType = 
+  | 'input' 
+  | 'select' 
+  | 'date' 
+  | 'datetime' 
+  | 'time' 
+  | 'textarea' 
+  | 'number' 
+  | 'switch' 
+  | 'radio' 
+  | 'checkbox' 
+  | 'text' 
+  | 'slotComponent' 
+  | 'custom' 
+  | 'rate' 
+  | 'slider' 
+  | 'color' 
+  | 'upload' 
+  | 'cascader' 
+  | 'tree-select' 
+  | 'autocomplete' 
+  | 'tag-input'
+
+// 基础表单项配置
+export interface BaseFormItemConfig {
   key: string
-  type: 'input' | 'select' | 'date' | 'datetime' | 'time' | 'textarea' | 'number' | 'switch' | 'radio' | 'checkbox' | 'text' | 'slotComponent' | 'custom' | 'rate' | 'slider' | 'color' | 'upload' | 'cascader' | 'tree-select' | 'autocomplete' | 'tag-input'
-  slotName?: string // 兼容旧版本，建议使用 slot 配置
-  slot?: SlotConfig // 新的插槽配置方式
-  customComponent?: string // 自定义组件名称
+  type: FormItemType
   colSpan?: number | string
   bind?: Record<string, any>
   isUseTooltip?: boolean
@@ -35,12 +56,44 @@ export interface FormItemConfig {
   clearable?: boolean
   disabled?: boolean
   readonly?: boolean
-  min?: number
-  max?: number
-  step?: number
-  showStops?: boolean
-  showInput?: boolean
-  range?: boolean
+  size?: 'large' | 'default' | 'small'
+}
+
+// 插槽组件配置
+export interface SlotFormItemConfig extends BaseFormItemConfig {
+  type: 'slotComponent'
+  slotName: string
+  slot?: SlotConfig
+}
+
+// 自定义组件配置
+export interface CustomFormItemConfig extends BaseFormItemConfig {
+  type: 'custom'
+  customComponent: string
+}
+
+// 输入框组件配置
+export interface InputFormItemConfig extends BaseFormItemConfig {
+  type: 'input' | 'textarea'
+  showPassword?: boolean
+  showWordLimit?: boolean
+  maxlength?: number
+  minlength?: number
+  prefixIcon?: string
+  suffixIcon?: string
+  autocomplete?: 'on' | 'off'
+  name?: string
+  id?: string
+  tabindex?: string | number
+  validateEvent?: boolean
+  autosize?: boolean | { minRows?: number; maxRows?: number }
+  resize?: 'none' | 'both' | 'horizontal' | 'vertical'
+}
+
+// 选择器组件配置
+export interface SelectFormItemConfig extends BaseFormItemConfig {
+  type: 'select'
+  options?: Array<{ label: string; value: any; [key: string]: any }>
   multiple?: boolean
   filterable?: boolean
   remote?: boolean
@@ -52,22 +105,98 @@ export interface FormItemConfig {
   defaultFirstOption?: boolean
   popperClass?: string
   automaticDropdown?: boolean
-  size?: 'large' | 'default' | 'small'
-  prefixIcon?: string
-  suffixIcon?: string
+}
+
+// 数字输入框配置
+export interface NumberFormItemConfig extends BaseFormItemConfig {
+  type: 'number'
+  min?: number
+  max?: number
+  step?: number
   showWordLimit?: boolean
   maxlength?: number
   minlength?: number
-  showPassword?: boolean
-  autosize?: boolean | { minRows?: number; maxRows?: number }
-  resize?: 'none' | 'both' | 'horizontal' | 'vertical'
-  autocomplete?: 'on' | 'off'
-  name?: string
-  id?: string
-  tabindex?: string | number
-  validateEvent?: boolean
-  [key: string]: any
 }
+
+// 日期选择器配置
+export interface DateFormItemConfig extends BaseFormItemConfig {
+  type: 'date' | 'datetime' | 'time'
+  format?: string
+  valueFormat?: string
+}
+
+// 滑块组件配置
+export interface SliderFormItemConfig extends BaseFormItemConfig {
+  type: 'slider'
+  min?: number
+  max?: number
+  step?: number
+  showStops?: boolean
+  showInput?: boolean
+  range?: boolean
+}
+
+// 评分组件配置
+export interface RateFormItemConfig extends BaseFormItemConfig {
+  type: 'rate'
+  max?: number
+  showScore?: boolean
+}
+
+// 级联选择器配置
+export interface CascaderFormItemConfig extends BaseFormItemConfig {
+  type: 'cascader'
+  options?: any[]
+  props?: Record<string, any>
+}
+
+// 树形选择器配置
+export interface TreeSelectFormItemConfig extends BaseFormItemConfig {
+  type: 'tree-select'
+  data?: any[]
+  props?: Record<string, any>
+}
+
+// 自动完成组件配置
+export interface AutocompleteFormItemConfig extends BaseFormItemConfig {
+  type: 'autocomplete'
+  fetchSuggestions?: Function
+  triggerOnFocus?: boolean
+}
+
+// 标签输入组件配置
+export interface TagInputFormItemConfig extends BaseFormItemConfig {
+  type: 'tag-input'
+  multiple?: boolean
+  filterable?: boolean
+  allowCreate?: boolean
+  defaultFirstOption?: boolean
+}
+
+// 上传组件配置
+export interface UploadFormItemConfig extends BaseFormItemConfig {
+  type: 'upload'
+  action?: string
+  autoUpload?: boolean
+  listType?: string
+}
+
+// 联合类型：表单项配置
+export type FormItemConfig = 
+  | BaseFormItemConfig
+  | SlotFormItemConfig
+  | CustomFormItemConfig
+  | InputFormItemConfig
+  | SelectFormItemConfig
+  | NumberFormItemConfig
+  | DateFormItemConfig
+  | SliderFormItemConfig
+  | RateFormItemConfig
+  | CascaderFormItemConfig
+  | TreeSelectFormItemConfig
+  | AutocompleteFormItemConfig
+  | TagInputFormItemConfig
+  | UploadFormItemConfig
 
 // 行配置
 export interface RowConfig {
