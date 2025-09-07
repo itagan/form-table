@@ -80,12 +80,23 @@ const slotProps = computed(() => ({
   index: null // 在FormTableColumn中动态设置
 }))
 
-// 提供自定义组件给子组件
+// 提供自定义组件给子组件 - 使用ref缓存优化性能
+const customComponentsCache = ref<Record<string, any>>({})
 const customComponentsMap = computed(() => {
-  const map: Record<string, any> = {}
-  props.customComponents?.forEach(comp => {
+  // 只有当customComponents真正变化时才重新计算
+  const currentComponents = props.customComponents || []
+  const cacheKey = currentComponents.map(c => c.name).join(',')
+  
+  if (customComponentsCache.value._cacheKey === cacheKey) {
+    return customComponentsCache.value
+  }
+  
+  const map: Record<string, any> = { _cacheKey: cacheKey }
+  currentComponents.forEach(comp => {
     map[comp.name] = comp.component
   })
+  
+  customComponentsCache.value = map
   return map
 })
 
