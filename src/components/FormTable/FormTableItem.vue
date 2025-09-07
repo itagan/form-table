@@ -4,85 +4,50 @@
     :rules="rules"
     :label="label"
     :label-width="labelWidth"
+    v-bind="formItemAttrs"
   >
-    <!-- 使用Tooltip包装 -->
+    <!-- 插槽组件 -->
+    <slot 
+      v-if="config.type === 'slotComponent' && config.slotName"
+      :name="config.slotName" 
+      :row="row" 
+      :index="index"
+    />
+    
+    <!-- 带Tooltip的组件 -->
     <el-tooltip 
-      v-if="isUseTooltip"
+      v-else-if="isUseTooltip"
       effect="dark" 
       :disabled="!hasContent" 
       :content="tooltipContent" 
       placement="top-start" 
       v-bind="tooltipProps"
     >
-      <component-wrapper 
+      <ComponentWrapper 
         :type="config.type"
         :field-key="config.key"
         :row="row"
-        :slot-name="config.slotName"
         :custom-component="config.customComponent"
         :custom-components="customComponents"
-        :placeholder="config.placeholder"
-        :clearable="config.clearable"
-        :disabled="config.disabled"
-        :readonly="config.readonly"
-        :min="config.min"
-        :max="config.max"
         v-bind="config.bind"
       />
     </el-tooltip>
     
-    <!-- 不使用Tooltip -->
-    <component-wrapper 
-      v-if="config.type !== 'slotComponent'"
+    <!-- 普通组件 -->
+    <ComponentWrapper 
+      v-else
       :type="config.type"
       :field-key="config.key"
       :row="row"
-      :slot-name="config.slotName"
       :custom-component="config.customComponent"
       :custom-components="customComponents"
-      :placeholder="config.placeholder"
-      :clearable="config.clearable"
-      :disabled="config.disabled"
-      :readonly="config.readonly"
-      :min="config.min"
-      :max="config.max"
       v-bind="config.bind"
     />
-    
-    <!-- 插槽组件 -->
-    <div v-else-if="config.type === 'slotComponent' && config.slotName">
-
-      <slot 
-        :name="config.slotName" 
-        :row="row" 
-        :index="index"
-      />
-
-    </div>
-    
-    <!-- 默认内容 -->
-    <div v-else>
-      <component-wrapper 
-        :type="config.type"
-        :field-key="config.key"
-        :row="row"
-        :slot-name="config.slotName"
-        :custom-component="config.customComponent"
-        :custom-components="customComponents"
-        :placeholder="config.placeholder"
-        :clearable="config.clearable"
-        :disabled="config.disabled"
-        :readonly="config.readonly"
-        :min="config.min"
-        :max="config.max"
-        v-bind="config.bind"
-      />
-    </div>
   </el-form-item>
 </template>
 
 <script lang="ts" setup>
-import { computed, inject } from 'vue'
+import { computed, inject, useAttrs } from 'vue'
 import ComponentWrapper from './ComponentWrapper.vue'
 
 // 注入自定义组件
@@ -125,6 +90,13 @@ const props = defineProps({
     type: Object,
     required: true
   }
+})
+
+const attrs = useAttrs()
+
+// 合并attrs，支持el-form-item的所有属性
+const formItemAttrs = computed(() => {
+  return attrs
 })
 
 // 计算属性

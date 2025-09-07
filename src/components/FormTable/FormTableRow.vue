@@ -2,7 +2,7 @@
   <el-row 
     :gutter="gutter" 
     :key="rowIndex" 
-    v-bind="rowBind"
+    v-bind="rowProps"
   >
     <el-col 
       v-for="(colItem, colIndex) in rowChildren"
@@ -10,26 +10,8 @@
       :span="colItem.colSpan || 24"
       v-bind="colItem.bind"
     >
-      <!-- 直接在这里处理插槽组件 -->
-      <el-form-item 
-        v-if="colItem.type === 'slotComponent' && colItem.slotName"
-        :prop="`tableData.${rowIndex}.${colItem.key}`"
-        :rules="colItem.rules"
-        :label="colItem.label"
-        :label-width="colItem.labelWidth"
-      >
-
-        <slot 
-          :name="colItem.slotName" 
-          :row="row" 
-          :index="rowIndex"
-        />
-
-      </el-form-item>
-      
-      <!-- 非插槽组件使用 FormTableItem -->
+      <!-- 统一的字段渲染 -->
       <FormTableItem
-        v-else
         :prop-path="`tableData.${rowIndex}.${colItem.key}`"
         :rules="colItem.rules"
         :label="colItem.label"
@@ -40,17 +22,15 @@
         :index="rowIndex"
         :config="colItem"
       >
-        <!-- 动态传递所有具名插槽 -->
-        <template v-for="(_, slotName) in $slots" v-slot:[slotName]="slotProps">
-          <slot :name="slotName" v-bind="slotProps" />
-        </template>
+        <!-- 简化的插槽传递 -->
+        <slot v-bind="slotProps" />
       </FormTableItem>
     </el-col>
   </el-row>
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, useAttrs } from 'vue'
 import FormTableItem from './FormTableItem.vue'
 import type { RowConfig, TableRow } from './types'
 
@@ -61,17 +41,29 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const attrs = useAttrs()
 
 // 计算属性
 const gutter = computed(() => {
-  return props.rowConfig.gutter || props.rowConfig.bind?.gutter || 10
+  return props.rowConfig.gutter || props.rowConfig.bind?.gutter || 0
 })
 
-const rowBind = computed(() => {
-  return props.rowConfig.bind || props.rowConfig.props || {}
+// 合并rowConfig的props和attrs，支持el-row的所有属性
+const rowProps = computed(() => {
+  return {
+    ...props.rowConfig.bind,
+    ...props.rowConfig.props,
+    ...attrs
+  }
 })
 
 const rowChildren = computed(() => {
   return props.rowConfig.children || []
 })
+
+// 简化的插槽props
+const slotProps = computed(() => ({
+  row: props.row,
+  index: props.rowIndex
+}))
 </script>
