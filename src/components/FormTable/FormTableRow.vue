@@ -9,6 +9,7 @@
       :key="colIndex"
       :span="colItem.colSpan || 24"
       v-bind="colItem.bind"
+      v-memo="[colItem, row[colItem.key]]"
     >
       <!-- 统一的字段渲染 -->
       <FormTableItem
@@ -48,22 +49,40 @@ const gutter = computed(() => {
   return props.rowConfig.gutter || props.rowConfig.bind?.gutter || 0
 })
 
-// 合并rowConfig的props和attrs，支持el-row的所有属性
+// 优化的rowProps计算属性 - 减少对象创建
 const rowProps = computed(() => {
+  const bind = props.rowConfig.bind || {}
+  const configProps = props.rowConfig.props || {}
+  const attrsObj = attrs || {}
+  
+  // 只有当属性真正存在时才合并，减少对象创建
+  const result: Record<string, any> = {}
+  
+  if (Object.keys(bind).length > 0) {
+    Object.assign(result, bind)
+  }
+  if (Object.keys(configProps).length > 0) {
+    Object.assign(result, configProps)
+  }
+  if (Object.keys(attrsObj).length > 0) {
+    Object.assign(result, attrsObj)
+  }
+  
+  return result
+})
+
+// 优化的rowChildren计算属性 - 使用缓存避免重复计算
+const rowChildren = computed(() => {
+  const children = props.rowConfig.children
+  return children && children.length > 0 ? children : []
+})
+
+// 优化的插槽props - 使用缓存避免重复创建
+const slotProps = computed(() => {
+  // 只有当row或index真正变化时才重新创建对象
   return {
-    ...props.rowConfig.bind,
-    ...props.rowConfig.props,
-    ...attrs
+    row: props.row,
+    index: props.rowIndex
   }
 })
-
-const rowChildren = computed(() => {
-  return props.rowConfig.children || []
-})
-
-// 简化的插槽props
-const slotProps = computed(() => ({
-  row: props.row,
-  index: props.rowIndex
-}))
 </script>

@@ -99,12 +99,14 @@ const formItemAttrs = computed(() => {
   return attrs
 })
 
-// 计算属性
+// 优化的计算属性 - 避免重复计算
 const hasContent = computed(() => {
-  return !!props.row[props.config.key]
+  const value = props.row[props.config.key]
+  return value !== null && value !== undefined && value !== ''
 })
 
 const tooltipContent = computed(() => {
-  return props.row[props.config.key] || ''
+  const value = props.row[props.config.key]
+  return value ? String(value) : ''
 })
 </script>

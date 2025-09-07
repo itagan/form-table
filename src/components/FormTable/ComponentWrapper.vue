@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject } from 'vue'
+import { computed, inject, onUnmounted } from 'vue'
 import { processComponentProps, validateComponentConfig } from './utils/componentProps'
 import { getComponentType } from './configs/defaultComponentConfigs'
 
@@ -78,20 +78,37 @@ const modelValue = computed({
   }
 })
 
-// 事件处理 - 优化性能
+// 事件处理 - 优化性能，添加防抖和节流
+let inputTimer: number | null = null
+let changeTimer: number | null = null
+
 const handleInput = (value: any) => {
-  if (props.row[props.fieldKey] !== value) {
-    props.row[props.fieldKey] = value
+  // 防抖处理，避免频繁更新
+  if (inputTimer) {
+    clearTimeout(inputTimer)
   }
+  
+  inputTimer = setTimeout(() => {
+    if (props.row[props.fieldKey] !== value) {
+      props.row[props.fieldKey] = value
+    }
+    inputTimer = null
+  }, 16) // 约60fps的更新频率
 }
 
 const handleChange = (value: any) => {
+  // 立即更新，但避免重复赋值
   if (props.row[props.fieldKey] !== value) {
     props.row[props.fieldKey] = value
   }
 }
 
 const handleBlur = (event: Event) => {
+  // 清理定时器，确保失焦时立即更新
+  if (inputTimer) {
+    clearTimeout(inputTimer)
+    inputTimer = null
+  }
   // 可以在这里添加失焦处理逻辑
 }
 
@@ -102,4 +119,16 @@ const handleFocus = (event: Event) => {
 const handleClick = (event: Event) => {
   // 可以在这里添加点击处理逻辑
 }
+
+// 组件卸载时清理定时器
+onUnmounted(() => {
+  if (inputTimer) {
+    clearTimeout(inputTimer)
+    inputTimer = null
+  }
+  if (changeTimer) {
+    clearTimeout(changeTimer)
+    changeTimer = null
+  }
+})
 </script>

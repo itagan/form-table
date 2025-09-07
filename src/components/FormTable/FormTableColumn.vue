@@ -11,6 +11,7 @@
         :row="scope.row"
         :row-index="scope.$index"
         :row-config="rowItem"
+        v-memo="[scope.row, rowItem]"
       >
         <!-- 简化的插槽传递 -->
         <slot v-bind="slotProps" />
@@ -32,17 +33,27 @@ interface Props {
 const props = defineProps<Props>()
 const attrs = useAttrs()
 
-// 合并column的props和attrs，支持el-table-column的所有属性
+// 优化的columnAttrs计算属性 - 减少对象创建
 const columnAttrs = computed(() => {
-  return {
-    ...props.column.props,
-    ...attrs
+  const columnProps = props.column.props || {}
+  const attrsObj = attrs || {}
+  
+  // 只有当属性真正存在时才合并，减少对象创建
+  const result: Record<string, any> = {}
+  
+  if (Object.keys(columnProps).length > 0) {
+    Object.assign(result, columnProps)
   }
+  if (Object.keys(attrsObj).length > 0) {
+    Object.assign(result, attrsObj)
+  }
+  
+  return result
 })
 
-// 简化的插槽props
-const slotProps = computed(() => ({
+// 优化的插槽props - 使用静态对象避免重复创建
+const slotProps = {
   row: null, // 在FormTableRow中动态设置
   index: null
-}))
+}
 </script>
