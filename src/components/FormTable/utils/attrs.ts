@@ -1,19 +1,9 @@
-/**
- * 属性处理工具函数
- */
-
-/**
- * 从对象中提取指定的属性
- * @param obj 源对象
- * @param keys 要提取的属性名数组
- * @returns 包含指定属性的新对象
- */
 export function pick<T extends Record<string, any>, K extends keyof T>(
   obj: T,
   keys: K[]
 ): Pick<T, K> {
   const result = {} as Pick<T, K>
-  keys.forEach(key => {
+  keys.forEach((key) => {
     if (key in obj && obj[key] !== undefined) {
       result[key] = obj[key]
     }
@@ -21,29 +11,9 @@ export function pick<T extends Record<string, any>, K extends keyof T>(
   return result
 }
 
-/**
- * 从对象中排除指定的属性
- * @param obj 源对象
- * @param keys 要排除的属性名数组
- * @returns 不包含指定属性的新对象
- */
-export function omit<T extends Record<string, any>, K extends keyof T>(
-  obj: T,
-  keys: K[]
-): Omit<T, K> {
-  const result = { ...obj }
-  keys.forEach(key => {
-    delete result[key]
-  })
-  return result
-}
-
-/**
- * el-form 支持的属性列表
- */
 export const EL_FORM_PROPS = [
   'labelWidth',
-  'labelPosition', 
+  'labelPosition',
   'labelSuffix',
   'hideRequiredAsterisk',
   'showMessage',
@@ -54,24 +24,19 @@ export const EL_FORM_PROPS = [
   'disabled'
 ] as const
 
-/**
- * el-table 支持的属性列表
- */
+// 只保留常用、稳定、在当前组件中最常见的 table 级属性。
 export const EL_TABLE_PROPS = [
   'border',
   'stripe',
   'size',
-  'showHeader',
-  'highlightCurrentRow',
-  'rowKey',
-  'defaultSort',
   'height',
   'maxHeight',
   'fit',
+  'showHeader',
   'showSummary',
   'sumText',
   'summaryMethod',
-  'spanMethod',
+  'rowKey',
   'rowClassName',
   'rowStyle',
   'cellClassName',
@@ -80,81 +45,22 @@ export const EL_TABLE_PROPS = [
   'headerRowStyle',
   'headerCellClassName',
   'headerCellStyle',
+  'highlightCurrentRow',
   'emptyText',
   'defaultExpandAll',
   'expandRowKeys',
-  'defaultSortOrders',
-  'tooltipEffect',
-  'showOverflowTooltip',
-  'rowSelection',
+  'treeProps',
   'lazy',
   'load',
-  'treeProps',
-  'indent',
-  'currentRowKey',
-  'selectOnIndeterminate',
-  'selectable',
-  'reserveSelection',
-  'sortBy',
-  'sortOrders',
-  'sortMethod',
-  'sortChange',
-  'filterMethod',
-  'filters',
-  'filterPlacement',
-  'filterMultiple',
-  'filterValue',
-  'filterChange',
-  'currentChange',
-  'headerDragend',
-  'expandChange',
-  'selectionChange',
-  'cellMouseEnter',
-  'cellMouseLeave',
-  'cellClick',
-  'cellDblclick',
-  'rowClick',
-  'rowDblclick',
-  'rowContextmenu',
-  'headerClick',
-  'headerContextmenu',
-  'sortChange',
-  'filterChange',
-  'currentChange',
-  'headerDragend',
-  'expandChange',
-  'selectionChange'
+  'spanMethod',
+  'tooltipEffect',
+  'showOverflowTooltip'
 ] as const
 
-/**
- * FormTable 特有的属性列表
- */
-export const FORM_TABLE_PROPS = [
-  'tableData',
-  'columns',
-  'rules',
-  'formData',
-  'customComponents',
-  'loading'
-] as const
-
-/**
- * 提取 el-form 相关的属性
- */
 export function extractFormAttrs<T extends Record<string, any>>(attrs: T) {
   return pick(attrs, EL_FORM_PROPS as any)
 }
 
-/**
- * 提取 el-table 相关的属性
- */
 export function extractTableAttrs<T extends Record<string, any>>(attrs: T) {
   return pick(attrs, EL_TABLE_PROPS as any)
-}
-
-/**
- * 提取 FormTable 特有的属性
- */
-export function extractFormTableAttrs<T extends Record<string, any>>(attrs: T) {
-  return pick(attrs, FORM_TABLE_PROPS as any)
 }

@@ -37,7 +37,7 @@ function getElementUIDefaults(componentType: string): Record<string, any> {
       clearable: true
     },
     'el-input-number': {
-      clearable: true
+      // input-number 组件不需要 clearable
     },
     'el-switch': {
       // switch组件不需要clearable
@@ -128,12 +128,6 @@ export function processComponentProps(options: ComponentPropsOptions): {
     delete componentProps.clearable
   }
   
-  // 5. 自定义组件特殊处理
-  if (type === 'custom') {
-    delete componentProps.clearable
-    delete componentProps.placeholder
-  }
-  
   return {
     componentType,
     componentProps
@@ -160,18 +154,6 @@ export function validateComponentConfig(type: string, props: Record<string, any>
   // 特定组件验证
   if (type === 'custom' && !props.customComponent) {
     errors.push('Custom component name is required when type is "custom"')
-  }
-  
-  if (type === 'select' && !props.options && !props.remote) {
-    errors.push('Select component requires options or remote configuration')
-  }
-  
-  if (type === 'cascader' && !props.options) {
-    errors.push('Cascader component requires options')
-  }
-  
-  if (type === 'tree-select' && !props.data) {
-    errors.push('Tree-select component requires data')
   }
   
   return {

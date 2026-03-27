@@ -10,8 +10,8 @@ import TheWelcome from '@/components/TheWelcome.vue'
         <router-link to="/form-table" class="nav-link">
           <el-button type="primary">FormTable 组件演示</el-button>
         </router-link>
-        <router-link to="/form-table-v2" class="nav-link">
-          <el-button type="success">FormTable V2 优化版本</el-button>
+        <router-link to="/form-table-advanced" class="nav-link">
+          <el-button type="success">FormTable 高级示例</el-button>
         </router-link>
       </div>
     </div>

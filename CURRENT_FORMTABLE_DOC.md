@@ -1,0 +1,337 @@
+# FormTable 当前文档
+
+这份文档以当前仓库代码为准，适用于 `Vue 2.7 + Element UI + TypeScript`。
+
+## 组件定位
+
+`FormTable` 是一个“表格内嵌表单”组件。
+
+适合这类场景：
+
+- 后台编辑表格
+- 每一行都是一组表单字段
+- 需要统一校验、动态增删行
+- 需要插槽或自定义组件扩展单元格
+
+组件入口：
+
+- `src/components/FormTable/index.vue`
+
+## 基础用法
+
+```vue
+<template>
+  <FormTable
+    ref="formTableRef"
+    :table-data="tableData"
+    :columns="columns"
+    :rules="rules"
+    :form-data="formData"
+    border
+    stripe
+    @update:tableData="handleTableDataUpdate"
+    @update:formData="handleFormDataUpdate"
+    @event="handleFormTableEvent"
+  />
+</template>
+
+<script setup lang="ts">
+import { reactive, ref } from 'vue'
+import FormTable from '@/components/FormTable/index.vue'
+import type { ColumnConfig } from '@/components/FormTable/types'
+
+const tableData = ref([
+  { name: '张三', age: 25, level: 'mid' }
+])
+
+const formData = reactive({
+  tableData: tableData.value
+})
+
+const rules = ref({
+  'tableData.*.name': [{ required: true, message: '请输入姓名', trigger: 'blur' }],
+  'tableData.*.level': [{ required: true, message: '请选择职级', trigger: 'change' }]
+})
+
+const columns = ref<ColumnConfig[]>([
+  {
+    name: '基本信息',
+    props: { width: '360px' },
+    children: [{
+      gutter: 10,
+      children: [
+        {
+          key: 'name',
+          type: 'input',
+          colSpan: 12,
+          placeholder: '请输入姓名'
+        },
+        {
+          key: 'level',
+          type: 'select',
+          colSpan: 12,
+          placeholder: '请选择职级',
+          options: [
+            { label: '初级', value: 'junior' },
+            { label: '中级', value: 'mid' },
+            { label: '高级', value: 'senior' }
+          ]
+        }
+      ]
+    }]
+  }
+])
+
+const handleTableDataUpdate = (newData: any[]) => {
+  tableData.value = newData
+  formData.tableData = newData
+}
+
+const handleFormDataUpdate = (newData: Record<string, any>) => {
+  Object.assign(formData, newData)
+}
+
+const handleFormTableEvent = (payload: { type: string; args: any[] }) => {
+  console.log(payload)
+}
+</script>
+```
+
+## Props
+
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| `tableData` | `TableRow[]` | 表格数据 |
+| `columns` | `ColumnConfig[]` | 列配置 |
+| `rules` | `Record<string, ValidationRule[]>` | 校验规则 |
+| `formData` | `Record<string, any>` | `el-form` 的 model |
+| `customComponents` | `CustomComponentConfig[]` | 自定义组件注册表 |
+| `loading` | `boolean` | 表格加载态 |
+
+还可以透传部分常用 `el-form` / `el-table` 属性，比如：
+
+- `border`
+- `stripe`
+- `size`
+- `label-width`
+- `height`
+- `max-height`
+
+## 事件
+
+组件会派发这些事件：
+
+| 事件名 | 参数 | 说明 |
+|------|------|------|
+| `update:tableData` | `TableRow[]` | 表格数据变更 |
+| `update:formData` | `Record<string, any>` | 表单数据变更 |
+| `row-add` | `(row, index)` | 调用 `addRow` 后触发 |
+| `row-remove` | `(row, index)` | 调用 `removeRow` 后触发 |
+| `validate` | `(valid, errors)` | 调用 `validate` 后触发 |
+| `event` | `({ type, args })` | 统一归档事件 |
+
+推荐外层同时监听：
+
+- 具体事件，做明确处理
+- `event`，做日志、埋点或统一调试
+
+## ref 方法
+
+通过 `ref` 可调用：
+
+- `validate(callback?)`
+- `resetFields()`
+- `clearValidate(props?)`
+- `addRow(rowData?)`
+- `removeRow(index)`
+- `getFormData()`
+- `setFormData(data)`
+
+## 配置结构
+
+### ColumnConfig
+
+```ts
+interface ColumnConfig {
+  name: string
+  props?: Record<string, any>
+  children: RowConfig[]
+}
+```
+
+### RowConfig
+
+```ts
+interface RowConfig {
+  bind?: Record<string, any>
+  props?: Record<string, any>
+  gutter?: number
+  children: FormItemConfig[]
+}
+```
+
+### FormItemConfig
+
+```ts
+interface FormItemConfig {
+  key: string
+  type: FormItemType
+  colSpan?: number | string
+  bind?: Record<string, any>
+  rules?: any[]
+  label?: string
+  labelWidth?: string
+  isUseTooltip?: boolean
+  tooltipProps?: Record<string, any>
+  placeholder?: string
+  clearable?: boolean
+  disabled?: boolean
+  readonly?: boolean
+  size?: 'large' | 'default' | 'small'
+  customComponent?: string
+  slotName?: string
+  options?: Array<{ label: string; value: any }>
+  remote?: boolean
+  remoteMethod?: Function
+  min?: number
+  max?: number
+  step?: number
+  format?: string
+  valueFormat?: string
+  props?: Record<string, any>
+  data?: any[]
+  fetchSuggestions?: Function
+  action?: string
+  rows?: number
+}
+```
+
+## type 支持
+
+当前支持这些 `type`：
+
+- `input`
+- `select`
+- `date`
+- `datetime`
+- `time`
+- `textarea`
+- `number`
+- `switch`
+- `radio`
+- `checkbox`
+- `text`
+- `slotComponent`
+- `custom`
+- `rate`
+- `slider`
+- `color`
+- `upload`
+- `cascader`
+- `tree-select`
+- `autocomplete`
+- `tag-input`
+
+## 配置建议
+
+建议按这个规则使用：
+
+- 常见配置直接写在表单项上
+- 非常见配置统一放进 `bind`
+
+### 常见配置直写
+
+```ts
+{
+  key: 'name',
+  type: 'input',
+  placeholder: '请输入姓名',
+  disabled: false
+}
+```
+
+### 非常见配置走 bind
+
+```ts
+{
+  key: 'remark',
+  type: 'textarea',
+  bind: {
+    rows: 3,
+    maxlength: 100,
+    showWordLimit: true
+  }
+}
+```
+
+## 插槽扩展
+
+如果某个单元格需要完全自定义，可以用 `slotComponent`。
+
+配置：
+
+```ts
+{
+  key: 'school',
+  type: 'slotComponent',
+  slotName: 'table-school',
+  colSpan: 24
+}
+```
+
+模板：
+
+```vue
+<FormTable ...>
+  <template #table-school="{ row, index }">
+    <el-select v-model="row.school" placeholder="请选择学校">
+      <el-option label="县一小" value="县一小" />
+      <el-option label="县二中" value="县二中" />
+    </el-select>
+  </template>
+</FormTable>
+```
+
+插槽参数：
+
+- `row`
+- `index`
+
+## 自定义组件扩展
+
+注册：
+
+```ts
+const customComponents = [
+  { name: 'PhoneInput', component: PhoneInput }
+]
+```
+
+配置：
+
+```ts
+{
+  key: 'phone',
+  type: 'custom',
+  customComponent: 'PhoneInput',
+  placeholder: '请输入手机号',
+  bind: {
+    clearable: true
+  }
+}
+```
+
+## 当前推荐参考
+
+如果你要看现成示例，优先看：
+
+- `src/views/FormTableView.vue`
+- `src/views/FormTableAdvancedView.vue`
+- `src/views/DebugView.vue`
+
+如果你要看实现，优先看：
+
+- `src/components/FormTable/index.vue`
+- `src/components/FormTable/FormTableItem.vue`
+- `src/components/FormTable/ComponentWrapper.vue`
+- `src/components/FormTable/types.ts`

@@ -28,10 +28,10 @@ const router = new VueRouter({
       component: () => import('../views/FormTableView.vue')
     },
     {
-      path: '/form-table-v2',
-      name: 'form-table-v2',
-      // 按需引入FormTable优化版本演示页面
-      component: () => import('../views/FormTableV2View.vue')
+      path: '/form-table-advanced',
+      name: 'form-table-advanced',
+      // 按需引入FormTable高级演示页面
+      component: () => import('../views/FormTableAdvancedView.vue')
     },
     {
       path: '/dynamic-slot-test',

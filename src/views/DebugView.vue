@@ -41,7 +41,7 @@
         :table-data="tableData"
         :columns="columns"
         :custom-components="customComponents"
-        @update:table-data="handleTableDataUpdate"
+        @update:tableData="handleTableDataUpdate"
       />
     </div>
   </div>

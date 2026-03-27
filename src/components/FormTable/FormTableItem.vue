@@ -23,35 +23,21 @@
       placement="top-start" 
       v-bind="tooltipProps"
     >
-      <ComponentWrapper 
-        :type="config.type"
-        :field-key="config.key"
-        :row="row"
-        :custom-component="config.customComponent"
-        :custom-components="customComponents"
-        v-bind="config.bind"
-      />
+      <ComponentWrapper v-bind="wrapperProps" />
     </el-tooltip>
     
     <!-- 普通组件 -->
-    <ComponentWrapper 
-      v-else
-      :type="config.type"
-      :field-key="config.key"
-      :row="row"
-      :custom-component="config.customComponent"
-      :custom-components="customComponents"
-      v-bind="config.bind"
-    />
+    <ComponentWrapper v-else v-bind="wrapperProps" />
   </el-form-item>
 </template>
 
 <script lang="ts" setup>
 import { computed, inject, useAttrs } from 'vue'
 import ComponentWrapper from './ComponentWrapper.vue'
+import type { FormItemConfig } from './types'
 
 // 注入自定义组件
-const customComponents = inject('customComponents', {} as Record<string, any>)
+const customComponents = inject('customComponents', computed(() => ({} as Record<string, any>)))
 
 const props = defineProps({
   propPath: {
@@ -97,6 +83,33 @@ const attrs = useAttrs()
 // 合并attrs，支持el-form-item的所有属性
 const formItemAttrs = computed(() => {
   return attrs
+})
+
+const wrapperProps = computed(() => {
+  const config = props.config as FormItemConfig
+  const {
+    key,
+    type,
+    customComponent,
+    bind,
+    rules,
+    label,
+    labelWidth,
+    isUseTooltip,
+    tooltipProps,
+    colSpan,
+    ...componentConfig
+  } = config
+
+  return {
+    type,
+    fieldKey: key,
+    row: props.row,
+    customComponent,
+    customComponents: customComponents.value,
+    bind,
+    ...componentConfig
+  }
 })
 
 // 优化的计算属性 - 避免重复计算

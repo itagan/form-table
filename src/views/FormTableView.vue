@@ -10,8 +10,8 @@
         :columns="columns"
         :rules="rules"
         :form-data="formData"
-        @update:table-data="handleTableDataUpdate"
-        @update:form-data="handleFormDataUpdate"
+        @update:tableData="handleTableDataUpdate"
+        @update:formData="handleFormDataUpdate"
       >
         <template #table-school="{ row, index }">
           <el-select v-model="row.school" placeholder="请选择学校">
@@ -39,7 +39,8 @@
 
 <script lang="ts" setup>
 import { ref, reactive } from 'vue'
-import FormTable from '@/components/FormTable.vue'
+import FormTable from '@/components/FormTable/index.vue'
+import type { ColumnConfig } from '@/components/FormTable/types'
 
 const tableData = ref([
   { name: '小米', age: 16, sex: '男', school: '县一小' },
@@ -60,24 +61,24 @@ const rules = ref({
   'tableData.*.school': [{ required: true, message: '请选择学校', trigger: 'change' }]
 })
 
-const columns = ref([
+const columns = ref<ColumnConfig[]>([
   {
     name: '姓名和年龄',
     props: { width: '300px' },
     children: [{
-      bind: { gutter: 10 },
+      gutter: 10,
       children: [
         {
+          key: 'name',
+          type: 'input',
           colSpan: 12,
-          elFormItemProps: { key: 'name' },
-          elInputProps: { placeholder: '请输入姓名' },
-          type: 'input'
+          placeholder: '请输入姓名'
         },
         {
+          key: 'age',
+          type: 'number',
           colSpan: 12,
-          elFormItemProps: { key: 'age' },
-          elInputProps: { placeholder: '请输入年龄', type: 'number' },
-          type: 'input'
+          placeholder: '请输入年龄'
         }
       ]
     }]
@@ -86,13 +87,11 @@ const columns = ref([
     name: '性别',
     props: { width: '150px' },
     children: [{
-      bind: {},
       children: [{
-        bind: {},
+        key: 'sex',
+        type: 'input',
         isUseTooltip: true,
-        elFormItemProps: { key: 'sex' },
-        elInputProps: { placeholder: '请输入性别' },
-        type: 'input'
+        placeholder: '请输入性别'
       }]
     }]
   },
@@ -100,17 +99,15 @@ const columns = ref([
     name: '学校',
     props: { width: '200px' },
     children: [{
-      bind: {},
       children: [{
-        bind: {},
-        isUseTooltip: false,
-        elFormItemProps: { key: 'school' },
+        key: 'school',
         type: 'slotComponent',
+        isUseTooltip: false,
         slotName: 'table-school'
       }]
     }]
   }
-] as any)
+])
 
 const formTableRef = ref()
 

@@ -1,6 +1,6 @@
 <template>
-  <div class="form-table-v2-demo">
-    <h1>FormTable 优化版本演示</h1>
+  <div class="form-table-advanced-demo">
+    <h1>FormTable 高级示例</h1>
     
     <div class="demo-section">
       <h2>Slot 插槽使用说明</h2>
@@ -32,6 +32,7 @@
         :loading="loading"
         :custom-components="customComponents"
         @update:tableData="handleTableDataUpdate"
+        @event="handleFormTableEvent"
       >
         <!-- 学校选择插槽 -->
         <template #table-school="{ row, index }">
@@ -71,6 +72,11 @@
       <h2>当前数据</h2>
       <pre>{{ JSON.stringify(tableData, null, 2) }}</pre>
     </div>
+
+    <div class="demo-section">
+      <h2>统一事件日志</h2>
+      <pre>{{ JSON.stringify(eventLog, null, 2) }}</pre>
+    </div>
   </div>
 </template>
 
@@ -88,6 +94,8 @@ const tableData = ref([
     name: '张三', 
     age: 25, 
     department: '技术部', 
+    level: 'senior',
+    remark: '负责核心模块与需求拆解。',
     status: true,
     phone: '13800138000',
     workStatus: 'processing',
@@ -100,6 +108,8 @@ const tableData = ref([
     name: '李四', 
     age: 30, 
     department: '产品部', 
+    level: 'mid',
+    remark: '跟进跨部门协作与需求排期。',
     status: false,
     phone: '13900139000',
     workStatus: 'pending',
@@ -120,6 +130,7 @@ watch(tableData, (newData: any[]) => {
 }, { deep: true, immediate: true })
 
 const loading = ref(false)
+const eventLog = ref<Array<{ type: string; args: any[] }>>([])
 
 // 自定义组件配置
 const customComponents = ref([
@@ -151,6 +162,7 @@ const rules = ref({
     { required: true, message: '请输入年龄', trigger: 'blur' },
     { type: 'number', min: 18, max: 65, message: '年龄必须在18-65之间', trigger: 'blur' }
   ],
+  'tableData.*.level': [{ required: true, message: '请选择职级', trigger: 'change' }],
   'tableData.*.phone': [
     { required: true, message: '请输入手机号', trigger: 'blur' },
     { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号格式', trigger: 'blur' }
@@ -170,13 +182,20 @@ const columns = ref<ColumnConfig[]>([
           key: 'name',
           type: 'input',
           colSpan: 12,
-          placeholder: '请输入姓名'
+          placeholder: '请输入姓名',
+          bind: {
+            maxlength: 20,
+            clearable: true
+          }
         },
         {
           key: 'age',
           type: 'number',
           colSpan: 12,
-          placeholder: '请输入年龄'
+          placeholder: '请输入年龄',
+          bind: {
+            controlsPosition: 'right'
+          }
         }
       ]
     }]
@@ -191,26 +210,54 @@ const columns = ref<ColumnConfig[]>([
           type: 'custom',
           customComponent: 'PhoneInput',
           colSpan: 24,
-          placeholder: '请输入手机号'
+          placeholder: '请输入手机号',
+          bind: {
+            clearable: true
+          }
         }
       ]
     }]
   },
   {
     name: '工作信息',
-    props: { width: '300px' },
+    props: { width: '420px' },
     children: [{
       children: [
         {
           key: 'department',
           type: 'input',
-          colSpan: 12,
+          colSpan: 10,
           placeholder: '请输入部门'
+        },
+        {
+          key: 'level',
+          type: 'select',
+          colSpan: 14,
+          placeholder: '请选择职级',
+          options: [
+            { label: '初级', value: 'junior' },
+            { label: '中级', value: 'mid' },
+            { label: '高级', value: 'senior' }
+          ],
+          bind: {
+            filterable: true
+          }
+        },
+        {
+          key: 'remark',
+          type: 'textarea',
+          colSpan: 24,
+          placeholder: '请输入备注',
+          bind: {
+            rows: 2,
+            maxlength: 60,
+            showWordLimit: true
+          }
         },
         {
           key: 'status',
           type: 'switch',
-          colSpan: 12
+          colSpan: 24
         }
       ]
     }]
@@ -314,6 +361,10 @@ const handleTableDataUpdate = (newData: any[]) => {
   formData.tableData = newData
 }
 
+const handleFormTableEvent = (payload: { type: string; args: any[] }) => {
+  eventLog.value = [payload, ...eventLog.value].slice(0, 8)
+}
+
 const handleSubmit = async () => {
   try {
     await formTableRef.value?.validate()
@@ -332,6 +383,8 @@ const handleAddRow = () => {
     name: '',
     age: 0,
     department: '',
+    level: 'junior',
+    remark: '',
     status: true,
     phone: '',
     workStatus: 'processing',
@@ -370,7 +423,7 @@ const toggleLoading = () => {
 </script>
 
 <style lang="less" scoped>
-.form-table-v2-demo {
+.form-table-advanced-demo {
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;

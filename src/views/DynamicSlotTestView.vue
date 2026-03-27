@@ -10,7 +10,7 @@
         :columns="columns"
         :rules="rules"
         :form-data="formData"
-        @update:table-data="handleTableDataUpdate"
+        @update:tableData="handleTableDataUpdate"
       >
         <!-- 自定义学校选择器 -->
         <template #custom-school="{ row, index }">
@@ -69,6 +69,7 @@
 
 <script lang="ts" setup>
 import { ref, reactive } from 'vue'
+import { Message } from 'element-ui'
 import FormTable from '@/components/FormTable/index.vue'
 
 const tableData = ref([
@@ -197,16 +198,16 @@ const handleSubmit = async () => {
   try {
     await formTableRef.value?.validate()
     console.log('表单验证通过', tableData.value)
-    ElMessage.success('表单提交成功！')
+    Message.success('表单提交成功！')
   } catch (error) {
     console.log('表单验证失败', error)
-    ElMessage.error('表单验证失败，请检查输入')
+    Message.error('表单验证失败，请检查输入')
   }
 }
 
 const handleReset = () => {
   formTableRef.value?.resetFields()
-  ElMessage.info('表单已重置')
+  Message.info('表单已重置')
 }
 
 const handleAddRow = () => {
@@ -217,15 +218,15 @@ const handleAddRow = () => {
     status: 'active',
     rating: 0
   })
-  ElMessage.success('已添加新行')
+  Message.success('已添加新行')
 }
 
 const handleRemoveRow = () => {
   if (tableData.value.length > 1) {
     tableData.value.pop()
-    ElMessage.success('已删除最后一行')
+    Message.success('已删除最后一行')
   } else {
-    ElMessage.warning('至少需要保留一行数据')
+    Message.warning('至少需要保留一行数据')
   }
 }
 
@@ -238,21 +239,21 @@ const getStatusText = (status: string) => {
 }
 
 const editRow = (row: any, index: number) => {
-  ElMessage.info(`编辑第 ${index + 1} 行: ${row.name}`)
+  Message.info(`编辑第 ${index + 1} 行: ${row.name}`)
 }
 
 const copyRow = (row: any, index: number) => {
   const newRow = { ...row, name: row.name + '_副本' }
   tableData.value.splice(index + 1, 0, newRow)
-  ElMessage.success(`已复制第 ${index + 1} 行`)
+  Message.success(`已复制第 ${index + 1} 行`)
 }
 
 const deleteRow = (index: number) => {
   if (tableData.value.length > 1) {
     tableData.value.splice(index, 1)
-    ElMessage.success(`已删除第 ${index + 1} 行`)
+    Message.success(`已删除第 ${index + 1} 行`)
   } else {
-    ElMessage.warning('至少需要保留一行数据')
+    Message.warning('至少需要保留一行数据')
   }
 }
 </script>

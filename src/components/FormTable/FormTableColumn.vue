@@ -13,8 +13,7 @@
         :row-config="rowItem"
         v-memo="[scope.row, rowItem]"
       >
-        <!-- 简化的插槽传递 -->
-        <slot v-bind="slotProps" />
+        <slot />
       </FormTableRow>
     </template>
   </el-table-column>
@@ -51,9 +50,4 @@ const columnAttrs = computed(() => {
   return result
 })
 
-// 优化的插槽props - 使用静态对象避免重复创建
-const slotProps = {
-  row: null, // 在FormTableRow中动态设置
-  index: null
-}
 </script>

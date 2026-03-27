@@ -3,7 +3,9 @@
     <el-select 
       v-model="countryCode" 
       style="width: 80px; margin-right: 8px;"
-      size="default"
+      :size="size"
+      :disabled="disabled"
+      @change="handleCountryCodeChange"
     >
       <el-option label="+86" value="+86" />
       <el-option label="+1" value="+1" />
@@ -92,6 +94,11 @@ export default Vue.extend({
     },
     handleChange(value: string) {
       const fullPhone = `${this.countryCode}${value}`
+      this.$emit('change', fullPhone)
+    },
+    handleCountryCodeChange(value: string) {
+      const fullPhone = `${value}${this.phoneNumber}`
+      this.$emit('input', fullPhone)
       this.$emit('change', fullPhone)
     }
   }

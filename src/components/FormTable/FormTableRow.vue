@@ -23,8 +23,7 @@
         :index="rowIndex"
         :config="colItem"
       >
-        <!-- 简化的插槽传递 -->
-        <slot v-bind="slotProps" />
+        <slot />
       </FormTableItem>
     </el-col>
   </el-row>
@@ -77,12 +76,4 @@ const rowChildren = computed(() => {
   return children && children.length > 0 ? children : []
 })
 
-// 优化的插槽props - 使用缓存避免重复创建
-const slotProps = computed(() => {
-  // 只有当row或index真正变化时才重新创建对象
-  return {
-    row: props.row,
-    index: props.rowIndex
-  }
-})
 </script>

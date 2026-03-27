@@ -1,24 +1,23 @@
 <template>
   <div class="form-table-container">
-    <el-form 
-      ref="formRef" 
-      :model="formData" 
-      :rules="rules"
+    <el-form
+      ref="formRef"
+      :model="props.formData"
+      :rules="props.rules"
       v-bind="formAttrs"
     >
       <el-table
-        :data="tableData"
+        :data="props.tableData"
         v-bind="tableAttrs"
-        v-loading="loading"
+        v-loading="props.loading"
       >
         <FormTableColumn
-          v-for="(column, columnIndex) in columns"
+          v-for="(column, columnIndex) in props.columns"
           :key="columnIndex"
           :column="column"
           :column-index="columnIndex"
         >
-          <!-- 简化的插槽传递 -->
-          <slot v-bind="slotProps" />
+          <slot />
         </FormTableColumn>
       </el-table>
     </el-form>
@@ -26,15 +25,18 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, computed, provide, useAttrs, shallowRef, triggerRef, watchEffect } from 'vue'
+import { computed, provide, ref, useAttrs } from 'vue'
 import FormTableColumn from './FormTableColumn.vue'
 import { extractFormAttrs, extractTableAttrs } from './utils/attrs'
-import type { FormTableProps, FormTableEmits, TableRow, ColumnConfig, ValidationRule, CustomComponentConfig } from './types'
+import type {
+  ColumnConfig,
+  CustomComponentConfig,
+  ValidationRule,
+  TableRow
+} from './types'
 
-// 获取所有属性
 const attrs = useAttrs()
 
-// 只定义FormTable特有的props
 const props = withDefaults(defineProps<{
   tableData: TableRow[]
   columns: ColumnConfig[]
@@ -51,135 +53,90 @@ const props = withDefaults(defineProps<{
   loading: false
 })
 
-// 事件定义
 const emit = defineEmits([
   'update:tableData',
   'update:formData',
-  'row-change',
   'row-add',
   'row-remove',
-  'validate'
+  'validate',
+  'event'
 ])
 
-// 表单引用
 const formRef = ref<any>(null)
 
-// 提取el-form相关的属性
-const formAttrs = computed(() => {
-  return extractFormAttrs(attrs)
-})
+const formAttrs = computed(() => extractFormAttrs(attrs))
+const tableAttrs = computed(() => extractTableAttrs(attrs))
 
-// 提取el-table相关的属性
-const tableAttrs = computed(() => {
-  return extractTableAttrs(attrs)
-})
-
-// 简化的插槽props
-const slotProps = computed(() => ({
-  row: null, // 在FormTableColumn中动态设置
-  index: null // 在FormTableColumn中动态设置
-}))
-
-// 提供自定义组件给子组件 - 使用ref缓存优化性能
-const customComponentsCache = ref<Record<string, any>>({})
 const customComponentsMap = computed(() => {
-  // 只有当customComponents真正变化时才重新计算
-  const currentComponents = props.customComponents || []
-  const cacheKey = currentComponents.map(c => c.name).join(',')
-  
-  if (customComponentsCache.value._cacheKey === cacheKey) {
-    return customComponentsCache.value
-  }
-  
-  const map: Record<string, any> = { _cacheKey: cacheKey }
-  currentComponents.forEach(comp => {
-    map[comp.name] = comp.component
+  const map: Record<string, any> = {}
+  props.customComponents.forEach((item) => {
+    map[item.name] = item.component
   })
-  
-  customComponentsCache.value = map
   return map
 })
 
-// Vue 2 的 provide/inject
 provide('customComponents', customComponentsMap)
 
-// 使用shallowRef优化性能，避免深度监听
-const tableData = shallowRef(props.tableData)
-const formData = shallowRef(props.formData)
+type DispatchEventName =
+  | 'update:tableData'
+  | 'update:formData'
+  | 'row-add'
+  | 'row-remove'
+  | 'validate'
 
-// 使用watchEffect替代深度监听，性能更好
-watchEffect(() => {
-  if (tableData.value !== props.tableData) {
-    tableData.value = props.tableData
-    triggerRef(tableData)
-  }
-})
+const dispatch = (type: DispatchEventName, ...args: any[]) => {
+  emit(type, ...args)
+  emit('event', { type, args })
+}
 
-watchEffect(() => {
-  if (formData.value !== props.formData) {
-    formData.value = props.formData
-    triggerRef(formData)
-  }
-})
-
-// 暴露方法
 defineExpose({
-  // 表单验证
   validate: async (callback?: (valid: boolean, errors: any[]) => void) => {
     try {
       const valid = await formRef.value?.validate()
       const errors: any[] = []
-      emit('validate', valid, errors)
+      dispatch('validate', valid, errors)
       callback?.(valid, errors)
       return valid
     } catch (error) {
       const errors: any[] = Array.isArray(error) ? error : [error]
-      emit('validate', false, errors)
+      dispatch('validate', false, errors)
       callback?.(false, errors)
       return false
     }
   },
-  
-  // 重置表单
+
   resetFields: () => {
     formRef.value?.resetFields()
   },
-  
-  // 清除验证
-  clearValidate: (props?: string | string[]) => {
-    formRef.value?.clearValidate(props)
+
+  clearValidate: (fieldProps?: string | string[]) => {
+    formRef.value?.clearValidate(fieldProps)
   },
-  
-  // 添加行
+
   addRow: (rowData?: Partial<TableRow>) => {
     const newRow = { ...rowData }
-    const newTableData = [...tableData.value, newRow]
-    emit('update:tableData', newTableData)
-    emit('row-add', newRow, newTableData.length - 1)
+    const nextTableData = [...props.tableData, newRow]
+    dispatch('update:tableData', nextTableData)
+    dispatch('row-add', newRow, nextTableData.length - 1)
   },
-  
-  // 删除行
+
   removeRow: (index: number) => {
-    const newTableData = [...tableData.value]
-    const removedRow = newTableData.splice(index, 1)[0]
-    emit('update:tableData', newTableData)
-    emit('row-remove', removedRow, index)
+    const nextTableData = [...props.tableData]
+    const removedRow = nextTableData.splice(index, 1)[0]
+    dispatch('update:tableData', nextTableData)
+    dispatch('row-remove', removedRow, index)
   },
-  
-  // 获取表单数据
-  getFormData: () => {
-    return {
-      tableData: tableData.value,
-      ...formData.value
-    }
-  },
-  
-  // 设置表单数据
+
+  getFormData: () => ({
+    tableData: props.tableData,
+    ...props.formData
+  }),
+
   setFormData: (data: Record<string, any>) => {
     if (data.tableData) {
-      emit('update:tableData', data.tableData)
+      dispatch('update:tableData', data.tableData)
     }
-    emit('update:formData', data)
+    dispatch('update:formData', data)
   }
 })
 </script>
@@ -191,10 +148,10 @@ defineExpose({
       .el-table__row {
         .el-table__cell {
           padding: 8px 0;
-          
+
           .el-form-item {
             margin-bottom: 0;
-            
+
             .el-form-item__content {
               line-height: 1;
             }
