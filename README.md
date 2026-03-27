@@ -1,37 +1,47 @@
-# form-table
+# FormTable
 
-#### 介绍
-基于vue2 + element ui的表单嵌套表格组件
+一个基于 `Vue 2.7 + Element UI + TypeScript` 的表格表单组件，适合后台“表格内嵌表单”场景。
 
-#### 软件架构
-软件架构说明
+## 当前状态
 
+这个仓库现在只保留新版实现。
 
-#### 安装教程
+核心入口：
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+- `src/components/FormTable/index.vue`
 
-#### 使用说明
+推荐先看：
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+- [当前完整文档](./CURRENT_FORMTABLE_DOC.md)
+- [基础示例](./src/views/FormTableView.vue)
+- [高级示例](./src/views/FormTableAdvancedView.vue)
+- [调试示例](./src/views/DebugView.vue)
 
-#### 参与贡献
+## 特性
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+- 配置驱动渲染列、布局和表单项
+- 基于 `el-form` 的统一校验
+- 支持插槽和自定义组件扩展
+- 支持 `bind` 透传不常见组件属性
+- 支持统一归档事件 `@event`
 
+## 运行
 
-#### 特技
+```bash
+pnpm install
+pnpm dev
+pnpm build
+pnpm type-check
+```
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+## 主要路由
+
+- `/form-table`
+- `/form-table-advanced`
+- `/dynamic-slot-test`
+
+## 文档说明
+
+详细 API、配置结构、事件、`bind` 透传、自定义组件和插槽用法，统一维护在：
+
+- [CURRENT_FORMTABLE_DOC.md](./CURRENT_FORMTABLE_DOC.md)
