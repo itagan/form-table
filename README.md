@@ -13,6 +13,7 @@
 推荐先看：
 
 - [当前完整文档](./CURRENT_FORMTABLE_DOC.md)
+- [更新记录](./CHANGELOG.md)
 - [基础示例](./src/views/FormTableView.vue)
 - [高级示例](./src/views/FormTableAdvancedView.vue)
 - [调试示例](./src/views/DebugView.vue)
