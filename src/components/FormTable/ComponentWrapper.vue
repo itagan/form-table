@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, type Ref } from 'vue'
+import { computed, inject } from 'vue'
 import { getComponentType } from './configs/defaultComponentConfigs'
 import { processComponentProps, validateComponentConfig } from './utils/componentProps'
 
@@ -16,19 +16,14 @@ interface Props {
   fieldKey: string
   row: Record<string, any>
   customComponent?: string
-  customComponents?: Record<string, any>
   bind?: Record<string, any>
   [key: string]: any
 }
 
 const props = defineProps<Props>()
 
-const injectedComponents = inject('customComponents', computed(() => ({} as Record<string, any>)))
+const customComponentsMap = inject('customComponents', computed(() => ({} as Record<string, any>)))
 const dispatch = inject<(type: string, ...args: any[]) => void>('dispatch')
-
-const customComponentsMap = computed(() => {
-  return props.customComponents || injectedComponents.value
-})
 
 const componentType = computed(() => {
   if (props.type === 'custom' && props.customComponent) {
@@ -51,7 +46,7 @@ const componentProps = computed(() => {
     }
   }
 
-  const { type, customComponent, customComponents, bind, ...otherProps } = props
+  const { type, customComponent, bind, ...otherProps } = props
 
   return processComponentProps({
     type,
