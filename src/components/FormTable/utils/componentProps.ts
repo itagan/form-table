@@ -36,30 +36,6 @@ function getElementUIDefaults(componentType: string): Record<string, any> {
       placeholder: '请选择时间',
       clearable: true
     },
-    'el-input-number': {
-      // input-number 组件不需要 clearable
-    },
-    'el-switch': {
-      // switch组件不需要clearable
-    },
-    'el-radio-group': {
-      // radio组件不需要clearable
-    },
-    'el-checkbox-group': {
-      // checkbox组件不需要clearable
-    },
-    'el-rate': {
-      // rate组件不需要clearable
-    },
-    'el-slider': {
-      // slider组件不需要clearable
-    },
-    'el-color-picker': {
-      // color组件不需要clearable
-    },
-    'el-upload': {
-      // upload组件不需要clearable
-    },
     'el-cascader': {
       placeholder: '请选择',
       clearable: true
@@ -73,7 +49,7 @@ function getElementUIDefaults(componentType: string): Record<string, any> {
       clearable: true
     }
   }
-  
+
   return defaults[componentType] || {}
 }
 
