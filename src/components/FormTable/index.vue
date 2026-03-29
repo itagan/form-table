@@ -53,14 +53,14 @@ const props = withDefaults(defineProps<{
   loading: false
 })
 
-const emit = defineEmits([
-  'update:tableData',
-  'update:formData',
-  'row-add',
-  'row-remove',
-  'validate',
-  'event'
-])
+const emit = defineEmits<{
+  (e: 'update:tableData', data: TableRow[]): void
+  (e: 'update:formData', data: Record<string, any>): void
+  (e: 'row-add', row: TableRow, index: number): void
+  (e: 'row-remove', row: TableRow, index: number): void
+  (e: 'validate', valid: boolean, errors: any[]): void
+  (e: 'event', payload: { type: string; args: any[] }): void
+}>()
 
 const formRef = ref<any>(null)
 
@@ -77,14 +77,9 @@ const customComponentsMap = computed(() => {
 
 provide('customComponents', customComponentsMap)
 
-type DispatchEventName =
-  | 'update:tableData'
-  | 'update:formData'
-  | 'row-add'
-  | 'row-remove'
-  | 'validate'
+type EmitEventName = 'update:tableData' | 'update:formData' | 'row-add' | 'row-remove' | 'validate'
 
-const dispatch = (type: DispatchEventName | 'update:row', ...args: any[]) => {
+const dispatch = (type: EmitEventName | 'update:row', ...args: any[]) => {
   if (type === 'update:row') {
     const [originalRow, fieldKey, value] = args
     const index = props.tableData.indexOf(originalRow)
@@ -95,7 +90,7 @@ const dispatch = (type: DispatchEventName | 'update:row', ...args: any[]) => {
     }
     return
   }
-  emit(type as DispatchEventName, ...args)
+  emit(type, ...args)
   emit('event', { type, args })
 }
 
