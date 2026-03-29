@@ -11,7 +11,6 @@
         :row="scope.row"
         :row-index="scope.$index"
         :row-config="rowItem"
-        v-memo="[scope.row, rowItem]"
       >
         <slot />
       </FormTableRow>

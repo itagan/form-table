@@ -9,7 +9,6 @@
       :key="colIndex"
       :span="colItem.colSpan || 24"
       v-bind="colItem.bind"
-      v-memo="[colItem, row[colItem.key]]"
     >
       <!-- 统一的字段渲染 -->
       <FormTableItem
