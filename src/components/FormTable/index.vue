@@ -84,10 +84,22 @@ type DispatchEventName =
   | 'row-remove'
   | 'validate'
 
-const dispatch = (type: DispatchEventName, ...args: any[]) => {
-  emit(type, ...args)
+const dispatch = (type: DispatchEventName | 'update:row', ...args: any[]) => {
+  if (type === 'update:row') {
+    const [originalRow, fieldKey, value] = args
+    const index = props.tableData.indexOf(originalRow)
+    if (index !== -1) {
+      const nextTableData = [...props.tableData]
+      nextTableData[index] = { ...nextTableData[index], [fieldKey]: value }
+      emit('update:tableData', nextTableData)
+    }
+    return
+  }
+  emit(type as DispatchEventName, ...args)
   emit('event', { type, args })
 }
+
+provide('dispatch', dispatch)
 
 defineExpose({
   validate: async (callback?: (valid: boolean, errors: any[]) => void) => {
