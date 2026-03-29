@@ -32,12 +32,9 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, useAttrs } from 'vue'
+import { computed, useAttrs } from 'vue'
 import ComponentWrapper from './ComponentWrapper.vue'
 import type { FormItemConfig } from './types'
-
-// 注入自定义组件
-const customComponents = inject('customComponents', computed(() => ({} as Record<string, any>)))
 
 const props = defineProps({
   propPath: {
@@ -106,7 +103,6 @@ const wrapperProps = computed(() => {
     fieldKey: key,
     row: props.row,
     customComponent,
-    customComponents: customComponents.value,
     bind,
     ...componentConfig
   }
