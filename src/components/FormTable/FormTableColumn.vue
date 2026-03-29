@@ -23,6 +23,7 @@
 import { computed, useAttrs } from 'vue'
 import FormTableRow from './FormTableRow.vue'
 import type { ColumnConfig } from './types'
+import { extractColumnAttrs } from './utils/attrs'
 
 interface Props {
   column: ColumnConfig
@@ -32,22 +33,8 @@ interface Props {
 const props = defineProps<Props>()
 const attrs = useAttrs()
 
-// 优化的columnAttrs计算属性 - 减少对象创建
-const columnAttrs = computed(() => {
-  const columnProps = props.column.props || {}
-  const attrsObj = attrs || {}
-  
-  // 只有当属性真正存在时才合并，减少对象创建
-  const result: Record<string, any> = {}
-  
-  if (Object.keys(columnProps).length > 0) {
-    Object.assign(result, columnProps)
-  }
-  if (Object.keys(attrsObj).length > 0) {
-    Object.assign(result, attrsObj)
-  }
-  
-  return result
-})
-
+const columnAttrs = computed(() => ({
+  ...extractColumnAttrs(attrs),
+  ...(props.column.props || {})
+}))
 </script>

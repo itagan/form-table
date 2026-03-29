@@ -57,10 +57,42 @@ export const EL_TABLE_PROPS = [
   'showOverflowTooltip'
 ] as const
 
+// el-table-column 支持的属性白名单
+export const EL_COLUMN_PROPS = [
+  'type',
+  'index',
+  'columnKey',
+  'width',
+  'minWidth',
+  'fixed',
+  'sortable',
+  'sortMethod',
+  'sortBy',
+  'sortOrders',
+  'resizable',
+  'formatter',
+  'showOverflowTooltip',
+  'align',
+  'headerAlign',
+  'className',
+  'labelClassName',
+  'selectable',
+  'reserveSelection',
+  'filters',
+  'filterPlacement',
+  'filterMultiple',
+  'filterMethod',
+  'filteredValue'
+] as const
+
 export function extractFormAttrs<T extends Record<string, any>>(attrs: T) {
   return pick(attrs, EL_FORM_PROPS as any)
 }
 
 export function extractTableAttrs<T extends Record<string, any>>(attrs: T) {
   return pick(attrs, EL_TABLE_PROPS as any)
+}
+
+export function extractColumnAttrs<T extends Record<string, any>>(attrs: T) {
+  return pick(attrs, EL_COLUMN_PROPS as any)
 }
