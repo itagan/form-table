@@ -1,9 +1,6 @@
 import { getDefaultConfig, getComponentType } from '../configs/defaultComponentConfigs'
 
-/**
- * 组件属性处理工具
- * 负责合并用户配置、默认配置和Element UI默认行为
- */
+const NO_CLEARABLE_TYPES = new Set(['switch', 'radio', 'checkbox', 'rate', 'slider', 'color', 'upload'])
 
 export interface ComponentPropsOptions {
   type: string
@@ -99,8 +96,7 @@ export function processComponentProps(options: ComponentPropsOptions): {
   }
   
   // 4. 特殊处理：移除不适合的属性
-  if (type === 'switch' || type === 'radio' || type === 'checkbox' || 
-      type === 'rate' || type === 'slider' || type === 'color' || type === 'upload') {
+  if (NO_CLEARABLE_TYPES.has(type)) {
     delete componentProps.clearable
   }
   

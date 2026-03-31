@@ -8,7 +8,6 @@
 
 <script lang="ts" setup>
 import { computed, inject } from 'vue'
-import { getComponentType } from './configs/defaultComponentConfigs'
 import { processComponentProps, validateComponentConfig } from './utils/componentProps'
 
 interface Props {
@@ -25,20 +24,7 @@ const props = defineProps<Props>()
 const customComponentsMap = inject('customComponents', computed(() => ({} as Record<string, any>)))
 const dispatch = inject<(type: string, ...args: any[]) => void>('dispatch')
 
-const componentType = computed(() => {
-  if (props.type === 'custom' && props.customComponent) {
-    const component = customComponentsMap.value[props.customComponent]
-    if (!component) {
-      console.warn(`Custom component "${props.customComponent}" not found. Available:`, Object.keys(customComponentsMap.value))
-      return 'div'
-    }
-    return component
-  }
-
-  return getComponentType(props.type)
-})
-
-const componentProps = computed(() => {
+const resolved = computed(() => {
   if (import.meta.env.DEV) {
     const validation = validateComponentConfig(props.type, props)
     if (!validation.valid) {
@@ -54,8 +40,11 @@ const componentProps = computed(() => {
     customComponents: customComponentsMap.value,
     bind,
     ...otherProps
-  }).componentProps
+  })
 })
+
+const componentType = computed(() => resolved.value.componentType)
+const componentProps = computed(() => resolved.value.componentProps)
 
 const modelValue = computed({
   get: () => props.row[props.fieldKey],

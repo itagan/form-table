@@ -4,7 +4,7 @@
     :rules="rules"
     :label="label"
     :label-width="labelWidth"
-    v-bind="formItemAttrs"
+    v-bind="attrs"
   >
     <!-- 插槽组件 -->
     <slot 
@@ -36,51 +36,27 @@ import { computed, useAttrs } from 'vue'
 import ComponentWrapper from './ComponentWrapper.vue'
 import type { FormItemConfig } from './types'
 
-const props = defineProps({
-  propPath: {
-    type: String,
-    required: true
-  },
-  rules: {
-    type: Array,
-    default: () => []
-  },
-  label: {
-    type: String,
-    default: ''
-  },
-  labelWidth: {
-    type: String,
-    default: 'auto'
-  },
-  isUseTooltip: {
-    type: Boolean,
-    default: false
-  },
-  tooltipProps: {
-    type: Object,
-    default: () => ({})
-  },
-  row: {
-    type: Object,
-    required: true
-  },
-  index: {
-    type: Number,
-    required: true
-  },
-  config: {
-    type: Object,
-    required: true
-  }
+interface Props {
+  propPath: string
+  rules?: any[]
+  label?: string
+  labelWidth?: string
+  isUseTooltip?: boolean
+  tooltipProps?: Record<string, any>
+  row: Record<string, any>
+  index: number
+  config: Record<string, any>
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  rules: () => [],
+  label: '',
+  labelWidth: 'auto',
+  isUseTooltip: false,
+  tooltipProps: () => ({})
 })
 
 const attrs = useAttrs()
-
-// 合并attrs，支持el-form-item的所有属性
-const formItemAttrs = computed(() => {
-  return attrs
-})
 
 const wrapperProps = computed(() => {
   const config = props.config as FormItemConfig
@@ -108,7 +84,6 @@ const wrapperProps = computed(() => {
   }
 })
 
-// 优化的计算属性 - 避免重复计算
 const hasContent = computed(() => {
   const value = props.row[props.config.key]
   return value !== null && value !== undefined && value !== ''
