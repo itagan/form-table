@@ -6,6 +6,7 @@
  */
 
 /** 从对象中选取指定键（忽略 undefined） */
+export function pick<T extends Record<string, any>, K extends keyof T>(
   obj: T,
   keys: K[]
 ): Pick<T, K> {
