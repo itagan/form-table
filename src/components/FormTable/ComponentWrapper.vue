@@ -7,13 +7,15 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject } from 'vue'
+import { computed, inject, type ComputedRef } from 'vue'
 import { processComponentProps, validateComponentConfig } from './utils/componentProps'
+import { FORM_TABLE_CUSTOM_COMPONENTS_KEY, FORM_TABLE_DISPATCH_KEY, type DispatchFn } from './types'
 
 interface Props {
   type: string
   fieldKey: string
   row: Record<string, any>
+  rowIndex: number
   customComponent?: string
   bind?: Record<string, any>
   [key: string]: any
@@ -21,8 +23,8 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const customComponentsMap = inject('customComponents', computed(() => ({} as Record<string, any>)))
-const dispatch = inject<(type: string, ...args: any[]) => void>('dispatch')
+const customComponentsMap = inject<ComputedRef<Record<string, any>>>(FORM_TABLE_CUSTOM_COMPONENTS_KEY, computed(() => ({})))
+const dispatch = inject<DispatchFn>(FORM_TABLE_DISPATCH_KEY)
 
 const resolved = computed(() => {
   if (import.meta.env.DEV) {
@@ -51,9 +53,9 @@ const modelValue = computed({
   set: (value) => {
     if (props.row[props.fieldKey] !== value) {
       if (dispatch) {
-        dispatch('update:row', props.row, props.fieldKey, value)
+        dispatch('update:row', props.rowIndex, props.row, props.fieldKey, value)
       } else {
-        props.row[props.fieldKey] = value
+        console.warn('[FormTable] dispatch not found, value update skipped.')
       }
     }
   }

@@ -31,9 +31,11 @@ import { extractFormAttrs, extractTableAttrs } from './utils/attrs'
 import type {
   ColumnConfig,
   CustomComponentConfig,
+  DispatchFn,
   ValidationRule,
   TableRow
 } from './types'
+import { FORM_TABLE_CUSTOM_COMPONENTS_KEY, FORM_TABLE_DISPATCH_KEY } from './types'
 
 const attrs = useAttrs()
 
@@ -75,26 +77,24 @@ const customComponentsMap = computed(() => {
   return map
 })
 
-provide('customComponents', customComponentsMap)
+provide(FORM_TABLE_CUSTOM_COMPONENTS_KEY, customComponentsMap)
 
 type EmitEventName = 'update:tableData' | 'update:formData' | 'row-add' | 'row-remove' | 'validate'
 
 const dispatch = (type: EmitEventName | 'update:row', ...args: any[]) => {
   if (type === 'update:row') {
-    const [originalRow, fieldKey, value] = args
-    const index = props.tableData.indexOf(originalRow)
-    if (index !== -1) {
-      const nextTableData = [...props.tableData]
-      nextTableData[index] = { ...nextTableData[index], [fieldKey]: value }
-      emit('update:tableData', nextTableData)
-    }
+    const [rowIndex, , fieldKey, value] = args
+    const nextTableData = [...props.tableData]
+    nextTableData[rowIndex] = { ...nextTableData[rowIndex], [fieldKey]: value }
+    emit('update:tableData', nextTableData)
     return
   }
-  emit(type, ...args)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ;(emit as any)(type, ...args)
   emit('event', { type, args })
 }
 
-provide('dispatch', dispatch)
+provide(FORM_TABLE_DISPATCH_KEY, dispatch)
 
 defineExpose({
   validate: async (callback?: (valid: boolean, errors: any[]) => void) => {

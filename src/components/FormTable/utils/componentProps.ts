@@ -10,44 +10,35 @@ export interface ComponentPropsOptions {
   [key: string]: any
 }
 
-/**
- * 获取Element UI组件的默认属性
- * @param componentType Element UI组件类型
- * @returns 默认属性
- */
-function getElementUIDefaults(componentType: string): Record<string, any> {
-  const defaults: Record<string, any> = {
-    'el-input': {
-      placeholder: '请输入',
-      clearable: true
-    },
-    'el-select': {
-      placeholder: '请选择',
-      clearable: true
-    },
-    'el-date-picker': {
-      placeholder: '请选择日期',
-      clearable: true
-    },
-    'el-time-picker': {
-      placeholder: '请选择时间',
-      clearable: true
-    },
-    'el-cascader': {
-      placeholder: '请选择',
-      clearable: true
-    },
-    'el-tree-select': {
-      placeholder: '请选择',
-      clearable: true
-    },
-    'el-autocomplete': {
-      placeholder: '请输入',
-      clearable: true
-    }
+const ELEMENT_UI_DEFAULTS: Record<string, Record<string, any>> = {
+  'el-input': {
+    placeholder: '请输入',
+    clearable: true
+  },
+  'el-select': {
+    placeholder: '请选择',
+    clearable: true
+  },
+  'el-date-picker': {
+    placeholder: '请选择日期',
+    clearable: true
+  },
+  'el-time-picker': {
+    placeholder: '请选择时间',
+    clearable: true
+  },
+  'el-cascader': {
+    placeholder: '请选择',
+    clearable: true
+  },
+  'el-tree-select': {
+    placeholder: '请选择',
+    clearable: true
+  },
+  'el-autocomplete': {
+    placeholder: '请输入',
+    clearable: true
   }
-
-  return defaults[componentType] || {}
 }
 
 /**
@@ -78,7 +69,7 @@ export function processComponentProps(options: ComponentPropsOptions): {
   
   // 2. 获取默认配置
   const defaultConfig = getDefaultConfig(type)
-  const elementUIDefaults = getElementUIDefaults(componentType)
+  const elementUIDefaults = ELEMENT_UI_DEFAULTS[componentType] || {}
   
   // 3. 合并属性（按优先级）
   const componentProps = {

@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, useAttrs } from 'vue'
+import { computed } from 'vue'
 import FormTableItem from './FormTableItem.vue'
 import type { RowConfig, TableRow } from './types'
 
@@ -38,13 +38,11 @@ const props = defineProps<{
   rowIndex: number
   rowConfig: RowConfig
 }>()
-const attrs = useAttrs()
 
 const gutter = computed(() => props.rowConfig.gutter || props.rowConfig.bind?.gutter || 0)
 
 const rowProps = computed(() => ({
   ...props.rowConfig.bind,
-  ...props.rowConfig.props,
-  ...attrs
+  ...props.rowConfig.props
 }))
 </script>

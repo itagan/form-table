@@ -45,7 +45,7 @@ interface Props {
   tooltipProps?: Record<string, any>
   row: Record<string, any>
   index: number
-  config: Record<string, any>
+  config: FormItemConfig
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -59,7 +59,6 @@ const props = withDefaults(defineProps<Props>(), {
 const attrs = useAttrs()
 
 const wrapperProps = computed(() => {
-  const config = props.config as FormItemConfig
   const {
     key,
     type,
@@ -72,12 +71,13 @@ const wrapperProps = computed(() => {
     tooltipProps,
     colSpan,
     ...componentConfig
-  } = config
+  } = props.config
 
   return {
     type,
     fieldKey: key,
     row: props.row,
+    rowIndex: props.index,
     customComponent,
     bind,
     ...componentConfig

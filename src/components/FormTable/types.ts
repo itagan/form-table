@@ -111,3 +111,9 @@ export interface FormTableEmits {
   'validate': [valid: boolean, errors: any[]]
   'event': [payload: FormTableEventPayload]
 }
+
+// provide/inject keys
+export type DispatchFn = (type: string, ...args: any[]) => void
+
+export const FORM_TABLE_CUSTOM_COMPONENTS_KEY: unique symbol = Symbol('customComponents')
+export const FORM_TABLE_DISPATCH_KEY: unique symbol = Symbol('dispatch')
