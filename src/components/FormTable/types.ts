@@ -146,3 +146,4 @@ export type DispatchFn = (type: string, ...args: any[]) => void
 
 export const FORM_TABLE_CUSTOM_COMPONENTS_KEY: unique symbol = Symbol('customComponents')
 export const FORM_TABLE_DISPATCH_KEY: unique symbol = Symbol('dispatch')
+export const FORM_TABLE_SLOTS_KEY: unique symbol = Symbol('formTableSlots')

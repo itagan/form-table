@@ -36,7 +36,7 @@
  * - customComponents: 自定义组件映射表
  * - dispatch: 统一事件分发函数，处理 update:row 等内部事件
  */
-import { computed, provide, ref, useAttrs } from 'vue'
+import { computed, provide, ref, useAttrs, useSlots } from 'vue'
 import FormTableColumn from './FormTableColumn.vue'
 import { extractFormAttrs, extractTableAttrs } from './utils/attrs'
 import type {
@@ -46,9 +46,10 @@ import type {
   ValidationRule,
   TableRow
 } from './types'
-import { FORM_TABLE_CUSTOM_COMPONENTS_KEY, FORM_TABLE_DISPATCH_KEY } from './types'
+import { FORM_TABLE_CUSTOM_COMPONENTS_KEY, FORM_TABLE_DISPATCH_KEY, FORM_TABLE_SLOTS_KEY } from './types'
 
 const attrs = useAttrs()
+const slots = useSlots()
 
 const props = withDefaults(defineProps<{
   tableData: TableRow[]
@@ -91,6 +92,7 @@ const customComponentsMap = computed(() => {
 })
 
 provide(FORM_TABLE_CUSTOM_COMPONENTS_KEY, customComponentsMap)
+provide(FORM_TABLE_SLOTS_KEY, slots)
 
 type EmitEventName = 'update:tableData' | 'update:formData' | 'row-add' | 'row-remove' | 'validate'
 

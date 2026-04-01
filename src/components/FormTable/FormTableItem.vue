@@ -6,11 +6,11 @@
     :label-width="labelWidth"
     v-bind="attrs"
   >
-    <!-- 插槽组件 -->
-    <slot 
-      v-if="config.type === 'slotComponent' && config.slotName"
-      :name="config.slotName" 
-      :row="row" 
+    <!-- 插槽组件: 从 FormTable 顶层注入的 $slots 中取具名插槽 -->
+    <SlotRenderer
+      v-if="config.type === 'slotComponent' && config.slotName && slotFn"
+      :slot-fn="slotFn"
+      :row="row"
       :index="index"
     />
     
@@ -40,9 +40,22 @@
  * 2. 带 Tooltip: isUseTooltip=true 时，内容超出用 el-tooltip 展示
  * 3. 普通组件: 由 ComponentWrapper 根据 type 动态渲染
  */
-import { computed, useAttrs } from 'vue'
+import { computed, defineComponent, inject, useAttrs } from 'vue'
 import ComponentWrapper from './ComponentWrapper.vue'
 import type { FormItemConfig } from './types'
+import { FORM_TABLE_SLOTS_KEY } from './types'
+
+// 渲染顶层插槽的包装组件
+const SlotRenderer = defineComponent({
+  props: {
+    slotFn: { type: Function, required: true as true },
+    row: { type: Object, default: () => ({}) },
+    index: { type: Number, default: 0 }
+  },
+  setup(props) {
+    return () => props.slotFn({ row: props.row, index: props.index })
+  }
+})
 
 interface Props {
   propPath: string
@@ -65,7 +78,12 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const attrs = useAttrs()
+const parentSlots = inject(FORM_TABLE_SLOTS_KEY, {} as Record<string, any>)
 
+// 从顶层 FormTable 注入的 slots 中取出对应具名插槽函数
+const slotFn = computed(() => {
+  return parentSlots[props.config.slotName!] || null
+})
 const wrapperProps = computed(() => {
   const {
     key,
