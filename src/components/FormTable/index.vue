@@ -25,6 +25,17 @@
 </template>
 
 <script lang="ts" setup>
+/**
+ * FormTable 主组件 - 表格内嵌表单
+ *
+ * 数据流: tableData(props) → el-table 渲染 → 用户编辑 → dispatch('update:row') → emit('update:tableData')
+ *
+ * 层级结构: FormTable > FormTableColumn > FormTableRow > FormTableItem > ComponentWrapper
+ *
+ * 通过 provide 向子组件注入:
+ * - customComponents: 自定义组件映射表
+ * - dispatch: 统一事件分发函数，处理 update:row 等内部事件
+ */
 import { computed, provide, ref, useAttrs } from 'vue'
 import FormTableColumn from './FormTableColumn.vue'
 import { extractFormAttrs, extractTableAttrs } from './utils/attrs'
@@ -66,9 +77,11 @@ const emit = defineEmits<{
 
 const formRef = ref<any>(null)
 
+// 从透传 attrs 中按白名单提取 el-form / el-table 可用属性
 const formAttrs = computed(() => extractFormAttrs(attrs))
 const tableAttrs = computed(() => extractTableAttrs(attrs))
 
+// 自定义组件映射表: { name → component }，供子组件 inject 使用
 const customComponentsMap = computed(() => {
   const map: Record<string, any> = {}
   props.customComponents.forEach((item) => {
@@ -81,6 +94,11 @@ provide(FORM_TABLE_CUSTOM_COMPONENTS_KEY, customComponentsMap)
 
 type EmitEventName = 'update:tableData' | 'update:formData' | 'row-add' | 'row-remove' | 'validate'
 
+/**
+ * 统一事件分发器
+ * - 'update:row': 单元格编辑时触发，按 rowIndex 更新对应行数据并 emit update:tableData
+ * - 其他事件: 直接转发并同步派发 'event' 归档事件
+ */
 const dispatch = (type: EmitEventName | 'update:row', ...args: any[]) => {
   if (type === 'update:row') {
     const [rowIndex, , fieldKey, value] = args
@@ -96,6 +114,7 @@ const dispatch = (type: EmitEventName | 'update:row', ...args: any[]) => {
 
 provide(FORM_TABLE_DISPATCH_KEY, dispatch)
 
+// 暴露给 ref 调用的方法
 defineExpose({
   validate: async (callback?: (valid: boolean, errors: any[]) => void) => {
     try {

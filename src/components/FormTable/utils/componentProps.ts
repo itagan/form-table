@@ -1,3 +1,10 @@
+/**
+ * componentProps 工具模块
+ *
+ * 负责将 FormItemConfig 解析为实际可渲染的组件类型和属性。
+ * 属性合并优先级: bind > 直接配置 > 默认配置 > Element UI 默认
+ */
+
 import { getDefaultConfig, getComponentType } from '../configs/defaultComponentConfigs'
 
 const NO_CLEARABLE_TYPES = new Set(['switch', 'radio', 'checkbox', 'rate', 'slider', 'color', 'upload'])

@@ -32,6 +32,14 @@
 </template>
 
 <script lang="ts" setup>
+/**
+ * FormTableItem - 表单项渲染
+ *
+ * 负责渲染单个表单字段，包含三种模式:
+ * 1. slotComponent: 通过 slotName 具名插槽自定义渲染
+ * 2. 带 Tooltip: isUseTooltip=true 时，内容超出用 el-tooltip 展示
+ * 3. 普通组件: 由 ComponentWrapper 根据 type 动态渲染
+ */
 import { computed, useAttrs } from 'vue'
 import ComponentWrapper from './ComponentWrapper.vue'
 import type { FormItemConfig } from './types'

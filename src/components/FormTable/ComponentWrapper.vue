@@ -7,6 +7,16 @@
 </template>
 
 <script lang="ts" setup>
+/**
+ * ComponentWrapper - 动态组件渲染器
+ *
+ * 根据 type 解析为对应的 Element 组件，通过 v-model 双向绑定行数据。
+ * 支持 input/select/date 等内置类型，也支持通过 customComponent 注入自定义组件。
+ *
+ * v-model 数据流:
+ *   get → row[fieldKey] 读取当前值
+ *   set → dispatch('update:row', rowIndex, row, fieldKey, newValue) 触发父组件更新
+ */
 import { computed, inject, type ComputedRef } from 'vue'
 import { processComponentProps, validateComponentConfig } from './utils/componentProps'
 import { FORM_TABLE_CUSTOM_COMPONENTS_KEY, FORM_TABLE_DISPATCH_KEY, type DispatchFn } from './types'

@@ -29,6 +29,12 @@
 </template>
 
 <script lang="ts" setup>
+/**
+ * FormTableRow - 行布局渲染
+ *
+ * 对应 el-row，将 rowConfig.children 中的每个 FormItemConfig 渲染为 el-col + FormTableItem
+ * gutter 优先取 rowConfig.gutter，其次取 rowConfig.bind.gutter
+ */
 import { computed } from 'vue'
 import FormTableItem from './FormTableItem.vue'
 import type { RowConfig, TableRow } from './types'

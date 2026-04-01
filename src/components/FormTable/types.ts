@@ -1,12 +1,26 @@
+/**
+ * 表格行数据结构，键值对形式，key 对应 FormItemConfig.key
+ */
 export interface TableRow {
   [key: string]: any
 }
 
+/**
+ * 自定义组件注册项，通过 props.customComponents 传入
+ */
 export interface CustomComponentConfig {
   name: string
   component: any
 }
 
+/**
+ * 支持的表单项类型
+ * - 基础输入: input, textarea, number
+ * - 选择类: select, radio, checkbox, switch, cascader, tree-select
+ * - 日期时间: date, datetime, time
+ * - 特殊: rate, slider, color, upload, autocomplete, tag-input
+ * - 扩展: text(纯文本展示), slotComponent(插槽渲染), custom(自定义组件)
+ */
 export type FormItemType =
   | 'input'
   | 'select'
@@ -30,7 +44,9 @@ export type FormItemType =
   | 'autocomplete'
   | 'tag-input'
 
-// 常用字段直接声明，非常见配置通过 bind 透传给具体组件。
+/**
+ * 表单项配置 - 常用字段直接声明，非常见配置通过 bind 透传给具体 Element 组件
+ */
 export interface FormItemConfig {
   key: string
   type: FormItemType
@@ -63,6 +79,9 @@ export interface FormItemConfig {
   rows?: number
 }
 
+/**
+ * 行配置 - 对应 el-row，包含多个表单项（el-col）
+ */
 export interface RowConfig {
   bind?: Record<string, any>
   props?: Record<string, any>
@@ -70,12 +89,19 @@ export interface RowConfig {
   children: FormItemConfig[]
 }
 
+/**
+ * 列配置 - 对应 el-table-column，内含多行布局
+ */
 export interface ColumnConfig {
   name: string
   props?: Record<string, any>
   children: RowConfig[]
 }
 
+/**
+ * 校验规则，兼容 el-form rules 格式
+ * propPath 格式: `tableData.${rowIndex}.${fieldKey}`
+ */
 export interface ValidationRule {
   required?: boolean
   type?: string
@@ -89,6 +115,9 @@ export interface ValidationRule {
   [key: string]: any
 }
 
+/**
+ * 组件 Props 聚合类型（供外部类型标注使用）
+ */
 export interface FormTableProps {
   tableData: TableRow[]
   columns: ColumnConfig[]
@@ -112,7 +141,7 @@ export interface FormTableEmits {
   'event': [payload: FormTableEventPayload]
 }
 
-// provide/inject keys
+// provide/inject keys - 使用 Symbol 保证类型安全
 export type DispatchFn = (type: string, ...args: any[]) => void
 
 export const FORM_TABLE_CUSTOM_COMPONENTS_KEY: unique symbol = Symbol('customComponents')

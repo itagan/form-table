@@ -19,6 +19,12 @@
 </template>
 
 <script lang="ts" setup>
+/**
+ * FormTableColumn - 列渲染
+ *
+ * 对应 el-table-column，在每个表格单元格的 scoped slot 中
+ * 按 column.children 渲染多行 FormTableRow 布局
+ */
 import { computed, useAttrs } from 'vue'
 import FormTableRow from './FormTableRow.vue'
 import type { ColumnConfig } from './types'

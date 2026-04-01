@@ -1,6 +1,8 @@
 /**
- * 默认组件配置
- * 只包含需要特殊处理的组件配置，其他组件使用Element UI默认行为
+ * 默认组件配置 & 类型映射
+ *
+ * - defaultComponentConfigs: 各 type 的默认属性（如日期格式、数字步长等）
+ * - componentTypeMap: type → Element 组件名的映射
  */
 
 export interface DefaultComponentConfig {

@@ -1,4 +1,11 @@
-export function pick<T extends Record<string, any>, K extends keyof T>(
+/**
+ * attrs 工具模块
+ *
+ * 从组件透传的 $attrs 中按白名单提取 el-form / el-table / el-table-column 可用属性，
+ * 避免非法属性传递到 DOM 引发警告。
+ */
+
+/** 从对象中选取指定键（忽略 undefined） */
   obj: T,
   keys: K[]
 ): Pick<T, K> {
@@ -11,6 +18,7 @@ export function pick<T extends Record<string, any>, K extends keyof T>(
   return result
 }
 
+/** el-form 支持的属性白名单 */
 export const EL_FORM_PROPS = [
   'labelWidth',
   'labelPosition',
@@ -24,7 +32,7 @@ export const EL_FORM_PROPS = [
   'disabled'
 ] as const
 
-// 只保留常用、稳定、在当前组件中最常见的 table 级属性。
+/** el-table 支持的属性白名单（只保留常用、稳定的属性） */
 export const EL_TABLE_PROPS = [
   'border',
   'stripe',
@@ -57,7 +65,7 @@ export const EL_TABLE_PROPS = [
   'showOverflowTooltip'
 ] as const
 
-// el-table-column 支持的属性白名单
+/** el-table-column 支持的属性白名单 */
 export const EL_COLUMN_PROPS = [
   'type',
   'index',
