@@ -40,12 +40,12 @@
  * 2. 带 Tooltip: isUseTooltip=true 时，内容超出用 el-tooltip 展示
  * 3. 普通组件: 由 ComponentWrapper 根据 type 动态渲染
  */
-import { computed, defineComponent, inject, useAttrs } from 'vue'
+import { computed, defineComponent, h, inject, useAttrs } from 'vue'
 import ComponentWrapper from './ComponentWrapper.vue'
 import type { FormItemConfig } from './types'
 import { FORM_TABLE_SLOTS_KEY } from './types'
 
-// 渲染顶层插槽的包装组件
+// 渲染顶层插槽的包装组件，用 div 包裹以兼容 Vue 2 单根节点要求
 const SlotRenderer = defineComponent({
   props: {
     slotFn: { type: Function, required: true as true },
@@ -53,7 +53,7 @@ const SlotRenderer = defineComponent({
     index: { type: Number, default: 0 }
   },
   setup(props) {
-    return () => props.slotFn({ row: props.row, index: props.index })
+    return () => h('div', props.slotFn({ row: props.row, index: props.index }))
   }
 })
 
