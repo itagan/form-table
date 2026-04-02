@@ -1,7 +1,7 @@
 <template>
   <el-form-item 
     :prop="propPath" 
-    :rules="rules"
+    :rules="effectiveRules"
     :label="label"
     :label-width="labelWidth"
     v-bind="attrs"
@@ -10,9 +10,10 @@
     <SlotRenderer
       v-if="config.type === 'slotComponent' && config.slotName && slotFn"
       :slot-fn="slotFn"
-      :row="row"
-      :index="index"
+      :slot-props="slotProps"
     />
+
+    <span v-else-if="config.type === 'slotComponent'" class="form-table-slot-fallback" />
     
     <!-- 带Tooltip的组件 -->
     <el-tooltip 
@@ -40,20 +41,25 @@
  * 2. 带 Tooltip: isUseTooltip=true 时，内容超出用 el-tooltip 展示
  * 3. 普通组件: 由 ComponentWrapper 根据 type 动态渲染
  */
-import { computed, defineComponent, h, inject, useAttrs } from 'vue'
+import { computed, defineComponent, h, inject, type ComputedRef, useAttrs } from 'vue'
 import ComponentWrapper from './ComponentWrapper.vue'
-import type { FormItemConfig } from './types'
-import { FORM_TABLE_SLOTS_KEY } from './types'
+import type { FormItemConfig, FormTableSlotContext, ValidationRule } from './types'
+import {
+  FORM_TABLE_DISPATCH_KEY,
+  FORM_TABLE_RULES_KEY,
+  FORM_TABLE_SLOTS_KEY,
+  type DispatchFn
+} from './types'
+import { resolveRulesForProp } from './utils/rules'
 
 // 渲染顶层插槽的包装组件，用 div 包裹以兼容 Vue 2 单根节点要求
 const SlotRenderer = defineComponent({
   props: {
     slotFn: { type: Function, required: true as true },
-    row: { type: Object, default: () => ({}) },
-    index: { type: Number, default: 0 }
+    slotProps: { type: Object, required: true as true }
   },
   setup(props) {
-    return () => h('div', props.slotFn({ row: props.row, index: props.index }))
+    return () => h('div', props.slotFn(props.slotProps))
   }
 })
 
@@ -70,7 +76,6 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  rules: () => [],
   label: '',
   labelWidth: 'auto',
   isUseTooltip: false,
@@ -78,12 +83,45 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const attrs = useAttrs()
+const dispatch = inject<DispatchFn>(FORM_TABLE_DISPATCH_KEY)
+const formRules = inject<ComputedRef<Record<string, ValidationRule[]>>>(FORM_TABLE_RULES_KEY, computed(() => ({})))
 const parentSlots = inject(FORM_TABLE_SLOTS_KEY, {} as Record<string, any>)
 
 // 从顶层 FormTable 注入的 slots 中取出对应具名插槽函数
 const slotFn = computed(() => {
   return parentSlots[props.config.slotName!] || null
 })
+
+const setValue = (value: any) => {
+  if (props.row[props.config.key] === value) {
+    return
+  }
+
+  if (dispatch) {
+    dispatch('update:row', props.index, props.row, props.config.key, value)
+    return
+  }
+
+  props.row[props.config.key] = value
+}
+
+const slotProps = computed<FormTableSlotContext>(() => ({
+  row: props.row,
+  index: props.index,
+  fieldKey: props.config.key,
+  propPath: props.propPath,
+  value: props.row[props.config.key],
+  setValue
+}))
+
+const effectiveRules = computed(() => {
+  const inheritedRules = resolveRulesForProp(formRules.value, props.propPath)
+  const localRules = props.rules || []
+  const mergedRules = [...inheritedRules, ...localRules]
+
+  return mergedRules.length > 0 ? mergedRules : undefined
+})
+
 const wrapperProps = computed(() => {
   const {
     key,
@@ -117,6 +155,6 @@ const hasContent = computed(() => {
 
 const tooltipContent = computed(() => {
   const value = props.row[props.config.key]
-  return value ? String(value) : ''
+  return value !== null && value !== undefined ? String(value) : ''
 })
 </script>

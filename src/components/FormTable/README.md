@@ -26,6 +26,8 @@ props.tableData → el-table 渲染
             外层通过 v-model 或 @update:tableData 同步
 ```
 
+`slotComponent` 也遵循同一条更新链路，推荐在插槽里使用组件提供的 `value` / `setValue`，避免直接修改 `row`。
+
 ## 关键模块
 
 | 文件 | 职责 |
@@ -47,3 +49,13 @@ props.tableData → el-table 渲染
 - `src/views/FormTableView.vue`
 - `src/views/FormTableAdvancedView.vue`
 - `src/views/DebugView.vue`
+
+## 规则说明
+
+- 支持精确规则路径，如 `tableData.0.name`
+- 支持通配规则路径，如 `tableData.*.name`
+
+## 同步说明
+
+- 内部字段编辑会触发 `update:tableData`
+- 同时也会触发 `update:formData`，并自动带上最新的 `tableData`

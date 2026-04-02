@@ -1,5 +1,57 @@
 <template>
+  <span v-if="type === 'text'" v-bind="componentProps">
+    {{ textContent }}
+  </span>
+
   <component
+    v-else-if="isSelectLike"
+    :is="componentType"
+    v-model="modelValue"
+    v-bind="componentPropsWithoutOptions"
+  >
+    <el-option
+      v-for="(option, optionIndex) in normalizedOptions"
+      :key="getOptionKey(option, optionIndex)"
+      :label="getOptionLabel(option)"
+      :value="getOptionValue(option)"
+      :disabled="option.disabled"
+    />
+  </component>
+
+  <component
+    v-else-if="type === 'radio'"
+    :is="componentType"
+    v-model="modelValue"
+    v-bind="componentPropsWithoutOptions"
+  >
+    <el-radio
+      v-for="(option, optionIndex) in normalizedOptions"
+      :key="getOptionKey(option, optionIndex)"
+      :label="getOptionValue(option)"
+      :disabled="option.disabled"
+    >
+      {{ getOptionLabel(option) }}
+    </el-radio>
+  </component>
+
+  <component
+    v-else-if="type === 'checkbox'"
+    :is="componentType"
+    v-model="modelValue"
+    v-bind="componentPropsWithoutOptions"
+  >
+    <el-checkbox
+      v-for="(option, optionIndex) in normalizedOptions"
+      :key="getOptionKey(option, optionIndex)"
+      :label="getOptionValue(option)"
+      :disabled="option.disabled"
+    >
+      {{ getOptionLabel(option) }}
+    </el-checkbox>
+  </component>
+
+  <component
+    v-else
     :is="componentType"
     v-model="modelValue"
     v-bind="componentProps"
@@ -57,6 +109,28 @@ const resolved = computed(() => {
 
 const componentType = computed(() => resolved.value.componentType)
 const componentProps = computed(() => resolved.value.componentProps)
+const normalizedOptions = computed(() => (Array.isArray(props.options) ? props.options : []))
+const isSelectLike = computed(() => props.type === 'select' || props.type === 'tag-input')
+const componentPropsWithoutOptions = computed(() => {
+  const { options, ...rest } = componentProps.value
+  return rest
+})
+const textContent = computed(() => {
+  const value = props.row[props.fieldKey]
+
+  if (normalizedOptions.value.length > 0) {
+    const matchedOption = normalizedOptions.value.find((option) => option?.value === value)
+    if (matchedOption) {
+      return matchedOption.label
+    }
+  }
+
+  return value !== null && value !== undefined ? String(value) : ''
+})
+
+const getOptionLabel = (option: Record<string, any>) => option?.label ?? option?.value ?? ''
+const getOptionValue = (option: Record<string, any>) => option?.value
+const getOptionKey = (option: Record<string, any>, index: number) => option?.value ?? option?.label ?? index
 
 const modelValue = computed({
   get: () => props.row[props.fieldKey],

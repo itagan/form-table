@@ -55,13 +55,22 @@ const ELEMENT_UI_DEFAULTS: Record<string, Record<string, any>> = {
  * @returns 处理后的组件属性
  */
 export function processComponentProps(options: ComponentPropsOptions): {
-  componentType: string
+  componentType: any
   componentProps: Record<string, any>
 } {
-  const { type, customComponent, customComponents, bind, ...userProps } = options
+  const {
+    type,
+    customComponent,
+    customComponents,
+    bind,
+    fieldKey,
+    row,
+    rowIndex,
+    ...userProps
+  } = options
   
   // 1. 获取组件类型
-  let componentType: string
+  let componentType: any
   if (type === 'custom' && customComponent) {
     const customComponentInstance = customComponents?.[customComponent]
     if (!customComponentInstance) {

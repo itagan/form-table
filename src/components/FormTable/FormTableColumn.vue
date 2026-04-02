@@ -1,13 +1,12 @@
 <template>
   <el-table-column
     :label="column.name"
-    :key="columnIndex"
     v-bind="columnAttrs"
   >
     <template v-slot="scope">
       <FormTableRow
         v-for="(rowItem, rowIndex) in column.children"
-        :key="rowIndex"
+        :key="getRowKey(rowItem, rowIndex)"
         :row="scope.row"
         :row-index="scope.$index"
         :row-config="rowItem"
@@ -42,4 +41,8 @@ const columnAttrs = computed(() => ({
   ...extractColumnAttrs(attrs),
   ...(props.column.props || {})
 }))
+
+const getRowKey = (row: ColumnConfig['children'][number], index: number) => {
+  return row.key || row.props?.key || index
+}
 </script>

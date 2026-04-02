@@ -35,8 +35,8 @@
         @event="handleFormTableEvent"
       >
         <!-- 学校选择插槽 -->
-        <template #table-school="{ row, index }">
-          <el-select v-model="row.school" placeholder="请选择学校">
+        <template #table-school="{ value, setValue }">
+          <el-select :value="value" placeholder="请选择学校" @input="setValue">
             <el-option label="县一小" value="县一小"></el-option>
             <el-option label="县二中" value="县二中"></el-option>
             <el-option label="市一中" value="市一中"></el-option>
@@ -45,8 +45,8 @@
         </template>
         
         <!-- 性别选择插槽 -->
-        <template #table-gender="{ row, index }">
-          <el-radio-group v-model="row.gender">
+        <template #table-gender="{ value, setValue }">
+          <el-radio-group :value="value" @input="setValue">
             <el-radio label="男">男</el-radio>
             <el-radio label="女">女</el-radio>
           </el-radio-group>
@@ -81,7 +81,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive } from 'vue'
 import FormTable from '@/components/FormTable/index.vue'
 import PhoneInput from '@/components/CustomComponents/PhoneInput.vue'
 import StatusTag from '@/components/CustomComponents/StatusTag.vue'
@@ -123,11 +123,6 @@ const tableData = ref([
 const formData = reactive({
   tableData: tableData.value
 })
-
-// 监听 tableData 变化，同步更新 formData
-watch(tableData, (newData: any[]) => {
-  formData.tableData = newData
-}, { deep: true, immediate: true })
 
 const loading = ref(false)
 const eventLog = ref<Array<{ type: string; args: any[] }>>([])
@@ -358,7 +353,6 @@ const formTableRef = ref()
 
 const handleTableDataUpdate = (newData: any[]) => {
   tableData.value = newData
-  formData.tableData = newData
 }
 
 const handleFormTableEvent = (payload: { type: string; args: any[] }) => {

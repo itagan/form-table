@@ -19,6 +19,20 @@ export function pick<T extends Record<string, any>, K extends keyof T>(
   return result
 }
 
+function kebabToCamelCase(value: string): string {
+  return value.replace(/-([a-z])/g, (_, char: string) => char.toUpperCase())
+}
+
+export function normalizeAttrs<T extends Record<string, any>>(attrs: T): Record<string, any> {
+  const normalized: Record<string, any> = {}
+
+  Object.keys(attrs).forEach((key) => {
+    normalized[kebabToCamelCase(key)] = attrs[key]
+  })
+
+  return normalized
+}
+
 /** el-form 支持的属性白名单 */
 export const EL_FORM_PROPS = [
   'labelWidth',
@@ -95,13 +109,13 @@ export const EL_COLUMN_PROPS = [
 ] as const
 
 export function extractFormAttrs<T extends Record<string, any>>(attrs: T) {
-  return pick(attrs, EL_FORM_PROPS as any)
+  return pick(normalizeAttrs(attrs), EL_FORM_PROPS as any)
 }
 
 export function extractTableAttrs<T extends Record<string, any>>(attrs: T) {
-  return pick(attrs, EL_TABLE_PROPS as any)
+  return pick(normalizeAttrs(attrs), EL_TABLE_PROPS as any)
 }
 
 export function extractColumnAttrs<T extends Record<string, any>>(attrs: T) {
-  return pick(attrs, EL_COLUMN_PROPS as any)
+  return pick(normalizeAttrs(attrs), EL_COLUMN_PROPS as any)
 }

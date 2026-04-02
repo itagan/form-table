@@ -13,8 +13,13 @@
         @update:tableData="handleTableDataUpdate"
       >
         <!-- 自定义学校选择器 -->
-        <template #custom-school="{ row, index }">
-          <el-select v-model="row.school" placeholder="请选择学校" style="width: 100%">
+        <template #custom-school="{ value, setValue }">
+          <el-select
+            :value="value"
+            placeholder="请选择学校"
+            style="width: 100%"
+            @input="setValue"
+          >
             <el-option label="清华大学" value="清华大学"></el-option>
             <el-option label="北京大学" value="北京大学"></el-option>
             <el-option label="复旦大学" value="复旦大学"></el-option>
@@ -42,12 +47,13 @@
         </template>
         
         <!-- 评分组件 -->
-        <template #rating-input="{ row, index }">
+        <template #rating-input="{ value, setValue }">
           <el-rate 
-            v-model="row.rating" 
+            :value="value" 
             :max="5" 
             show-score 
             text-color="#ff9900"
+            @input="setValue"
           />
         </template>
       </FormTable>
@@ -191,7 +197,6 @@ const formTableRef = ref()
 
 const handleTableDataUpdate = (newData: any[]) => {
   tableData.value = newData
-  formData.tableData = newData
 }
 
 const handleSubmit = async () => {
@@ -211,7 +216,7 @@ const handleReset = () => {
 }
 
 const handleAddRow = () => {
-  tableData.value.push({ 
+  formTableRef.value?.addRow({
     name: '', 
     age: 0, 
     school: '', 
@@ -223,7 +228,7 @@ const handleAddRow = () => {
 
 const handleRemoveRow = () => {
   if (tableData.value.length > 1) {
-    tableData.value.pop()
+    formTableRef.value?.removeRow(tableData.value.length - 1)
     Message.success('已删除最后一行')
   } else {
     Message.warning('至少需要保留一行数据')
@@ -250,7 +255,7 @@ const copyRow = (row: any, index: number) => {
 
 const deleteRow = (index: number) => {
   if (tableData.value.length > 1) {
-    tableData.value.splice(index, 1)
+    formTableRef.value?.removeRow(index)
     Message.success(`已删除第 ${index + 1} 行`)
   } else {
     Message.warning('至少需要保留一行数据')

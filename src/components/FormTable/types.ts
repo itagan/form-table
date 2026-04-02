@@ -83,6 +83,7 @@ export interface FormItemConfig {
  * 行配置 - 对应 el-row，包含多个表单项（el-col）
  */
 export interface RowConfig {
+  key?: string
   bind?: Record<string, any>
   props?: Record<string, any>
   gutter?: number
@@ -93,6 +94,7 @@ export interface RowConfig {
  * 列配置 - 对应 el-table-column，内含多行布局
  */
 export interface ColumnConfig {
+  key?: string
   name: string
   props?: Record<string, any>
   children: RowConfig[]
@@ -132,6 +134,15 @@ export interface FormTableEventPayload {
   args: any[]
 }
 
+export interface FormTableSlotContext {
+  row: TableRow
+  index: number
+  fieldKey: string
+  propPath: string
+  value: any
+  setValue: (value: any) => void
+}
+
 export interface FormTableEmits {
   'update:tableData': [data: TableRow[]]
   'update:formData': [data: Record<string, any>]
@@ -146,4 +157,5 @@ export type DispatchFn = (type: string, ...args: any[]) => void
 
 export const FORM_TABLE_CUSTOM_COMPONENTS_KEY: unique symbol = Symbol('customComponents')
 export const FORM_TABLE_DISPATCH_KEY: unique symbol = Symbol('dispatch')
+export const FORM_TABLE_RULES_KEY: unique symbol = Symbol('rules')
 export const FORM_TABLE_SLOTS_KEY: unique symbol = Symbol('formTableSlots')

@@ -13,8 +13,8 @@
         @update:tableData="handleTableDataUpdate"
         @update:formData="handleFormDataUpdate"
       >
-        <template #table-school="{ row, index }">
-          <el-select v-model="row.school" placeholder="请选择学校">
+        <template #table-school="{ value, setValue }">
+          <el-select :value="value" placeholder="请选择学校" @input="setValue">
             <el-option label="县一小" value="县一小"></el-option>
             <el-option label="县二中" value="县二中"></el-option>
             <el-option label="市一中" value="市一中"></el-option>
@@ -113,7 +113,6 @@ const formTableRef = ref()
 
 const handleTableDataUpdate = (newData: any[]) => {
   tableData.value = newData
-  formData.tableData = newData
 }
 
 const handleFormDataUpdate = (newData: any) => {
@@ -134,12 +133,12 @@ const handleReset = () => {
 }
 
 const handleAddRow = () => {
-  tableData.value.push({ name: '', age: 0, sex: '', school: '' })
+  formTableRef.value?.addRow({ name: '', age: 0, sex: '', school: '' })
 }
 
 const handleRemoveRow = () => {
   if (tableData.value.length > 1) {
-    tableData.value.pop()
+    formTableRef.value?.removeRow(tableData.value.length - 1)
   }
 }
 </script>

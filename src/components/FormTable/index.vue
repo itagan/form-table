@@ -2,7 +2,7 @@
   <div class="form-table-container">
     <el-form
       ref="formRef"
-      :model="props.formData"
+      :model="formModel"
       :rules="props.rules"
       v-bind="formAttrs"
     >
@@ -13,7 +13,7 @@
       >
         <FormTableColumn
           v-for="(column, columnIndex) in props.columns"
-          :key="columnIndex"
+          :key="getColumnKey(column, columnIndex)"
           :column="column"
           :column-index="columnIndex"
         >
@@ -46,7 +46,12 @@ import type {
   ValidationRule,
   TableRow
 } from './types'
-import { FORM_TABLE_CUSTOM_COMPONENTS_KEY, FORM_TABLE_DISPATCH_KEY, FORM_TABLE_SLOTS_KEY } from './types'
+import {
+  FORM_TABLE_CUSTOM_COMPONENTS_KEY,
+  FORM_TABLE_DISPATCH_KEY,
+  FORM_TABLE_RULES_KEY,
+  FORM_TABLE_SLOTS_KEY
+} from './types'
 
 const attrs = useAttrs()
 const slots = useSlots()
@@ -81,6 +86,22 @@ const formRef = ref<any>(null)
 // 从透传 attrs 中按白名单提取 el-form / el-table 可用属性
 const formAttrs = computed(() => extractFormAttrs(attrs))
 const tableAttrs = computed(() => extractTableAttrs(attrs))
+const formModel = computed(() => ({
+  ...props.formData,
+  tableData: props.tableData
+}))
+
+const emitFormDataUpdate = (tableData: TableRow[]) => {
+  emit('update:formData', {
+    ...props.formData,
+    tableData
+  })
+}
+
+const emitTableDataChange = (tableData: TableRow[]) => {
+  emit('update:tableData', tableData)
+  emitFormDataUpdate(tableData)
+}
 
 // 自定义组件映射表: { name → component }，供子组件 inject 使用
 const customComponentsMap = computed(() => {
@@ -93,6 +114,11 @@ const customComponentsMap = computed(() => {
 
 provide(FORM_TABLE_CUSTOM_COMPONENTS_KEY, customComponentsMap)
 provide(FORM_TABLE_SLOTS_KEY, slots)
+provide(FORM_TABLE_RULES_KEY, computed(() => props.rules))
+
+const getColumnKey = (column: ColumnConfig, index: number) => {
+  return column.key || column.props?.columnKey || column.name || index
+}
 
 type EmitEventName = 'update:tableData' | 'update:formData' | 'row-add' | 'row-remove' | 'validate'
 
@@ -106,7 +132,7 @@ const dispatch = (type: EmitEventName | 'update:row', ...args: any[]) => {
     const [rowIndex, , fieldKey, value] = args
     const nextTableData = [...props.tableData]
     nextTableData[rowIndex] = { ...nextTableData[rowIndex], [fieldKey]: value }
-    emit('update:tableData', nextTableData)
+    emitTableDataChange(nextTableData)
     return
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -144,27 +170,29 @@ defineExpose({
   addRow: (rowData?: Partial<TableRow>) => {
     const newRow = { ...rowData }
     const nextTableData = [...props.tableData, newRow]
-    dispatch('update:tableData', nextTableData)
+    emitTableDataChange(nextTableData)
     dispatch('row-add', newRow, nextTableData.length - 1)
   },
 
   removeRow: (index: number) => {
     const nextTableData = [...props.tableData]
     const removedRow = nextTableData.splice(index, 1)[0]
-    dispatch('update:tableData', nextTableData)
+    emitTableDataChange(nextTableData)
     dispatch('row-remove', removedRow, index)
   },
 
   getFormData: () => ({
-    tableData: props.tableData,
-    ...props.formData
+    ...formModel.value
   }),
 
   setFormData: (data: Record<string, any>) => {
     if (data.tableData) {
-      dispatch('update:tableData', data.tableData)
+      emitTableDataChange(data.tableData)
     }
-    dispatch('update:formData', data)
+    dispatch('update:formData', {
+      ...data,
+      tableData: data.tableData ?? props.tableData
+    })
   }
 })
 </script>

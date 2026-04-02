@@ -1,12 +1,11 @@
 <template>
   <el-row
     :gutter="gutter"
-    :key="rowIndex"
     v-bind="rowProps"
   >
     <el-col
       v-for="(colItem, colIndex) in rowConfig.children"
-      :key="colIndex"
+      :key="colItem.key || colIndex"
       :span="colItem.colSpan || 24"
       v-bind="colItem.bind"
     >

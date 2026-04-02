@@ -124,7 +124,7 @@ const handleFormTableEvent = (payload: { type: string; args: any[] }) => {
 | 事件名 | 参数 | 说明 |
 |------|------|------|
 | `update:tableData` | `TableRow[]` | 表格数据变更 |
-| `update:formData` | `Record<string, any>` | 表单数据变更 |
+| `update:formData` | `Record<string, any>` | 表单数据变更，`tableData` 变更时会自动同步 |
 | `row-add` | `(row, index)` | 调用 `addRow` 后触发 |
 | `row-remove` | `(row, index)` | 调用 `removeRow` 后触发 |
 | `validate` | `(valid, errors)` | 调用 `validate` 后触发 |
@@ -134,6 +134,30 @@ const handleFormTableEvent = (payload: { type: string; args: any[] }) => {
 
 - 具体事件，做明确处理
 - `event`，做日志、埋点或统一调试
+
+如果只是为了保持 `formData.tableData` 同步，可以只处理 `update:formData`，组件内部会在行编辑、增行、删行时自动带上最新 `tableData`。
+
+## Slot 上下文
+
+当 `type: 'slotComponent'` 时，插槽会收到这些参数：
+
+- `row`
+- `index`
+- `fieldKey`
+- `propPath`
+- `value`
+- `setValue`
+
+推荐优先使用 `value + setValue` 更新字段，而不是直接修改 `row`，这样可以保持和内置组件一致的数据更新链路。
+
+```vue
+<template #table-school="{ value, setValue }">
+  <el-select :value="value" placeholder="请选择学校" @input="setValue">
+    <el-option label="县一小" value="县一小" />
+    <el-option label="县二中" value="县二中" />
+  </el-select>
+</template>
+```
 
 ## ref 方法
 
@@ -249,6 +273,15 @@ interface FormItemConfig {
   disabled: false
 }
 ```
+
+## 校验规则说明
+
+支持这两种规则写法：
+
+- 精确路径：`tableData.0.name`
+- 通配路径：`tableData.*.name`
+
+推荐在动态行场景中优先使用通配路径，组件内部会按当前行索引自动匹配到对应字段。
 
 ### 非常见配置走 bind
 
