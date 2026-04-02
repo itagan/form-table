@@ -13,6 +13,33 @@ export interface CustomComponentConfig {
   component: any
 }
 
+export interface FormTableBaseContext {
+  formData: Record<string, any>
+  tableData: TableRow[]
+}
+
+export interface FormTableRuntimeContext extends FormTableBaseContext {
+  row: TableRow
+  index: number
+  fieldKey?: string
+}
+
+export type DynamicValue<T> = T | ((context: FormTableRuntimeContext) => T)
+
+export interface FormItemOption {
+  label?: any
+  value?: any
+  disabled?: boolean
+  [key: string]: any
+}
+
+export interface OptionPropsConfig {
+  label?: string
+  value?: string
+  disabled?: string
+  key?: string
+}
+
 /**
  * 支持的表单项类型
  * - 基础输入: input, textarea, number
@@ -50,7 +77,9 @@ export type FormItemType =
 export interface FormItemConfig {
   key: string
   type: FormItemType
+  visible?: DynamicValue<boolean>
   colSpan?: number | string
+  colProps?: Record<string, any>
   bind?: Record<string, any>
   rules?: any[]
   label?: string
@@ -64,7 +93,8 @@ export interface FormItemConfig {
   size?: 'large' | 'default' | 'small'
   customComponent?: string
   slotName?: string
-  options?: Array<{ label: string; value: any; [key: string]: any }>
+  options?: FormItemOption[]
+  optionProps?: OptionPropsConfig
   remote?: boolean
   remoteMethod?: Function
   min?: number
@@ -77,6 +107,9 @@ export interface FormItemConfig {
   fetchSuggestions?: Function
   action?: string
   rows?: number
+  defaultValue?: DynamicValue<any>
+  formatter?: (value: any, context: FormTableRuntimeContext) => any
+  emptyText?: string
 }
 
 /**
@@ -84,6 +117,7 @@ export interface FormItemConfig {
  */
 export interface RowConfig {
   key?: string
+  visible?: DynamicValue<boolean>
   bind?: Record<string, any>
   props?: Record<string, any>
   gutter?: number
@@ -96,6 +130,7 @@ export interface RowConfig {
 export interface ColumnConfig {
   key?: string
   name: string
+  visible?: DynamicValue<boolean>
   props?: Record<string, any>
   children: RowConfig[]
 }
@@ -140,7 +175,10 @@ export interface FormTableSlotContext {
   fieldKey: string
   propPath: string
   value: any
+  formData: Record<string, any>
+  tableData: TableRow[]
   setValue: (value: any) => void
+  updateRow: (patch: Record<string, any>) => void
 }
 
 export interface FormTableEmits {
@@ -156,6 +194,7 @@ export interface FormTableEmits {
 export type DispatchFn = (type: string, ...args: any[]) => void
 
 export const FORM_TABLE_CUSTOM_COMPONENTS_KEY: unique symbol = Symbol('customComponents')
+export const FORM_TABLE_CONTEXT_KEY: unique symbol = Symbol('formTableContext')
 export const FORM_TABLE_DISPATCH_KEY: unique symbol = Symbol('dispatch')
 export const FORM_TABLE_RULES_KEY: unique symbol = Symbol('rules')
 export const FORM_TABLE_SLOTS_KEY: unique symbol = Symbol('formTableSlots')

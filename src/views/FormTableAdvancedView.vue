@@ -188,6 +188,7 @@ const columns = ref<ColumnConfig[]>([
           type: 'number',
           colSpan: 12,
           placeholder: '请输入年龄',
+          defaultValue: 18,
           bind: {
             controlsPosition: 'right'
           }
@@ -229,6 +230,7 @@ const columns = ref<ColumnConfig[]>([
           type: 'select',
           colSpan: 14,
           placeholder: '请选择职级',
+          defaultValue: 'junior',
           options: [
             { label: '初级', value: 'junior' },
             { label: '中级', value: 'mid' },
@@ -241,6 +243,7 @@ const columns = ref<ColumnConfig[]>([
         {
           key: 'remark',
           type: 'textarea',
+          visible: ({ row }) => row.level !== 'junior',
           colSpan: 24,
           placeholder: '请输入备注',
           bind: {
@@ -252,6 +255,7 @@ const columns = ref<ColumnConfig[]>([
         {
           key: 'status',
           type: 'switch',
+          defaultValue: true,
           colSpan: 24
         }
       ]
@@ -266,6 +270,7 @@ const columns = ref<ColumnConfig[]>([
           key: 'workStatus',
           type: 'custom',
           customComponent: 'StatusTag',
+          defaultValue: 'processing',
           colSpan: 24,
           options: [
             { value: 'processing', label: '处理中', type: 'info' },
@@ -328,6 +333,7 @@ const columns = ref<ColumnConfig[]>([
           key: 'gender',
           type: 'slotComponent',
           slotName: 'table-gender',
+          defaultValue: '男',
           colSpan: 24
         }
       ]
@@ -375,17 +381,12 @@ const handleReset = () => {
 const handleAddRow = () => {
   formTableRef.value?.addRow({
     name: '',
-    age: 0,
     department: '',
-    level: 'junior',
     remark: '',
-    status: true,
     phone: '',
-    workStatus: 'processing',
     testValue: '',
     simpleTest: '',
     school: '',
-    gender: '男'
   })
 }
 

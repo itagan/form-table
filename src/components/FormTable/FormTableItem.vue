@@ -43,13 +43,21 @@
  */
 import { computed, defineComponent, h, inject, type ComputedRef, useAttrs } from 'vue'
 import ComponentWrapper from './ComponentWrapper.vue'
-import type { FormItemConfig, FormTableSlotContext, ValidationRule } from './types'
+import type {
+  FormItemConfig,
+  FormTableBaseContext,
+  FormTableSlotContext,
+  ValidationRule
+} from './types'
 import {
+  FORM_TABLE_CONTEXT_KEY,
   FORM_TABLE_DISPATCH_KEY,
   FORM_TABLE_RULES_KEY,
   FORM_TABLE_SLOTS_KEY,
   type DispatchFn
 } from './types'
+import { createRuntimeContext } from './utils/dynamic'
+import { resolveDisplayValue } from './utils/display'
 import { resolveRulesForProp } from './utils/rules'
 
 // 渲染顶层插槽的包装组件，用 div 包裹以兼容 Vue 2 单根节点要求
@@ -83,6 +91,10 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const attrs = useAttrs()
+const formTableContext = inject<ComputedRef<FormTableBaseContext>>(
+  FORM_TABLE_CONTEXT_KEY,
+  computed(() => ({ formData: {}, tableData: [] }))
+)
 const dispatch = inject<DispatchFn>(FORM_TABLE_DISPATCH_KEY)
 const formRules = inject<ComputedRef<Record<string, ValidationRule[]>>>(FORM_TABLE_RULES_KEY, computed(() => ({})))
 const parentSlots = inject(FORM_TABLE_SLOTS_KEY, {} as Record<string, any>)
@@ -105,13 +117,31 @@ const setValue = (value: any) => {
   props.row[props.config.key] = value
 }
 
+const updateRow = (patch: Record<string, any>) => {
+  if (dispatch) {
+    dispatch('update:row-data', props.index, patch)
+    return
+  }
+
+  Object.assign(props.row, patch)
+}
+
+const runtimeContext = computed(() => createRuntimeContext(formTableContext.value, {
+  row: props.row,
+  index: props.index,
+  fieldKey: props.config.key
+}))
+
 const slotProps = computed<FormTableSlotContext>(() => ({
   row: props.row,
   index: props.index,
   fieldKey: props.config.key,
   propPath: props.propPath,
   value: props.row[props.config.key],
-  setValue
+  formData: formTableContext.value.formData,
+  tableData: formTableContext.value.tableData,
+  setValue,
+  updateRow
 }))
 
 const effectiveRules = computed(() => {
@@ -126,7 +156,9 @@ const wrapperProps = computed(() => {
   const {
     key,
     type,
+    visible,
     customComponent,
+    colProps,
     bind,
     rules,
     label,
@@ -134,6 +166,7 @@ const wrapperProps = computed(() => {
     isUseTooltip,
     tooltipProps,
     colSpan,
+    defaultValue,
     ...componentConfig
   } = props.config
 
@@ -154,7 +187,15 @@ const hasContent = computed(() => {
 })
 
 const tooltipContent = computed(() => {
-  const value = props.row[props.config.key]
-  return value !== null && value !== undefined ? String(value) : ''
+  const displayValue = resolveDisplayValue(
+    props.row[props.config.key],
+    props.config.options,
+    props.config.optionProps,
+    props.config.formatter,
+    props.config.emptyText,
+    runtimeContext.value
+  )
+
+  return displayValue !== null && displayValue !== undefined ? String(displayValue) : ''
 })
 </script>

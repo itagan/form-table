@@ -17,6 +17,13 @@
 
 - `src/components/FormTable/index.vue`
 
+## 配置原则
+
+- 常用字段直接配置，比如 `label`、`placeholder`、`rules`
+- 非常见组件属性优先通过 `bind` 透传
+- 顶层 `attrs` 继续负责 `el-form` / `el-table` / `el-table-column` 的通用扩展
+- 只有 `visible`、`defaultValue`、`formatter`、`colProps` 这类透传本身解决不了的结构能力，才额外提供配置项
+
 ## 基础用法
 
 ```vue
@@ -146,7 +153,10 @@ const handleFormTableEvent = (payload: { type: string; args: any[] }) => {
 - `fieldKey`
 - `propPath`
 - `value`
+- `formData`
+- `tableData`
 - `setValue`
+- `updateRow`
 
 推荐优先使用 `value + setValue` 更新字段，而不是直接修改 `row`，这样可以保持和内置组件一致的数据更新链路。
 
@@ -178,6 +188,7 @@ const handleFormTableEvent = (payload: { type: string; args: any[] }) => {
 ```ts
 interface ColumnConfig {
   name: string
+  visible?: boolean | ((context) => boolean)
   props?: Record<string, any>
   children: RowConfig[]
 }
@@ -187,6 +198,7 @@ interface ColumnConfig {
 
 ```ts
 interface RowConfig {
+  visible?: boolean | ((context) => boolean)
   bind?: Record<string, any>
   props?: Record<string, any>
   gutter?: number
@@ -200,7 +212,9 @@ interface RowConfig {
 interface FormItemConfig {
   key: string
   type: FormItemType
+  visible?: boolean | ((context) => boolean)
   colSpan?: number | string
+  colProps?: Record<string, any>
   bind?: Record<string, any>
   rules?: any[]
   label?: string
@@ -227,6 +241,15 @@ interface FormItemConfig {
   fetchSuggestions?: Function
   action?: string
   rows?: number
+  defaultValue?: any | ((context) => any)
+  formatter?: (value, context) => any
+  emptyText?: string
+  optionProps?: {
+    label?: string
+    value?: string
+    disabled?: string
+    key?: string
+  }
 }
 ```
 
@@ -262,6 +285,7 @@ interface FormItemConfig {
 
 - 常见配置直接写在表单项上
 - 非常见配置统一放进 `bind`
+- 行列显隐、默认值、文本展示这类结构能力再使用独立配置
 
 ### 常见配置直写
 

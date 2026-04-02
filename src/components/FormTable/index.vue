@@ -12,7 +12,7 @@
         v-loading="props.loading"
       >
         <FormTableColumn
-          v-for="(column, columnIndex) in props.columns"
+          v-for="(column, columnIndex) in visibleColumns"
           :key="getColumnKey(column, columnIndex)"
           :column="column"
           :column-index="columnIndex"
@@ -39,15 +39,18 @@
 import { computed, provide, ref, useAttrs, useSlots } from 'vue'
 import FormTableColumn from './FormTableColumn.vue'
 import { extractFormAttrs, extractTableAttrs } from './utils/attrs'
+import { buildDefaultRow, createRuntimeContext, resolveVisible } from './utils/dynamic'
 import type {
   ColumnConfig,
   CustomComponentConfig,
   DispatchFn,
+  FormTableBaseContext,
   ValidationRule,
   TableRow
 } from './types'
 import {
   FORM_TABLE_CUSTOM_COMPONENTS_KEY,
+  FORM_TABLE_CONTEXT_KEY,
   FORM_TABLE_DISPATCH_KEY,
   FORM_TABLE_RULES_KEY,
   FORM_TABLE_SLOTS_KEY
@@ -90,6 +93,14 @@ const formModel = computed(() => ({
   ...props.formData,
   tableData: props.tableData
 }))
+const formTableContext = computed<FormTableBaseContext>(() => ({
+  formData: formModel.value,
+  tableData: props.tableData
+}))
+const visibleColumns = computed(() => {
+  const context = createRuntimeContext(formTableContext.value)
+  return props.columns.filter((column) => resolveVisible(column.visible, context))
+})
 
 const emitFormDataUpdate = (tableData: TableRow[]) => {
   emit('update:formData', {
@@ -113,6 +124,7 @@ const customComponentsMap = computed(() => {
 })
 
 provide(FORM_TABLE_CUSTOM_COMPONENTS_KEY, customComponentsMap)
+provide(FORM_TABLE_CONTEXT_KEY, formTableContext)
 provide(FORM_TABLE_SLOTS_KEY, slots)
 provide(FORM_TABLE_RULES_KEY, computed(() => props.rules))
 
@@ -127,7 +139,7 @@ type EmitEventName = 'update:tableData' | 'update:formData' | 'row-add' | 'row-r
  * - 'update:row': 单元格编辑时触发，按 rowIndex 更新对应行数据并 emit update:tableData
  * - 其他事件: 直接转发并同步派发 'event' 归档事件
  */
-const dispatch = (type: EmitEventName | 'update:row', ...args: any[]) => {
+const dispatch = (type: EmitEventName | 'update:row' | 'update:row-data', ...args: any[]) => {
   if (type === 'update:row') {
     const [rowIndex, , fieldKey, value] = args
     const nextTableData = [...props.tableData]
@@ -135,6 +147,15 @@ const dispatch = (type: EmitEventName | 'update:row', ...args: any[]) => {
     emitTableDataChange(nextTableData)
     return
   }
+
+  if (type === 'update:row-data') {
+    const [rowIndex, patch] = args
+    const nextTableData = [...props.tableData]
+    nextTableData[rowIndex] = { ...nextTableData[rowIndex], ...patch }
+    emitTableDataChange(nextTableData)
+    return
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ;(emit as any)(type, ...args)
   emit('event', { type, args })
@@ -168,7 +189,12 @@ defineExpose({
   },
 
   addRow: (rowData?: Partial<TableRow>) => {
-    const newRow = { ...rowData }
+    const newRow = buildDefaultRow(
+      visibleColumns.value,
+      formTableContext.value,
+      props.tableData.length,
+      rowData || {}
+    )
     const nextTableData = [...props.tableData, newRow]
     emitTableDataChange(nextTableData)
     dispatch('row-add', newRow, nextTableData.length - 1)

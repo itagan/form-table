@@ -1,5 +1,5 @@
 <template>
-  <span v-if="type === 'text'" v-bind="componentProps">
+  <span v-if="type === 'text'" v-bind="componentRenderProps">
     {{ textContent }}
   </span>
 
@@ -7,14 +7,14 @@
     v-else-if="isSelectLike"
     :is="componentType"
     v-model="modelValue"
-    v-bind="componentPropsWithoutOptions"
+    v-bind="componentRenderProps"
   >
     <el-option
       v-for="(option, optionIndex) in normalizedOptions"
-      :key="getOptionKey(option, optionIndex)"
-      :label="getOptionLabel(option)"
-      :value="getOptionValue(option)"
-      :disabled="option.disabled"
+      :key="getOptionKey(option, optionIndex, props.optionProps)"
+      :label="getOptionLabel(option, props.optionProps)"
+      :value="getOptionValue(option, props.optionProps)"
+      :disabled="getOptionDisabled(option, props.optionProps)"
     />
   </component>
 
@@ -22,15 +22,15 @@
     v-else-if="type === 'radio'"
     :is="componentType"
     v-model="modelValue"
-    v-bind="componentPropsWithoutOptions"
+    v-bind="componentRenderProps"
   >
     <el-radio
       v-for="(option, optionIndex) in normalizedOptions"
-      :key="getOptionKey(option, optionIndex)"
-      :label="getOptionValue(option)"
-      :disabled="option.disabled"
+      :key="getOptionKey(option, optionIndex, props.optionProps)"
+      :label="getOptionValue(option, props.optionProps)"
+      :disabled="getOptionDisabled(option, props.optionProps)"
     >
-      {{ getOptionLabel(option) }}
+      {{ getOptionLabel(option, props.optionProps) }}
     </el-radio>
   </component>
 
@@ -38,15 +38,15 @@
     v-else-if="type === 'checkbox'"
     :is="componentType"
     v-model="modelValue"
-    v-bind="componentPropsWithoutOptions"
+    v-bind="componentRenderProps"
   >
     <el-checkbox
       v-for="(option, optionIndex) in normalizedOptions"
-      :key="getOptionKey(option, optionIndex)"
-      :label="getOptionValue(option)"
-      :disabled="option.disabled"
+      :key="getOptionKey(option, optionIndex, props.optionProps)"
+      :label="getOptionValue(option, props.optionProps)"
+      :disabled="getOptionDisabled(option, props.optionProps)"
     >
-      {{ getOptionLabel(option) }}
+      {{ getOptionLabel(option, props.optionProps) }}
     </el-checkbox>
   </component>
 
@@ -54,7 +54,7 @@
     v-else
     :is="componentType"
     v-model="modelValue"
-    v-bind="componentProps"
+    v-bind="componentRenderProps"
   />
 </template>
 
@@ -71,7 +71,22 @@
  */
 import { computed, inject, type ComputedRef } from 'vue'
 import { processComponentProps, validateComponentConfig } from './utils/componentProps'
-import { FORM_TABLE_CUSTOM_COMPONENTS_KEY, FORM_TABLE_DISPATCH_KEY, type DispatchFn } from './types'
+import { createRuntimeContext } from './utils/dynamic'
+import {
+  getOptionDisabled,
+  getOptionKey,
+  getOptionLabel,
+  getOptionValue,
+  resolveDisplayValue
+} from './utils/display'
+import {
+  FORM_TABLE_CONTEXT_KEY,
+  FORM_TABLE_CUSTOM_COMPONENTS_KEY,
+  FORM_TABLE_DISPATCH_KEY,
+  type DispatchFn,
+  type FormItemOption,
+  type FormTableBaseContext
+} from './types'
 
 interface Props {
   type: string
@@ -85,6 +100,10 @@ interface Props {
 
 const props = defineProps<Props>()
 
+const formTableContext = inject<ComputedRef<FormTableBaseContext>>(
+  FORM_TABLE_CONTEXT_KEY,
+  computed(() => ({ formData: {}, tableData: [] }))
+)
 const customComponentsMap = inject<ComputedRef<Record<string, any>>>(FORM_TABLE_CUSTOM_COMPONENTS_KEY, computed(() => ({})))
 const dispatch = inject<DispatchFn>(FORM_TABLE_DISPATCH_KEY)
 
@@ -109,28 +128,27 @@ const resolved = computed(() => {
 
 const componentType = computed(() => resolved.value.componentType)
 const componentProps = computed(() => resolved.value.componentProps)
-const normalizedOptions = computed(() => (Array.isArray(props.options) ? props.options : []))
+const normalizedOptions = computed<FormItemOption[]>(() => (Array.isArray(props.options) ? props.options : []))
 const isSelectLike = computed(() => props.type === 'select' || props.type === 'tag-input')
-const componentPropsWithoutOptions = computed(() => {
-  const { options, ...rest } = componentProps.value
+const runtimeContext = computed(() => createRuntimeContext(formTableContext.value, {
+  row: props.row,
+  index: props.rowIndex,
+  fieldKey: props.fieldKey
+}))
+const componentRenderProps = computed(() => {
+  const { options, formatter, emptyText, optionProps, ...rest } = componentProps.value
   return rest
 })
 const textContent = computed(() => {
-  const value = props.row[props.fieldKey]
-
-  if (normalizedOptions.value.length > 0) {
-    const matchedOption = normalizedOptions.value.find((option) => option?.value === value)
-    if (matchedOption) {
-      return matchedOption.label
-    }
-  }
-
-  return value !== null && value !== undefined ? String(value) : ''
+  return resolveDisplayValue(
+    props.row[props.fieldKey],
+    normalizedOptions.value,
+    props.optionProps,
+    props.formatter,
+    props.emptyText,
+    runtimeContext.value
+  )
 })
-
-const getOptionLabel = (option: Record<string, any>) => option?.label ?? option?.value ?? ''
-const getOptionValue = (option: Record<string, any>) => option?.value
-const getOptionKey = (option: Record<string, any>, index: number) => option?.value ?? option?.label ?? index
 
 const modelValue = computed({
   get: () => props.row[props.fieldKey],

@@ -28,6 +28,13 @@ props.tableData → el-table 渲染
 
 `slotComponent` 也遵循同一条更新链路，推荐在插槽里使用组件提供的 `value` / `setValue`，避免直接修改 `row`。
 
+## 配置约定
+
+- 常用字段直接配置
+- 非常见组件属性优先放到 `bind`
+- 顶层 `attrs` 用来扩展 `el-form` / `el-table` / `el-table-column`
+- 只有 `visible`、`defaultValue`、`formatter`、`colProps` 这类结构能力额外提供独立配置
+
 ## 关键模块
 
 | 文件 | 职责 |
