@@ -32,6 +32,7 @@
         :loading="loading"
         :custom-components="customComponents"
         @update:tableData="handleTableDataUpdate"
+        @field-change="handleFieldChange"
         @event="handleFormTableEvent"
       >
         <!-- 学校选择插槽 -->
@@ -187,6 +188,14 @@ const columns = ref<ColumnConfig[]>([
           type: 'input',
           colSpan: 12,
           placeholder: '请输入姓名',
+          listeners: {
+            blur: (context) => {
+              const currentValue = String(context.value || '').trim()
+              if (currentValue !== context.value) {
+                context.setValue(currentValue)
+              }
+            }
+          },
           bind: {
             maxlength: 20,
             clearable: true
@@ -378,7 +387,23 @@ const handleTableDataUpdate = (newData: any[]) => {
 }
 
 const handleFormTableEvent = (payload: { type: string; args: any[] }) => {
+  if (payload.type === 'field-change') {
+    return
+  }
   eventLog.value = [payload, ...eventLog.value].slice(0, 8)
+}
+
+const handleFieldChange = (payload: {
+  row: Record<string, any>
+  index: number
+  fieldKey: string
+  value: any
+  previousValue: any
+}) => {
+  eventLog.value = [{
+    type: 'field-change',
+    args: [payload]
+  }, ...eventLog.value].slice(0, 8)
 }
 
 const handleSubmit = async () => {

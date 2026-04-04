@@ -24,7 +24,14 @@ export interface FormTableRuntimeContext extends FormTableBaseContext {
   fieldKey?: string
 }
 
+export interface FormTableFieldContext extends FormTableRuntimeContext {
+  value: any
+  setValue: (value: any) => void
+  updateRow: (patch: Record<string, any>) => void
+}
+
 export type DynamicValue<T> = T | ((context: FormTableRuntimeContext) => T)
+export type FormTableFieldListener = (context: FormTableFieldContext, ...args: any[]) => void
 
 export interface FormItemOption {
   label?: any
@@ -81,6 +88,7 @@ export interface FormItemConfig {
   colSpan?: number | string
   colProps?: Record<string, any>
   bind?: Record<string, any>
+  listeners?: Record<string, FormTableFieldListener>
   rules?: any[]
   label?: string
   labelWidth?: string
@@ -169,6 +177,14 @@ export interface FormTableEventPayload {
   args: any[]
 }
 
+export interface FormTableFieldChangePayload {
+  row: TableRow
+  index: number
+  fieldKey: string
+  value: any
+  previousValue: any
+}
+
 export interface FormTableSlotContext {
   row: TableRow
   index: number
@@ -207,6 +223,7 @@ export interface FormTableActions {
 export interface FormTableEmits {
   'update:tableData': [data: TableRow[]]
   'update:formData': [data: Record<string, any>]
+  'field-change': [payload: FormTableFieldChangePayload]
   'row-add': [row: TableRow, index: number]
   'row-copy': [row: TableRow, index: number]
   'row-update': [row: TableRow, index: number]

@@ -8,6 +8,7 @@
     :is="componentType"
     v-model="modelValue"
     v-bind="componentRenderProps"
+    v-on="componentListeners"
   >
     <el-option
       v-for="(option, optionIndex) in normalizedOptions"
@@ -23,6 +24,7 @@
     :is="componentType"
     v-model="modelValue"
     v-bind="componentRenderProps"
+    v-on="componentListeners"
   >
     <el-radio
       v-for="(option, optionIndex) in normalizedOptions"
@@ -39,6 +41,7 @@
     :is="componentType"
     v-model="modelValue"
     v-bind="componentRenderProps"
+    v-on="componentListeners"
   >
     <el-checkbox
       v-for="(option, optionIndex) in normalizedOptions"
@@ -55,6 +58,7 @@
     :is="componentType"
     v-model="modelValue"
     v-bind="componentRenderProps"
+    v-on="componentListeners"
   />
 </template>
 
@@ -81,10 +85,12 @@ import {
 } from './utils/display'
 import { getValueByPath } from './utils/path'
 import {
+  FORM_TABLE_ACTIONS_KEY,
   FORM_TABLE_CONTEXT_KEY,
   FORM_TABLE_CUSTOM_COMPONENTS_KEY,
   FORM_TABLE_DISPATCH_KEY,
   type DispatchFn,
+  type FormTableActions,
   type FormItemOption,
   type FormTableBaseContext
 } from './types'
@@ -105,6 +111,20 @@ const formTableContext = inject<ComputedRef<FormTableBaseContext>>(
   FORM_TABLE_CONTEXT_KEY,
   computed(() => ({ formData: {}, tableData: [] }))
 )
+const formTableActions = inject<FormTableActions>(FORM_TABLE_ACTIONS_KEY, {
+  addRow: () => undefined,
+  insertRow: () => undefined,
+  copyRow: () => undefined,
+  updateRow: () => undefined,
+  removeRow: () => undefined,
+  moveRow: () => undefined,
+  getRow: () => undefined,
+  getRowFieldProps: () => [],
+  validateField: async () => true,
+  validateRow: async () => true,
+  clearValidate: () => undefined,
+  clearRowValidate: () => undefined
+})
 const customComponentsMap = inject<ComputedRef<Record<string, any>>>(FORM_TABLE_CUSTOM_COMPONENTS_KEY, computed(() => ({})))
 const dispatch = inject<DispatchFn>(FORM_TABLE_DISPATCH_KEY)
 
@@ -149,6 +169,30 @@ const textContent = computed(() => {
     props.emptyText,
     runtimeContext.value
   )
+})
+const updateRow = (patch: Record<string, any>) => {
+  formTableActions.updateRow(props.rowIndex, patch)
+}
+const setValue = (value: any) => {
+  if (getValueByPath(props.row, props.fieldKey) !== value && dispatch) {
+    dispatch('update:row', props.rowIndex, props.row, props.fieldKey, value)
+  }
+}
+const fieldContext = computed(() => ({
+  ...runtimeContext.value,
+  value: getValueByPath(props.row, props.fieldKey),
+  setValue,
+  updateRow
+}))
+const componentListeners = computed(() => {
+  const listeners = props.listeners || {}
+  return Object.keys(listeners).reduce<Record<string, (...args: any[]) => void>>((acc, eventName) => {
+    const listener = listeners[eventName]
+    acc[eventName] = (...args: any[]) => {
+      listener?.(fieldContext.value, ...args)
+    }
+    return acc
+  }, {})
 })
 
 const modelValue = computed({

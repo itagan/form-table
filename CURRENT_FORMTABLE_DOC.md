@@ -132,6 +132,7 @@ const handleFormTableEvent = (payload: { type: string; args: any[] }) => {
 |------|------|------|
 | `update:tableData` | `TableRow[]` | 表格数据变更 |
 | `update:formData` | `Record<string, any>` | 表单数据变更，`tableData` 变更时会自动同步 |
+| `field-change` | `({ row, index, fieldKey, value, previousValue })` | 单个字段值变化 |
 | `row-add` | `(row, index)` | 调用 `addRow` 后触发 |
 | `row-copy` | `(row, index)` | 调用 `copyRow` 后触发 |
 | `row-update` | `(row, index)` | 调用 `updateRow` 后触发 |
@@ -234,6 +235,7 @@ interface FormItemConfig {
   colSpan?: number | string
   colProps?: Record<string, any>
   bind?: Record<string, any>
+  listeners?: Record<string, (context, ...args) => void>
   rules?: any[]
   label?: string
   labelWidth?: string
@@ -276,6 +278,8 @@ interface FormItemConfig {
 - `name`
 - `profile.city`
 - `contact.phone`
+
+`listeners` 用来监听具体字段组件抛出的事件，适合处理 `blur`、`focus`、`change` 这类组件级交互。
 
 ## type 支持
 

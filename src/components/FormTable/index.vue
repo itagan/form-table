@@ -40,7 +40,7 @@ import { computed, provide, ref, useAttrs, useSlots } from 'vue'
 import FormTableColumn from './FormTableColumn.vue'
 import { extractFormAttrs, extractTableAttrs } from './utils/attrs'
 import { buildDefaultRow, createRuntimeContext, resolveVisible } from './utils/dynamic'
-import { applyRowPatch, setValueByPath } from './utils/path'
+import { applyRowPatch, getValueByPath, setValueByPath } from './utils/path'
 import type {
   ColumnConfig,
   CustomComponentConfig,
@@ -48,6 +48,7 @@ import type {
   FormItemConfig,
   FormTableActions,
   FormTableBaseContext,
+  FormTableFieldChangePayload,
   RowConfig,
   ValidationRule,
   TableRow
@@ -83,6 +84,7 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   (e: 'update:tableData', data: TableRow[]): void
   (e: 'update:formData', data: Record<string, any>): void
+  (e: 'field-change', payload: FormTableFieldChangePayload): void
   (e: 'row-add', row: TableRow, index: number): void
   (e: 'row-copy', row: TableRow, index: number): void
   (e: 'row-update', row: TableRow, index: number): void
@@ -138,6 +140,7 @@ const getColumnKey = (column: ColumnConfig, index: number) => {
 type EmitEventName =
   | 'update:tableData'
   | 'update:formData'
+  | 'field-change'
   | 'row-add'
   | 'row-copy'
   | 'row-update'
@@ -325,10 +328,18 @@ provide(FORM_TABLE_RULES_KEY, computed(() => props.rules))
  */
 const dispatch = (type: EmitEventName | 'update:row' | 'update:row-data', ...args: any[]) => {
   if (type === 'update:row') {
-    const [rowIndex, , fieldKey, value] = args
+    const [rowIndex, row, fieldKey, value] = args
     const nextTableData = [...props.tableData]
+    const previousValue = row ? getValueByPath(row, fieldKey) : undefined
     nextTableData[rowIndex] = setValueByPath(nextTableData[rowIndex], fieldKey, value)
     emitTableDataChange(nextTableData)
+    dispatch('field-change', {
+      row: nextTableData[rowIndex],
+      index: rowIndex,
+      fieldKey,
+      value,
+      previousValue
+    })
     return
   }
 

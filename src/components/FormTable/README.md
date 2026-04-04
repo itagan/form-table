@@ -72,3 +72,8 @@ props.tableData → el-table 渲染
 
 - `ref` 现在支持 `insertRow`、`copyRow`、`updateRow`、`moveRow`、`getRow`、`validateField`、`validateRow`
 - `slotComponent` 上下文也提供当前行的快捷方法，如 `removeCurrentRow`、`copyCurrentRow`、`insertBefore`、`insertAfter`
+
+## 字段事件
+
+- 组件提供统一的 `field-change` 事件
+- 单个字段组件事件可通过 `listeners` 配置透传并拿到字段上下文
