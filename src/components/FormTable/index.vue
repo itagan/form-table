@@ -44,11 +44,15 @@ import type {
   ColumnConfig,
   CustomComponentConfig,
   DispatchFn,
+  FormItemConfig,
+  FormTableActions,
   FormTableBaseContext,
+  RowConfig,
   ValidationRule,
   TableRow
 } from './types'
 import {
+  FORM_TABLE_ACTIONS_KEY,
   FORM_TABLE_CUSTOM_COMPONENTS_KEY,
   FORM_TABLE_CONTEXT_KEY,
   FORM_TABLE_DISPATCH_KEY,
@@ -79,6 +83,9 @@ const emit = defineEmits<{
   (e: 'update:tableData', data: TableRow[]): void
   (e: 'update:formData', data: Record<string, any>): void
   (e: 'row-add', row: TableRow, index: number): void
+  (e: 'row-copy', row: TableRow, index: number): void
+  (e: 'row-update', row: TableRow, index: number): void
+  (e: 'row-move', row: TableRow, fromIndex: number, toIndex: number): void
   (e: 'row-remove', row: TableRow, index: number): void
   (e: 'validate', valid: boolean, errors: any[]): void
   (e: 'event', payload: { type: string; args: any[] }): void
@@ -123,16 +130,192 @@ const customComponentsMap = computed(() => {
   return map
 })
 
-provide(FORM_TABLE_CUSTOM_COMPONENTS_KEY, customComponentsMap)
-provide(FORM_TABLE_CONTEXT_KEY, formTableContext)
-provide(FORM_TABLE_SLOTS_KEY, slots)
-provide(FORM_TABLE_RULES_KEY, computed(() => props.rules))
-
 const getColumnKey = (column: ColumnConfig, index: number) => {
   return column.key || column.props?.columnKey || column.name || index
 }
 
-type EmitEventName = 'update:tableData' | 'update:formData' | 'row-add' | 'row-remove' | 'validate'
+type EmitEventName =
+  | 'update:tableData'
+  | 'update:formData'
+  | 'row-add'
+  | 'row-copy'
+  | 'row-update'
+  | 'row-move'
+  | 'row-remove'
+  | 'validate'
+
+const normalizeInsertIndex = (index: number) => {
+  return Math.max(0, Math.min(index, props.tableData.length))
+}
+
+const normalizeMoveIndex = (index: number) => {
+  const maxIndex = Math.max(props.tableData.length - 1, 0)
+  return Math.max(0, Math.min(index, maxIndex))
+}
+
+const getVisibleRowItems = (rowConfig: RowConfig, row: TableRow, rowIndex: number) => {
+  const rowContext = createRuntimeContext(formTableContext.value, {
+    row,
+    index: rowIndex
+  })
+
+  if (!resolveVisible(rowConfig.visible, rowContext)) {
+    return [] as FormItemConfig[]
+  }
+
+  return rowConfig.children.filter((item) => {
+    return resolveVisible(item.visible, createRuntimeContext(formTableContext.value, {
+      row,
+      index: rowIndex,
+      fieldKey: item.key
+    }))
+  })
+}
+
+const getRowFieldProps = (rowIndex: number) => {
+  const row = props.tableData[rowIndex]
+  if (!row) {
+    return []
+  }
+
+  const fieldProps: string[] = []
+
+  visibleColumns.value.forEach((column) => {
+    column.children.forEach((rowConfig) => {
+      getVisibleRowItems(rowConfig, row, rowIndex).forEach((item) => {
+        fieldProps.push(`tableData.${rowIndex}.${item.key}`)
+      })
+    })
+  })
+
+  return fieldProps
+}
+
+const validateFieldProps = async (fieldProp: string | string[]) => {
+  const fieldProps = Array.isArray(fieldProp) ? fieldProp : [fieldProp]
+  if (fieldProps.length === 0 || !formRef.value?.validateField) {
+    return true
+  }
+
+  try {
+    await Promise.all(fieldProps.map((prop) => {
+      return new Promise<void>((resolve, reject) => {
+        formRef.value?.validateField(prop, (message: string) => {
+          if (message) {
+            reject(new Error(message))
+            return
+          }
+
+          resolve()
+        })
+      })
+    }))
+    return true
+  } catch {
+    return false
+  }
+}
+
+const insertRow = (index: number, rowData?: Partial<TableRow>) => {
+  const insertIndex = normalizeInsertIndex(index)
+  const newRow = buildDefaultRow(
+    visibleColumns.value,
+    formTableContext.value,
+    insertIndex,
+    rowData || {}
+  )
+  const nextTableData = [...props.tableData]
+  nextTableData.splice(insertIndex, 0, newRow)
+  emitTableDataChange(nextTableData)
+  dispatch('row-add', newRow, insertIndex)
+}
+
+const updateRow = (index: number, patch: Partial<TableRow>) => {
+  if (!props.tableData[index]) {
+    return
+  }
+
+  const nextRow = { ...props.tableData[index], ...patch }
+  const nextTableData = [...props.tableData]
+  nextTableData[index] = nextRow
+  emitTableDataChange(nextTableData)
+  dispatch('row-update', nextRow, index)
+}
+
+const copyRow = (index: number, patch?: Partial<TableRow>) => {
+  const sourceRow = props.tableData[index]
+  if (!sourceRow) {
+    return
+  }
+
+  const copiedRow = buildDefaultRow(
+    visibleColumns.value,
+    formTableContext.value,
+    index + 1,
+    { ...sourceRow, ...(patch || {}) }
+  )
+  const nextTableData = [...props.tableData]
+  nextTableData.splice(index + 1, 0, copiedRow)
+  emitTableDataChange(nextTableData)
+  dispatch('row-copy', copiedRow, index + 1)
+}
+
+const removeRow = (index: number) => {
+  if (!props.tableData[index]) {
+    return
+  }
+
+  const nextTableData = [...props.tableData]
+  const removedRow = nextTableData.splice(index, 1)[0]
+  emitTableDataChange(nextTableData)
+  dispatch('row-remove', removedRow, index)
+}
+
+const moveRow = (fromIndex: number, toIndex: number) => {
+  if (!props.tableData[fromIndex]) {
+    return
+  }
+
+  const normalizedToIndex = normalizeMoveIndex(toIndex)
+  if (fromIndex === normalizedToIndex) {
+    return
+  }
+
+  const nextTableData = [...props.tableData]
+  const movedRow = nextTableData.splice(fromIndex, 1)[0]
+  nextTableData.splice(normalizedToIndex, 0, movedRow)
+  emitTableDataChange(nextTableData)
+  dispatch('row-move', movedRow, fromIndex, normalizedToIndex)
+}
+
+const formTableActions: FormTableActions = {
+  addRow: (rowData?: Partial<TableRow>) => {
+    insertRow(props.tableData.length, rowData)
+  },
+  insertRow,
+  copyRow,
+  updateRow,
+  removeRow,
+  moveRow,
+  getRow: (index: number) => props.tableData[index],
+  getRowFieldProps,
+  validateField: validateFieldProps,
+  validateRow: async (index: number) => {
+    return await validateFieldProps(getRowFieldProps(index))
+  },
+  clearValidate: (fieldProps?: string | string[]) => {
+    formRef.value?.clearValidate(fieldProps)
+  },
+  clearRowValidate: (index: number) => {
+    formRef.value?.clearValidate(getRowFieldProps(index))
+  }
+}
+
+provide(FORM_TABLE_CUSTOM_COMPONENTS_KEY, customComponentsMap)
+provide(FORM_TABLE_CONTEXT_KEY, formTableContext)
+provide(FORM_TABLE_ACTIONS_KEY, formTableActions)
+provide(FORM_TABLE_SLOTS_KEY, slots)
+provide(FORM_TABLE_RULES_KEY, computed(() => props.rules))
 
 /**
  * 统一事件分发器
@@ -184,28 +367,27 @@ defineExpose({
     formRef.value?.resetFields()
   },
 
-  clearValidate: (fieldProps?: string | string[]) => {
-    formRef.value?.clearValidate(fieldProps)
+  validateField: validateFieldProps,
+
+  validateRow: async (index: number) => {
+    return await formTableActions.validateRow(index)
   },
 
-  addRow: (rowData?: Partial<TableRow>) => {
-    const newRow = buildDefaultRow(
-      visibleColumns.value,
-      formTableContext.value,
-      props.tableData.length,
-      rowData || {}
-    )
-    const nextTableData = [...props.tableData, newRow]
-    emitTableDataChange(nextTableData)
-    dispatch('row-add', newRow, nextTableData.length - 1)
-  },
+  clearValidate: formTableActions.clearValidate,
 
-  removeRow: (index: number) => {
-    const nextTableData = [...props.tableData]
-    const removedRow = nextTableData.splice(index, 1)[0]
-    emitTableDataChange(nextTableData)
-    dispatch('row-remove', removedRow, index)
-  },
+  addRow: formTableActions.addRow,
+
+  insertRow,
+
+  copyRow,
+
+  updateRow,
+
+  moveRow,
+
+  getRow: formTableActions.getRow,
+
+  removeRow,
 
   getFormData: () => ({
     ...formModel.value

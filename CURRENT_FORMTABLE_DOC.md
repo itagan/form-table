@@ -133,6 +133,9 @@ const handleFormTableEvent = (payload: { type: string; args: any[] }) => {
 | `update:tableData` | `TableRow[]` | 表格数据变更 |
 | `update:formData` | `Record<string, any>` | 表单数据变更，`tableData` 变更时会自动同步 |
 | `row-add` | `(row, index)` | 调用 `addRow` 后触发 |
+| `row-copy` | `(row, index)` | 调用 `copyRow` 后触发 |
+| `row-update` | `(row, index)` | 调用 `updateRow` 后触发 |
+| `row-move` | `(row, fromIndex, toIndex)` | 调用 `moveRow` 后触发 |
 | `row-remove` | `(row, index)` | 调用 `removeRow` 后触发 |
 | `validate` | `(valid, errors)` | 调用 `validate` 后触发 |
 | `event` | `({ type, args })` | 统一归档事件 |
@@ -157,6 +160,14 @@ const handleFormTableEvent = (payload: { type: string; args: any[] }) => {
 - `tableData`
 - `setValue`
 - `updateRow`
+- `removeCurrentRow`
+- `copyCurrentRow`
+- `insertBefore`
+- `insertAfter`
+- `validateCurrentField`
+- `validateCurrentRow`
+- `clearCurrentFieldValidate`
+- `clearCurrentRowValidate`
 
 推荐优先使用 `value + setValue` 更新字段，而不是直接修改 `row`，这样可以保持和内置组件一致的数据更新链路。
 
@@ -177,6 +188,13 @@ const handleFormTableEvent = (payload: { type: string; args: any[] }) => {
 - `resetFields()`
 - `clearValidate(props?)`
 - `addRow(rowData?)`
+- `insertRow(index, rowData?)`
+- `copyRow(index, patch?)`
+- `updateRow(index, patch)`
+- `moveRow(fromIndex, toIndex)`
+- `getRow(index)`
+- `validateField(props)`
+- `validateRow(index)`
 - `removeRow(index)`
 - `getFormData()`
 - `setFormData(data)`

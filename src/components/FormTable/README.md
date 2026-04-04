@@ -66,3 +66,8 @@ props.tableData → el-table 渲染
 
 - 内部字段编辑会触发 `update:tableData`
 - 同时也会触发 `update:formData`，并自动带上最新的 `tableData`
+
+## 行操作
+
+- `ref` 现在支持 `insertRow`、`copyRow`、`updateRow`、`moveRow`、`getRow`、`validateField`、`validateRow`
+- `slotComponent` 上下文也提供当前行的快捷方法，如 `removeCurrentRow`、`copyCurrentRow`、`insertBefore`、`insertAfter`

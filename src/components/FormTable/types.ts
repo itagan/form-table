@@ -179,12 +179,38 @@ export interface FormTableSlotContext {
   tableData: TableRow[]
   setValue: (value: any) => void
   updateRow: (patch: Record<string, any>) => void
+  removeCurrentRow: () => void
+  copyCurrentRow: (patch?: Partial<TableRow>) => void
+  insertBefore: (rowData?: Partial<TableRow>) => void
+  insertAfter: (rowData?: Partial<TableRow>) => void
+  validateCurrentField: () => Promise<boolean>
+  validateCurrentRow: () => Promise<boolean>
+  clearCurrentFieldValidate: () => void
+  clearCurrentRowValidate: () => void
+}
+
+export interface FormTableActions {
+  addRow: (rowData?: Partial<TableRow>) => void
+  insertRow: (index: number, rowData?: Partial<TableRow>) => void
+  copyRow: (index: number, patch?: Partial<TableRow>) => void
+  updateRow: (index: number, patch: Partial<TableRow>) => void
+  removeRow: (index: number) => void
+  moveRow: (fromIndex: number, toIndex: number) => void
+  getRow: (index: number) => TableRow | undefined
+  getRowFieldProps: (index: number) => string[]
+  validateField: (fieldProp: string | string[]) => Promise<boolean>
+  validateRow: (index: number) => Promise<boolean>
+  clearValidate: (fieldProps?: string | string[]) => void
+  clearRowValidate: (index: number) => void
 }
 
 export interface FormTableEmits {
   'update:tableData': [data: TableRow[]]
   'update:formData': [data: Record<string, any>]
   'row-add': [row: TableRow, index: number]
+  'row-copy': [row: TableRow, index: number]
+  'row-update': [row: TableRow, index: number]
+  'row-move': [row: TableRow, fromIndex: number, toIndex: number]
   'row-remove': [row: TableRow, index: number]
   'validate': [valid: boolean, errors: any[]]
   'event': [payload: FormTableEventPayload]
@@ -195,6 +221,7 @@ export type DispatchFn = (type: string, ...args: any[]) => void
 
 export const FORM_TABLE_CUSTOM_COMPONENTS_KEY: unique symbol = Symbol('customComponents')
 export const FORM_TABLE_CONTEXT_KEY: unique symbol = Symbol('formTableContext')
+export const FORM_TABLE_ACTIONS_KEY: unique symbol = Symbol('formTableActions')
 export const FORM_TABLE_DISPATCH_KEY: unique symbol = Symbol('dispatch')
 export const FORM_TABLE_RULES_KEY: unique symbol = Symbol('rules')
 export const FORM_TABLE_SLOTS_KEY: unique symbol = Symbol('formTableSlots')

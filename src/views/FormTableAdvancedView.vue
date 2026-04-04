@@ -53,9 +53,11 @@
         </template>
         
         <!-- 操作按钮插槽 -->
-        <template #table-actions="{ row, index }">
+        <template #table-actions="{ index, copyCurrentRow, removeCurrentRow, insertAfter }">
           <el-button size="small" type="primary" @click="handleEditRow(index)">编辑</el-button>
-          <el-button size="small" type="danger" @click="handleDeleteRow(index)">删除</el-button>
+          <el-button size="small" @click="copyCurrentRow({ name: `复制-${index + 1}` })">复制</el-button>
+          <el-button size="small" @click="insertAfter({ name: '', phone: '' })">插入</el-button>
+          <el-button size="small" type="danger" @click="handleDeleteRow(index, removeCurrentRow)">删除</el-button>
         </template>
       </FormTable>
       
@@ -401,9 +403,9 @@ const handleEditRow = (index: number) => {
   // 这里可以添加编辑逻辑，比如打开编辑对话框
 }
 
-const handleDeleteRow = (index: number) => {
+const handleDeleteRow = (index: number, removeCurrentRow?: () => void) => {
   if (tableData.value.length > 1) {
-    formTableRef.value?.removeRow(index)
+    removeCurrentRow?.() || formTableRef.value?.removeRow(index)
   }
 }
 

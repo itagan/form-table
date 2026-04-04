@@ -44,12 +44,14 @@
 import { computed, defineComponent, h, inject, type ComputedRef, useAttrs } from 'vue'
 import ComponentWrapper from './ComponentWrapper.vue'
 import type {
+  FormTableActions,
   FormItemConfig,
   FormTableBaseContext,
   FormTableSlotContext,
   ValidationRule
 } from './types'
 import {
+  FORM_TABLE_ACTIONS_KEY,
   FORM_TABLE_CONTEXT_KEY,
   FORM_TABLE_DISPATCH_KEY,
   FORM_TABLE_RULES_KEY,
@@ -91,6 +93,20 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const attrs = useAttrs()
+const formTableActions = inject<FormTableActions>(FORM_TABLE_ACTIONS_KEY, {
+  addRow: () => undefined,
+  insertRow: () => undefined,
+  copyRow: () => undefined,
+  updateRow: () => undefined,
+  removeRow: () => undefined,
+  moveRow: () => undefined,
+  getRow: () => undefined,
+  getRowFieldProps: () => [],
+  validateField: async () => true,
+  validateRow: async () => true,
+  clearValidate: () => undefined,
+  clearRowValidate: () => undefined
+})
 const formTableContext = inject<ComputedRef<FormTableBaseContext>>(
   FORM_TABLE_CONTEXT_KEY,
   computed(() => ({ formData: {}, tableData: [] }))
@@ -141,7 +157,15 @@ const slotProps = computed<FormTableSlotContext>(() => ({
   formData: formTableContext.value.formData,
   tableData: formTableContext.value.tableData,
   setValue,
-  updateRow
+  updateRow,
+  removeCurrentRow: () => formTableActions.removeRow(props.index),
+  copyCurrentRow: (patch?: Partial<Record<string, any>>) => formTableActions.copyRow(props.index, patch),
+  insertBefore: (rowData?: Partial<Record<string, any>>) => formTableActions.insertRow(props.index, rowData),
+  insertAfter: (rowData?: Partial<Record<string, any>>) => formTableActions.insertRow(props.index + 1, rowData),
+  validateCurrentField: async () => await formTableActions.validateField(props.propPath),
+  validateCurrentRow: async () => await formTableActions.validateRow(props.index),
+  clearCurrentFieldValidate: () => formTableActions.clearValidate(props.propPath),
+  clearCurrentRowValidate: () => formTableActions.clearRowValidate(props.index)
 }))
 
 const effectiveRules = computed(() => {
