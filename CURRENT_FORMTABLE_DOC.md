@@ -271,6 +271,12 @@ interface FormItemConfig {
 }
 ```
 
+其中 `key` 支持路径写法，比如：
+
+- `name`
+- `profile.city`
+- `contact.phone`
+
 ## type 支持
 
 当前支持这些 `type`：

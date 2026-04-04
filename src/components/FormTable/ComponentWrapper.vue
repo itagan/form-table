@@ -79,6 +79,7 @@ import {
   getOptionValue,
   resolveDisplayValue
 } from './utils/display'
+import { getValueByPath } from './utils/path'
 import {
   FORM_TABLE_CONTEXT_KEY,
   FORM_TABLE_CUSTOM_COMPONENTS_KEY,
@@ -141,7 +142,7 @@ const componentRenderProps = computed(() => {
 })
 const textContent = computed(() => {
   return resolveDisplayValue(
-    props.row[props.fieldKey],
+    getValueByPath(props.row, props.fieldKey),
     normalizedOptions.value,
     props.optionProps,
     props.formatter,
@@ -151,9 +152,9 @@ const textContent = computed(() => {
 })
 
 const modelValue = computed({
-  get: () => props.row[props.fieldKey],
+  get: () => getValueByPath(props.row, props.fieldKey),
   set: (value) => {
-    if (props.row[props.fieldKey] !== value) {
+    if (getValueByPath(props.row, props.fieldKey) !== value) {
       if (dispatch) {
         dispatch('update:row', props.rowIndex, props.row, props.fieldKey, value)
       } else {

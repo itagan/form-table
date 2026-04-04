@@ -5,6 +5,7 @@ import type {
   FormTableRuntimeContext,
   TableRow
 } from '../types'
+import { applyRowPatch, getValueByPath, setValueByPath } from './path'
 
 export function createRuntimeContext(
   baseContext: FormTableBaseContext,
@@ -43,7 +44,7 @@ export function buildDefaultRow(
   rowIndex: number,
   seed: Partial<TableRow> = {}
 ): TableRow {
-  const draftRow: TableRow = { ...seed }
+  const draftRow: TableRow = applyRowPatch({}, seed)
 
   columns.forEach((column) => {
     const columnContext = createRuntimeContext(baseContext, {
@@ -76,13 +77,13 @@ export function buildDefaultRow(
           return
         }
 
-        if (draftRow[item.key] !== undefined) {
+        if (getValueByPath(draftRow, item.key) !== undefined) {
           return
         }
 
         const defaultValue = resolveDynamicValue(item.defaultValue, itemContext)
         if (defaultValue !== undefined) {
-          draftRow[item.key] = defaultValue
+          Object.assign(draftRow, setValueByPath(draftRow, item.key, defaultValue))
         }
       })
     })

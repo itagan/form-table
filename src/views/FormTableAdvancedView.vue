@@ -96,6 +96,9 @@ const tableData = ref([
     name: '张三', 
     age: 25, 
     department: '技术部', 
+    profile: {
+      city: '杭州'
+    },
     level: 'senior',
     remark: '负责核心模块与需求拆解。',
     status: true,
@@ -110,6 +113,9 @@ const tableData = ref([
     name: '李四', 
     age: 30, 
     department: '产品部', 
+    profile: {
+      city: '上海'
+    },
     level: 'mid',
     remark: '跟进跨部门协作与需求排期。',
     status: false,
@@ -164,6 +170,7 @@ const rules = ref({
     { required: true, message: '请输入手机号', trigger: 'blur' },
     { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号格式', trigger: 'blur' }
   ],
+  'tableData.*.profile.city': [{ required: true, message: '请输入所在城市', trigger: 'blur' }],
   'tableData.*.school': [{ required: true, message: '请选择学校', trigger: 'change' }],
   'tableData.*.gender': [{ required: true, message: '请选择性别', trigger: 'change' }]
 })
@@ -226,6 +233,13 @@ const columns = ref<ColumnConfig[]>([
           type: 'input',
           colSpan: 10,
           placeholder: '请输入部门'
+        },
+        {
+          key: 'profile.city',
+          type: 'input',
+          colSpan: 14,
+          placeholder: '请输入所在城市',
+          defaultValue: '上海'
         },
         {
           key: 'level',
@@ -384,6 +398,7 @@ const handleAddRow = () => {
   formTableRef.value?.addRow({
     name: '',
     department: '',
+    'profile.city': '成都',
     remark: '',
     phone: '',
     testValue: '',

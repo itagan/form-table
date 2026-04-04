@@ -61,6 +61,7 @@ props.tableData → el-table 渲染
 
 - 支持精确规则路径，如 `tableData.0.name`
 - 支持通配规则路径，如 `tableData.*.name`
+- `FormItemConfig.key` 也支持路径写法，如 `profile.city`
 
 ## 同步说明
 

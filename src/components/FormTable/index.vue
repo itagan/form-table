@@ -40,6 +40,7 @@ import { computed, provide, ref, useAttrs, useSlots } from 'vue'
 import FormTableColumn from './FormTableColumn.vue'
 import { extractFormAttrs, extractTableAttrs } from './utils/attrs'
 import { buildDefaultRow, createRuntimeContext, resolveVisible } from './utils/dynamic'
+import { applyRowPatch, setValueByPath } from './utils/path'
 import type {
   ColumnConfig,
   CustomComponentConfig,
@@ -235,7 +236,7 @@ const updateRow = (index: number, patch: Partial<TableRow>) => {
     return
   }
 
-  const nextRow = { ...props.tableData[index], ...patch }
+  const nextRow = applyRowPatch(props.tableData[index], patch)
   const nextTableData = [...props.tableData]
   nextTableData[index] = nextRow
   emitTableDataChange(nextTableData)
@@ -252,7 +253,7 @@ const copyRow = (index: number, patch?: Partial<TableRow>) => {
     visibleColumns.value,
     formTableContext.value,
     index + 1,
-    { ...sourceRow, ...(patch || {}) }
+    applyRowPatch(sourceRow, patch || {})
   )
   const nextTableData = [...props.tableData]
   nextTableData.splice(index + 1, 0, copiedRow)
@@ -326,7 +327,7 @@ const dispatch = (type: EmitEventName | 'update:row' | 'update:row-data', ...arg
   if (type === 'update:row') {
     const [rowIndex, , fieldKey, value] = args
     const nextTableData = [...props.tableData]
-    nextTableData[rowIndex] = { ...nextTableData[rowIndex], [fieldKey]: value }
+    nextTableData[rowIndex] = setValueByPath(nextTableData[rowIndex], fieldKey, value)
     emitTableDataChange(nextTableData)
     return
   }
@@ -334,7 +335,7 @@ const dispatch = (type: EmitEventName | 'update:row' | 'update:row-data', ...arg
   if (type === 'update:row-data') {
     const [rowIndex, patch] = args
     const nextTableData = [...props.tableData]
-    nextTableData[rowIndex] = { ...nextTableData[rowIndex], ...patch }
+    nextTableData[rowIndex] = applyRowPatch(nextTableData[rowIndex], patch)
     emitTableDataChange(nextTableData)
     return
   }

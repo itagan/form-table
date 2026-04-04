@@ -60,6 +60,7 @@ import {
 } from './types'
 import { createRuntimeContext } from './utils/dynamic'
 import { resolveDisplayValue } from './utils/display'
+import { getValueByPath } from './utils/path'
 import { resolveRulesForProp } from './utils/rules'
 
 // 渲染顶层插槽的包装组件，用 div 包裹以兼容 Vue 2 单根节点要求
@@ -121,7 +122,7 @@ const slotFn = computed(() => {
 })
 
 const setValue = (value: any) => {
-  if (props.row[props.config.key] === value) {
+  if (getValueByPath(props.row, props.config.key) === value) {
     return
   }
 
@@ -153,7 +154,7 @@ const slotProps = computed<FormTableSlotContext>(() => ({
   index: props.index,
   fieldKey: props.config.key,
   propPath: props.propPath,
-  value: props.row[props.config.key],
+  value: getValueByPath(props.row, props.config.key),
   formData: formTableContext.value.formData,
   tableData: formTableContext.value.tableData,
   setValue,
@@ -206,13 +207,13 @@ const wrapperProps = computed(() => {
 })
 
 const hasContent = computed(() => {
-  const value = props.row[props.config.key]
+  const value = getValueByPath(props.row, props.config.key)
   return value !== null && value !== undefined && value !== ''
 })
 
 const tooltipContent = computed(() => {
   const displayValue = resolveDisplayValue(
-    props.row[props.config.key],
+    getValueByPath(props.row, props.config.key),
     props.config.options,
     props.config.optionProps,
     props.config.formatter,
