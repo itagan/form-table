@@ -22,7 +22,7 @@
       :disabled="!hasContent" 
       :content="tooltipContent" 
       placement="top-start" 
-      v-bind="tooltipProps"
+      v-bind="resolvedTooltipProps"
     >
       <ComponentWrapper v-bind="wrapperProps" />
     </el-tooltip>
@@ -44,6 +44,7 @@
 import { computed, defineComponent, h, inject, type ComputedRef, useAttrs } from 'vue'
 import ComponentWrapper from './ComponentWrapper.vue'
 import type {
+  DynamicValue,
   FormTableActions,
   FormItemConfig,
   FormTableBaseContext,
@@ -58,7 +59,7 @@ import {
   FORM_TABLE_SLOTS_KEY,
   type DispatchFn
 } from './types'
-import { createRuntimeContext } from './utils/dynamic'
+import { createRuntimeContext, resolveDynamicValue } from './utils/dynamic'
 import { resolveDisplayValue } from './utils/display'
 import { getValueByPath } from './utils/path'
 import { resolveRulesForProp } from './utils/rules'
@@ -80,7 +81,7 @@ interface Props {
   label?: string
   labelWidth?: string
   isUseTooltip?: boolean
-  tooltipProps?: Record<string, any>
+  tooltipProps?: DynamicValue<Record<string, any>>
   row: Record<string, any>
   index: number
   config: FormItemConfig
@@ -149,6 +150,26 @@ const runtimeContext = computed(() => createRuntimeContext(formTableContext.valu
   fieldKey: props.config.key
 }))
 
+const resolvedTooltipProps = computed<Record<string, any>>(() => {
+  return resolveDynamicValue(props.tooltipProps, runtimeContext.value) || {}
+})
+
+const resolvedBind = computed<Record<string, any>>(() => {
+  return resolveDynamicValue(props.config.bind, runtimeContext.value) || {}
+})
+
+const resolvedComponentProps = computed<Record<string, any> | undefined>(() => {
+  return resolveDynamicValue(props.config.props, runtimeContext.value)
+})
+
+const resolvedOptions = computed(() => {
+  return resolveDynamicValue(props.config.options, runtimeContext.value)
+})
+
+const resolvedOptionProps = computed(() => {
+  return resolveDynamicValue(props.config.optionProps, runtimeContext.value)
+})
+
 const slotProps = computed<FormTableSlotContext>(() => ({
   row: props.row,
   index: props.index,
@@ -185,6 +206,9 @@ const wrapperProps = computed(() => {
     customComponent,
     colProps,
     bind,
+    props: componentProps,
+    options,
+    optionProps,
     rules,
     label,
     labelWidth,
@@ -201,7 +225,10 @@ const wrapperProps = computed(() => {
     row: props.row,
     rowIndex: props.index,
     customComponent,
-    bind,
+    bind: resolvedBind.value,
+    props: resolvedComponentProps.value,
+    options: resolvedOptions.value,
+    optionProps: resolvedOptionProps.value,
     ...componentConfig
   }
 })
@@ -214,8 +241,8 @@ const hasContent = computed(() => {
 const tooltipContent = computed(() => {
   const displayValue = resolveDisplayValue(
     getValueByPath(props.row, props.config.key),
-    props.config.options,
-    props.config.optionProps,
+    resolvedOptions.value,
+    resolvedOptionProps.value,
     props.config.formatter,
     props.config.emptyText,
     runtimeContext.value

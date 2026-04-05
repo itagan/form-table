@@ -24,10 +24,12 @@
  * 对应 el-table-column，在每个表格单元格的 scoped slot 中
  * 按 column.children 渲染多行 FormTableRow 布局
  */
-import { computed, useAttrs } from 'vue'
+import { computed, inject, type ComputedRef, useAttrs } from 'vue'
 import FormTableRow from './FormTableRow.vue'
-import type { ColumnConfig } from './types'
+import type { ColumnConfig, FormTableBaseContext } from './types'
+import { FORM_TABLE_CONTEXT_KEY } from './types'
 import { extractColumnAttrs } from './utils/attrs'
+import { createRuntimeContext, resolveDynamicValue } from './utils/dynamic'
 
 interface Props {
   column: ColumnConfig
@@ -36,13 +38,20 @@ interface Props {
 
 const props = defineProps<Props>()
 const attrs = useAttrs()
+const formTableContext = inject<ComputedRef<FormTableBaseContext>>(
+  FORM_TABLE_CONTEXT_KEY,
+  computed(() => ({ formData: {}, tableData: [] }))
+)
+
+const runtimeContext = computed(() => createRuntimeContext(formTableContext.value))
 
 const columnAttrs = computed(() => ({
   ...extractColumnAttrs(attrs),
-  ...(props.column.props || {})
+  ...(resolveDynamicValue(props.column.props, runtimeContext.value) || {})
 }))
 
 const getRowKey = (row: ColumnConfig['children'][number], index: number) => {
-  return row.key || row.props?.key || index
+  const rowProps = resolveDynamicValue(row.props, runtimeContext.value) || {}
+  return row.key || rowProps.key || index
 }
 </script>

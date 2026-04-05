@@ -208,7 +208,7 @@ const handleFormTableEvent = (payload: { type: string; args: any[] }) => {
 interface ColumnConfig {
   name: string
   visible?: boolean | ((context) => boolean)
-  props?: Record<string, any>
+  props?: Record<string, any> | ((context) => Record<string, any>)
   children: RowConfig[]
 }
 ```
@@ -218,8 +218,8 @@ interface ColumnConfig {
 ```ts
 interface RowConfig {
   visible?: boolean | ((context) => boolean)
-  bind?: Record<string, any>
-  props?: Record<string, any>
+  bind?: Record<string, any> | ((context) => Record<string, any>)
+  props?: Record<string, any> | ((context) => Record<string, any>)
   gutter?: number
   children: FormItemConfig[]
 }
@@ -233,15 +233,15 @@ interface FormItemConfig {
   type: FormItemType
   visible?: boolean | ((context) => boolean)
   colSpan?: number | string
-  colProps?: Record<string, any>
-  bind?: Record<string, any>
+  colProps?: Record<string, any> | ((context) => Record<string, any>)
+  bind?: Record<string, any> | ((context) => Record<string, any>)
   listeners?: Record<string, (context, ...args) => void>
   onValueChange?: (context) => Partial<TableRow> | void
   rules?: any[]
   label?: string
   labelWidth?: string
   isUseTooltip?: boolean
-  tooltipProps?: Record<string, any>
+  tooltipProps?: Record<string, any> | ((context) => Record<string, any>)
   placeholder?: string
   clearable?: boolean
   disabled?: boolean
@@ -249,7 +249,7 @@ interface FormItemConfig {
   size?: 'large' | 'default' | 'small'
   customComponent?: string
   slotName?: string
-  options?: Array<{ label: string; value: any }>
+  options?: Array<{ label: string; value: any }> | ((context) => Array<{ label: string; value: any }>)
   remote?: boolean
   remoteMethod?: Function
   min?: number
@@ -257,7 +257,7 @@ interface FormItemConfig {
   step?: number
   format?: string
   valueFormat?: string
-  props?: Record<string, any>
+  props?: Record<string, any> | ((context) => Record<string, any>)
   data?: any[]
   fetchSuggestions?: Function
   action?: string
@@ -270,7 +270,12 @@ interface FormItemConfig {
     value?: string
     disabled?: string
     key?: string
-  }
+  } | ((context) => {
+    label?: string
+    value?: string
+    disabled?: string
+    key?: string
+  })
 }
 ```
 
@@ -281,6 +286,19 @@ interface FormItemConfig {
 - `contact.phone`
 
 `listeners` 用来监听具体字段组件抛出的事件，适合处理 `blur`、`focus`、`change` 这类组件级交互。
+
+`bind`、`props`、`colProps`、`tooltipProps`、`options`、`optionProps` 也支持函数写法，会按当前 `row / index / fieldKey / formData / tableData` 动态解析。
+
+```ts
+{
+  key: 'department',
+  type: 'input',
+  bind: ({ row }) => ({
+    disabled: row.status === false,
+    placeholder: row.status === false ? '当前已停用，部门不可编辑' : '请输入部门'
+  })
+}
+```
 
 `onValueChange` 用来处理字段联动。它会在字段值真正变更后执行，如果返回一个 patch，组件会继续把 patch 合并回当前行，并沿用同一条更新链路。
 

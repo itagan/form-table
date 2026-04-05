@@ -241,7 +241,19 @@ const columns = ref<ColumnConfig[]>([
           key: 'department',
           type: 'input',
           colSpan: 10,
-          placeholder: '请输入部门'
+          placeholder: '请输入部门',
+          onValueChange: ({ value, getValue }) => {
+            if (value !== '技术部' && getValue('level') === 'senior') {
+              return {
+                level: 'mid'
+              }
+            }
+          },
+          bind: ({ row }) => ({
+            disabled: row.status === false,
+            clearable: row.status !== false,
+            placeholder: row.status === false ? '当前已停用，部门不可编辑' : '请输入部门'
+          })
         },
         {
           key: 'profile.city',
@@ -256,6 +268,18 @@ const columns = ref<ColumnConfig[]>([
           colSpan: 14,
           placeholder: '请选择职级',
           defaultValue: 'junior',
+          options: ({ row }) => {
+            const commonOptions = [
+              { label: '初级', value: 'junior' },
+              { label: '中级', value: 'mid' }
+            ]
+
+            if (row.department === '技术部') {
+              return [...commonOptions, { label: '高级', value: 'senior' }]
+            }
+
+            return commonOptions
+          },
           onValueChange: ({ value, row, getValue }) => {
             if (value === 'junior') {
               return {
@@ -269,14 +293,10 @@ const columns = ref<ColumnConfig[]>([
               }
             }
           },
-          options: [
-            { label: '初级', value: 'junior' },
-            { label: '中级', value: 'mid' },
-            { label: '高级', value: 'senior' }
-          ],
-          bind: {
-            filterable: true
-          }
+          bind: ({ row }) => ({
+            filterable: true,
+            placeholder: row.department === '技术部' ? '请选择技术职级' : '请选择通用职级'
+          })
         },
         {
           key: 'remark',
@@ -284,11 +304,12 @@ const columns = ref<ColumnConfig[]>([
           visible: ({ row }) => row.level !== 'junior',
           colSpan: 24,
           placeholder: '请输入备注',
-          bind: {
-            rows: 2,
+          bind: ({ row }) => ({
+            rows: row.level === 'senior' ? 3 : 2,
             maxlength: 60,
-            showWordLimit: true
-          }
+            showWordLimit: true,
+            placeholder: row.status === false ? '当前已停用，备注可不填写' : '请输入备注'
+          })
         },
         {
           key: 'status',

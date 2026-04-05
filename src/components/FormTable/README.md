@@ -34,6 +34,7 @@ props.tableData → el-table 渲染
 
 - 常用字段直接配置
 - 非常见组件属性优先放到 `bind`
+- `bind`、`props`、`colProps`、`options` 支持函数写法，可按当前上下文动态返回
 - 顶层 `attrs` 用来扩展 `el-form` / `el-table` / `el-table-column`
 - 只有 `visible`、`defaultValue`、`formatter`、`colProps` 这类结构能力额外提供独立配置
 

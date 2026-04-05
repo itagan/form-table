@@ -39,7 +39,7 @@
 import { computed, provide, ref, useAttrs, useSlots } from 'vue'
 import FormTableColumn from './FormTableColumn.vue'
 import { extractFormAttrs, extractTableAttrs } from './utils/attrs'
-import { buildDefaultRow, createRuntimeContext, resolveVisible } from './utils/dynamic'
+import { buildDefaultRow, createRuntimeContext, resolveDynamicValue, resolveVisible } from './utils/dynamic'
 import { applyRowPatch, getValueByPath, setValueByPath } from './utils/path'
 import type {
   ColumnConfig,
@@ -135,7 +135,8 @@ const customComponentsMap = computed(() => {
 })
 
 const getColumnKey = (column: ColumnConfig, index: number) => {
-  return column.key || column.props?.columnKey || column.name || index
+  const columnProps = resolveDynamicValue(column.props, createRuntimeContext(formTableContext.value)) || {}
+  return column.key || columnProps.columnKey || column.name || index
 }
 
 type EmitEventName =

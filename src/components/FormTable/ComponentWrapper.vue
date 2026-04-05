@@ -12,10 +12,10 @@
   >
     <el-option
       v-for="(option, optionIndex) in normalizedOptions"
-      :key="getOptionKey(option, optionIndex, props.optionProps)"
-      :label="getOptionLabel(option, props.optionProps)"
-      :value="getOptionValue(option, props.optionProps)"
-      :disabled="getOptionDisabled(option, props.optionProps)"
+      :key="getOptionKey(option, optionIndex, resolvedOptionProps)"
+      :label="getOptionLabel(option, resolvedOptionProps)"
+      :value="getOptionValue(option, resolvedOptionProps)"
+      :disabled="getOptionDisabled(option, resolvedOptionProps)"
     />
   </component>
 
@@ -28,11 +28,11 @@
   >
     <el-radio
       v-for="(option, optionIndex) in normalizedOptions"
-      :key="getOptionKey(option, optionIndex, props.optionProps)"
-      :label="getOptionValue(option, props.optionProps)"
-      :disabled="getOptionDisabled(option, props.optionProps)"
+      :key="getOptionKey(option, optionIndex, resolvedOptionProps)"
+      :label="getOptionValue(option, resolvedOptionProps)"
+      :disabled="getOptionDisabled(option, resolvedOptionProps)"
     >
-      {{ getOptionLabel(option, props.optionProps) }}
+      {{ getOptionLabel(option, resolvedOptionProps) }}
     </el-radio>
   </component>
 
@@ -45,11 +45,11 @@
   >
     <el-checkbox
       v-for="(option, optionIndex) in normalizedOptions"
-      :key="getOptionKey(option, optionIndex, props.optionProps)"
-      :label="getOptionValue(option, props.optionProps)"
-      :disabled="getOptionDisabled(option, props.optionProps)"
+      :key="getOptionKey(option, optionIndex, resolvedOptionProps)"
+      :label="getOptionValue(option, resolvedOptionProps)"
+      :disabled="getOptionDisabled(option, resolvedOptionProps)"
     >
-      {{ getOptionLabel(option, props.optionProps) }}
+      {{ getOptionLabel(option, resolvedOptionProps) }}
     </el-checkbox>
   </component>
 
@@ -75,7 +75,7 @@
  */
 import { computed, inject, type ComputedRef } from 'vue'
 import { processComponentProps, validateComponentConfig } from './utils/componentProps'
-import { createRuntimeContext } from './utils/dynamic'
+import { createRuntimeContext, resolveDynamicValue } from './utils/dynamic'
 import {
   getOptionDisabled,
   getOptionKey,
@@ -127,6 +127,24 @@ const formTableActions = inject<FormTableActions>(FORM_TABLE_ACTIONS_KEY, {
 })
 const customComponentsMap = inject<ComputedRef<Record<string, any>>>(FORM_TABLE_CUSTOM_COMPONENTS_KEY, computed(() => ({})))
 const dispatch = inject<DispatchFn>(FORM_TABLE_DISPATCH_KEY)
+const runtimeContext = computed(() => createRuntimeContext(formTableContext.value, {
+  row: props.row,
+  index: props.rowIndex,
+  fieldKey: props.fieldKey
+}))
+const resolvedBind = computed<Record<string, any>>(() => {
+  return resolveDynamicValue(props.bind, runtimeContext.value) || {}
+})
+const resolvedOptions = computed<FormItemOption[]>(() => {
+  const options = resolveDynamicValue(props.options, runtimeContext.value)
+  return Array.isArray(options) ? options : []
+})
+const resolvedOptionProps = computed(() => {
+  return resolveDynamicValue(props.optionProps, runtimeContext.value)
+})
+const resolvedComponentInnerProps = computed<Record<string, any> | undefined>(() => {
+  return resolveDynamicValue(props.props, runtimeContext.value)
+})
 
 const resolved = computed(() => {
   if (import.meta.env.DEV) {
@@ -136,26 +154,32 @@ const resolved = computed(() => {
     }
   }
 
-  const { type, customComponent, bind, ...otherProps } = props
+  const {
+    type,
+    customComponent,
+    bind,
+    options,
+    optionProps,
+    props: componentInnerProps,
+    ...otherProps
+  } = props
 
   return processComponentProps({
     type,
     customComponent,
     customComponents: customComponentsMap.value,
-    bind,
+    bind: resolvedBind.value,
+    options: resolvedOptions.value,
+    optionProps: resolvedOptionProps.value,
+    props: resolvedComponentInnerProps.value,
     ...otherProps
   })
 })
 
 const componentType = computed(() => resolved.value.componentType)
 const componentProps = computed(() => resolved.value.componentProps)
-const normalizedOptions = computed<FormItemOption[]>(() => (Array.isArray(props.options) ? props.options : []))
+const normalizedOptions = computed<FormItemOption[]>(() => resolvedOptions.value)
 const isSelectLike = computed(() => props.type === 'select' || props.type === 'tag-input')
-const runtimeContext = computed(() => createRuntimeContext(formTableContext.value, {
-  row: props.row,
-  index: props.rowIndex,
-  fieldKey: props.fieldKey
-}))
 const componentRenderProps = computed(() => {
   const { options, formatter, emptyText, optionProps, ...rest } = componentProps.value
   return rest
@@ -164,7 +188,7 @@ const textContent = computed(() => {
   return resolveDisplayValue(
     getValueByPath(props.row, props.fieldKey),
     normalizedOptions.value,
-    props.optionProps,
+    resolvedOptionProps.value,
     props.formatter,
     props.emptyText,
     runtimeContext.value

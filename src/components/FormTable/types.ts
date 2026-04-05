@@ -92,15 +92,15 @@ export interface FormItemConfig {
   type: FormItemType
   visible?: DynamicValue<boolean>
   colSpan?: number | string
-  colProps?: Record<string, any>
-  bind?: Record<string, any>
+  colProps?: DynamicValue<Record<string, any>>
+  bind?: DynamicValue<Record<string, any>>
   listeners?: Record<string, FormTableFieldListener>
   onValueChange?: (context: FormTableFieldChangeContext) => Partial<TableRow> | void
   rules?: any[]
   label?: string
   labelWidth?: string
   isUseTooltip?: boolean
-  tooltipProps?: Record<string, any>
+  tooltipProps?: DynamicValue<Record<string, any>>
   placeholder?: string
   clearable?: boolean
   disabled?: boolean
@@ -108,8 +108,8 @@ export interface FormItemConfig {
   size?: 'large' | 'default' | 'small'
   customComponent?: string
   slotName?: string
-  options?: FormItemOption[]
-  optionProps?: OptionPropsConfig
+  options?: DynamicValue<FormItemOption[]>
+  optionProps?: DynamicValue<OptionPropsConfig>
   remote?: boolean
   remoteMethod?: Function
   min?: number
@@ -117,7 +117,7 @@ export interface FormItemConfig {
   step?: number
   format?: string
   valueFormat?: string
-  props?: Record<string, any>
+  props?: DynamicValue<Record<string, any>>
   data?: any[]
   fetchSuggestions?: Function
   action?: string
@@ -133,8 +133,8 @@ export interface FormItemConfig {
 export interface RowConfig {
   key?: string
   visible?: DynamicValue<boolean>
-  bind?: Record<string, any>
-  props?: Record<string, any>
+  bind?: DynamicValue<Record<string, any>>
+  props?: DynamicValue<Record<string, any>>
   gutter?: number
   children: FormItemConfig[]
 }
@@ -146,7 +146,7 @@ export interface ColumnConfig {
   key?: string
   name: string
   visible?: DynamicValue<boolean>
-  props?: Record<string, any>
+  props?: DynamicValue<Record<string, any>>
   children: RowConfig[]
 }
 
