@@ -148,6 +148,8 @@ const handleFormTableEvent = (payload: { type: string; args: any[] }) => {
 
 如果只是为了保持 `formData.tableData` 同步，可以只处理 `update:formData`，组件内部会在行编辑、增行、删行时自动带上最新 `tableData`。
 
+动态隐藏的字段会自动清理已有校验错误，避免界面上残留不可见字段的报错状态。
+
 ## Slot 上下文
 
 当 `type: 'slotComponent'` 时，插槽会收到这些参数：

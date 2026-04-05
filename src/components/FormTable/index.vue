@@ -36,7 +36,7 @@
  * - customComponents: 自定义组件映射表
  * - dispatch: 统一事件分发函数，处理 update:row 等内部事件
  */
-import { computed, provide, ref, useAttrs, useSlots } from 'vue'
+import { computed, nextTick, provide, ref, useAttrs, useSlots, watch } from 'vue'
 import FormTableColumn from './FormTableColumn.vue'
 import { extractFormAttrs, extractTableAttrs } from './utils/attrs'
 import { buildDefaultRow, createRuntimeContext, resolveDynamicValue, resolveVisible } from './utils/dynamic'
@@ -113,6 +113,14 @@ const visibleColumns = computed(() => {
   return props.columns.filter((column) => resolveVisible(column.visible, context))
 })
 
+const createTableBaseContext = (tableData: TableRow[]): FormTableBaseContext => ({
+  formData: {
+    ...props.formData,
+    tableData
+  },
+  tableData
+})
+
 const emitFormDataUpdate = (tableData: TableRow[]) => {
   emit('update:formData', {
     ...props.formData,
@@ -171,7 +179,16 @@ const normalizeMoveIndex = (index: number) => {
 }
 
 const getVisibleRowItems = (rowConfig: RowConfig, row: TableRow, rowIndex: number) => {
-  const rowContext = createRuntimeContext(formTableContext.value, {
+  return getVisibleRowItemsByContext(rowConfig, row, rowIndex, formTableContext.value)
+}
+
+const getVisibleRowItemsByContext = (
+  rowConfig: RowConfig,
+  row: TableRow,
+  rowIndex: number,
+  baseContext: FormTableBaseContext
+) => {
+  const rowContext = createRuntimeContext(baseContext, {
     row,
     index: rowIndex
   })
@@ -181,7 +198,7 @@ const getVisibleRowItems = (rowConfig: RowConfig, row: TableRow, rowIndex: numbe
   }
 
   return rowConfig.children.filter((item) => {
-    return resolveVisible(item.visible, createRuntimeContext(formTableContext.value, {
+    return resolveVisible(item.visible, createRuntimeContext(baseContext, {
       row,
       index: rowIndex,
       fieldKey: item.key
@@ -214,6 +231,24 @@ const getConfiguredFieldKeys = () => {
   })
 
   return Array.from(fieldKeys)
+}
+
+const getAllRowFieldProps = (rowIndex: number, tableData: TableRow[] = props.tableData) => {
+  if (!tableData[rowIndex]) {
+    return []
+  }
+
+  const fieldProps: string[] = []
+
+  props.columns.forEach((column) => {
+    column.children.forEach((rowConfig) => {
+      rowConfig.children.forEach((item) => {
+        fieldProps.push(`tableData.${rowIndex}.${item.key}`)
+      })
+    })
+  })
+
+  return fieldProps
 }
 
 const createFieldChangeContext = (
@@ -384,6 +419,7 @@ const commitRowChange = (rowIndex: number, patch: Partial<TableRow>) => {
   const nextTableData = [...props.tableData]
   nextTableData[rowIndex] = resolved.nextRow
   emitTableDataChange(nextTableData)
+  scheduleHiddenFieldValidationCleanup(nextTableData)
   resolved.fieldChanges.forEach((change) => {
     dispatch('field-change', change)
   })
@@ -392,22 +428,55 @@ const commitRowChange = (rowIndex: number, patch: Partial<TableRow>) => {
 }
 
 const getRowFieldProps = (rowIndex: number) => {
-  const row = props.tableData[rowIndex]
+  return getVisibleRowFieldProps(rowIndex, props.tableData)
+}
+
+const getVisibleRowFieldProps = (rowIndex: number, tableData: TableRow[]) => {
+  const row = tableData[rowIndex]
   if (!row) {
     return []
   }
 
   const fieldProps: string[] = []
+  const baseContext = createTableBaseContext(tableData)
+  const visibleColumnsForTable = props.columns.filter((column) => {
+    return resolveVisible(column.visible, createRuntimeContext(baseContext))
+  })
 
-  visibleColumns.value.forEach((column) => {
+  visibleColumnsForTable.forEach((column) => {
     column.children.forEach((rowConfig) => {
-      getVisibleRowItems(rowConfig, row, rowIndex).forEach((item) => {
+      getVisibleRowItemsByContext(rowConfig, row, rowIndex, baseContext).forEach((item) => {
         fieldProps.push(`tableData.${rowIndex}.${item.key}`)
       })
     })
   })
 
   return fieldProps
+}
+
+const clearHiddenFieldValidations = (tableData: TableRow[]) => {
+  const hiddenFieldProps = tableData.reduce<string[]>((propsList, _row, rowIndex) => {
+    const allFieldProps = getAllRowFieldProps(rowIndex, tableData)
+    const visibleFieldProps = new Set(getVisibleRowFieldProps(rowIndex, tableData))
+
+    allFieldProps.forEach((fieldProp) => {
+      if (!visibleFieldProps.has(fieldProp)) {
+        propsList.push(fieldProp)
+      }
+    })
+
+    return propsList
+  }, [])
+
+  if (hiddenFieldProps.length > 0) {
+    formRef.value?.clearValidate(hiddenFieldProps)
+  }
+}
+
+const scheduleHiddenFieldValidationCleanup = (tableData: TableRow[]) => {
+  nextTick(() => {
+    clearHiddenFieldValidations(tableData)
+  })
 }
 
 const validateFieldProps = async (fieldProp: string | string[]) => {
@@ -451,6 +520,7 @@ const insertRow = (index: number, rowData?: Partial<TableRow>) => {
   })
   nextTableData[insertIndex] = resolved.nextRow
   emitTableDataChange(nextTableData)
+  scheduleHiddenFieldValidationCleanup(nextTableData)
   dispatch('row-add', resolved.nextRow, insertIndex)
 }
 
@@ -487,6 +557,7 @@ const copyRow = (index: number, patch?: Partial<TableRow>) => {
   })
   nextTableData[index + 1] = resolved.nextRow
   emitTableDataChange(nextTableData)
+  scheduleHiddenFieldValidationCleanup(nextTableData)
   dispatch('row-copy', resolved.nextRow, index + 1)
 }
 
@@ -495,9 +566,11 @@ const removeRow = (index: number) => {
     return
   }
 
+  formRef.value?.clearValidate(getAllRowFieldProps(index))
   const nextTableData = [...props.tableData]
   const removedRow = nextTableData.splice(index, 1)[0]
   emitTableDataChange(nextTableData)
+  scheduleHiddenFieldValidationCleanup(nextTableData)
   dispatch('row-remove', removedRow, index)
 }
 
@@ -515,6 +588,7 @@ const moveRow = (fromIndex: number, toIndex: number) => {
   const movedRow = nextTableData.splice(fromIndex, 1)[0]
   nextTableData.splice(normalizedToIndex, 0, movedRow)
   emitTableDataChange(nextTableData)
+  scheduleHiddenFieldValidationCleanup(nextTableData)
   dispatch('row-move', movedRow, fromIndex, normalizedToIndex)
 }
 
@@ -537,7 +611,7 @@ const formTableActions: FormTableActions = {
     formRef.value?.clearValidate(fieldProps)
   },
   clearRowValidate: (index: number) => {
-    formRef.value?.clearValidate(getRowFieldProps(index))
+    formRef.value?.clearValidate(getAllRowFieldProps(index))
   }
 }
 
@@ -546,6 +620,14 @@ provide(FORM_TABLE_CONTEXT_KEY, formTableContext)
 provide(FORM_TABLE_ACTIONS_KEY, formTableActions)
 provide(FORM_TABLE_SLOTS_KEY, slots)
 provide(FORM_TABLE_RULES_KEY, computed(() => props.rules))
+
+watch(
+  [() => props.tableData, () => props.formData],
+  ([tableData]) => {
+    scheduleHiddenFieldValidationCleanup(tableData)
+  },
+  { deep: true, immediate: true }
+)
 
 /**
  * 统一事件分发器

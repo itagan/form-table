@@ -70,6 +70,7 @@ props.tableData → el-table 渲染
 
 - 内部字段编辑会触发 `update:tableData`
 - 同时也会触发 `update:formData`，并自动带上最新的 `tableData`
+- 因显隐切换而隐藏的字段会自动清理已有校验状态
 
 ## 行操作
 
