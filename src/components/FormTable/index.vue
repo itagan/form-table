@@ -48,6 +48,7 @@ import type {
   FormItemConfig,
   FormTableActions,
   FormTableBaseContext,
+  FormTableFieldChangeContext,
   FormTableFieldChangePayload,
   RowConfig,
   ValidationRule,
@@ -148,6 +149,11 @@ type EmitEventName =
   | 'row-remove'
   | 'validate'
 
+interface ResolvedRowChange {
+  nextRow: TableRow
+  fieldChanges: FormTableFieldChangePayload[]
+}
+
 const normalizeInsertIndex = (index: number) => {
   return Math.max(0, Math.min(index, props.tableData.length))
 }
@@ -174,6 +180,159 @@ const getVisibleRowItems = (rowConfig: RowConfig, row: TableRow, rowIndex: numbe
       fieldKey: item.key
     }))
   })
+}
+
+const getFieldConfigByKey = (fieldKey: string) => {
+  for (const column of props.columns) {
+    for (const rowConfig of column.children) {
+      const matchedItem = rowConfig.children.find((item) => item.key === fieldKey)
+      if (matchedItem) {
+        return matchedItem
+      }
+    }
+  }
+
+  return undefined
+}
+
+const createFieldChangeContext = (
+  rowIndex: number,
+  row: TableRow,
+  fieldKey: string,
+  value: any,
+  previousValue: any
+): FormTableFieldChangeContext => {
+  const nextTableData = [...props.tableData]
+  nextTableData[rowIndex] = row
+
+  return {
+    row,
+    index: rowIndex,
+    fieldKey,
+    value,
+    previousValue,
+    tableData: nextTableData,
+    formData: {
+      ...props.formData,
+      tableData: nextTableData
+    },
+    getValue: (path: string) => getValueByPath(row, path)
+  }
+}
+
+const resolveRowChange = (rowIndex: number, initialPatch: Partial<TableRow>): ResolvedRowChange | null => {
+  const currentRow = props.tableData[rowIndex]
+  if (!currentRow) {
+    return null
+  }
+
+  let nextRow = currentRow
+  const fieldChanges = new Map<string, FormTableFieldChangePayload>()
+  const pendingChanges: FormTableFieldChangePayload[] = []
+
+  const applyPatch = (patch?: Partial<TableRow>) => {
+    if (!patch) {
+      return
+    }
+
+    Object.keys(patch).forEach((fieldKey) => {
+      const value = patch[fieldKey]
+      const previousValue = getValueByPath(nextRow, fieldKey)
+
+      if (Object.is(previousValue, value)) {
+        return
+      }
+
+      nextRow = setValueByPath(nextRow, fieldKey, value)
+
+      const currentChange = fieldChanges.get(fieldKey)
+      const initialPreviousValue = currentChange?.previousValue ?? previousValue
+
+      if (Object.is(initialPreviousValue, value)) {
+        fieldChanges.delete(fieldKey)
+      } else {
+        fieldChanges.set(fieldKey, {
+          row: nextRow,
+          index: rowIndex,
+          fieldKey,
+          value,
+          previousValue: initialPreviousValue
+        })
+      }
+
+      pendingChanges.push({
+        row: nextRow,
+        index: rowIndex,
+        fieldKey,
+        value,
+        previousValue
+      })
+    })
+  }
+
+  applyPatch(initialPatch)
+
+  let processedCount = 0
+  const maxLinkedChanges = 100
+
+  while (pendingChanges.length > 0 && processedCount < maxLinkedChanges) {
+    const change = pendingChanges.shift()!
+    const fieldConfig = getFieldConfigByKey(change.fieldKey)
+
+    if (!fieldConfig?.onValueChange) {
+      processedCount += 1
+      continue
+    }
+
+    const linkedPatch = fieldConfig.onValueChange(
+      createFieldChangeContext(
+        rowIndex,
+        nextRow,
+        change.fieldKey,
+        change.value,
+        change.previousValue
+      )
+    )
+
+    if (linkedPatch) {
+      applyPatch(linkedPatch)
+    }
+    processedCount += 1
+  }
+
+  if (pendingChanges.length > 0) {
+    console.warn('[FormTable] onValueChange exceeded max linked update count, remaining changes were ignored.')
+  }
+
+  const resolvedFieldChanges = Array.from(fieldChanges.values()).map((change) => ({
+    ...change,
+    row: nextRow
+  }))
+
+  return {
+    nextRow,
+    fieldChanges: resolvedFieldChanges
+  }
+}
+
+const commitRowChange = (rowIndex: number, patch: Partial<TableRow>) => {
+  const resolved = resolveRowChange(rowIndex, patch)
+  if (!resolved) {
+    return null
+  }
+
+  if (resolved.fieldChanges.length === 0) {
+    return resolved
+  }
+
+  const nextTableData = [...props.tableData]
+  nextTableData[rowIndex] = resolved.nextRow
+  emitTableDataChange(nextTableData)
+  resolved.fieldChanges.forEach((change) => {
+    dispatch('field-change', change)
+  })
+
+  return resolved
 }
 
 const getRowFieldProps = (rowIndex: number) => {
@@ -239,11 +398,12 @@ const updateRow = (index: number, patch: Partial<TableRow>) => {
     return
   }
 
-  const nextRow = applyRowPatch(props.tableData[index], patch)
-  const nextTableData = [...props.tableData]
-  nextTableData[index] = nextRow
-  emitTableDataChange(nextTableData)
-  dispatch('row-update', nextRow, index)
+  const resolved = commitRowChange(index, patch)
+  if (!resolved || resolved.fieldChanges.length === 0) {
+    return
+  }
+
+  dispatch('row-update', resolved.nextRow, index)
 }
 
 const copyRow = (index: number, patch?: Partial<TableRow>) => {
@@ -328,26 +488,16 @@ provide(FORM_TABLE_RULES_KEY, computed(() => props.rules))
  */
 const dispatch = (type: EmitEventName | 'update:row' | 'update:row-data', ...args: any[]) => {
   if (type === 'update:row') {
-    const [rowIndex, row, fieldKey, value] = args
-    const nextTableData = [...props.tableData]
-    const previousValue = row ? getValueByPath(row, fieldKey) : undefined
-    nextTableData[rowIndex] = setValueByPath(nextTableData[rowIndex], fieldKey, value)
-    emitTableDataChange(nextTableData)
-    dispatch('field-change', {
-      row: nextTableData[rowIndex],
-      index: rowIndex,
-      fieldKey,
-      value,
-      previousValue
+    const [rowIndex, _row, fieldKey, value] = args
+    commitRowChange(rowIndex, {
+      [fieldKey]: value
     })
     return
   }
 
   if (type === 'update:row-data') {
     const [rowIndex, patch] = args
-    const nextTableData = [...props.tableData]
-    nextTableData[rowIndex] = applyRowPatch(nextTableData[rowIndex], patch)
-    emitTableDataChange(nextTableData)
+    commitRowChange(rowIndex, patch)
     return
   }
 

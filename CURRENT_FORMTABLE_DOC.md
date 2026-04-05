@@ -236,6 +236,7 @@ interface FormItemConfig {
   colProps?: Record<string, any>
   bind?: Record<string, any>
   listeners?: Record<string, (context, ...args) => void>
+  onValueChange?: (context) => Partial<TableRow> | void
   rules?: any[]
   label?: string
   labelWidth?: string
@@ -280,6 +281,26 @@ interface FormItemConfig {
 - `contact.phone`
 
 `listeners` 用来监听具体字段组件抛出的事件，适合处理 `blur`、`focus`、`change` 这类组件级交互。
+
+`onValueChange` 用来处理字段联动。它会在字段值真正变更后执行，如果返回一个 patch，组件会继续把 patch 合并回当前行，并沿用同一条更新链路。
+
+```ts
+{
+  key: 'level',
+  type: 'select',
+  onValueChange: ({ value }) => {
+    if (value === 'junior') {
+      return { remark: '' }
+    }
+  }
+}
+```
+
+这个能力适合处理：
+
+- 某个字段变化后清空另一个字段
+- 自动补默认值
+- 联动更新嵌套字段，比如 `profile.city`
 
 ## type 支持
 

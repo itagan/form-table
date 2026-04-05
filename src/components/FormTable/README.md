@@ -21,6 +21,8 @@ props.tableData → el-table 渲染
                   ↓ 用户编辑
             dispatch('update:row', rowIndex, row, fieldKey, value)
                   ↓
+            onValueChange（如有配置）继续解析联动 patch
+                  ↓
             emit('update:tableData', newTableData)
                   ↓
             外层通过 v-model 或 @update:tableData 同步
@@ -77,3 +79,4 @@ props.tableData → el-table 渲染
 
 - 组件提供统一的 `field-change` 事件
 - 单个字段组件事件可通过 `listeners` 配置透传并拿到字段上下文
+- 如果字段配置了 `onValueChange`，可以在值变化后返回行 patch 做最小联动更新

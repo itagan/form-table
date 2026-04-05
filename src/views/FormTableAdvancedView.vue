@@ -256,6 +256,19 @@ const columns = ref<ColumnConfig[]>([
           colSpan: 14,
           placeholder: '请选择职级',
           defaultValue: 'junior',
+          onValueChange: ({ value, row, getValue }) => {
+            if (value === 'junior') {
+              return {
+                remark: ''
+              }
+            }
+
+            if (!getValue('remark')) {
+              return {
+                remark: `${row.name || '该成员'}当前为${value}级，需要补充说明。`
+              }
+            }
+          },
           options: [
             { label: '初级', value: 'junior' },
             { label: '中级', value: 'mid' },
@@ -281,6 +294,19 @@ const columns = ref<ColumnConfig[]>([
           key: 'status',
           type: 'switch',
           defaultValue: true,
+          onValueChange: ({ value, getValue }) => {
+            if (value === false) {
+              return {
+                workStatus: 'pending'
+              }
+            }
+
+            if (getValue('workStatus') === 'pending') {
+              return {
+                workStatus: 'processing'
+              }
+            }
+          },
           colSpan: 24
         }
       ]

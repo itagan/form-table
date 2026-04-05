@@ -30,6 +30,12 @@ export interface FormTableFieldContext extends FormTableRuntimeContext {
   updateRow: (patch: Record<string, any>) => void
 }
 
+export interface FormTableFieldChangeContext extends FormTableRuntimeContext {
+  value: any
+  previousValue: any
+  getValue: (path: string) => any
+}
+
 export type DynamicValue<T> = T | ((context: FormTableRuntimeContext) => T)
 export type FormTableFieldListener = (context: FormTableFieldContext, ...args: any[]) => void
 
@@ -89,6 +95,7 @@ export interface FormItemConfig {
   colProps?: Record<string, any>
   bind?: Record<string, any>
   listeners?: Record<string, FormTableFieldListener>
+  onValueChange?: (context: FormTableFieldChangeContext) => Partial<TableRow> | void
   rules?: any[]
   label?: string
   labelWidth?: string
