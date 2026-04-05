@@ -154,6 +154,12 @@ interface ResolvedRowChange {
   fieldChanges: FormTableFieldChangePayload[]
 }
 
+interface InitialFieldChange {
+  fieldKey: string
+  value: any
+  previousValue: any
+}
+
 const normalizeInsertIndex = (index: number) => {
   return Math.max(0, Math.min(index, props.tableData.length))
 }
@@ -195,40 +201,102 @@ const getFieldConfigByKey = (fieldKey: string) => {
   return undefined
 }
 
+const getConfiguredFieldKeys = () => {
+  const fieldKeys = new Set<string>()
+
+  props.columns.forEach((column) => {
+    column.children.forEach((rowConfig) => {
+      rowConfig.children.forEach((item) => {
+        fieldKeys.add(item.key)
+      })
+    })
+  })
+
+  return Array.from(fieldKeys)
+}
+
 const createFieldChangeContext = (
   rowIndex: number,
   row: TableRow,
   fieldKey: string,
   value: any,
-  previousValue: any
+  previousValue: any,
+  tableData: TableRow[]
 ): FormTableFieldChangeContext => {
-  const nextTableData = [...props.tableData]
-  nextTableData[rowIndex] = row
-
   return {
     row,
     index: rowIndex,
     fieldKey,
     value,
     previousValue,
-    tableData: nextTableData,
+    tableData,
     formData: {
       ...props.formData,
-      tableData: nextTableData
+      tableData
     },
     getValue: (path: string) => getValueByPath(row, path)
   }
 }
 
-const resolveRowChange = (rowIndex: number, initialPatch: Partial<TableRow>): ResolvedRowChange | null => {
-  const currentRow = props.tableData[rowIndex]
-  if (!currentRow) {
-    return null
-  }
+const createInitialFieldChanges = (row: TableRow): InitialFieldChange[] => {
+  return getConfiguredFieldKeys().reduce<InitialFieldChange[]>((changes, fieldKey) => {
+    const value = getValueByPath(row, fieldKey)
+    if (value === undefined) {
+      return changes
+    }
 
+    changes.push({
+      fieldKey,
+      value,
+      previousValue: undefined
+    })
+    return changes
+  }, [])
+}
+
+const resolveRowChange = (
+  rowIndex: number,
+  currentRow: TableRow,
+  options: {
+    tableData?: TableRow[]
+    initialPatch?: Partial<TableRow>
+    initialChanges?: InitialFieldChange[]
+  } = {}
+): ResolvedRowChange => {
   let nextRow = currentRow
+  const nextTableData = [...(options.tableData || props.tableData)]
+  nextTableData[rowIndex] = nextRow
   const fieldChanges = new Map<string, FormTableFieldChangePayload>()
   const pendingChanges: FormTableFieldChangePayload[] = []
+
+  const queueFieldChange = (fieldKey: string, value: any, previousValue: any) => {
+    if (Object.is(previousValue, value)) {
+      return
+    }
+
+    const currentChange = fieldChanges.get(fieldKey)
+    const initialPreviousValue = currentChange?.previousValue ?? previousValue
+
+    if (Object.is(initialPreviousValue, value)) {
+      fieldChanges.delete(fieldKey)
+    } else {
+      fieldChanges.set(fieldKey, {
+        row: nextRow,
+        index: rowIndex,
+        fieldKey,
+        value,
+        previousValue: initialPreviousValue
+      })
+    }
+
+    pendingChanges.push({
+      row: nextRow,
+      index: rowIndex,
+      fieldKey,
+      value,
+      previousValue
+    })
+  }
 
   const applyPatch = (patch?: Partial<TableRow>) => {
     if (!patch) {
@@ -244,33 +312,15 @@ const resolveRowChange = (rowIndex: number, initialPatch: Partial<TableRow>): Re
       }
 
       nextRow = setValueByPath(nextRow, fieldKey, value)
-
-      const currentChange = fieldChanges.get(fieldKey)
-      const initialPreviousValue = currentChange?.previousValue ?? previousValue
-
-      if (Object.is(initialPreviousValue, value)) {
-        fieldChanges.delete(fieldKey)
-      } else {
-        fieldChanges.set(fieldKey, {
-          row: nextRow,
-          index: rowIndex,
-          fieldKey,
-          value,
-          previousValue: initialPreviousValue
-        })
-      }
-
-      pendingChanges.push({
-        row: nextRow,
-        index: rowIndex,
-        fieldKey,
-        value,
-        previousValue
-      })
+      nextTableData[rowIndex] = nextRow
+      queueFieldChange(fieldKey, value, previousValue)
     })
   }
 
-  applyPatch(initialPatch)
+  applyPatch(options.initialPatch)
+  ;(options.initialChanges || []).forEach((change) => {
+    queueFieldChange(change.fieldKey, change.value, change.previousValue)
+  })
 
   let processedCount = 0
   const maxLinkedChanges = 100
@@ -290,7 +340,8 @@ const resolveRowChange = (rowIndex: number, initialPatch: Partial<TableRow>): Re
         nextRow,
         change.fieldKey,
         change.value,
-        change.previousValue
+        change.previousValue,
+        nextTableData
       )
     )
 
@@ -316,10 +367,14 @@ const resolveRowChange = (rowIndex: number, initialPatch: Partial<TableRow>): Re
 }
 
 const commitRowChange = (rowIndex: number, patch: Partial<TableRow>) => {
-  const resolved = resolveRowChange(rowIndex, patch)
-  if (!resolved) {
+  const currentRow = props.tableData[rowIndex]
+  if (!currentRow) {
     return null
   }
+
+  const resolved = resolveRowChange(rowIndex, currentRow, {
+    initialPatch: patch
+  })
 
   if (resolved.fieldChanges.length === 0) {
     return resolved
@@ -381,16 +436,21 @@ const validateFieldProps = async (fieldProp: string | string[]) => {
 
 const insertRow = (index: number, rowData?: Partial<TableRow>) => {
   const insertIndex = normalizeInsertIndex(index)
-  const newRow = buildDefaultRow(
+  const draftRow = buildDefaultRow(
     visibleColumns.value,
     formTableContext.value,
     insertIndex,
     rowData || {}
   )
   const nextTableData = [...props.tableData]
-  nextTableData.splice(insertIndex, 0, newRow)
+  nextTableData.splice(insertIndex, 0, draftRow)
+  const resolved = resolveRowChange(insertIndex, draftRow, {
+    tableData: nextTableData,
+    initialChanges: createInitialFieldChanges(draftRow)
+  })
+  nextTableData[insertIndex] = resolved.nextRow
   emitTableDataChange(nextTableData)
-  dispatch('row-add', newRow, insertIndex)
+  dispatch('row-add', resolved.nextRow, insertIndex)
 }
 
 const updateRow = (index: number, patch: Partial<TableRow>) => {
@@ -420,8 +480,13 @@ const copyRow = (index: number, patch?: Partial<TableRow>) => {
   )
   const nextTableData = [...props.tableData]
   nextTableData.splice(index + 1, 0, copiedRow)
+  const resolved = resolveRowChange(index + 1, copiedRow, {
+    tableData: nextTableData,
+    initialChanges: createInitialFieldChanges(copiedRow)
+  })
+  nextTableData[index + 1] = resolved.nextRow
   emitTableDataChange(nextTableData)
-  dispatch('row-copy', copiedRow, index + 1)
+  dispatch('row-copy', resolved.nextRow, index + 1)
 }
 
 const removeRow = (index: number) => {

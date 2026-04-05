@@ -80,3 +80,4 @@ props.tableData → el-table 渲染
 - 组件提供统一的 `field-change` 事件
 - 单个字段组件事件可通过 `listeners` 配置透传并拿到字段上下文
 - 如果字段配置了 `onValueChange`，可以在值变化后返回行 patch 做最小联动更新
+- `addRow`、`insertRow`、`copyRow` 产生的新行也会应用 `onValueChange`

@@ -284,6 +284,8 @@ interface FormItemConfig {
 
 `onValueChange` 用来处理字段联动。它会在字段值真正变更后执行，如果返回一个 patch，组件会继续把 patch 合并回当前行，并沿用同一条更新链路。
 
+通过 `addRow`、`insertRow`、`copyRow` 新增行时，默认值和传入的种子值也会触发这套联动逻辑。
+
 ```ts
 {
   key: 'level',
