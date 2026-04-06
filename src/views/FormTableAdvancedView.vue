@@ -54,7 +54,9 @@
         </template>
         
         <!-- 操作按钮插槽 -->
-        <template #table-actions="{ index, copyCurrentRow, removeCurrentRow, insertAfter }">
+        <template #table-actions="{ index, isFirstRow, isLastRow, moveUp, moveDown, copyCurrentRow, removeCurrentRow, insertAfter }">
+          <el-button size="small" :disabled="isFirstRow" @click="moveUp">上移</el-button>
+          <el-button size="small" :disabled="isLastRow" @click="moveDown">下移</el-button>
           <el-button size="small" type="primary" @click="handleEditRow(index)">编辑</el-button>
           <el-button size="small" @click="copyCurrentRow({ name: `复制-${index + 1}` })">复制</el-button>
           <el-button size="small" @click="insertAfter({ name: '', phone: '' })">插入</el-button>

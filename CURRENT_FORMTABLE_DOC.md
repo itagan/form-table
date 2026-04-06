@@ -156,6 +156,9 @@ const handleFormTableEvent = (payload: { type: string; args: any[] }) => {
 
 - `row`
 - `index`
+- `rowCount`
+- `isFirstRow`
+- `isLastRow`
 - `fieldKey`
 - `propPath`
 - `value`
@@ -167,6 +170,9 @@ const handleFormTableEvent = (payload: { type: string; args: any[] }) => {
 - `copyCurrentRow`
 - `insertBefore`
 - `insertAfter`
+- `moveCurrentRow`
+- `moveUp`
+- `moveDown`
 - `validateCurrentField`
 - `validateCurrentRow`
 - `clearCurrentFieldValidate`

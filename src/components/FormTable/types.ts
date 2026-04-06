@@ -195,6 +195,9 @@ export interface FormTableFieldChangePayload {
 export interface FormTableSlotContext {
   row: TableRow
   index: number
+  rowCount: number
+  isFirstRow: boolean
+  isLastRow: boolean
   fieldKey: string
   propPath: string
   value: any
@@ -206,6 +209,9 @@ export interface FormTableSlotContext {
   copyCurrentRow: (patch?: Partial<TableRow>) => void
   insertBefore: (rowData?: Partial<TableRow>) => void
   insertAfter: (rowData?: Partial<TableRow>) => void
+  moveCurrentRow: (toIndex: number) => void
+  moveUp: () => void
+  moveDown: () => void
   validateCurrentField: () => Promise<boolean>
   validateCurrentRow: () => Promise<boolean>
   clearCurrentFieldValidate: () => void
