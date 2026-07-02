@@ -422,7 +422,7 @@ interface FormItemConfig {
 
 推荐在动态行场景中优先使用通配路径，组件内部会按当前行索引自动匹配到对应字段。
 
-### 组件属性走 component.bind
+### 更多组件属性
 
 ```ts
 {
@@ -461,8 +461,8 @@ interface FormItemConfig {
 
 ```vue
 <FormTable ...>
-  <template #table-school="{ row, index }">
-    <el-select v-model="row.school" placeholder="请选择学校">
+  <template #table-school="{ value, setValue }">
+    <el-select :value="value" placeholder="请选择学校" @input="setValue">
       <el-option label="县一小" value="县一小" />
       <el-option label="县二中" value="县二中" />
     </el-select>
@@ -474,6 +474,29 @@ interface FormItemConfig {
 
 - `row`
 - `index`
+- `rowCount`
+- `isFirstRow`
+- `isLastRow`
+- `fieldKey`
+- `propPath`
+- `value`
+- `formData`
+- `tableData`
+- `setValue`
+- `updateRow`
+- `removeCurrentRow`
+- `copyCurrentRow`
+- `insertBefore`
+- `insertAfter`
+- `moveCurrentRow`
+- `moveUp`
+- `moveDown`
+- `validateCurrentField`
+- `validateCurrentRow`
+- `clearCurrentFieldValidate`
+- `clearCurrentRowValidate`
+
+推荐使用 `value` / `setValue` 更新当前字段，避免直接改 `row` 绕过内部联动和事件链路。
 
 ## 自定义组件扩展
 
@@ -507,7 +530,7 @@ const customComponents = [
 
 - `src/views/FormTableView.vue`
 - `src/views/FormTableAdvancedView.vue`
-- `src/views/DebugView.vue`
+- `src/views/DynamicSlotTestView.vue`
 
 如果你要看实现，优先看：
 

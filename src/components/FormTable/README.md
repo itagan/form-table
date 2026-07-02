@@ -4,6 +4,8 @@
 
 - `CURRENT_FORMTABLE_DOC.md`
 
+这份文件只保留实现导航，API 和示例以根目录文档为准。
+
 ## 组件架构
 
 ```text
@@ -46,6 +48,10 @@ props.tableData → el-table 渲染
 | `types.ts` | 类型定义 + provide/inject Symbol keys |
 | `utils/attrs.ts` | 从 $attrs 按白名单提取 el-form/el-table/el-column 属性 |
 | `utils/componentProps.ts` | 解析 FormItemConfig 为组件类型 + 合并属性 |
+| `utils/schema.ts` | 归一化 columns，生成字段索引 |
+| `utils/fieldChange.ts` | 处理字段变化、联动 patch 和变更记录 |
+| `utils/rowActions.ts` | 处理增删插移等纯行操作 |
+| `utils/validation.ts` | 处理校验字段计算和隐藏字段错误清理 |
 | `configs/defaultComponentConfigs.ts` | 各 type 的默认配置和组件映射表 |
 
 ## 推荐阅读顺序
@@ -59,6 +65,7 @@ props.tableData → el-table 渲染
 
 - `src/views/FormTableView.vue`
 - `src/views/FormTableAdvancedView.vue`
+- `src/views/DynamicSlotTestView.vue`
 - `src/views/DebugView.vue`
 
 ## 规则说明

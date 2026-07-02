@@ -16,13 +16,13 @@
 - [更新记录](./CHANGELOG.md)
 - [基础示例](./src/views/FormTableView.vue)
 - [高级示例](./src/views/FormTableAdvancedView.vue)
-- [调试示例](./src/views/DebugView.vue)
 
 ## 特性
 
 - 配置驱动渲染列、布局和表单项
 - 基于 `el-form` 的统一校验
-- 支持插槽和自定义组件扩展
+- 支持动态显隐、默认值、字段联动和行操作
+- 支持插槽和自定义组件扩展，插槽上下文提供行操作快捷方法
 - 支持通过 `component.bind` 统一配置组件属性
 - 支持统一归档事件 `@event`
 
@@ -40,6 +40,7 @@ pnpm type-check
 - `/form-table`
 - `/form-table-advanced`
 - `/dynamic-slot-test`
+- `/debug`
 
 ## 文档说明
 
