@@ -28,15 +28,16 @@ props.tableData → el-table 渲染
             外层通过 v-model 或 @update:tableData 同步
 ```
 
-`slotComponent` 也遵循同一条更新链路，推荐在插槽里使用组件提供的 `value` / `setValue`，避免直接修改 `row`。
+`slot` 也遵循同一条更新链路，推荐在插槽里使用组件提供的 `value` / `setValue`，避免直接修改 `row`。
 
 ## 配置约定
 
 - 常用字段直接配置
-- 非常见组件属性优先放到 `bind`
-- `bind`、`props`、`colProps`、`options` 支持函数写法，可按当前上下文动态返回
+- 结构能力按职责放到 `layout`、`component`、`display`、`behavior`
+- 非常见组件属性优先放到 `component.bind`
+- `component.bind`、`component.props`、`layout.colProps`、`component.options` 支持函数写法，可按当前上下文动态返回
 - 顶层 `attrs` 用来扩展 `el-form` / `el-table` / `el-table-column`
-- 只有 `visible`、`defaultValue`、`formatter`、`colProps` 这类结构能力额外提供独立配置
+- 只有 `behavior.visible`、`behavior.defaultValue`、`display.formatter`、`layout.colProps` 这类结构能力额外提供独立配置
 
 ## 关键模块
 
@@ -75,8 +76,8 @@ props.tableData → el-table 渲染
 ## 行操作
 
 - `ref` 现在支持 `insertRow`、`copyRow`、`updateRow`、`moveRow`、`getRow`、`validateField`、`validateRow`
-- `slotComponent` 上下文也提供当前行的快捷方法，如 `removeCurrentRow`、`copyCurrentRow`、`insertBefore`、`insertAfter`
-- `slotComponent` 上下文也提供 `isFirstRow`、`isLastRow`、`moveUp`、`moveDown`，更适合直接写操作列
+- `slot` 上下文也提供当前行的快捷方法，如 `removeCurrentRow`、`copyCurrentRow`、`insertBefore`、`insertAfter`
+- `slot` 上下文也提供 `isFirstRow`、`isLastRow`、`moveUp`、`moveDown`，更适合直接写操作列
 
 ## 字段事件
 

@@ -109,7 +109,7 @@ export const componentTypeMap: Record<string, string> = {
   radio: 'el-radio-group',
   checkbox: 'el-checkbox-group',
   text: 'span',
-  slotComponent: 'div',
+  slot: 'div',
   custom: 'div',
   rate: 'el-rate',
   slider: 'el-slider',

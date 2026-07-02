@@ -40,6 +40,10 @@ import { computed, nextTick, provide, ref, useAttrs, useSlots, watch } from 'vue
 import FormTableColumn from './FormTableColumn.vue'
 import { extractFormAttrs, extractTableAttrs } from './utils/attrs'
 import { buildDefaultRow, createRuntimeContext, resolveDynamicValue, resolveVisible } from './utils/dynamic'
+import {
+  getFormItemOnValueChange,
+  resolveFormItemVisible
+} from './utils/fieldConfig'
 import { applyRowPatch, getValueByPath, setValueByPath } from './utils/path'
 import type {
   ColumnConfig,
@@ -198,7 +202,7 @@ const getVisibleRowItemsByContext = (
   }
 
   return rowConfig.children.filter((item) => {
-    return resolveVisible(item.visible, createRuntimeContext(baseContext, {
+    return resolveFormItemVisible(item, createRuntimeContext(baseContext, {
       row,
       index: rowIndex,
       fieldKey: item.key
@@ -365,12 +369,14 @@ const resolveRowChange = (
     const change = pendingChanges.shift()!
     const fieldConfig = getFieldConfigByKey(change.fieldKey)
 
-    if (!fieldConfig?.onValueChange) {
+    const onValueChange = fieldConfig ? getFormItemOnValueChange(fieldConfig) : undefined
+
+    if (!onValueChange) {
       processedCount += 1
       continue
     }
 
-    const linkedPatch = fieldConfig.onValueChange(
+    const linkedPatch = onValueChange(
       createFieldChangeContext(
         rowIndex,
         nextRow,

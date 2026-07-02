@@ -121,7 +121,9 @@ const columns = ref([
           type: 'input',
           label: '姓名',
           placeholder: '请输入姓名',
-          colSpan: 24
+          layout: {
+            span: 24
+          }
         }
       ]
     }]
@@ -135,7 +137,9 @@ const columns = ref([
         type: 'number',
         label: '年龄',
         placeholder: '请输入年龄',
-        colSpan: 24
+        layout: {
+          span: 24
+        }
       }]
     }]
   },
@@ -145,10 +149,14 @@ const columns = ref([
     children: [{
       children: [{
         key: 'school',
-        type: 'slotComponent',
-        slotName: 'custom-school',
+        type: 'slot',
         label: '学校',
-        colSpan: 24
+        layout: {
+          span: 24
+        },
+        component: {
+          slotName: 'custom-school'
+        }
       }]
     }]
   },
@@ -158,10 +166,14 @@ const columns = ref([
     children: [{
       children: [{
         key: 'status',
-        type: 'slotComponent',
-        slotName: 'status-display',
+        type: 'slot',
         label: '状态',
-        colSpan: 24
+        layout: {
+          span: 24
+        },
+        component: {
+          slotName: 'status-display'
+        }
       }]
     }]
   },
@@ -171,10 +183,14 @@ const columns = ref([
     children: [{
       children: [{
         key: 'rating',
-        type: 'slotComponent',
-        slotName: 'rating-input',
+        type: 'slot',
         label: '评分',
-        colSpan: 24
+        layout: {
+          span: 24
+        },
+        component: {
+          slotName: 'rating-input'
+        }
       }]
     }]
   },
@@ -184,10 +200,14 @@ const columns = ref([
     children: [{
       children: [{
         key: 'actions',
-        type: 'slotComponent',
-        slotName: 'row-actions',
+        type: 'slot',
         label: '操作',
-        colSpan: 24
+        layout: {
+          span: 24
+        },
+        component: {
+          slotName: 'row-actions'
+        }
       }]
     }]
   }

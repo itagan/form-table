@@ -10,7 +10,7 @@
         <li><strong>性别选择插槽 (#table-gender)</strong>: 使用 el-radio-group 组件进行性别选择</li>
         <li><strong>操作按钮插槽 (#table-actions)</strong>: 使用自定义按钮进行行操作</li>
       </ul>
-      <p>在 columns 配置中，使用 <code>type: 'slotComponent'</code> 和 <code>slotName: 'table-xxx'</code> 来指定插槽。</p>
+      <p>在 columns 配置中，使用 <code>type: 'slot'</code> 和 <code>slotName: 'table-xxx'</code> 来指定插槽。</p>
     </div>
     
     <div class="demo-section">
@@ -188,29 +188,39 @@ const columns = ref<ColumnConfig[]>([
         {
           key: 'name',
           type: 'input',
-          colSpan: 12,
           placeholder: '请输入姓名',
-          listeners: {
-            blur: (context) => {
-              const currentValue = String(context.value || '').trim()
-              if (currentValue !== context.value) {
-                context.setValue(currentValue)
-              }
-            }
+          layout: {
+            span: 12
           },
-          bind: {
-            maxlength: 20,
-            clearable: true
+          component: {
+            listeners: {
+              blur: (context) => {
+                const currentValue = String(context.value || '').trim()
+                if (currentValue !== context.value) {
+                  context.setValue(currentValue)
+                }
+              }
+            },
+            bind: {
+              maxlength: 20,
+              clearable: true
+            }
           }
         },
         {
           key: 'age',
           type: 'number',
-          colSpan: 12,
           placeholder: '请输入年龄',
-          defaultValue: 18,
-          bind: {
-            controlsPosition: 'right'
+          layout: {
+            span: 12
+          },
+          component: {
+            bind: {
+              controlsPosition: 'right'
+            }
+          },
+          behavior: {
+            defaultValue: 18
           }
         }
       ]
@@ -224,11 +234,15 @@ const columns = ref<ColumnConfig[]>([
         {
           key: 'phone',
           type: 'custom',
-          customComponent: 'PhoneInput',
-          colSpan: 24,
           placeholder: '请输入手机号',
-          bind: {
-            clearable: true
+          layout: {
+            span: 24
+          },
+          component: {
+            customComponent: 'PhoneInput',
+            bind: {
+              clearable: true
+            }
           }
         }
       ]
@@ -242,95 +256,121 @@ const columns = ref<ColumnConfig[]>([
         {
           key: 'department',
           type: 'input',
-          colSpan: 10,
           placeholder: '请输入部门',
-          onValueChange: ({ value, getValue }) => {
-            if (value !== '技术部' && getValue('level') === 'senior') {
-              return {
-                level: 'mid'
+          layout: {
+            span: 10
+          },
+          component: {
+            bind: ({ row }) => ({
+              disabled: row.status === false,
+              clearable: row.status !== false,
+              placeholder: row.status === false ? '当前已停用，部门不可编辑' : '请输入部门'
+            })
+          },
+          behavior: {
+            onValueChange: ({ value, getValue }) => {
+              if (value !== '技术部' && getValue('level') === 'senior') {
+                return {
+                  level: 'mid'
+                }
               }
             }
-          },
-          bind: ({ row }) => ({
-            disabled: row.status === false,
-            clearable: row.status !== false,
-            placeholder: row.status === false ? '当前已停用，部门不可编辑' : '请输入部门'
-          })
+          }
         },
         {
           key: 'profile.city',
           type: 'input',
-          colSpan: 14,
           placeholder: '请输入所在城市',
-          defaultValue: '上海'
+          layout: {
+            span: 14
+          },
+          behavior: {
+            defaultValue: '上海'
+          }
         },
         {
           key: 'level',
           type: 'select',
-          colSpan: 14,
           placeholder: '请选择职级',
-          defaultValue: 'junior',
-          options: ({ row }) => {
-            const commonOptions = [
-              { label: '初级', value: 'junior' },
-              { label: '中级', value: 'mid' }
-            ]
-
-            if (row.department === '技术部') {
-              return [...commonOptions, { label: '高级', value: 'senior' }]
-            }
-
-            return commonOptions
+          layout: {
+            span: 14
           },
-          onValueChange: ({ value, row, getValue }) => {
-            if (value === 'junior') {
-              return {
-                remark: ''
+          component: {
+            options: ({ row }) => {
+              const commonOptions = [
+                { label: '初级', value: 'junior' },
+                { label: '中级', value: 'mid' }
+              ]
+
+              if (row.department === '技术部') {
+                return [...commonOptions, { label: '高级', value: 'senior' }]
+              }
+
+              return commonOptions
+            },
+            bind: ({ row }) => ({
+              filterable: true,
+              placeholder: row.department === '技术部' ? '请选择技术职级' : '请选择通用职级'
+            })
+          },
+          behavior: {
+            defaultValue: 'junior',
+            onValueChange: ({ value, row, getValue }) => {
+              if (value === 'junior') {
+                return {
+                  remark: ''
+                }
+              }
+
+              if (!getValue('remark')) {
+                return {
+                  remark: `${row.name || '该成员'}当前为${value}级，需要补充说明。`
+                }
               }
             }
-
-            if (!getValue('remark')) {
-              return {
-                remark: `${row.name || '该成员'}当前为${value}级，需要补充说明。`
-              }
-            }
-          },
-          bind: ({ row }) => ({
-            filterable: true,
-            placeholder: row.department === '技术部' ? '请选择技术职级' : '请选择通用职级'
-          })
+          }
         },
         {
           key: 'remark',
           type: 'textarea',
-          visible: ({ row }) => row.level !== 'junior',
-          colSpan: 24,
           placeholder: '请输入备注',
-          bind: ({ row }) => ({
-            rows: row.level === 'senior' ? 3 : 2,
-            maxlength: 60,
-            showWordLimit: true,
-            placeholder: row.status === false ? '当前已停用，备注可不填写' : '请输入备注'
-          })
+          layout: {
+            span: 24
+          },
+          component: {
+            bind: ({ row }) => ({
+              rows: row.level === 'senior' ? 3 : 2,
+              maxlength: 60,
+              showWordLimit: true,
+              placeholder: row.status === false ? '当前已停用，备注可不填写' : '请输入备注'
+            })
+          },
+          behavior: {
+            visible: ({ row }) => row.level !== 'junior'
+          }
         },
         {
           key: 'status',
           type: 'switch',
-          defaultValue: true,
-          onValueChange: ({ value, getValue }) => {
-            if (value === false) {
-              return {
-                workStatus: 'pending'
-              }
-            }
-
-            if (getValue('workStatus') === 'pending') {
-              return {
-                workStatus: 'processing'
-              }
-            }
+          layout: {
+            span: 24
           },
-          colSpan: 24
+          behavior: {
+            defaultValue: true,
+            onValueChange: ({ value, getValue }) => {
+              if (value === false) {
+                return {
+                  workStatus: 'pending'
+                }
+              }
+
+              if (getValue('workStatus') === 'pending') {
+                return {
+                  workStatus: 'processing'
+                }
+              }
+            }
+          }
         }
       ]
     }]
@@ -343,15 +383,21 @@ const columns = ref<ColumnConfig[]>([
         {
           key: 'workStatus',
           type: 'custom',
-          customComponent: 'StatusTag',
-          defaultValue: 'processing',
-          colSpan: 24,
-          options: [
-            { value: 'processing', label: '处理中', type: 'info' },
-            { value: 'pending', label: '待处理', type: 'warning' },
-            { value: 'completed', label: '已完成', type: 'success' },
-            { value: 'failed', label: '失败', type: 'danger' }
-          ]
+          layout: {
+            span: 24
+          },
+          component: {
+            customComponent: 'StatusTag',
+            options: [
+              { value: 'processing', label: '处理中', type: 'info' },
+              { value: 'pending', label: '待处理', type: 'warning' },
+              { value: 'completed', label: '已完成', type: 'success' },
+              { value: 'failed', label: '失败', type: 'danger' }
+            ]
+          },
+          behavior: {
+            defaultValue: 'processing'
+          }
         }
       ]
     }]
@@ -364,8 +410,12 @@ const columns = ref<ColumnConfig[]>([
         {
           key: 'testValue',
           type: 'custom',
-          customComponent: 'TestComponent',
-          colSpan: 24
+          layout: {
+            span: 24
+          },
+          component: {
+            customComponent: 'TestComponent'
+          }
         }
       ]
     }]
@@ -378,8 +428,12 @@ const columns = ref<ColumnConfig[]>([
         {
           key: 'simpleTest',
           type: 'custom',
-          customComponent: 'SimpleTest',
-          colSpan: 24
+          layout: {
+            span: 24
+          },
+          component: {
+            customComponent: 'SimpleTest'
+          }
         }
       ]
     }]
@@ -391,9 +445,13 @@ const columns = ref<ColumnConfig[]>([
       children: [
         {
           key: 'school',
-          type: 'slotComponent',
-          slotName: 'table-school',
-          colSpan: 24
+          type: 'slot',
+          layout: {
+            span: 24
+          },
+          component: {
+            slotName: 'table-school'
+          }
         }
       ]
     }]
@@ -405,10 +463,16 @@ const columns = ref<ColumnConfig[]>([
       children: [
         {
           key: 'gender',
-          type: 'slotComponent',
-          slotName: 'table-gender',
-          defaultValue: '男',
-          colSpan: 24
+          type: 'slot',
+          layout: {
+            span: 24
+          },
+          component: {
+            slotName: 'table-gender'
+          },
+          behavior: {
+            defaultValue: '男'
+          }
         }
       ]
     }]
@@ -420,9 +484,13 @@ const columns = ref<ColumnConfig[]>([
       children: [
         {
           key: 'actions',
-          type: 'slotComponent',
-          slotName: 'table-actions',
-          colSpan: 24
+          type: 'slot',
+          layout: {
+            span: 24
+          },
+          component: {
+            slotName: 'table-actions'
+          }
         }
       ]
     }]

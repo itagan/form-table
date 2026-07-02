@@ -7,7 +7,7 @@
     <el-col
       v-for="(itemEntry, colIndex) in visibleItems"
       :key="itemEntry.config.key || colIndex"
-      :span="itemEntry.config.colSpan || 24"
+      :span="itemEntry.span"
       v-bind="itemEntry.colProps"
     >
       <!-- 统一的字段渲染 -->
@@ -16,8 +16,6 @@
         :rules="itemEntry.config.rules"
         :label="itemEntry.config.label"
         :label-width="itemEntry.config.labelWidth"
-        :is-use-tooltip="itemEntry.config.isUseTooltip"
-        :tooltip-props="itemEntry.config.tooltipProps"
         :row="row"
         :index="rowIndex"
         :config="itemEntry.config"
@@ -40,6 +38,11 @@ import FormTableItem from './FormTableItem.vue'
 import type { FormItemConfig, FormTableBaseContext, RowConfig, TableRow } from './types'
 import { FORM_TABLE_CONTEXT_KEY } from './types'
 import { createRuntimeContext, resolveDynamicValue, resolveVisible } from './utils/dynamic'
+import {
+  getFormItemColSpan,
+  resolveFormItemColProps,
+  resolveFormItemVisible
+} from './utils/fieldConfig'
 
 const props = defineProps<{
   row: TableRow
@@ -71,21 +74,30 @@ const rowProps = computed(() => ({
   ...resolvedRowProps.value
 }))
 
-const visibleItems = computed<Array<{ config: FormItemConfig; colProps?: Record<string, any> }>>(() => {
-  return props.rowConfig.children.reduce<Array<{ config: FormItemConfig; colProps?: Record<string, any> }>>((items, item) => {
+const visibleItems = computed<Array<{
+  config: FormItemConfig
+  span: number | string
+  colProps?: Record<string, any>
+}>>(() => {
+  return props.rowConfig.children.reduce<Array<{
+    config: FormItemConfig
+    span: number | string
+    colProps?: Record<string, any>
+  }>>((items, item) => {
     const itemContext = createRuntimeContext(formTableContext.value, {
       row: props.row,
       index: props.rowIndex,
       fieldKey: item.key
     })
 
-    if (!resolveVisible(item.visible, itemContext)) {
+    if (!resolveFormItemVisible(item, itemContext)) {
       return items
     }
 
     items.push({
       config: item,
-      colProps: resolveDynamicValue(item.colProps, itemContext) || undefined
+      span: getFormItemColSpan(item),
+      colProps: resolveFormItemColProps(item, itemContext)
     })
 
     return items

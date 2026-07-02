@@ -103,7 +103,9 @@ const columns = ref<ColumnConfig[]>([
         {
           key: 'name',
           type: 'input',
-          colSpan: 24,
+          layout: {
+            span: 24
+          },
           placeholder: '请输入姓名'
         }
       ]
@@ -117,8 +119,12 @@ const columns = ref<ColumnConfig[]>([
         {
           key: 'phone',
           type: 'custom',
-          customComponent: 'PhoneInput',
-          colSpan: 24
+          layout: {
+            span: 24
+          },
+          component: {
+            customComponent: 'PhoneInput'
+          }
         }
       ]
     }]
@@ -131,9 +137,13 @@ const columns = ref<ColumnConfig[]>([
         {
           key: 'status',
           type: 'custom',
-          customComponent: 'StatusTag',
-          colSpan: 24,
-          options: statusOptions
+          layout: {
+            span: 24
+          },
+          component: {
+            customComponent: 'StatusTag',
+            options: statusOptions
+          }
         }
       ]
     }]
@@ -146,8 +156,12 @@ const columns = ref<ColumnConfig[]>([
         {
           key: 'test',
           type: 'custom',
-          customComponent: 'TestComponent',
-          colSpan: 24
+          layout: {
+            span: 24
+          },
+          component: {
+            customComponent: 'TestComponent'
+          }
         }
       ]
     }]

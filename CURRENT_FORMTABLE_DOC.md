@@ -21,8 +21,9 @@
 
 - 常用字段直接配置，比如 `label`、`placeholder`、`rules`
 - 非常见组件属性优先通过 `bind` 透传
+- 结构能力按职责分组到 `layout`、`component`、`display`、`behavior`
 - 顶层 `attrs` 继续负责 `el-form` / `el-table` / `el-table-column` 的通用扩展
-- 只有 `visible`、`defaultValue`、`formatter`、`colProps` 这类透传本身解决不了的结构能力，才额外提供配置项
+- 只有 `visible`、`defaultValue`、`formatter`、`layout.colProps` 这类透传本身解决不了的结构能力，才额外提供配置项
 
 ## 基础用法
 
@@ -70,19 +71,21 @@ const columns = ref<ColumnConfig[]>([
         {
           key: 'name',
           type: 'input',
-          colSpan: 12,
+          layout: { span: 12 },
           placeholder: '请输入姓名'
         },
         {
           key: 'level',
           type: 'select',
-          colSpan: 12,
           placeholder: '请选择职级',
-          options: [
-            { label: '初级', value: 'junior' },
-            { label: '中级', value: 'mid' },
-            { label: '高级', value: 'senior' }
-          ]
+          layout: { span: 12 },
+          component: {
+            options: [
+              { label: '初级', value: 'junior' },
+              { label: '中级', value: 'mid' },
+              { label: '高级', value: 'senior' }
+            ]
+          }
         }
       ]
     }]
@@ -152,7 +155,7 @@ const handleFormTableEvent = (payload: { type: string; args: any[] }) => {
 
 ## Slot 上下文
 
-当 `type: 'slotComponent'` 时，插槽会收到这些参数：
+当 `type: 'slot'` 时，插槽会收到这些参数：
 
 - `row`
 - `index`
@@ -239,25 +242,50 @@ interface RowConfig {
 interface FormItemConfig {
   key: string
   type: FormItemType
-  visible?: boolean | ((context) => boolean)
-  colSpan?: number | string
-  colProps?: Record<string, any> | ((context) => Record<string, any>)
-  bind?: Record<string, any> | ((context) => Record<string, any>)
-  listeners?: Record<string, (context, ...args) => void>
-  onValueChange?: (context) => Partial<TableRow> | void
+  layout?: {
+    span?: number | string
+    colProps?: Record<string, any> | ((context) => Record<string, any>)
+  }
+  component?: {
+    customComponent?: string
+    slotName?: string
+    bind?: Record<string, any> | ((context) => Record<string, any>)
+    props?: Record<string, any> | ((context) => Record<string, any>)
+    listeners?: Record<string, (context, ...args) => void>
+    options?: Array<{ label: string; value: any }> | ((context) => Array<{ label: string; value: any }>)
+    optionProps?: {
+      label?: string
+      value?: string
+      disabled?: string
+      key?: string
+    } | ((context) => {
+      label?: string
+      value?: string
+      disabled?: string
+      key?: string
+    })
+  }
+  display?: {
+    tooltip?: boolean | {
+      enabled?: boolean
+      props?: Record<string, any> | ((context) => Record<string, any>)
+    }
+    formatter?: (value, context) => any
+    emptyText?: string
+  }
+  behavior?: {
+    visible?: boolean | ((context) => boolean)
+    defaultValue?: any | ((context) => any)
+    onValueChange?: (context) => Partial<TableRow> | void
+  }
   rules?: any[]
   label?: string
   labelWidth?: string
-  isUseTooltip?: boolean
-  tooltipProps?: Record<string, any> | ((context) => Record<string, any>)
   placeholder?: string
   clearable?: boolean
   disabled?: boolean
   readonly?: boolean
   size?: 'large' | 'default' | 'small'
-  customComponent?: string
-  slotName?: string
-  options?: Array<{ label: string; value: any }> | ((context) => Array<{ label: string; value: any }>)
   remote?: boolean
   remoteMethod?: Function
   min?: number
@@ -265,25 +293,39 @@ interface FormItemConfig {
   step?: number
   format?: string
   valueFormat?: string
-  props?: Record<string, any> | ((context) => Record<string, any>)
   data?: any[]
   fetchSuggestions?: Function
   action?: string
   rows?: number
-  defaultValue?: any | ((context) => any)
-  formatter?: (value, context) => any
-  emptyText?: string
-  optionProps?: {
-    label?: string
-    value?: string
-    disabled?: string
-    key?: string
-  } | ((context) => {
-    label?: string
-    value?: string
-    disabled?: string
-    key?: string
-  })
+}
+```
+
+推荐写法：
+
+```ts
+{
+  key: 'name',
+  type: 'input',
+  label: '姓名',
+  layout: {
+    span: 12
+  },
+  component: {
+    bind: ({ row }) => ({
+      disabled: row.status === false,
+      placeholder: row.status === false ? '当前已停用' : '请输入姓名'
+    }),
+    listeners: {
+      blur: ({ value, setValue }) => setValue(String(value || '').trim())
+    }
+  },
+  display: {
+    tooltip: true,
+    emptyText: '-'
+  },
+  behavior: {
+    defaultValue: ''
+  }
 }
 ```
 
@@ -293,22 +335,24 @@ interface FormItemConfig {
 - `profile.city`
 - `contact.phone`
 
-`listeners` 用来监听具体字段组件抛出的事件，适合处理 `blur`、`focus`、`change` 这类组件级交互。
+`component.listeners` 用来监听具体字段组件抛出的事件，适合处理 `blur`、`focus`、`change` 这类组件级交互。
 
-`bind`、`props`、`colProps`、`tooltipProps`、`options`、`optionProps` 也支持函数写法，会按当前 `row / index / fieldKey / formData / tableData` 动态解析。
+`component.bind`、`component.props`、`layout.colProps`、`display.tooltip.props`、`component.options`、`component.optionProps` 也支持函数写法，会按当前 `row / index / fieldKey / formData / tableData` 动态解析。
 
 ```ts
 {
   key: 'department',
   type: 'input',
-  bind: ({ row }) => ({
-    disabled: row.status === false,
-    placeholder: row.status === false ? '当前已停用，部门不可编辑' : '请输入部门'
-  })
+  component: {
+    bind: ({ row }) => ({
+      disabled: row.status === false,
+      placeholder: row.status === false ? '当前已停用，部门不可编辑' : '请输入部门'
+    })
+  }
 }
 ```
 
-`onValueChange` 用来处理字段联动。它会在字段值真正变更后执行，如果返回一个 patch，组件会继续把 patch 合并回当前行，并沿用同一条更新链路。
+`behavior.onValueChange` 用来处理字段联动。它会在字段值真正变更后执行，如果返回一个 patch，组件会继续把 patch 合并回当前行，并沿用同一条更新链路。
 
 通过 `addRow`、`insertRow`、`copyRow` 新增行时，默认值和传入的种子值也会触发这套联动逻辑。
 
@@ -316,9 +360,11 @@ interface FormItemConfig {
 {
   key: 'level',
   type: 'select',
-  onValueChange: ({ value }) => {
-    if (value === 'junior') {
-      return { remark: '' }
+  behavior: {
+    onValueChange: ({ value }) => {
+      if (value === 'junior') {
+        return { remark: '' }
+      }
     }
   }
 }
@@ -345,7 +391,7 @@ interface FormItemConfig {
 - `radio`
 - `checkbox`
 - `text`
-- `slotComponent`
+- `slot`
 - `custom`
 - `rate`
 - `slider`
@@ -390,26 +436,32 @@ interface FormItemConfig {
 {
   key: 'remark',
   type: 'textarea',
-  bind: {
-    rows: 3,
-    maxlength: 100,
-    showWordLimit: true
+  component: {
+    bind: {
+      rows: 3,
+      maxlength: 100,
+      showWordLimit: true
+    }
   }
 }
 ```
 
 ## 插槽扩展
 
-如果某个单元格需要完全自定义，可以用 `slotComponent`。
+如果某个单元格需要完全自定义，可以用 `slot`。
 
 配置：
 
 ```ts
 {
   key: 'school',
-  type: 'slotComponent',
-  slotName: 'table-school',
-  colSpan: 24
+  type: 'slot',
+  layout: {
+    span: 24
+  },
+  component: {
+    slotName: 'table-school'
+  }
 }
 ```
 
@@ -447,10 +499,12 @@ const customComponents = [
 {
   key: 'phone',
   type: 'custom',
-  customComponent: 'PhoneInput',
   placeholder: '请输入手机号',
-  bind: {
-    clearable: true
+  component: {
+    customComponent: 'PhoneInput',
+    bind: {
+      clearable: true
+    }
   }
 }
 ```

@@ -71,13 +71,21 @@ const columns = ref<ColumnConfig[]>([
         {
           key: 'name',
           type: 'input',
-          colSpan: 12,
-          placeholder: '请输入姓名'
+          layout: {
+            span: 12
+          },
+          component: {
+            bind: {
+              placeholder: '请输入姓名'
+            }
+          }
         },
         {
           key: 'age',
           type: 'number',
-          colSpan: 12,
+          layout: {
+            span: 12
+          },
           placeholder: '请输入年龄'
         }
       ]
@@ -90,7 +98,9 @@ const columns = ref<ColumnConfig[]>([
       children: [{
         key: 'sex',
         type: 'input',
-        isUseTooltip: true,
+        display: {
+          tooltip: true
+        },
         placeholder: '请输入性别'
       }]
     }]
@@ -101,9 +111,13 @@ const columns = ref<ColumnConfig[]>([
     children: [{
       children: [{
         key: 'school',
-        type: 'slotComponent',
-        isUseTooltip: false,
-        slotName: 'table-school'
+        type: 'slot',
+        display: {
+          tooltip: false
+        },
+        component: {
+          slotName: 'table-school'
+        }
       }]
     }]
   }

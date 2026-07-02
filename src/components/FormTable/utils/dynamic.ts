@@ -73,7 +73,7 @@ export function buildDefaultRow(
           fieldKey: item.key
         })
 
-        if (!resolveVisible(item.visible, itemContext)) {
+        if (!resolveVisible(item.behavior?.visible, itemContext)) {
           return
         }
 
@@ -81,7 +81,7 @@ export function buildDefaultRow(
           return
         }
 
-        const defaultValue = resolveDynamicValue(item.defaultValue, itemContext)
+        const defaultValue = resolveDynamicValue(item.behavior?.defaultValue, itemContext)
         if (defaultValue !== undefined) {
           Object.assign(draftRow, setValueByPath(draftRow, item.key, defaultValue))
         }

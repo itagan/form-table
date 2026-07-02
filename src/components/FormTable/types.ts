@@ -38,6 +38,7 @@ export interface FormTableFieldChangeContext extends FormTableRuntimeContext {
 
 export type DynamicValue<T> = T | ((context: FormTableRuntimeContext) => T)
 export type FormTableFieldListener = (context: FormTableFieldContext, ...args: any[]) => void
+export type FormTableFieldChangeHandler = (context: FormTableFieldChangeContext) => Partial<TableRow> | void
 
 export interface FormItemOption {
   label?: any
@@ -53,13 +54,45 @@ export interface OptionPropsConfig {
   key?: string
 }
 
+export interface FormItemLayoutConfig {
+  span?: number | string
+  colProps?: DynamicValue<Record<string, any>>
+}
+
+export interface FormItemComponentConfig {
+  customComponent?: string
+  slotName?: string
+  bind?: DynamicValue<Record<string, any>>
+  props?: DynamicValue<Record<string, any>>
+  listeners?: Record<string, FormTableFieldListener>
+  options?: DynamicValue<FormItemOption[]>
+  optionProps?: DynamicValue<OptionPropsConfig>
+}
+
+export interface FormItemTooltipConfig {
+  enabled?: boolean
+  props?: DynamicValue<Record<string, any>>
+}
+
+export interface FormItemDisplayConfig {
+  tooltip?: boolean | FormItemTooltipConfig
+  formatter?: (value: any, context: FormTableRuntimeContext) => any
+  emptyText?: string
+}
+
+export interface FormItemBehaviorConfig {
+  visible?: DynamicValue<boolean>
+  defaultValue?: DynamicValue<any>
+  onValueChange?: FormTableFieldChangeHandler
+}
+
 /**
  * 支持的表单项类型
  * - 基础输入: input, textarea, number
  * - 选择类: select, radio, checkbox, switch, cascader, tree-select
  * - 日期时间: date, datetime, time
  * - 特殊: rate, slider, color, upload, autocomplete, tag-input
- * - 扩展: text(纯文本展示), slotComponent(插槽渲染), custom(自定义组件)
+ * - 扩展: text(纯文本展示), slot(插槽渲染), custom(自定义组件)
  */
 export type FormItemType =
   | 'input'
@@ -73,7 +106,7 @@ export type FormItemType =
   | 'radio'
   | 'checkbox'
   | 'text'
-  | 'slotComponent'
+  | 'slot'
   | 'custom'
   | 'rate'
   | 'slider'
@@ -85,31 +118,23 @@ export type FormItemType =
   | 'tag-input'
 
 /**
- * 表单项配置 - 常用字段直接声明，非常见配置通过 bind 透传给具体 Element 组件
+ * 表单项配置 - 结构能力按职责分组，组件属性统一放到 component.bind/component.props
  */
 export interface FormItemConfig {
   key: string
   type: FormItemType
-  visible?: DynamicValue<boolean>
-  colSpan?: number | string
-  colProps?: DynamicValue<Record<string, any>>
-  bind?: DynamicValue<Record<string, any>>
-  listeners?: Record<string, FormTableFieldListener>
-  onValueChange?: (context: FormTableFieldChangeContext) => Partial<TableRow> | void
+  layout?: FormItemLayoutConfig
+  component?: FormItemComponentConfig
+  display?: FormItemDisplayConfig
+  behavior?: FormItemBehaviorConfig
   rules?: any[]
   label?: string
   labelWidth?: string
-  isUseTooltip?: boolean
-  tooltipProps?: DynamicValue<Record<string, any>>
   placeholder?: string
   clearable?: boolean
   disabled?: boolean
   readonly?: boolean
   size?: 'large' | 'default' | 'small'
-  customComponent?: string
-  slotName?: string
-  options?: DynamicValue<FormItemOption[]>
-  optionProps?: DynamicValue<OptionPropsConfig>
   remote?: boolean
   remoteMethod?: Function
   min?: number
@@ -117,14 +142,10 @@ export interface FormItemConfig {
   step?: number
   format?: string
   valueFormat?: string
-  props?: DynamicValue<Record<string, any>>
   data?: any[]
   fetchSuggestions?: Function
   action?: string
   rows?: number
-  defaultValue?: DynamicValue<any>
-  formatter?: (value: any, context: FormTableRuntimeContext) => any
-  emptyText?: string
 }
 
 /**

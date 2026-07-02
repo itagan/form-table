@@ -8,16 +8,16 @@
   >
     <!-- 插槽组件: 从 FormTable 顶层注入的 $slots 中取具名插槽 -->
     <SlotRenderer
-      v-if="config.type === 'slotComponent' && config.slotName && slotFn"
+      v-if="config.type === 'slot' && slotName && slotFn"
       :slot-fn="slotFn"
       :slot-props="slotProps"
     />
 
-    <span v-else-if="config.type === 'slotComponent'" class="form-table-slot-fallback" />
+    <span v-else-if="config.type === 'slot'" class="form-table-slot-fallback" />
     
     <!-- 带Tooltip的组件 -->
     <el-tooltip 
-      v-else-if="isUseTooltip"
+      v-else-if="isTooltipEnabled"
       effect="dark" 
       :disabled="!hasContent" 
       :content="tooltipContent" 
@@ -37,14 +37,13 @@
  * FormTableItem - 表单项渲染
  *
  * 负责渲染单个表单字段，包含三种模式:
- * 1. slotComponent: 通过 slotName 具名插槽自定义渲染
- * 2. 带 Tooltip: isUseTooltip=true 时，内容超出用 el-tooltip 展示
+ * 1. slot: 通过 slotName 具名插槽自定义渲染
+ * 2. 带 Tooltip: display.tooltip=true 时，内容超出用 el-tooltip 展示
  * 3. 普通组件: 由 ComponentWrapper 根据 type 动态渲染
  */
 import { computed, defineComponent, h, inject, type ComputedRef, useAttrs } from 'vue'
 import ComponentWrapper from './ComponentWrapper.vue'
 import type {
-  DynamicValue,
   FormTableActions,
   FormItemConfig,
   FormTableBaseContext,
@@ -59,8 +58,21 @@ import {
   FORM_TABLE_SLOTS_KEY,
   type DispatchFn
 } from './types'
-import { createRuntimeContext, resolveDynamicValue } from './utils/dynamic'
+import { createRuntimeContext } from './utils/dynamic'
 import { resolveDisplayValue } from './utils/display'
+import {
+  getFormItemCustomComponent,
+  getFormItemEmptyText,
+  getFormItemFormatter,
+  getFormItemListeners,
+  getFormItemSlotName,
+  isFormItemTooltipEnabled,
+  resolveFormItemBind,
+  resolveFormItemComponentProps,
+  resolveFormItemOptions,
+  resolveFormItemOptionProps,
+  resolveFormItemTooltipProps
+} from './utils/fieldConfig'
 import { getValueByPath } from './utils/path'
 import { resolveRulesForProp } from './utils/rules'
 
@@ -80,8 +92,6 @@ interface Props {
   rules?: any[]
   label?: string
   labelWidth?: string
-  isUseTooltip?: boolean
-  tooltipProps?: DynamicValue<Record<string, any>>
   row: Record<string, any>
   index: number
   config: FormItemConfig
@@ -89,9 +99,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   label: '',
-  labelWidth: 'auto',
-  isUseTooltip: false,
-  tooltipProps: () => ({})
+  labelWidth: 'auto'
 })
 
 const attrs = useAttrs()
@@ -118,8 +126,9 @@ const formRules = inject<ComputedRef<Record<string, ValidationRule[]>>>(FORM_TAB
 const parentSlots = inject(FORM_TABLE_SLOTS_KEY, {} as Record<string, any>)
 
 // 从顶层 FormTable 注入的 slots 中取出对应具名插槽函数
+const slotName = computed(() => getFormItemSlotName(props.config))
 const slotFn = computed(() => {
-  return parentSlots[props.config.slotName!] || null
+  return slotName.value ? parentSlots[slotName.value] || null : null
 })
 
 const setValue = (value: any) => {
@@ -151,23 +160,23 @@ const runtimeContext = computed(() => createRuntimeContext(formTableContext.valu
 }))
 
 const resolvedTooltipProps = computed<Record<string, any>>(() => {
-  return resolveDynamicValue(props.tooltipProps, runtimeContext.value) || {}
+  return resolveFormItemTooltipProps(props.config, runtimeContext.value)
 })
 
 const resolvedBind = computed<Record<string, any>>(() => {
-  return resolveDynamicValue(props.config.bind, runtimeContext.value) || {}
+  return resolveFormItemBind(props.config, runtimeContext.value)
 })
 
 const resolvedComponentProps = computed<Record<string, any> | undefined>(() => {
-  return resolveDynamicValue(props.config.props, runtimeContext.value)
+  return resolveFormItemComponentProps(props.config, runtimeContext.value)
 })
 
 const resolvedOptions = computed(() => {
-  return resolveDynamicValue(props.config.options, runtimeContext.value)
+  return resolveFormItemOptions(props.config, runtimeContext.value)
 })
 
 const resolvedOptionProps = computed(() => {
-  return resolveDynamicValue(props.config.optionProps, runtimeContext.value)
+  return resolveFormItemOptionProps(props.config, runtimeContext.value)
 })
 
 const slotProps = computed<FormTableSlotContext>(() => ({
@@ -208,20 +217,13 @@ const wrapperProps = computed(() => {
   const {
     key,
     type,
-    visible,
-    customComponent,
-    colProps,
-    bind,
-    props: componentProps,
-    options,
-    optionProps,
+    component,
     rules,
     label,
     labelWidth,
-    isUseTooltip,
-    tooltipProps,
-    colSpan,
-    defaultValue,
+    layout,
+    display,
+    behavior,
     ...componentConfig
   } = props.config
 
@@ -230,14 +232,19 @@ const wrapperProps = computed(() => {
     fieldKey: key,
     row: props.row,
     rowIndex: props.index,
-    customComponent,
+    ...componentConfig,
+    customComponent: getFormItemCustomComponent(props.config),
     bind: resolvedBind.value,
     props: resolvedComponentProps.value,
     options: resolvedOptions.value,
     optionProps: resolvedOptionProps.value,
-    ...componentConfig
+    listeners: getFormItemListeners(props.config),
+    formatter: getFormItemFormatter(props.config),
+    emptyText: getFormItemEmptyText(props.config)
   }
 })
+
+const isTooltipEnabled = computed(() => isFormItemTooltipEnabled(props.config))
 
 const hasContent = computed(() => {
   const value = getValueByPath(props.row, props.config.key)
@@ -249,8 +256,8 @@ const tooltipContent = computed(() => {
     getValueByPath(props.row, props.config.key),
     resolvedOptions.value,
     resolvedOptionProps.value,
-    props.config.formatter,
-    props.config.emptyText,
+    getFormItemFormatter(props.config),
+    getFormItemEmptyText(props.config),
     runtimeContext.value
   )
 
