@@ -130,6 +130,12 @@ const slotFn = computed(() => {
   return slotName.value ? parentSlots[slotName.value] || null : null
 })
 
+/**
+ * 更新当前字段值。
+ *
+ * 插槽和内置组件都通过 dispatch 进入 FormTable 主组件，确保字段联动、
+ * field-change 事件和 update:tableData 的行为一致。
+ */
 const setValue = (value: any) => {
   if (getValueByPath(props.row, props.config.key) === value) {
     return
@@ -143,6 +149,11 @@ const setValue = (value: any) => {
   props.row[props.config.key] = value
 }
 
+/**
+ * 批量更新当前行。
+ *
+ * slot 自定义内容可以通过它提交多个字段的 patch，而不需要直接修改 row。
+ */
 const updateRow = (patch: Record<string, any>) => {
   if (dispatch) {
     dispatch('update:row-data', props.index, patch)
@@ -174,6 +185,11 @@ const resolvedOptionProps = computed(() => {
   return resolveFormItemOptionProps(props.config, runtimeContext.value)
 })
 
+/**
+ * 传给 slot 的上下文。
+ *
+ * 除基础行信息外，也暴露行操作和校验快捷方法，让操作列可以保持声明式配置。
+ */
 const slotProps = computed<FormTableSlotContext>(() => ({
   row: props.row,
   index: props.index,
@@ -200,6 +216,11 @@ const slotProps = computed<FormTableSlotContext>(() => ({
   clearCurrentRowValidate: () => formTableActions.clearRowValidate(props.index)
 }))
 
+/**
+ * 合并全局 rules 和字段自身 rules。
+ *
+ * 全局 rules 支持通配路径，字段 rules 适合写局部、一次性的补充规则。
+ */
 const effectiveRules = computed(() => {
   const inheritedRules = resolveRulesForProp(formRules.value, props.propPath)
   const localRules = props.rules || []
@@ -208,6 +229,12 @@ const effectiveRules = computed(() => {
   return mergedRules.length > 0 ? mergedRules : undefined
 })
 
+/**
+ * 传给 ComponentWrapper 的渲染参数。
+ *
+ * 这里只传组件渲染需要的字段，避免把 layout/display/behavior 等结构配置
+ * 继续下传到底层 Element UI 组件。
+ */
 const wrapperProps = computed(() => {
   const {
     key,
@@ -238,11 +265,17 @@ const wrapperProps = computed(() => {
 
 const isTooltipEnabled = computed(() => isFormItemTooltipEnabled(props.config))
 
+/**
+ * tooltip 在空值时不展示，避免出现空浮层。
+ */
 const hasContent = computed(() => {
   const value = getValueByPath(props.row, props.config.key)
   return value !== null && value !== undefined && value !== ''
 })
 
+/**
+ * tooltip 展示内容复用 text 类型的展示解析逻辑。
+ */
 const tooltipContent = computed(() => {
   const displayValue = resolveDisplayValue(
     getValueByPath(props.row, props.config.key),

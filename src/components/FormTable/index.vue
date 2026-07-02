@@ -109,20 +109,31 @@ const formRef = ref<any>(null)
 // 从透传 attrs 中按白名单提取 el-form / el-table 可用属性
 const formAttrs = computed(() => extractFormAttrs(attrs))
 const tableAttrs = computed(() => extractTableAttrs(attrs))
+
+// el-form 的 model 始终把外部 formData 和当前 tableData 合并，保证校验路径 tableData.* 可用。
 const formModel = computed(() => ({
   ...props.formData,
   tableData: props.tableData
 }))
+
+// 子组件动态配置函数共用的基础上下文。
 const formTableContext = computed<FormTableBaseContext>(() => ({
   formData: formModel.value,
   tableData: props.tableData
 }))
+
+// columns 归一化后提供字段索引，供联动、校验路径和行初始化复用。
 const schema = computed(() => normalizeColumns(props.columns))
 const visibleColumns = computed(() => {
   const context = createRuntimeContext(formTableContext.value)
   return schema.value.columns.filter((column) => resolveVisible(column.visible, context))
 })
 
+/**
+ * 基于指定 tableData 创建临时上下文。
+ *
+ * 行增删改移过程中，真实 props 还没更新；需要用临时 tableData 计算显隐和校验字段。
+ */
 const createTableBaseContext = (tableData: TableRow[]): FormTableBaseContext => ({
   formData: {
     ...props.formData,
@@ -131,6 +142,11 @@ const createTableBaseContext = (tableData: TableRow[]): FormTableBaseContext => 
   tableData
 })
 
+/**
+ * 同步外层 formData。
+ *
+ * FormTable 内部只拥有 tableData 的变更来源，其他 formData 字段保持外部原值。
+ */
 const emitFormDataUpdate = (tableData: TableRow[]) => {
   emit('update:formData', {
     ...props.formData,
@@ -138,6 +154,9 @@ const emitFormDataUpdate = (tableData: TableRow[]) => {
   })
 }
 
+/**
+ * 提交 tableData 变化，并同步派发 formData 更新。
+ */
 const emitTableDataChange = (tableData: TableRow[]) => {
   emit('update:tableData', tableData)
   emitFormDataUpdate(tableData)
@@ -172,6 +191,11 @@ const getVisibleRowItems = (rowConfig: RowConfig, row: TableRow, rowIndex: numbe
   return getVisibleRowItemsByContext(rowConfig, row, rowIndex, formTableContext.value)
 }
 
+/**
+ * 获取某行配置下当前可见的字段项。
+ *
+ * 这个函数同时服务实时渲染和隐藏字段校验清理，所以允许传入临时 baseContext。
+ */
 const getVisibleRowItemsByContext = (
   rowConfig: RowConfig,
   row: TableRow,
@@ -212,6 +236,15 @@ const getAllRowFieldProps = (rowIndex: number, tableData: TableRow[] = props.tab
   return getSchemaFieldProps(schema.value, rowIndex)
 }
 
+/**
+ * 提交单行 patch。
+ *
+ * 所有字段编辑、slot setValue、updateRow 最终都会进入这里；该函数负责：
+ * - 解析路径 patch。
+ * - 执行字段联动。
+ * - 派发表格更新和 field-change。
+ * - 调度隐藏字段校验清理。
+ */
 const commitRowChange = (rowIndex: number, patch: Partial<TableRow>) => {
   const currentRow = props.tableData[rowIndex]
   if (!currentRow) {
@@ -250,6 +283,11 @@ const getRowFieldProps = (rowIndex: number) => {
   return getVisibleRowFieldProps(rowIndex, props.tableData)
 }
 
+/**
+ * 获取指定行当前可见字段的校验路径。
+ *
+ * 与 getAllRowFieldProps 的差集用于清理隐藏字段上残留的校验错误。
+ */
 const getVisibleRowFieldProps = (rowIndex: number, tableData: TableRow[]) => {
   const row = tableData[rowIndex]
   if (!row) {
@@ -282,6 +320,11 @@ const {
   getVisibleRowFieldProps
 })
 
+/**
+ * 插入行。
+ *
+ * 新行先根据可见字段补默认值，再触发初始化字段联动，确保新增行和用户编辑共用一套行为。
+ */
 const insertRow = (index: number, rowData?: Partial<TableRow>) => {
   const insertIndex = normalizeInsertIndex(index, props.tableData.length)
   const draftRow = buildDefaultRow(
@@ -311,6 +354,11 @@ const insertRow = (index: number, rowData?: Partial<TableRow>) => {
   dispatch('row-add', resolved.nextRow, insertIndex)
 }
 
+/**
+ * 更新指定行。
+ *
+ * patch 支持嵌套路径 key，例如 `{ 'profile.city': '杭州' }`。
+ */
 const updateRow = (index: number, patch: Partial<TableRow>) => {
   if (!props.tableData[index]) {
     return
@@ -324,6 +372,11 @@ const updateRow = (index: number, patch: Partial<TableRow>) => {
   dispatch('row-update', resolved.nextRow, index)
 }
 
+/**
+ * 复制指定行。
+ *
+ * patch 会覆盖源行数据，并重新走默认值和字段联动，适合复制后微调部分字段。
+ */
 const copyRow = (index: number, patch?: Partial<TableRow>) => {
   const sourceRow = props.tableData[index]
   if (!sourceRow) {
@@ -356,6 +409,9 @@ const copyRow = (index: number, patch?: Partial<TableRow>) => {
   dispatch('row-copy', resolved.nextRow, insertIndex)
 }
 
+/**
+ * 删除指定行，并清理该行曾经注册过的校验状态。
+ */
 const removeRow = (index: number) => {
   const removeResult = removeTableRow(props.tableData, index)
   if (!removeResult) {
@@ -369,6 +425,11 @@ const removeRow = (index: number) => {
   dispatch('row-remove', removedRow, index)
 }
 
+/**
+ * 移动行顺序。
+ *
+ * 移动后需要重新清理隐藏字段校验，因为校验路径里的 rowIndex 已经变化。
+ */
 const moveRow = (fromIndex: number, toIndex: number) => {
   const moveResult = moveTableRow(props.tableData, fromIndex, toIndex)
   if (!moveResult) {
@@ -381,6 +442,7 @@ const moveRow = (fromIndex: number, toIndex: number) => {
   dispatch('row-move', movedRow, fromIndex, normalizedToIndex)
 }
 
+// 提供给内部插槽和子组件的统一动作集合，也复用为部分 ref 方法实现。
 const formTableActions: FormTableActions = {
   addRow: (rowData?: Partial<TableRow>) => {
     insertRow(props.tableData.length, rowData)
@@ -410,6 +472,7 @@ provide(FORM_TABLE_ACTIONS_KEY, formTableActions)
 provide(FORM_TABLE_SLOTS_KEY, slots)
 provide(FORM_TABLE_RULES_KEY, computed(() => props.rules))
 
+// 表格数据、列配置或外部 formData 变化后，重新清理不可见字段的校验状态。
 watch(
   [() => props.tableData, () => props.columns, () => props.formData],
   ([tableData]) => {
@@ -445,7 +508,7 @@ const dispatch = (type: EmitEventName | 'update:row' | 'update:row-data', ...arg
 
 provide(FORM_TABLE_DISPATCH_KEY, dispatch)
 
-// 暴露给 ref 调用的方法
+// 暴露给业务侧 ref 调用的方法，保持和 Element UI Form 常用 API 风格接近。
 defineExpose({
   validate: async (callback?: (valid: boolean, errors: any[]) => void) => {
     try {

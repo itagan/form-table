@@ -1,6 +1,11 @@
 import type { ColumnConfig, FormItemConfig } from '../types'
 import { componentTypeMap } from '../configs/defaultComponentConfigs'
 
+/**
+ * 归一化后的表格 schema。
+ *
+ * `fieldMap` 用于按字段 key 快速找到配置，`fieldKeys` 用于生成整行校验路径。
+ */
 export interface NormalizedFormTableSchema {
   columns: ColumnConfig[]
   fieldMap: Map<string, FormItemConfig>
@@ -9,6 +14,11 @@ export interface NormalizedFormTableSchema {
 
 const knownFormItemTypes = new Set(Object.keys(componentTypeMap))
 
+/**
+ * 开发环境下的字段配置校验。
+ *
+ * 这里只做非阻塞告警，避免运行时因为局部配置错误导致整张表无法渲染。
+ */
 function validateFormItemConfig(item: FormItemConfig) {
   if (!knownFormItemTypes.has(item.type)) {
     console.warn(`[FormTable] unknown field type "${item.type}" for field "${item.key}".`)
@@ -23,6 +33,11 @@ function validateFormItemConfig(item: FormItemConfig) {
   }
 }
 
+/**
+ * 将外部 columns 配置归一化为渲染和运行时查询都能复用的 schema。
+ *
+ * 当前不做深拷贝，保留原始 columns 引用；调用方仍然按 props 驱动更新。
+ */
 export function normalizeColumns(columns: ColumnConfig[]): NormalizedFormTableSchema {
   const fieldMap = new Map<string, FormItemConfig>()
   const fieldKeys: string[] = []
@@ -54,6 +69,11 @@ export function normalizeColumns(columns: ColumnConfig[]): NormalizedFormTableSc
   }
 }
 
+/**
+ * 生成指定行的全部字段校验路径。
+ *
+ * Element UI 的 el-form 校验路径格式为 `tableData.${rowIndex}.${fieldKey}`。
+ */
 export function getSchemaFieldProps(schema: NormalizedFormTableSchema, rowIndex: number) {
   return schema.fieldKeys.map((fieldKey) => `tableData.${rowIndex}.${fieldKey}`)
 }

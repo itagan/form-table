@@ -132,10 +132,17 @@ const runtimeContext = computed(() => createRuntimeContext(formTableContext.valu
   index: props.rowIndex,
   fieldKey: props.fieldKey
 }))
+
+// 选项已经在 FormTableItem 中解析动态值，这里只兜底保证渲染层拿到数组。
 const resolvedOptions = computed<FormItemOption[]>(() => {
   return Array.isArray(props.options) ? props.options : []
 })
 
+/**
+ * 解析实际组件类型和最终渲染 props。
+ *
+ * listeners/formatter/emptyText 是 FormTable 控制字段，不能透传到底层组件。
+ */
 const resolved = computed(() => {
   const {
     type,
@@ -164,10 +171,18 @@ const componentType = computed(() => resolved.value.componentType)
 const componentProps = computed(() => resolved.value.componentProps)
 const normalizedOptions = computed<FormItemOption[]>(() => resolvedOptions.value)
 const isSelectLike = computed(() => props.type === 'select' || props.type === 'tag-input')
+
+/**
+ * 过滤只用于 FormTable 内部展示逻辑的字段，避免污染 Element UI 组件 props。
+ */
 const componentRenderProps = computed(() => {
   const { options, formatter, emptyText, optionProps, ...rest } = componentProps.value
   return rest
 })
+
+/**
+ * text 类型的展示内容。
+ */
 const textContent = computed(() => {
   return resolveDisplayValue(
     getValueByPath(props.row, props.fieldKey),
@@ -178,20 +193,34 @@ const textContent = computed(() => {
     runtimeContext.value
   )
 })
+
 const updateRow = (patch: Record<string, any>) => {
   formTableActions.updateRow(props.rowIndex, patch)
 }
+
 const setValue = (value: any) => {
   if (getValueByPath(props.row, props.fieldKey) !== value && dispatch) {
     dispatch('update:row', props.rowIndex, props.row, props.fieldKey, value)
   }
 }
+
+/**
+ * 传给 component.listeners 的字段上下文。
+ *
+ * 业务 listener 可以读取当前值，也可以通过 setValue/updateRow 进入统一更新链路。
+ */
 const fieldContext = computed(() => ({
   ...runtimeContext.value,
   value: getValueByPath(props.row, props.fieldKey),
   setValue,
   updateRow
 }))
+
+/**
+ * 将配置中的 listener 包装成 Vue 事件监听器。
+ *
+ * 底层组件原始事件参数会跟在字段上下文之后传给业务回调。
+ */
 const componentListeners = computed(() => {
   const listeners = props.listeners || {}
   return Object.keys(listeners).reduce<Record<string, (...args: any[]) => void>>((acc, eventName) => {
@@ -203,6 +232,11 @@ const componentListeners = computed(() => {
   }, {})
 })
 
+/**
+ * 底层组件 v-model 代理。
+ *
+ * set 时不直接改 row，而是交给主组件统一处理联动、事件和数据提交。
+ */
 const modelValue = computed({
   get: () => getValueByPath(props.row, props.fieldKey),
   set: (value) => {

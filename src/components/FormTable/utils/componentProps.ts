@@ -9,6 +9,11 @@ import { getDefaultConfig, getComponentType } from '../configs/defaultComponentC
 
 const NO_CLEARABLE_TYPES = new Set(['switch', 'radio', 'checkbox', 'rate', 'slider', 'color', 'upload'])
 
+/**
+ * 组件属性解析入参。
+ *
+ * 除显式字段外，剩余字段会作为渲染层透传属性参与合并。
+ */
 export interface ComponentPropsOptions {
   type: string
   customComponent?: string
@@ -17,6 +22,11 @@ export interface ComponentPropsOptions {
   [key: string]: any
 }
 
+/**
+ * Element UI 常用组件默认属性。
+ *
+ * 这些值只提供体验默认值，业务方仍可通过 `component.bind` 覆盖。
+ */
 const ELEMENT_UI_DEFAULTS: Record<string, Record<string, any>> = {
   'el-input': {
     placeholder: '请输入',

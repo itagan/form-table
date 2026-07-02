@@ -23,6 +23,12 @@ function kebabToCamelCase(value: string): string {
   return value.replace(/-([a-z])/g, (_, char: string) => char.toUpperCase())
 }
 
+/**
+ * 归一化透传属性名。
+ *
+ * Vue 模板中常用 `label-width`，Element UI 实际 prop 名为 `labelWidth`；
+ * 统一转成 camelCase 后再按白名单提取。
+ */
 export function normalizeAttrs<T extends Record<string, any>>(attrs: T): Record<string, any> {
   const normalized: Record<string, any> = {}
 
@@ -108,14 +114,23 @@ export const EL_COLUMN_PROPS = [
   'filteredValue'
 ] as const
 
+/**
+ * 提取 el-form 可接收的透传属性。
+ */
 export function extractFormAttrs<T extends Record<string, any>>(attrs: T) {
   return pick(normalizeAttrs(attrs), EL_FORM_PROPS as any)
 }
 
+/**
+ * 提取 el-table 可接收的透传属性。
+ */
 export function extractTableAttrs<T extends Record<string, any>>(attrs: T) {
   return pick(normalizeAttrs(attrs), EL_TABLE_PROPS as any)
 }
 
+/**
+ * 提取 el-table-column 可接收的透传属性。
+ */
 export function extractColumnAttrs<T extends Record<string, any>>(attrs: T) {
   return pick(normalizeAttrs(attrs), EL_COLUMN_PROPS as any)
 }
