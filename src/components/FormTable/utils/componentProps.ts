@@ -2,7 +2,7 @@
  * componentProps 工具模块
  *
  * 负责将 FormItemConfig 解析为实际可渲染的组件类型和属性。
- * 属性合并优先级: bind > 直接配置 > 默认配置 > Element UI 默认
+ * 属性合并优先级: component.bind > 渲染透传配置 > 默认配置 > Element UI 默认
  */
 
 import { getDefaultConfig, getComponentType } from '../configs/defaultComponentConfigs'
@@ -50,7 +50,7 @@ const ELEMENT_UI_DEFAULTS: Record<string, Record<string, any>> = {
 
 /**
  * 处理组件属性
- * 优先级：用户bind配置 > 用户直接配置 > 默认配置 > Element UI默认
+ * 优先级：component.bind 配置 > 渲染透传配置 > 默认配置 > Element UI 默认
  * @param options 组件配置选项
  * @returns 处理后的组件属性
  */
@@ -95,10 +95,10 @@ export function processComponentProps(options: ComponentPropsOptions): {
     // 组件默认配置
     ...defaultConfig,
     
-    // 用户直接配置的属性
+    // 渲染层透传属性
     ...userProps,
     
-    // 用户通过bind配置的属性（最高优先级）
+    // 用户通过 component.bind 配置的属性（最高优先级）
     ...bind
   }
   
@@ -110,33 +110,5 @@ export function processComponentProps(options: ComponentPropsOptions): {
   return {
     componentType,
     componentProps
-  }
-}
-
-/**
- * 验证组件配置
- * @param type 组件类型
- * @param props 组件属性
- * @returns 验证结果
- */
-export function validateComponentConfig(type: string, props: Record<string, any>): {
-  valid: boolean
-  errors: string[]
-} {
-  const errors: string[] = []
-  
-  // 基础验证
-  if (!type) {
-    errors.push('Component type is required')
-  }
-  
-  // 特定组件验证
-  if (type === 'custom' && !props.customComponent) {
-    errors.push('Custom component name is required when type is "custom"')
-  }
-  
-  return {
-    valid: errors.length === 0,
-    errors
   }
 }

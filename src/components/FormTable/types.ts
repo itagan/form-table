@@ -63,7 +63,6 @@ export interface FormItemComponentConfig {
   customComponent?: string
   slotName?: string
   bind?: DynamicValue<Record<string, any>>
-  props?: DynamicValue<Record<string, any>>
   listeners?: Record<string, FormTableFieldListener>
   options?: DynamicValue<FormItemOption[]>
   optionProps?: DynamicValue<OptionPropsConfig>
@@ -118,7 +117,7 @@ export type FormItemType =
   | 'tag-input'
 
 /**
- * 表单项配置 - 结构能力按职责分组，组件属性统一放到 component.bind/component.props
+ * 表单项配置 - 结构能力按职责分组，组件属性统一放到 component.bind
  */
 export interface FormItemConfig {
   key: string
@@ -130,22 +129,6 @@ export interface FormItemConfig {
   rules?: any[]
   label?: string
   labelWidth?: string
-  placeholder?: string
-  clearable?: boolean
-  disabled?: boolean
-  readonly?: boolean
-  size?: 'large' | 'default' | 'small'
-  remote?: boolean
-  remoteMethod?: Function
-  min?: number
-  max?: number
-  step?: number
-  format?: string
-  valueFormat?: string
-  data?: any[]
-  fetchSuggestions?: Function
-  action?: string
-  rows?: number
 }
 
 /**

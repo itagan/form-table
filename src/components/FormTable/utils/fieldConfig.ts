@@ -42,14 +42,6 @@ export function resolveFormItemBind(
   return resolveRecord(item.component?.bind, context)
 }
 
-export function resolveFormItemComponentProps(
-  item: FormItemConfig,
-  context: FormTableRuntimeContext
-) {
-  const componentProps = resolveRecord(item.component?.props, context)
-  return Object.keys(componentProps).length > 0 ? componentProps : undefined
-}
-
 export function resolveFormItemOptions(
   item: FormItemConfig,
   context: FormTableRuntimeContext

@@ -19,8 +19,8 @@
 
 ## 配置原则
 
-- 常用字段直接配置，比如 `label`、`placeholder`、`rules`
-- 非常见组件属性优先通过 `bind` 透传
+- 结构字段直接配置，比如 `label`、`rules`
+- 组件属性统一通过 `component.bind` 配置
 - 结构能力按职责分组到 `layout`、`component`、`display`、`behavior`
 - 顶层 `attrs` 继续负责 `el-form` / `el-table` / `el-table-column` 的通用扩展
 - 只有 `visible`、`defaultValue`、`formatter`、`layout.colProps` 这类透传本身解决不了的结构能力，才额外提供配置项
@@ -72,14 +72,20 @@ const columns = ref<ColumnConfig[]>([
           key: 'name',
           type: 'input',
           layout: { span: 12 },
-          placeholder: '请输入姓名'
+          component: {
+            bind: {
+              placeholder: '请输入姓名'
+            }
+          }
         },
         {
           key: 'level',
           type: 'select',
-          placeholder: '请选择职级',
           layout: { span: 12 },
           component: {
+            bind: {
+              placeholder: '请选择职级'
+            },
             options: [
               { label: '初级', value: 'junior' },
               { label: '中级', value: 'mid' },
@@ -250,7 +256,6 @@ interface FormItemConfig {
     customComponent?: string
     slotName?: string
     bind?: Record<string, any> | ((context) => Record<string, any>)
-    props?: Record<string, any> | ((context) => Record<string, any>)
     listeners?: Record<string, (context, ...args) => void>
     options?: Array<{ label: string; value: any }> | ((context) => Array<{ label: string; value: any }>)
     optionProps?: {
@@ -281,22 +286,6 @@ interface FormItemConfig {
   rules?: any[]
   label?: string
   labelWidth?: string
-  placeholder?: string
-  clearable?: boolean
-  disabled?: boolean
-  readonly?: boolean
-  size?: 'large' | 'default' | 'small'
-  remote?: boolean
-  remoteMethod?: Function
-  min?: number
-  max?: number
-  step?: number
-  format?: string
-  valueFormat?: string
-  data?: any[]
-  fetchSuggestions?: Function
-  action?: string
-  rows?: number
 }
 ```
 
@@ -337,7 +326,7 @@ interface FormItemConfig {
 
 `component.listeners` 用来监听具体字段组件抛出的事件，适合处理 `blur`、`focus`、`change` 这类组件级交互。
 
-`component.bind`、`component.props`、`layout.colProps`、`display.tooltip.props`、`component.options`、`component.optionProps` 也支持函数写法，会按当前 `row / index / fieldKey / formData / tableData` 动态解析。
+`component.bind`、`layout.colProps`、`display.tooltip.props`、`component.options`、`component.optionProps` 也支持函数写法，会按当前 `row / index / fieldKey / formData / tableData` 动态解析。
 
 ```ts
 {
@@ -406,18 +395,21 @@ interface FormItemConfig {
 
 建议按这个规则使用：
 
-- 常见配置直接写在表单项上
-- 非常见配置统一放进 `bind`
+- 组件属性统一放进 `component.bind`
 - 行列显隐、默认值、文本展示这类结构能力再使用独立配置
 
-### 常见配置直写
+### 组件属性
 
 ```ts
 {
   key: 'name',
   type: 'input',
-  placeholder: '请输入姓名',
-  disabled: false
+  component: {
+    bind: {
+      placeholder: '请输入姓名',
+      disabled: false
+    }
+  }
 }
 ```
 
@@ -430,7 +422,7 @@ interface FormItemConfig {
 
 推荐在动态行场景中优先使用通配路径，组件内部会按当前行索引自动匹配到对应字段。
 
-### 非常见配置走 bind
+### 组件属性走 component.bind
 
 ```ts
 {
@@ -499,10 +491,10 @@ const customComponents = [
 {
   key: 'phone',
   type: 'custom',
-  placeholder: '请输入手机号',
   component: {
     customComponent: 'PhoneInput',
     bind: {
+      placeholder: '请输入手机号',
       clearable: true
     }
   }

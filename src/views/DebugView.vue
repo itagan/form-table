@@ -106,7 +106,11 @@ const columns = ref<ColumnConfig[]>([
           layout: {
             span: 24
           },
-          placeholder: '请输入姓名'
+          component: {
+            bind: {
+              placeholder: '请输入姓名'
+            }
+          }
         }
       ]
     }]

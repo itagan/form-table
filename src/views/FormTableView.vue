@@ -86,7 +86,11 @@ const columns = ref<ColumnConfig[]>([
           layout: {
             span: 12
           },
-          placeholder: '请输入年龄'
+          component: {
+            bind: {
+              placeholder: '请输入年龄'
+            }
+          }
         }
       ]
     }]
@@ -101,7 +105,11 @@ const columns = ref<ColumnConfig[]>([
         display: {
           tooltip: true
         },
-        placeholder: '请输入性别'
+        component: {
+          bind: {
+            placeholder: '请输入性别'
+          }
+        }
       }]
     }]
   },

@@ -188,7 +188,6 @@ const columns = ref<ColumnConfig[]>([
         {
           key: 'name',
           type: 'input',
-          placeholder: '请输入姓名',
           layout: {
             span: 12
           },
@@ -202,6 +201,7 @@ const columns = ref<ColumnConfig[]>([
               }
             },
             bind: {
+              placeholder: '请输入姓名',
               maxlength: 20,
               clearable: true
             }
@@ -210,12 +210,12 @@ const columns = ref<ColumnConfig[]>([
         {
           key: 'age',
           type: 'number',
-          placeholder: '请输入年龄',
           layout: {
             span: 12
           },
           component: {
             bind: {
+              placeholder: '请输入年龄',
               controlsPosition: 'right'
             }
           },
@@ -234,13 +234,13 @@ const columns = ref<ColumnConfig[]>([
         {
           key: 'phone',
           type: 'custom',
-          placeholder: '请输入手机号',
           layout: {
             span: 24
           },
           component: {
             customComponent: 'PhoneInput',
             bind: {
+              placeholder: '请输入手机号',
               clearable: true
             }
           }
@@ -256,7 +256,6 @@ const columns = ref<ColumnConfig[]>([
         {
           key: 'department',
           type: 'input',
-          placeholder: '请输入部门',
           layout: {
             span: 10
           },
@@ -280,9 +279,13 @@ const columns = ref<ColumnConfig[]>([
         {
           key: 'profile.city',
           type: 'input',
-          placeholder: '请输入所在城市',
           layout: {
             span: 14
+          },
+          component: {
+            bind: {
+              placeholder: '请输入所在城市'
+            }
           },
           behavior: {
             defaultValue: '上海'
@@ -291,7 +294,6 @@ const columns = ref<ColumnConfig[]>([
         {
           key: 'level',
           type: 'select',
-          placeholder: '请选择职级',
           layout: {
             span: 14
           },
@@ -333,7 +335,6 @@ const columns = ref<ColumnConfig[]>([
         {
           key: 'remark',
           type: 'textarea',
-          placeholder: '请输入备注',
           layout: {
             span: 24
           },

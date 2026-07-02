@@ -32,10 +32,10 @@ props.tableData → el-table 渲染
 
 ## 配置约定
 
-- 常用字段直接配置
+- 结构字段直接配置，比如 `label`、`rules`
 - 结构能力按职责放到 `layout`、`component`、`display`、`behavior`
-- 非常见组件属性优先放到 `component.bind`
-- `component.bind`、`component.props`、`layout.colProps`、`component.options` 支持函数写法，可按当前上下文动态返回
+- 组件属性统一放到 `component.bind`
+- `component.bind`、`layout.colProps`、`component.options` 支持函数写法，可按当前上下文动态返回
 - 顶层 `attrs` 用来扩展 `el-form` / `el-table` / `el-table-column`
 - 只有 `behavior.visible`、`behavior.defaultValue`、`display.formatter`、`layout.colProps` 这类结构能力额外提供独立配置
 

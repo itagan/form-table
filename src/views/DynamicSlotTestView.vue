@@ -120,9 +120,13 @@ const columns = ref([
           key: 'name',
           type: 'input',
           label: '姓名',
-          placeholder: '请输入姓名',
           layout: {
             span: 24
+          },
+          component: {
+            bind: {
+              placeholder: '请输入姓名'
+            }
           }
         }
       ]
@@ -136,9 +140,13 @@ const columns = ref([
         key: 'age',
         type: 'number',
         label: '年龄',
-        placeholder: '请输入年龄',
         layout: {
           span: 24
+        },
+        component: {
+          bind: {
+            placeholder: '请输入年龄'
+          }
         }
       }]
     }]

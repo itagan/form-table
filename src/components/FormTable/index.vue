@@ -36,15 +36,21 @@
  * - customComponents: 自定义组件映射表
  * - dispatch: 统一事件分发函数，处理 update:row 等内部事件
  */
-import { computed, nextTick, provide, ref, useAttrs, useSlots, watch } from 'vue'
+import { computed, provide, ref, useAttrs, useSlots, watch } from 'vue'
 import FormTableColumn from './FormTableColumn.vue'
 import { extractFormAttrs, extractTableAttrs } from './utils/attrs'
 import { buildDefaultRow, createRuntimeContext, resolveDynamicValue, resolveVisible } from './utils/dynamic'
+import { resolveFormItemVisible } from './utils/fieldConfig'
+import { createInitialFieldChanges, resolveRowChange } from './utils/fieldChange'
+import { applyRowPatch } from './utils/path'
 import {
-  getFormItemOnValueChange,
-  resolveFormItemVisible
-} from './utils/fieldConfig'
-import { applyRowPatch, getValueByPath, setValueByPath } from './utils/path'
+  insertTableRow,
+  moveTableRow,
+  normalizeInsertIndex,
+  removeTableRow
+} from './utils/rowActions'
+import { getSchemaFieldProps, normalizeColumns } from './utils/schema'
+import { createValidationController } from './utils/validation'
 import type {
   ColumnConfig,
   CustomComponentConfig,
@@ -52,7 +58,6 @@ import type {
   FormItemConfig,
   FormTableActions,
   FormTableBaseContext,
-  FormTableFieldChangeContext,
   FormTableFieldChangePayload,
   RowConfig,
   ValidationRule,
@@ -112,9 +117,10 @@ const formTableContext = computed<FormTableBaseContext>(() => ({
   formData: formModel.value,
   tableData: props.tableData
 }))
+const schema = computed(() => normalizeColumns(props.columns))
 const visibleColumns = computed(() => {
   const context = createRuntimeContext(formTableContext.value)
-  return props.columns.filter((column) => resolveVisible(column.visible, context))
+  return schema.value.columns.filter((column) => resolveVisible(column.visible, context))
 })
 
 const createTableBaseContext = (tableData: TableRow[]): FormTableBaseContext => ({
@@ -162,26 +168,6 @@ type EmitEventName =
   | 'row-remove'
   | 'validate'
 
-interface ResolvedRowChange {
-  nextRow: TableRow
-  fieldChanges: FormTableFieldChangePayload[]
-}
-
-interface InitialFieldChange {
-  fieldKey: string
-  value: any
-  previousValue: any
-}
-
-const normalizeInsertIndex = (index: number) => {
-  return Math.max(0, Math.min(index, props.tableData.length))
-}
-
-const normalizeMoveIndex = (index: number) => {
-  const maxIndex = Math.max(props.tableData.length - 1, 0)
-  return Math.max(0, Math.min(index, maxIndex))
-}
-
 const getVisibleRowItems = (rowConfig: RowConfig, row: TableRow, rowIndex: number) => {
   return getVisibleRowItemsByContext(rowConfig, row, rowIndex, formTableContext.value)
 }
@@ -211,30 +197,11 @@ const getVisibleRowItemsByContext = (
 }
 
 const getFieldConfigByKey = (fieldKey: string) => {
-  for (const column of props.columns) {
-    for (const rowConfig of column.children) {
-      const matchedItem = rowConfig.children.find((item) => item.key === fieldKey)
-      if (matchedItem) {
-        return matchedItem
-      }
-    }
-  }
-
-  return undefined
+  return schema.value.fieldMap.get(fieldKey)
 }
 
 const getConfiguredFieldKeys = () => {
-  const fieldKeys = new Set<string>()
-
-  props.columns.forEach((column) => {
-    column.children.forEach((rowConfig) => {
-      rowConfig.children.forEach((item) => {
-        fieldKeys.add(item.key)
-      })
-    })
-  })
-
-  return Array.from(fieldKeys)
+  return schema.value.fieldKeys
 }
 
 const getAllRowFieldProps = (rowIndex: number, tableData: TableRow[] = props.tableData) => {
@@ -242,170 +209,7 @@ const getAllRowFieldProps = (rowIndex: number, tableData: TableRow[] = props.tab
     return []
   }
 
-  const fieldProps: string[] = []
-
-  props.columns.forEach((column) => {
-    column.children.forEach((rowConfig) => {
-      rowConfig.children.forEach((item) => {
-        fieldProps.push(`tableData.${rowIndex}.${item.key}`)
-      })
-    })
-  })
-
-  return fieldProps
-}
-
-const createFieldChangeContext = (
-  rowIndex: number,
-  row: TableRow,
-  fieldKey: string,
-  value: any,
-  previousValue: any,
-  tableData: TableRow[]
-): FormTableFieldChangeContext => {
-  return {
-    row,
-    index: rowIndex,
-    fieldKey,
-    value,
-    previousValue,
-    tableData,
-    formData: {
-      ...props.formData,
-      tableData
-    },
-    getValue: (path: string) => getValueByPath(row, path)
-  }
-}
-
-const createInitialFieldChanges = (row: TableRow): InitialFieldChange[] => {
-  return getConfiguredFieldKeys().reduce<InitialFieldChange[]>((changes, fieldKey) => {
-    const value = getValueByPath(row, fieldKey)
-    if (value === undefined) {
-      return changes
-    }
-
-    changes.push({
-      fieldKey,
-      value,
-      previousValue: undefined
-    })
-    return changes
-  }, [])
-}
-
-const resolveRowChange = (
-  rowIndex: number,
-  currentRow: TableRow,
-  options: {
-    tableData?: TableRow[]
-    initialPatch?: Partial<TableRow>
-    initialChanges?: InitialFieldChange[]
-  } = {}
-): ResolvedRowChange => {
-  let nextRow = currentRow
-  const nextTableData = [...(options.tableData || props.tableData)]
-  nextTableData[rowIndex] = nextRow
-  const fieldChanges = new Map<string, FormTableFieldChangePayload>()
-  const pendingChanges: FormTableFieldChangePayload[] = []
-
-  const queueFieldChange = (fieldKey: string, value: any, previousValue: any) => {
-    if (Object.is(previousValue, value)) {
-      return
-    }
-
-    const currentChange = fieldChanges.get(fieldKey)
-    const initialPreviousValue = currentChange?.previousValue ?? previousValue
-
-    if (Object.is(initialPreviousValue, value)) {
-      fieldChanges.delete(fieldKey)
-    } else {
-      fieldChanges.set(fieldKey, {
-        row: nextRow,
-        index: rowIndex,
-        fieldKey,
-        value,
-        previousValue: initialPreviousValue
-      })
-    }
-
-    pendingChanges.push({
-      row: nextRow,
-      index: rowIndex,
-      fieldKey,
-      value,
-      previousValue
-    })
-  }
-
-  const applyPatch = (patch?: Partial<TableRow>) => {
-    if (!patch) {
-      return
-    }
-
-    Object.keys(patch).forEach((fieldKey) => {
-      const value = patch[fieldKey]
-      const previousValue = getValueByPath(nextRow, fieldKey)
-
-      if (Object.is(previousValue, value)) {
-        return
-      }
-
-      nextRow = setValueByPath(nextRow, fieldKey, value)
-      nextTableData[rowIndex] = nextRow
-      queueFieldChange(fieldKey, value, previousValue)
-    })
-  }
-
-  applyPatch(options.initialPatch)
-  ;(options.initialChanges || []).forEach((change) => {
-    queueFieldChange(change.fieldKey, change.value, change.previousValue)
-  })
-
-  let processedCount = 0
-  const maxLinkedChanges = 100
-
-  while (pendingChanges.length > 0 && processedCount < maxLinkedChanges) {
-    const change = pendingChanges.shift()!
-    const fieldConfig = getFieldConfigByKey(change.fieldKey)
-
-    const onValueChange = fieldConfig ? getFormItemOnValueChange(fieldConfig) : undefined
-
-    if (!onValueChange) {
-      processedCount += 1
-      continue
-    }
-
-    const linkedPatch = onValueChange(
-      createFieldChangeContext(
-        rowIndex,
-        nextRow,
-        change.fieldKey,
-        change.value,
-        change.previousValue,
-        nextTableData
-      )
-    )
-
-    if (linkedPatch) {
-      applyPatch(linkedPatch)
-    }
-    processedCount += 1
-  }
-
-  if (pendingChanges.length > 0) {
-    console.warn('[FormTable] onValueChange exceeded max linked update count, remaining changes were ignored.')
-  }
-
-  const resolvedFieldChanges = Array.from(fieldChanges.values()).map((change) => ({
-    ...change,
-    row: nextRow
-  }))
-
-  return {
-    nextRow,
-    fieldChanges: resolvedFieldChanges
-  }
+  return getSchemaFieldProps(schema.value, rowIndex)
 }
 
 const commitRowChange = (rowIndex: number, patch: Partial<TableRow>) => {
@@ -414,9 +218,18 @@ const commitRowChange = (rowIndex: number, patch: Partial<TableRow>) => {
     return null
   }
 
-  const resolved = resolveRowChange(rowIndex, currentRow, {
-    initialPatch: patch
-  })
+  const resolved = resolveRowChange(
+    {
+      rowIndex,
+      currentRow,
+      tableData: props.tableData,
+      formData: props.formData,
+      getFieldConfig: getFieldConfigByKey
+    },
+    {
+      initialPatch: patch
+    }
+  )
 
   if (resolved.fieldChanges.length === 0) {
     return resolved
@@ -445,7 +258,7 @@ const getVisibleRowFieldProps = (rowIndex: number, tableData: TableRow[]) => {
 
   const fieldProps: string[] = []
   const baseContext = createTableBaseContext(tableData)
-  const visibleColumnsForTable = props.columns.filter((column) => {
+  const visibleColumnsForTable = schema.value.columns.filter((column) => {
     return resolveVisible(column.visible, createRuntimeContext(baseContext))
   })
 
@@ -460,70 +273,38 @@ const getVisibleRowFieldProps = (rowIndex: number, tableData: TableRow[]) => {
   return fieldProps
 }
 
-const clearHiddenFieldValidations = (tableData: TableRow[]) => {
-  const hiddenFieldProps = tableData.reduce<string[]>((propsList, _row, rowIndex) => {
-    const allFieldProps = getAllRowFieldProps(rowIndex, tableData)
-    const visibleFieldProps = new Set(getVisibleRowFieldProps(rowIndex, tableData))
-
-    allFieldProps.forEach((fieldProp) => {
-      if (!visibleFieldProps.has(fieldProp)) {
-        propsList.push(fieldProp)
-      }
-    })
-
-    return propsList
-  }, [])
-
-  if (hiddenFieldProps.length > 0) {
-    formRef.value?.clearValidate(hiddenFieldProps)
-  }
-}
-
-const scheduleHiddenFieldValidationCleanup = (tableData: TableRow[]) => {
-  nextTick(() => {
-    clearHiddenFieldValidations(tableData)
-  })
-}
-
-const validateFieldProps = async (fieldProp: string | string[]) => {
-  const fieldProps = Array.isArray(fieldProp) ? fieldProp : [fieldProp]
-  if (fieldProps.length === 0 || !formRef.value?.validateField) {
-    return true
-  }
-
-  try {
-    await Promise.all(fieldProps.map((prop) => {
-      return new Promise<void>((resolve, reject) => {
-        formRef.value?.validateField(prop, (message: string) => {
-          if (message) {
-            reject(new Error(message))
-            return
-          }
-
-          resolve()
-        })
-      })
-    }))
-    return true
-  } catch {
-    return false
-  }
-}
+const {
+  scheduleHiddenFieldValidationCleanup,
+  validateFieldProps
+} = createValidationController({
+  formRef,
+  getAllRowFieldProps,
+  getVisibleRowFieldProps
+})
 
 const insertRow = (index: number, rowData?: Partial<TableRow>) => {
-  const insertIndex = normalizeInsertIndex(index)
+  const insertIndex = normalizeInsertIndex(index, props.tableData.length)
   const draftRow = buildDefaultRow(
     visibleColumns.value,
     formTableContext.value,
     insertIndex,
     rowData || {}
   )
-  const nextTableData = [...props.tableData]
-  nextTableData.splice(insertIndex, 0, draftRow)
-  const resolved = resolveRowChange(insertIndex, draftRow, {
-    tableData: nextTableData,
-    initialChanges: createInitialFieldChanges(draftRow)
-  })
+  const insertResult = insertTableRow(props.tableData, insertIndex, draftRow)
+  const { nextTableData } = insertResult
+  const resolved = resolveRowChange(
+    {
+      rowIndex: insertIndex,
+      currentRow: draftRow,
+      tableData: props.tableData,
+      formData: props.formData,
+      getFieldConfig: getFieldConfigByKey
+    },
+    {
+      tableData: nextTableData,
+      initialChanges: createInitialFieldChanges(draftRow, getConfiguredFieldKeys())
+    }
+  )
   nextTableData[insertIndex] = resolved.nextRow
   emitTableDataChange(nextTableData)
   scheduleHiddenFieldValidationCleanup(nextTableData)
@@ -555,44 +336,46 @@ const copyRow = (index: number, patch?: Partial<TableRow>) => {
     index + 1,
     applyRowPatch(sourceRow, patch || {})
   )
-  const nextTableData = [...props.tableData]
-  nextTableData.splice(index + 1, 0, copiedRow)
-  const resolved = resolveRowChange(index + 1, copiedRow, {
-    tableData: nextTableData,
-    initialChanges: createInitialFieldChanges(copiedRow)
-  })
-  nextTableData[index + 1] = resolved.nextRow
+  const { insertIndex, nextTableData } = insertTableRow(props.tableData, index + 1, copiedRow)
+  const resolved = resolveRowChange(
+    {
+      rowIndex: insertIndex,
+      currentRow: copiedRow,
+      tableData: props.tableData,
+      formData: props.formData,
+      getFieldConfig: getFieldConfigByKey
+    },
+    {
+      tableData: nextTableData,
+      initialChanges: createInitialFieldChanges(copiedRow, getConfiguredFieldKeys())
+    }
+  )
+  nextTableData[insertIndex] = resolved.nextRow
   emitTableDataChange(nextTableData)
   scheduleHiddenFieldValidationCleanup(nextTableData)
-  dispatch('row-copy', resolved.nextRow, index + 1)
+  dispatch('row-copy', resolved.nextRow, insertIndex)
 }
 
 const removeRow = (index: number) => {
-  if (!props.tableData[index]) {
+  const removeResult = removeTableRow(props.tableData, index)
+  if (!removeResult) {
     return
   }
 
   formRef.value?.clearValidate(getAllRowFieldProps(index))
-  const nextTableData = [...props.tableData]
-  const removedRow = nextTableData.splice(index, 1)[0]
+  const { removedRow, nextTableData } = removeResult
   emitTableDataChange(nextTableData)
   scheduleHiddenFieldValidationCleanup(nextTableData)
   dispatch('row-remove', removedRow, index)
 }
 
 const moveRow = (fromIndex: number, toIndex: number) => {
-  if (!props.tableData[fromIndex]) {
+  const moveResult = moveTableRow(props.tableData, fromIndex, toIndex)
+  if (!moveResult) {
     return
   }
 
-  const normalizedToIndex = normalizeMoveIndex(toIndex)
-  if (fromIndex === normalizedToIndex) {
-    return
-  }
-
-  const nextTableData = [...props.tableData]
-  const movedRow = nextTableData.splice(fromIndex, 1)[0]
-  nextTableData.splice(normalizedToIndex, 0, movedRow)
+  const { movedRow, normalizedToIndex, nextTableData } = moveResult
   emitTableDataChange(nextTableData)
   scheduleHiddenFieldValidationCleanup(nextTableData)
   dispatch('row-move', movedRow, fromIndex, normalizedToIndex)
@@ -628,11 +411,11 @@ provide(FORM_TABLE_SLOTS_KEY, slots)
 provide(FORM_TABLE_RULES_KEY, computed(() => props.rules))
 
 watch(
-  [() => props.tableData, () => props.formData],
+  [() => props.tableData, () => props.columns, () => props.formData],
   ([tableData]) => {
     scheduleHiddenFieldValidationCleanup(tableData)
   },
-  { deep: true, immediate: true }
+  { immediate: true }
 )
 
 /**

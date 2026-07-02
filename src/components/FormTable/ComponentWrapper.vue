@@ -74,8 +74,8 @@
  *   set → dispatch('update:row', rowIndex, row, fieldKey, newValue) 触发父组件更新
  */
 import { computed, inject, type ComputedRef } from 'vue'
-import { processComponentProps, validateComponentConfig } from './utils/componentProps'
-import { createRuntimeContext, resolveDynamicValue } from './utils/dynamic'
+import { processComponentProps } from './utils/componentProps'
+import { createRuntimeContext } from './utils/dynamic'
 import {
   getOptionDisabled,
   getOptionKey,
@@ -132,35 +132,20 @@ const runtimeContext = computed(() => createRuntimeContext(formTableContext.valu
   index: props.rowIndex,
   fieldKey: props.fieldKey
 }))
-const resolvedBind = computed<Record<string, any>>(() => {
-  return resolveDynamicValue(props.bind, runtimeContext.value) || {}
-})
 const resolvedOptions = computed<FormItemOption[]>(() => {
-  const options = resolveDynamicValue(props.options, runtimeContext.value)
-  return Array.isArray(options) ? options : []
-})
-const resolvedOptionProps = computed(() => {
-  return resolveDynamicValue(props.optionProps, runtimeContext.value)
-})
-const resolvedComponentInnerProps = computed<Record<string, any> | undefined>(() => {
-  return resolveDynamicValue(props.props, runtimeContext.value)
+  return Array.isArray(props.options) ? props.options : []
 })
 
 const resolved = computed(() => {
-  if (import.meta.env.DEV) {
-    const validation = validateComponentConfig(props.type, props)
-    if (!validation.valid) {
-      console.warn('Component configuration validation failed:', validation.errors)
-    }
-  }
-
   const {
     type,
     customComponent,
     bind,
     options,
     optionProps,
-    props: componentInnerProps,
+    listeners,
+    formatter,
+    emptyText,
     ...otherProps
   } = props
 
@@ -168,10 +153,9 @@ const resolved = computed(() => {
     type,
     customComponent,
     customComponents: customComponentsMap.value,
-    bind: resolvedBind.value,
+    bind: props.bind || {},
     options: resolvedOptions.value,
-    optionProps: resolvedOptionProps.value,
-    props: resolvedComponentInnerProps.value,
+    optionProps: props.optionProps,
     ...otherProps
   })
 })
@@ -188,7 +172,7 @@ const textContent = computed(() => {
   return resolveDisplayValue(
     getValueByPath(props.row, props.fieldKey),
     normalizedOptions.value,
-    resolvedOptionProps.value,
+    props.optionProps,
     props.formatter,
     props.emptyText,
     runtimeContext.value

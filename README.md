@@ -23,7 +23,7 @@
 - 配置驱动渲染列、布局和表单项
 - 基于 `el-form` 的统一校验
 - 支持插槽和自定义组件扩展
-- 支持 `bind` 透传不常见组件属性
+- 支持通过 `component.bind` 统一配置组件属性
 - 支持统一归档事件 `@event`
 
 ## 运行
@@ -43,6 +43,6 @@ pnpm type-check
 
 ## 文档说明
 
-详细 API、配置结构、事件、`bind` 透传、自定义组件和插槽用法，统一维护在：
+详细 API、配置结构、事件、组件属性、自定义组件和插槽用法，统一维护在：
 
 - [CURRENT_FORMTABLE_DOC.md](./CURRENT_FORMTABLE_DOC.md)

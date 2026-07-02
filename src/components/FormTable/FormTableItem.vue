@@ -68,7 +68,6 @@ import {
   getFormItemSlotName,
   isFormItemTooltipEnabled,
   resolveFormItemBind,
-  resolveFormItemComponentProps,
   resolveFormItemOptions,
   resolveFormItemOptionProps,
   resolveFormItemTooltipProps
@@ -167,10 +166,6 @@ const resolvedBind = computed<Record<string, any>>(() => {
   return resolveFormItemBind(props.config, runtimeContext.value)
 })
 
-const resolvedComponentProps = computed<Record<string, any> | undefined>(() => {
-  return resolveFormItemComponentProps(props.config, runtimeContext.value)
-})
-
 const resolvedOptions = computed(() => {
   return resolveFormItemOptions(props.config, runtimeContext.value)
 })
@@ -223,8 +218,7 @@ const wrapperProps = computed(() => {
     labelWidth,
     layout,
     display,
-    behavior,
-    ...componentConfig
+    behavior
   } = props.config
 
   return {
@@ -232,10 +226,8 @@ const wrapperProps = computed(() => {
     fieldKey: key,
     row: props.row,
     rowIndex: props.index,
-    ...componentConfig,
     customComponent: getFormItemCustomComponent(props.config),
     bind: resolvedBind.value,
-    props: resolvedComponentProps.value,
     options: resolvedOptions.value,
     optionProps: resolvedOptionProps.value,
     listeners: getFormItemListeners(props.config),
