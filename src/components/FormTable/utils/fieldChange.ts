@@ -1,7 +1,9 @@
 import type {
   FormItemConfig,
+  FormTableRecord,
   FormTableFieldChangeContext,
   FormTableFieldChangePayload,
+  FormTableValue,
   TableRow
 } from '../types'
 import { getFormItemOnValueChange } from './fieldConfig'
@@ -15,8 +17,8 @@ import { getValueByPath, setValueByPath } from './path'
  */
 export interface InitialFieldChange {
   fieldKey: string
-  value: any
-  previousValue: any
+  value: FormTableValue
+  previousValue: FormTableValue
 }
 
 /**
@@ -34,7 +36,7 @@ interface ResolveRowChangeContext {
   rowIndex: number
   currentRow: TableRow
   tableData: TableRow[]
-  formData: Record<string, any>
+  formData: FormTableRecord
   getFieldConfig: (fieldKey: string) => FormItemConfig | undefined
 }
 
@@ -54,10 +56,10 @@ function createFieldChangeContext(
   rowIndex: number,
   row: TableRow,
   fieldKey: string,
-  value: any,
-  previousValue: any,
+  value: FormTableValue,
+  previousValue: FormTableValue,
   tableData: TableRow[],
-  formData: Record<string, any>
+  formData: FormTableRecord
 ): FormTableFieldChangeContext {
   return {
     row,
@@ -125,7 +127,11 @@ export function resolveRowChange(
    * 同一字段在一条联动链中可能被多次更新，这里会保留初始 previousValue
    * 和最终 value；如果最终值回到初始值，则取消这条变更。
    */
-  const queueFieldChange = (fieldKey: string, value: any, previousValue: any) => {
+  const queueFieldChange = (
+    fieldKey: string,
+    value: FormTableValue,
+    previousValue: FormTableValue
+  ) => {
     if (Object.is(previousValue, value)) {
       return
     }

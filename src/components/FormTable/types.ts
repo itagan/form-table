@@ -45,10 +45,10 @@ export type FormTableFieldListener = (context: FormTableFieldContext, ...args: a
 export type FormTableFieldChangeHandler = (context: FormTableFieldChangeContext) => Partial<TableRow> | void
 
 export interface FormItemOption {
-  label?: any
-  value?: any
+  label?: FormTableValue
+  value?: FormTableValue
   disabled?: boolean
-  [key: string]: any
+  [key: string]: FormTableValue
 }
 
 export interface OptionPropsConfig {
@@ -79,7 +79,7 @@ export interface FormItemTooltipConfig {
 
 export interface FormItemDisplayConfig {
   tooltip?: boolean | FormItemTooltipConfig
-  formatter?: (value: FormTableValue, context: FormTableRuntimeContext) => any
+  formatter?: (value: FormTableValue, context: FormTableRuntimeContext) => FormTableValue
   emptyText?: string
 }
 
@@ -169,10 +169,14 @@ export interface ValidationRule {
   max?: number
   message?: string
   trigger?: string | string[]
-  validator?: (rule: any, value: any, callback: Function) => void
+  validator?: (
+    rule: ValidationRule,
+    value: FormTableValue,
+    callback: (error?: Error | string) => void
+  ) => void
   pattern?: RegExp
   len?: number
-  [key: string]: any
+  [key: string]: FormTableValue
 }
 
 /**
@@ -189,15 +193,15 @@ export interface FormTableProps {
 
 export interface FormTableEventPayload {
   type: string
-  args: any[]
+  args: FormTableValue[]
 }
 
 export interface FormTableFieldChangePayload {
   row: TableRow
   index: number
   fieldKey: string
-  value: any
-  previousValue: any
+  value: FormTableValue
+  previousValue: FormTableValue
 }
 
 export interface FormTableSlotContext {
@@ -208,7 +212,7 @@ export interface FormTableSlotContext {
   isLastRow: boolean
   fieldKey: string
   propPath: string
-  value: any
+  value: FormTableValue
   formData: FormTableRecord
   tableData: TableRow[]
   setValue: (value: FormTableValue) => void

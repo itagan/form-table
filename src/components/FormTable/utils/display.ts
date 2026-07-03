@@ -1,5 +1,6 @@
 import type {
   FormItemOption,
+  FormTableValue,
   FormTableRuntimeContext,
   OptionPropsConfig
 } from '../types'
@@ -71,10 +72,10 @@ export function getOptionKey(
  * 用于 `type: 'text'` 和 tooltip 内容展示。
  */
 export function resolveDisplayValue(
-  value: any,
+  value: FormTableValue,
   options: FormItemOption[] | undefined,
   optionProps: OptionPropsConfig | undefined,
-  formatter: ((value: any, context: FormTableRuntimeContext) => any) | undefined,
+  formatter: ((value: FormTableValue, context: FormTableRuntimeContext) => FormTableValue) | undefined,
   emptyText: string | undefined,
   context: FormTableRuntimeContext
 ) {
