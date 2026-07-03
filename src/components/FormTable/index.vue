@@ -48,9 +48,11 @@ import type {
   CustomComponentConfig,
   FormTableEmitFn,
   FormTableElementFormRef,
+  FormTableEventPayload,
   FormTableFieldChangePayload,
   FormTableRecord,
   FormTableSlots,
+  FormTableValidationErrors,
   ValidationRule,
   TableRow
 } from './types'
@@ -93,8 +95,8 @@ const emit = defineEmits<{
   (e: 'row-update', row: TableRow, index: number): void
   (e: 'row-move', row: TableRow, fromIndex: number, toIndex: number): void
   (e: 'row-remove', row: TableRow, index: number): void
-  (e: 'validate', valid: boolean, errors: any[]): void
-  (e: 'event', payload: { type: string; args: any[] }): void
+  (e: 'validate', valid: boolean, errors: FormTableValidationErrors): void
+  (e: 'event', payload: FormTableEventPayload): void
 }>()
 
 const formRef = ref<FormTableElementFormRef | null>(null)

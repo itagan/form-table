@@ -5,6 +5,7 @@ import type {
   FormTableEmits,
   FormTableExpose,
   FormTableRecord,
+  FormTableValidationErrors,
   TableRow
 } from '../types'
 
@@ -56,16 +57,16 @@ export function useFormTableExpose(options: UseFormTableExposeOptions): FormTabl
 
   return {
     // validate 保持 Element UI callback 风格，同时返回 Promise<boolean> 方便 await。
-    validate: async (callback?: (valid: boolean, errors: any[]) => void) => {
+    validate: async (callback?: (valid: boolean, errors: FormTableValidationErrors) => void) => {
       try {
         const valid = await formRef.value?.validate?.()
-        const errors: any[] = []
+        const errors: FormTableValidationErrors = []
         const normalizedValid = Boolean(valid)
         emitBusinessEvent('validate', normalizedValid, errors)
         callback?.(normalizedValid, errors)
         return normalizedValid
       } catch (error) {
-        const errors: any[] = Array.isArray(error) ? error : [error]
+        const errors: FormTableValidationErrors = Array.isArray(error) ? error : [error]
         emitBusinessEvent('validate', false, errors)
         callback?.(false, errors)
         return false

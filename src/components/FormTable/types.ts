@@ -196,6 +196,8 @@ export interface FormTableEventPayload {
   args: FormTableValue[]
 }
 
+export type FormTableValidationErrors = any[]
+
 export interface FormTableFieldChangePayload {
   row: TableRow
   index: number
@@ -270,7 +272,7 @@ export interface FormTableElementFormRef {
  * 保持接近 Element UI Form 的使用习惯，同时补充表格行操作和数据读写能力。
  */
 export interface FormTableExpose {
-  validate: (callback?: (valid: boolean, errors: any[]) => void) => Promise<boolean>
+  validate: (callback?: (valid: boolean, errors: FormTableValidationErrors) => void) => Promise<boolean>
   resetFields: () => void
   validateField: (fieldProp: string | string[]) => Promise<boolean>
   validateRow: (index: number) => Promise<boolean>
@@ -295,7 +297,7 @@ export interface FormTableEmits {
   'row-update': [row: TableRow, index: number]
   'row-move': [row: TableRow, fromIndex: number, toIndex: number]
   'row-remove': [row: TableRow, index: number]
-  'validate': [valid: boolean, errors: any[]]
+  'validate': [valid: boolean, errors: FormTableValidationErrors]
   'event': [payload: FormTableEventPayload]
 }
 
