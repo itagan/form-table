@@ -1,5 +1,5 @@
 import type { ComputedRef, Ref } from 'vue'
-import type { FormTableActions, TableRow } from '../types'
+import type { FormTableActions, FormTableExpose, TableRow } from '../types'
 
 type ValidateEvent = 'validate'
 type UpdateFormDataEvent = 'update:formData'
@@ -31,7 +31,7 @@ interface UseFormTableExposeOptions {
  * callers still receive the same Element-UI-like methods while index.vue only
  * wires the implementation together.
  */
-export function useFormTableExpose(options: UseFormTableExposeOptions) {
+export function useFormTableExpose(options: UseFormTableExposeOptions): FormTableExpose {
   const {
     props,
     formRef,

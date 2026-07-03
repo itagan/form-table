@@ -237,6 +237,28 @@ export interface FormTableActions {
   clearRowValidate: (index: number) => void
 }
 
+/**
+ * FormTable 通过 ref 暴露给业务侧的公开方法。
+ *
+ * 保持接近 Element UI Form 的使用习惯，同时补充表格行操作和数据读写能力。
+ */
+export interface FormTableExpose {
+  validate: (callback?: (valid: boolean, errors: any[]) => void) => Promise<boolean>
+  resetFields: () => void
+  validateField: (fieldProp: string | string[]) => Promise<boolean>
+  validateRow: (index: number) => Promise<boolean>
+  clearValidate: (fieldProps?: string | string[]) => void
+  addRow: (rowData?: Partial<TableRow>) => void
+  insertRow: (index: number, rowData?: Partial<TableRow>) => void
+  copyRow: (index: number, patch?: Partial<TableRow>) => void
+  updateRow: (index: number, patch: Partial<TableRow>) => void
+  moveRow: (fromIndex: number, toIndex: number) => void
+  getRow: (index: number) => TableRow | undefined
+  removeRow: (index: number) => void
+  getFormData: () => Record<string, any>
+  setFormData: (data: Record<string, any>) => void
+}
+
 export interface FormTableEmits {
   'update:tableData': [data: TableRow[]]
   'update:formData': [data: Record<string, any>]

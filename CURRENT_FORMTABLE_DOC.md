@@ -284,6 +284,14 @@ const handleFormTableEvent = (payload: { type: string; args: any[] }) => {
 - `getFormData()`
 - `setFormData(data)`
 
+TypeScript 中推荐这样标注：
+
+```ts
+import type { FormTableExpose } from '@/components/FormTable/types'
+
+const formTableRef = ref<FormTableExpose>()
+```
+
 ## 配置结构
 
 ### ColumnConfig
