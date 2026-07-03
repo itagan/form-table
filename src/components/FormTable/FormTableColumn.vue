@@ -3,15 +3,6 @@
     :label="column.name"
     v-bind="columnAttrs"
   >
-    <template v-slot:header="scope">
-      <slot
-        name="header"
-        v-bind="getHeaderSlotProps(scope)"
-      >
-        {{ column.name }}
-      </slot>
-    </template>
-
     <template v-slot="scope">
       <FormTableRow
         v-for="(rowItem, rowIndex) in column.children"
@@ -35,7 +26,7 @@
  */
 import { computed, inject, type ComputedRef, useAttrs } from 'vue'
 import FormTableRow from './FormTableRow.vue'
-import type { ColumnConfig, ComponentBind, FormTableBaseContext } from './types'
+import type { ColumnConfig, FormTableBaseContext } from './types'
 import { FORM_TABLE_CONTEXT_KEY } from './types'
 import { extractColumnAttrs } from './utils/attrs'
 import { createRuntimeContext, resolveDynamicValue } from './utils/dynamic'
@@ -63,13 +54,4 @@ const getRowKey = (row: ColumnConfig['children'][number], index: number) => {
   const rowProps = resolveDynamicValue(row.props, runtimeContext.value) || {}
   return row.key || rowProps.key || index
 }
-
-const getHeaderSlotProps = (scope: ComponentBind) => ({
-  ...scope,
-  columnConfig: props.column,
-  columnIndex: props.columnIndex,
-  label: props.column.name,
-  formData: formTableContext.value.formData,
-  tableData: formTableContext.value.tableData
-})
 </script>

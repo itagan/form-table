@@ -12,7 +12,7 @@
 - 每一行都是一组表单字段
 - 需要统一校验、动态增删行
 - 需要插槽或自定义组件扩展单元格
-- 需要透传 Element UI 原生表头插槽能力
+- 需要透传 Element UI 原生表头渲染能力
 
 组件入口：
 
@@ -68,7 +68,7 @@ FormTable/index.vue
 ## 功能语义
 
 - 字段更新统一入口：内置组件、slot、自定义组件都应通过 `dispatch('update:row')` 或 slot 暴露的 `setValue/updateRow` 进入 `commitRowChange`。
-- 列头自定义渲染透传 Element UI 的 `header` 插槽，未声明插槽时回退到 `column.name`。
+- 列头自定义渲染通过 `column.props.renderHeader` 透传 Element UI 原生能力，未配置时回退到 `column.name`。
 - 字段联动保持同步模型：`behavior.onValueChange` 返回当前行 patch，不引入异步联动队列。
 - 隐藏字段策略：字段隐藏后保留原值，但会清理 Element UI 上残留的校验状态。
 - 路径字段策略：`profile.city` 这类 key 贯穿取值、更新、默认值、联动和校验路径。
@@ -85,23 +85,34 @@ FormTable/index.vue
 
 不推荐在 slot 或自定义组件里直接修改 `row.xxx`。直接写入虽然可能让当前渲染短暂变化，但会绕过路径 patch、`onValueChange`、`field-change` 和 `update:formData` 同步。
 
-### 表头插槽
+### 表头渲染
 
-FormTable 透传 Element UI `el-table-column` 的 `header` 插槽，不需要在 `columns` 里增加额外配置。
+FormTable 的 `column.props` 会直接透传给 `el-table-column`，因此可以使用 Element UI 原生 `render-header` 对应的 camelCase 写法 `renderHeader`，不需要新增 FormTable 专用 API。
 
-```vue
-<FormTable :columns="columns" :table-data="tableData" :rules="rules" :form-data="formData">
-  <template #header="{ label, columnIndex, columnConfig, column, $index, formData, tableData }">
-    <template v-if="columnConfig.name === '基本信息'">
-      <span>{{ label }}</span>
-      <el-tag size="mini">第 {{ columnIndex + 1 }} 列</el-tag>
-    </template>
-    <span v-else>{{ label }}</span>
-  </template>
-</FormTable>
+```ts
+const columns = [
+  {
+    name: '姓名',
+    props: {
+      renderHeader: (h, { column }) => h('span', [
+        h('span', column.label),
+        h('el-tooltip', {
+          props: {
+            content: '按姓名筛选'
+          }
+        }, [
+          h('i', {
+            class: 'el-icon-search'
+          })
+        ])
+      ])
+    },
+    children: []
+  }
+]
 ```
 
-其中 `column`、`$index` 来自 Element UI 原始 header slot；`columnConfig`、`columnIndex`、`label`、`formData` 和 `tableData` 是 FormTable 补充的上下文。`label` 来自 `column.name`，也会继续传给 `el-table-column` 作为默认表头文案。
+`renderHeader` 的参数保持 Element UI 原生格式：`(h, { column, $index })`。
 
 ### 数据同步边界
 
