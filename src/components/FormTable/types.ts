@@ -279,8 +279,33 @@ export type FormTableEmitFn = <K extends FormTableEventName>(
   ...args: FormTableEmits[K]
 ) => void
 
+export interface FormTableInternalCommandPayloads {
+  'update:row': [
+    rowIndex: number,
+    row: TableRow,
+    fieldKey: string,
+    value: any
+  ]
+  'update:row-data': [
+    rowIndex: number,
+    patch: Partial<TableRow>
+  ]
+}
+
+export type FormTableInternalCommandName = keyof FormTableInternalCommandPayloads
+export type FormTablePublicDispatchEventName = FormTableArchivedEventName
+
 // provide/inject keys - 使用 Symbol 保证类型安全
-export type DispatchFn = (type: string, ...args: any[]) => void
+export type DispatchFn = {
+  <K extends FormTableInternalCommandName>(
+    type: K,
+    ...args: FormTableInternalCommandPayloads[K]
+  ): void
+  <K extends FormTablePublicDispatchEventName>(
+    type: K,
+    ...args: FormTableEmits[K]
+  ): void
+}
 
 export const FORM_TABLE_CUSTOM_COMPONENTS_KEY: unique symbol = Symbol('customComponents')
 export const FORM_TABLE_CONTEXT_KEY: unique symbol = Symbol('formTableContext')

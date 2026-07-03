@@ -3,6 +3,9 @@ import type {
   FormTableArchivedEventName,
   FormTableEmitFn,
   FormTableEmits,
+  FormTableInternalCommandName,
+  FormTableInternalCommandPayloads,
+  FormTablePublicDispatchEventName,
   TableRow
 } from '../types'
 
@@ -35,15 +38,28 @@ export function useFormTableEvents(emit: FormTableEmitFn) {
   }
 
   // 内部命令不会触发 event 归档，只有它们解析后的业务结果会被派发出去。
-  const dispatch: DispatchFn = (type: string, ...args: any[]) => {
+  function dispatch<K extends FormTableInternalCommandName>(
+    type: K,
+    ...args: FormTableInternalCommandPayloads[K]
+  ): void
+  function dispatch<K extends FormTablePublicDispatchEventName>(
+    type: K,
+    ...args: FormTableEmits[K]
+  ): void
+  function dispatch(
+    type: FormTableInternalCommandName | FormTablePublicDispatchEventName,
+    ...args:
+      | FormTableInternalCommandPayloads[FormTableInternalCommandName]
+      | FormTableEmits[FormTablePublicDispatchEventName]
+  ) {
     if (type === 'update:row') {
-      const [rowIndex, _row, fieldKey, value] = args
+      const [rowIndex, _row, fieldKey, value] = args as FormTableInternalCommandPayloads['update:row']
       internalHandlers.updateRowField?.(rowIndex, fieldKey, value)
       return
     }
 
     if (type === 'update:row-data') {
-      const [rowIndex, patch] = args
+      const [rowIndex, patch] = args as FormTableInternalCommandPayloads['update:row-data']
       internalHandlers.updateRowData?.(rowIndex, patch)
       return
     }
@@ -51,8 +67,10 @@ export function useFormTableEvents(emit: FormTableEmitFn) {
     emitBusinessEvent(type as FormTableArchivedEventName, ...(args as FormTableEmits[FormTableArchivedEventName]))
   }
 
+  const typedDispatch: DispatchFn = dispatch
+
   return {
-    dispatch,
+    dispatch: typedDispatch,
     emitBusinessEvent,
     setInternalEventHandlers
   }
