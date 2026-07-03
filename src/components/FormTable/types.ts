@@ -198,7 +198,7 @@ export interface FormTableEventPayload {
   args: FormTableValue[]
 }
 
-export type FormTableValidationErrors = any[]
+export type FormTableValidationErrors = unknown[]
 
 export interface FormTableFieldChangePayload {
   row: TableRow
