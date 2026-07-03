@@ -4,6 +4,7 @@ import type {
   FormItemConfig,
   FormTableActions,
   FormTableBaseContext,
+  FormTableElementFormRef,
   FormTableEmits,
   FormTableProps,
   TableRow
@@ -30,7 +31,7 @@ type FormTableRowsEventName =
 
 interface UseFormTableRowsOptions {
   props: FormTableRowsProps
-  formRef: Ref<any>
+  formRef: Ref<FormTableElementFormRef | null>
   formTableContext: ComputedRef<FormTableBaseContext>
   visibleColumns: ComputedRef<ColumnConfig[]>
   getFieldConfigByKey: (fieldKey: string) => FormItemConfig | undefined
@@ -209,7 +210,7 @@ export function useFormTableRows(options: UseFormTableRowsOptions) {
       return
     }
 
-    formRef.value?.clearValidate(getAllRowFieldProps(index))
+    formRef.value?.clearValidate?.(getAllRowFieldProps(index))
     const { removedRow, nextTableData } = removeResult
     emitTableDataChange(nextTableData)
     scheduleHiddenFieldValidationCleanup(nextTableData)
@@ -246,10 +247,10 @@ export function useFormTableRows(options: UseFormTableRowsOptions) {
       return await validateFieldProps(getRowFieldProps(index))
     },
     clearValidate: (fieldProps?: string | string[]) => {
-      formRef.value?.clearValidate(fieldProps)
+      formRef.value?.clearValidate?.(fieldProps)
     },
     clearRowValidate: (index: number) => {
-      formRef.value?.clearValidate(getAllRowFieldProps(index))
+      formRef.value?.clearValidate?.(getAllRowFieldProps(index))
     }
   }
 

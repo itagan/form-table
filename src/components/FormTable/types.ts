@@ -246,6 +246,22 @@ export interface FormTableActions {
 }
 
 /**
+ * 内部持有的 Element UI Form 实例能力边界。
+ *
+ * FormTable 只依赖这些方法做整体校验、字段校验和校验状态清理，
+ * 避免 composable 直接透传宽泛的 `any`。
+ */
+export interface FormTableElementFormRef {
+  validate?: () => Promise<boolean> | boolean
+  validateField?: (
+    fieldProp: string,
+    callback: (message: string) => void
+  ) => void
+  resetFields?: () => void
+  clearValidate?: (fieldProps?: string | string[]) => void
+}
+
+/**
  * FormTable 通过 ref 暴露给业务侧的公开方法。
  *
  * 保持接近 Element UI Form 的使用习惯，同时补充表格行操作和数据读写能力。

@@ -1,6 +1,7 @@
 import type { ComputedRef, Ref } from 'vue'
 import type {
   FormTableActions,
+  FormTableElementFormRef,
   FormTableEmits,
   FormTableExpose,
   FormTableRecord,
@@ -15,7 +16,7 @@ interface UseFormTableExposeOptions {
   props: {
     tableData: TableRow[]
   }
-  formRef: Ref<any>
+  formRef: Ref<FormTableElementFormRef | null>
   formModel: ComputedRef<FormTableRecord>
   formTableActions: FormTableActions
   validateFieldProps: (fieldProp: string | string[]) => Promise<boolean>
@@ -57,11 +58,12 @@ export function useFormTableExpose(options: UseFormTableExposeOptions): FormTabl
     // validate 保持 Element UI callback 风格，同时返回 Promise<boolean> 方便 await。
     validate: async (callback?: (valid: boolean, errors: any[]) => void) => {
       try {
-        const valid = await formRef.value?.validate()
+        const valid = await formRef.value?.validate?.()
         const errors: any[] = []
-        emitBusinessEvent('validate', valid, errors)
-        callback?.(valid, errors)
-        return valid
+        const normalizedValid = Boolean(valid)
+        emitBusinessEvent('validate', normalizedValid, errors)
+        callback?.(normalizedValid, errors)
+        return normalizedValid
       } catch (error) {
         const errors: any[] = Array.isArray(error) ? error : [error]
         emitBusinessEvent('validate', false, errors)
@@ -71,7 +73,7 @@ export function useFormTableExpose(options: UseFormTableExposeOptions): FormTabl
     },
 
     resetFields: () => {
-      formRef.value?.resetFields()
+      formRef.value?.resetFields?.()
     },
 
     validateField: validateFieldProps,

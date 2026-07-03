@@ -1,12 +1,12 @@
 import { watch, type Ref } from 'vue'
-import type { FormTableProps, TableRow } from '../types'
+import type { FormTableElementFormRef, FormTableProps, TableRow } from '../types'
 import { createValidationController } from '../utils/validation'
 
 type FormTableValidationProps = Pick<FormTableProps, 'tableData' | 'columns' | 'formData'>
 
 interface UseFormTableValidationOptions {
   props: FormTableValidationProps
-  formRef: Ref<any>
+  formRef: Ref<FormTableElementFormRef | null>
   getAllRowFieldProps: (rowIndex: number, tableData?: TableRow[]) => string[]
   getVisibleRowFieldProps: (rowIndex: number, tableData: TableRow[]) => string[]
 }

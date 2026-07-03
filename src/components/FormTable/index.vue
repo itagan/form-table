@@ -47,6 +47,7 @@ import type {
   ColumnConfig,
   CustomComponentConfig,
   FormTableEmitFn,
+  FormTableElementFormRef,
   FormTableFieldChangePayload,
   FormTableRecord,
   ValidationRule,
@@ -95,7 +96,7 @@ const emit = defineEmits<{
   (e: 'event', payload: { type: string; args: any[] }): void
 }>()
 
-const formRef = ref<any>(null)
+const formRef = ref<FormTableElementFormRef | null>(null)
 const formAttrs = computed(() => extractFormAttrs(attrs))
 const tableAttrs = computed(() => extractTableAttrs(attrs))
 

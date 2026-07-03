@@ -1,5 +1,5 @@
 import { nextTick, type Ref } from 'vue'
-import type { TableRow } from '../types'
+import type { FormTableElementFormRef, TableRow } from '../types'
 
 /**
  * 校验控制器依赖。
@@ -7,7 +7,7 @@ import type { TableRow } from '../types'
  * 字段路径计算由主组件提供，控制器只负责调度和调用 el-form API。
  */
 interface ValidationControllerOptions {
-  formRef: Ref<any>
+  formRef: Ref<FormTableElementFormRef | null>
   getAllRowFieldProps: (rowIndex: number, tableData?: TableRow[]) => string[]
   getVisibleRowFieldProps: (rowIndex: number, tableData: TableRow[]) => string[]
 }
@@ -46,7 +46,7 @@ export function createValidationController(options: ValidationControllerOptions)
     }, [])
 
     if (hiddenFieldProps.length > 0) {
-      formRef.value?.clearValidate(hiddenFieldProps)
+      formRef.value?.clearValidate?.(hiddenFieldProps)
     }
   }
 
@@ -82,14 +82,15 @@ export function createValidationController(options: ValidationControllerOptions)
    */
   const validateFieldProps = async (fieldProp: string | string[]) => {
     const fieldProps = Array.isArray(fieldProp) ? fieldProp : [fieldProp]
-    if (fieldProps.length === 0 || !formRef.value?.validateField) {
+    const validateField = formRef.value?.validateField
+    if (fieldProps.length === 0 || !validateField) {
       return true
     }
 
     try {
       await Promise.all(fieldProps.map((prop) => {
         return new Promise<void>((resolve, reject) => {
-          formRef.value?.validateField(prop, (message: string) => {
+          validateField(prop, (message: string) => {
             if (message) {
               reject(new Error(message))
               return
