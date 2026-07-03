@@ -12,6 +12,7 @@
 - 每一行都是一组表单字段
 - 需要统一校验、动态增删行
 - 需要插槽或自定义组件扩展单元格
+- 需要通过具名插槽自定义列表头
 
 组件入口：
 
@@ -67,6 +68,7 @@ FormTable/index.vue
 ## 功能语义
 
 - 字段更新统一入口：内置组件、slot、自定义组件都应通过 `dispatch('update:row')` 或 slot 暴露的 `setValue/updateRow` 进入 `commitRowChange`。
+- 列头自定义渲染通过 `column.header.slotName` 指向顶层具名插槽，未命中插槽时回退到 `column.name`。
 - 字段联动保持同步模型：`behavior.onValueChange` 返回当前行 patch，不引入异步联动队列。
 - 隐藏字段策略：字段隐藏后保留原值，但会清理 Element UI 上残留的校验状态。
 - 路径字段策略：`profile.city` 这类 key 贯穿取值、更新、默认值、联动和校验路径。
@@ -82,6 +84,33 @@ FormTable/index.vue
 | ref 行方法 | `updateRow(index, patch)` | 复用字段提交入口，支持路径 patch 和联动 |
 
 不推荐在 slot 或自定义组件里直接修改 `row.xxx`。直接写入虽然可能让当前渲染短暂变化，但会绕过路径 patch、`onValueChange`、`field-change` 和 `update:formData` 同步。
+
+### 表头插槽
+
+列配置可以通过 `header.slotName` 指定一个顶层具名插槽来自定义表头：
+
+```ts
+const columns = [
+  {
+    name: '基本信息',
+    header: {
+      slotName: 'header-basic-info'
+    },
+    children: []
+  }
+]
+```
+
+```vue
+<FormTable :columns="columns" :table-data="tableData" :rules="rules" :form-data="formData">
+  <template #header-basic-info="{ label, columnIndex, column, formData, tableData }">
+    <span>{{ label }}</span>
+    <el-tag size="mini">第 {{ columnIndex + 1 }} 列</el-tag>
+  </template>
+</FormTable>
+```
+
+表头插槽上下文包含 `column`、`columnIndex`、`label`、`formData` 和 `tableData`。其中 `label` 来自 `column.name`，也会继续传给 `el-table-column` 作为默认表头文案。
 
 ### 数据同步边界
 

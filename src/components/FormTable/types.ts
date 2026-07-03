@@ -149,12 +149,17 @@ export interface RowConfig {
   children: FormItemConfig[]
 }
 
+export interface ColumnHeaderConfig {
+  slotName?: string
+}
+
 /**
  * 列配置 - 对应 el-table-column，内含多行布局
  */
 export interface ColumnConfig {
   key?: string
   name: string
+  header?: ColumnHeaderConfig
   visible?: DynamicValue<boolean>
   props?: DynamicValue<ComponentBind>
   children: RowConfig[]
@@ -234,7 +239,15 @@ export interface FormTableSlotContext {
   clearCurrentRowValidate: () => void
 }
 
-export type FormTableSlotFn = (slotProps: FormTableSlotContext) => any
+export interface FormTableHeaderSlotContext {
+  column: ColumnConfig
+  columnIndex: number
+  label: string
+  formData: FormTableRecord
+  tableData: TableRow[]
+}
+
+export type FormTableSlotFn<T = any> = (slotProps: T) => any
 export type FormTableSlots = Record<string, FormTableSlotFn | undefined>
 
 export interface FormTableActions {
