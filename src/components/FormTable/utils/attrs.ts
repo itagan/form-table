@@ -4,13 +4,14 @@
  * 从组件透传的 $attrs 中按白名单提取 el-form / el-table / el-table-column 可用属性，
  * 避免非法属性传递到 DOM 引发警告。
  */
+import type { ComponentBind } from '../types'
 
 /** 从对象中选取指定键（忽略 undefined） */
-export function pick<T extends Record<string, any>, K extends keyof T>(
-  obj: T,
-  keys: K[]
-): Pick<T, K> {
-  const result = {} as Pick<T, K>
+export function pick<K extends string>(
+  obj: ComponentBind,
+  keys: readonly K[]
+): Partial<Record<K, ComponentBind[string]>> {
+  const result: Partial<Record<K, ComponentBind[string]>> = {}
   keys.forEach((key) => {
     if (key in obj && obj[key] !== undefined) {
       result[key] = obj[key]
@@ -29,8 +30,8 @@ function kebabToCamelCase(value: string): string {
  * Vue 模板中常用 `label-width`，Element UI 实际 prop 名为 `labelWidth`；
  * 统一转成 camelCase 后再按白名单提取。
  */
-export function normalizeAttrs<T extends Record<string, any>>(attrs: T): Record<string, any> {
-  const normalized: Record<string, any> = {}
+export function normalizeAttrs(attrs: ComponentBind): ComponentBind {
+  const normalized: ComponentBind = {}
 
   Object.keys(attrs).forEach((key) => {
     normalized[kebabToCamelCase(key)] = attrs[key]
@@ -118,19 +119,19 @@ export const EL_COLUMN_PROPS = [
  * 提取 el-form 可接收的透传属性。
  */
 export function extractFormAttrs<T extends Record<string, any>>(attrs: T) {
-  return pick(normalizeAttrs(attrs), EL_FORM_PROPS as any)
+  return pick(normalizeAttrs(attrs), EL_FORM_PROPS)
 }
 
 /**
  * 提取 el-table 可接收的透传属性。
  */
 export function extractTableAttrs<T extends Record<string, any>>(attrs: T) {
-  return pick(normalizeAttrs(attrs), EL_TABLE_PROPS as any)
+  return pick(normalizeAttrs(attrs), EL_TABLE_PROPS)
 }
 
 /**
  * 提取 el-table-column 可接收的透传属性。
  */
 export function extractColumnAttrs<T extends Record<string, any>>(attrs: T) {
-  return pick(normalizeAttrs(attrs), EL_COLUMN_PROPS as any)
+  return pick(normalizeAttrs(attrs), EL_COLUMN_PROPS)
 }
