@@ -3,6 +3,7 @@ import type {
   ColumnConfig,
   FormItemConfig,
   FormTableBaseContext,
+  FormTableProps,
   RowConfig,
   TableRow
 } from '../types'
@@ -10,10 +11,7 @@ import { createRuntimeContext, resolveDynamicValue, resolveVisible } from '../ut
 import { resolveFormItemVisible } from '../utils/fieldConfig'
 import { getSchemaFieldProps, normalizeColumns } from '../utils/schema'
 
-interface FormTableSchemaProps {
-  columns: ColumnConfig[]
-  tableData: TableRow[]
-}
+type FormTableSchemaProps = Pick<FormTableProps, 'columns' | 'tableData'>
 
 interface UseFormTableSchemaOptions {
   props: FormTableSchemaProps

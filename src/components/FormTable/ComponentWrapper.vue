@@ -74,6 +74,7 @@
  *   set → dispatch('update:row', rowIndex, row, fieldKey, newValue) 触发父组件更新
  */
 import { computed, inject, type ComputedRef } from 'vue'
+import { createFallbackFormTableActions } from './utils/actions'
 import { processComponentProps } from './utils/componentProps'
 import { createRuntimeContext } from './utils/dynamic'
 import {
@@ -111,20 +112,7 @@ const formTableContext = inject<ComputedRef<FormTableBaseContext>>(
   FORM_TABLE_CONTEXT_KEY,
   computed(() => ({ formData: {}, tableData: [] }))
 )
-const formTableActions = inject<FormTableActions>(FORM_TABLE_ACTIONS_KEY, {
-  addRow: () => undefined,
-  insertRow: () => undefined,
-  copyRow: () => undefined,
-  updateRow: () => undefined,
-  removeRow: () => undefined,
-  moveRow: () => undefined,
-  getRow: () => undefined,
-  getRowFieldProps: () => [],
-  validateField: async () => true,
-  validateRow: async () => true,
-  clearValidate: () => undefined,
-  clearRowValidate: () => undefined
-})
+const formTableActions = inject<FormTableActions>(FORM_TABLE_ACTIONS_KEY, createFallbackFormTableActions())
 const customComponentsMap = inject<ComputedRef<Record<string, any>>>(FORM_TABLE_CUSTOM_COMPONENTS_KEY, computed(() => ({})))
 const dispatch = inject<DispatchFn>(FORM_TABLE_DISPATCH_KEY)
 

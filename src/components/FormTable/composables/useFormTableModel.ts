@@ -1,15 +1,11 @@
 import { computed } from 'vue'
 import type {
-  CustomComponentConfig,
   FormTableBaseContext,
+  FormTableProps,
   TableRow
 } from '../types'
 
-interface FormTableModelProps {
-  tableData: TableRow[]
-  formData: Record<string, any>
-  customComponents?: CustomComponentConfig[]
-}
+type FormTableModelProps = Pick<FormTableProps, 'tableData' | 'formData' | 'customComponents'>
 
 interface UseFormTableModelOptions {
   props: FormTableModelProps

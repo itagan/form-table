@@ -1,12 +1,8 @@
 import { watch, type Ref } from 'vue'
-import type { ColumnConfig, TableRow } from '../types'
+import type { FormTableProps, TableRow } from '../types'
 import { createValidationController } from '../utils/validation'
 
-interface FormTableValidationProps {
-  tableData: TableRow[]
-  columns: ColumnConfig[]
-  formData: Record<string, any>
-}
+type FormTableValidationProps = Pick<FormTableProps, 'tableData' | 'columns' | 'formData'>
 
 interface UseFormTableValidationOptions {
   props: FormTableValidationProps

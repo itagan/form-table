@@ -5,6 +5,7 @@ import type {
   FormTableActions,
   FormTableBaseContext,
   FormTableEmits,
+  FormTableProps,
   TableRow
 } from '../types'
 import { buildDefaultRow } from '../utils/dynamic'
@@ -17,10 +18,7 @@ import {
   removeTableRow
 } from '../utils/rowActions'
 
-interface FormTableRowsProps {
-  tableData: TableRow[]
-  formData: Record<string, any>
-}
+type FormTableRowsProps = Pick<FormTableProps, 'tableData' | 'formData'>
 
 type FormTableRowsEventName =
   | 'field-change'

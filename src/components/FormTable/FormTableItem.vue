@@ -60,6 +60,7 @@ import {
 } from './types'
 import { createRuntimeContext } from './utils/dynamic'
 import { resolveDisplayValue } from './utils/display'
+import { createFallbackFormTableActions } from './utils/actions'
 import {
   getFormItemCustomComponent,
   getFormItemEmptyText,
@@ -102,20 +103,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const attrs = useAttrs()
-const formTableActions = inject<FormTableActions>(FORM_TABLE_ACTIONS_KEY, {
-  addRow: () => undefined,
-  insertRow: () => undefined,
-  copyRow: () => undefined,
-  updateRow: () => undefined,
-  removeRow: () => undefined,
-  moveRow: () => undefined,
-  getRow: () => undefined,
-  getRowFieldProps: () => [],
-  validateField: async () => true,
-  validateRow: async () => true,
-  clearValidate: () => undefined,
-  clearRowValidate: () => undefined
-})
+const formTableActions = inject<FormTableActions>(FORM_TABLE_ACTIONS_KEY, createFallbackFormTableActions())
 const formTableContext = inject<ComputedRef<FormTableBaseContext>>(
   FORM_TABLE_CONTEXT_KEY,
   computed(() => ({ formData: {}, tableData: [] }))
