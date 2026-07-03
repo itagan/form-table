@@ -25,11 +25,10 @@ interface UseFormTableExposeOptions {
 }
 
 /**
- * Builds the public ref API exposed by FormTable.
+ * 构造 FormTable 通过 ref 暴露给业务侧的公开方法。
  *
- * Keeping this object in one place makes the compatibility surface explicit:
- * callers still receive the same Element-UI-like methods while index.vue only
- * wires the implementation together.
+ * 这里集中维护兼容面：业务侧仍拿到接近 Element UI Form 的方法，
+ * 同时附带表格行操作；index.vue 只负责把依赖组装进来。
  */
 export function useFormTableExpose(options: UseFormTableExposeOptions): FormTableExpose {
   const {
@@ -48,6 +47,7 @@ export function useFormTableExpose(options: UseFormTableExposeOptions): FormTabl
   } = options
 
   return {
+    // validate 保持 Element UI callback 风格，同时返回 Promise<boolean> 方便 await。
     validate: async (callback?: (valid: boolean, errors: any[]) => void) => {
       try {
         const valid = await formRef.value?.validate()
@@ -93,6 +93,7 @@ export function useFormTableExpose(options: UseFormTableExposeOptions): FormTabl
       ...formModel.value
     }),
 
+    // setFormData 会同步 tableData；没有传 tableData 时保留当前行数据。
     setFormData: (data: Record<string, any>) => {
       if (data.tableData) {
         emitTableDataChange(data.tableData)

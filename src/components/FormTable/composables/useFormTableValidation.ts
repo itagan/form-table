@@ -16,10 +16,10 @@ interface UseFormTableValidationOptions {
 }
 
 /**
- * Owns validation scheduling and the hidden-field cleanup policy.
+ * 维护校验调度和隐藏字段错误清理策略。
  *
- * Hidden fields keep their values, but their Element UI validation state is
- * cleared after visibility changes so invisible errors do not linger.
+ * 隐藏字段会保留行数据里的原值，但会清理 Element UI 的校验状态，
+ * 避免不可见字段的错误提示残留在界面或阻塞当前可见行校验。
  */
 export function useFormTableValidation(options: UseFormTableValidationOptions) {
   const {
@@ -35,6 +35,7 @@ export function useFormTableValidation(options: UseFormTableValidationOptions) {
     getVisibleRowFieldProps
   })
 
+  // tableData、columns、formData 都可能影响显隐条件，变化后统一延迟清理隐藏字段错误。
   watch(
     [() => props.tableData, () => props.columns, () => props.formData],
     ([tableData]) => {

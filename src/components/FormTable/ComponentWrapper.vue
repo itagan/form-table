@@ -127,6 +127,8 @@ const formTableActions = inject<FormTableActions>(FORM_TABLE_ACTIONS_KEY, {
 })
 const customComponentsMap = inject<ComputedRef<Record<string, any>>>(FORM_TABLE_CUSTOM_COMPONENTS_KEY, computed(() => ({})))
 const dispatch = inject<DispatchFn>(FORM_TABLE_DISPATCH_KEY)
+
+// 底层组件和业务 listeners 共用同一份字段上下文，确保读到的是当前行、当前字段。
 const runtimeContext = computed(() => createRuntimeContext(formTableContext.value, {
   row: props.row,
   index: props.rowIndex,
@@ -167,6 +169,7 @@ const resolved = computed(() => {
   })
 })
 
+// select 和 tag-input 都使用 el-option 子节点，其余类型按各自模板分支处理。
 const componentType = computed(() => resolved.value.componentType)
 const componentProps = computed(() => resolved.value.componentProps)
 const normalizedOptions = computed<FormItemOption[]>(() => resolvedOptions.value)

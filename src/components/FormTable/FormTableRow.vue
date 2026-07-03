@@ -60,6 +60,7 @@ const runtimeContext = computed(() => createRuntimeContext(formTableContext.valu
   index: props.rowIndex
 }))
 
+// 行级 visible 使用当前表格行作为上下文；隐藏行不会渲染其内部字段和校验项。
 const isVisible = computed(() => resolveVisible(props.rowConfig.visible, runtimeContext.value))
 const resolvedRowBind = computed<Record<string, any>>(() => {
   return resolveDynamicValue(props.rowConfig.bind, runtimeContext.value) || {}
@@ -74,6 +75,11 @@ const rowProps = computed(() => ({
   ...resolvedRowProps.value
 }))
 
+/**
+ * 逐字段解析显隐、栅格 span 和 el-col props。
+ *
+ * 每个字段都会带上自己的 fieldKey 创建上下文，避免一个字段的动态配置误读成行级配置。
+ */
 const visibleItems = computed<Array<{
   config: FormItemConfig
   span: number | string
