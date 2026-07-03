@@ -230,6 +230,9 @@ export interface FormTableSlotContext {
   clearCurrentRowValidate: () => void
 }
 
+export type FormTableSlotFn = (slotProps: FormTableSlotContext) => any
+export type FormTableSlots = Record<string, FormTableSlotFn | undefined>
+
 export interface FormTableActions {
   addRow: (rowData?: Partial<TableRow>) => void
   insertRow: (index: number, rowData?: Partial<TableRow>) => void

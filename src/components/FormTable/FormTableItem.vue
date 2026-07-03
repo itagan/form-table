@@ -49,6 +49,7 @@ import type {
   FormTableBaseContext,
   FormTableRecord,
   FormTableSlotContext,
+  FormTableSlots,
   FormTableValue,
   ValidationRule
 } from './types'
@@ -113,7 +114,7 @@ const formTableContext = inject<ComputedRef<FormTableBaseContext>>(
 )
 const dispatch = inject<DispatchFn>(FORM_TABLE_DISPATCH_KEY)
 const formRules = inject<ComputedRef<Record<string, ValidationRule[]>>>(FORM_TABLE_RULES_KEY, computed(() => ({})))
-const parentSlots = inject(FORM_TABLE_SLOTS_KEY, {} as Record<string, any>)
+const parentSlots = inject<FormTableSlots>(FORM_TABLE_SLOTS_KEY, {})
 
 // 从顶层 FormTable 注入的 slots 中取出对应具名插槽函数
 const slotName = computed(() => getFormItemSlotName(props.config))

@@ -50,6 +50,7 @@ import type {
   FormTableElementFormRef,
   FormTableFieldChangePayload,
   FormTableRecord,
+  FormTableSlots,
   ValidationRule,
   TableRow
 } from './types'
@@ -178,7 +179,7 @@ setInternalEventHandlers({
 provide(FORM_TABLE_CUSTOM_COMPONENTS_KEY, customComponentsMap)
 provide(FORM_TABLE_CONTEXT_KEY, formTableContext)
 provide(FORM_TABLE_ACTIONS_KEY, formTableActions)
-provide(FORM_TABLE_SLOTS_KEY, slots)
+provide(FORM_TABLE_SLOTS_KEY, slots as FormTableSlots)
 provide(FORM_TABLE_RULES_KEY, computed(() => props.rules))
 provide(FORM_TABLE_DISPATCH_KEY, dispatch)
 

@@ -6,11 +6,12 @@ import type {
   FormTableInternalCommandName,
   FormTableInternalCommandPayloads,
   FormTablePublicDispatchEventName,
+  FormTableValue,
   TableRow
 } from '../types'
 
 interface InternalEventHandlers {
-  updateRowField?: (rowIndex: number, fieldKey: string, value: any) => void
+  updateRowField?: (rowIndex: number, fieldKey: string, value: FormTableValue) => void
   updateRowData?: (rowIndex: number, patch: Partial<TableRow>) => void
 }
 
