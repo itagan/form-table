@@ -172,9 +172,14 @@ FormTable/index.vue
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import FormTable from '@/components/FormTable/index.vue'
-import type { ColumnConfig } from '@/components/FormTable/types'
+import type {
+  ColumnConfig,
+  FormTableEventPayload,
+  FormTableRecord,
+  TableRow
+} from '@/components/FormTable/types'
 
-const tableData = ref([
+const tableData = ref<TableRow[]>([
   { name: '张三', age: 25, level: 'mid' }
 ])
 
@@ -224,17 +229,18 @@ const columns = ref<ColumnConfig[]>([
   }
 ])
 
-const handleTableDataUpdate = (newData: any[]) => {
+const handleTableDataUpdate = (newData: TableRow[]) => {
   tableData.value = newData
   formData.tableData = newData
 }
 
-const handleFormDataUpdate = (newData: Record<string, any>) => {
+const handleFormDataUpdate = (newData: FormTableRecord) => {
   Object.assign(formData, newData)
 }
 
-const handleFormTableEvent = (payload: { type: string; args: any[] }) => {
-  console.log(payload)
+const eventLog = ref<FormTableEventPayload[]>([])
+const handleFormTableEvent = (payload: FormTableEventPayload) => {
+  eventLog.value = [payload, ...eventLog.value].slice(0, 8)
 }
 </script>
 ```
@@ -246,7 +252,7 @@ const handleFormTableEvent = (payload: { type: string; args: any[] }) => {
 | `tableData` | `TableRow[]` | 表格数据 |
 | `columns` | `ColumnConfig[]` | 列配置 |
 | `rules` | `Record<string, ValidationRule[]>` | 校验规则 |
-| `formData` | `Record<string, any>` | `el-form` 的 model |
+| `formData` | `FormTableRecord` | `el-form` 的 model |
 | `customComponents` | `CustomComponentConfig[]` | 自定义组件注册表 |
 | `loading` | `boolean` | 表格加载态 |
 
@@ -266,7 +272,7 @@ const handleFormTableEvent = (payload: { type: string; args: any[] }) => {
 | 事件名 | 参数 | 说明 |
 |------|------|------|
 | `update:tableData` | `TableRow[]` | 表格数据变更 |
-| `update:formData` | `Record<string, any>` | 表单数据变更，`tableData` 变更时会自动同步 |
+| `update:formData` | `FormTableRecord` | 表单数据变更，`tableData` 变更时会自动同步 |
 | `field-change` | `({ row, index, fieldKey, value, previousValue })` | 单个字段值变化 |
 | `row-add` | `(row, index)` | 调用 `addRow` 后触发 |
 | `row-copy` | `(row, index)` | 调用 `copyRow` 后触发 |
@@ -359,7 +365,7 @@ const formTableRef = ref<FormTableExpose>()
 interface ColumnConfig {
   name: string
   visible?: boolean | ((context) => boolean)
-  props?: Record<string, any> | ((context) => Record<string, any>)
+  props?: ComponentBind | ((context) => ComponentBind)
   children: RowConfig[]
 }
 ```
@@ -369,8 +375,8 @@ interface ColumnConfig {
 ```ts
 interface RowConfig {
   visible?: boolean | ((context) => boolean)
-  bind?: Record<string, any> | ((context) => Record<string, any>)
-  props?: Record<string, any> | ((context) => Record<string, any>)
+  bind?: ComponentBind | ((context) => ComponentBind)
+  props?: ComponentBind | ((context) => ComponentBind)
   gutter?: number
   children: FormItemConfig[]
 }
@@ -384,14 +390,14 @@ interface FormItemConfig {
   type: FormItemType
   layout?: {
     span?: number | string
-    colProps?: Record<string, any> | ((context) => Record<string, any>)
+    colProps?: ComponentBind | ((context) => ComponentBind)
   }
   component?: {
     customComponent?: string
     slotName?: string
-    bind?: Record<string, any> | ((context) => Record<string, any>)
-    listeners?: Record<string, (context, ...args) => void>
-    options?: Array<{ label: string; value: any }> | ((context) => Array<{ label: string; value: any }>)
+    bind?: ComponentBind | ((context) => ComponentBind)
+    listeners?: Record<string, FormTableFieldListener>
+    options?: FormItemOption[] | ((context) => FormItemOption[])
     optionProps?: {
       label?: string
       value?: string
@@ -407,17 +413,17 @@ interface FormItemConfig {
   display?: {
     tooltip?: boolean | {
       enabled?: boolean
-      props?: Record<string, any> | ((context) => Record<string, any>)
+      props?: ComponentBind | ((context) => ComponentBind)
     }
-    formatter?: (value, context) => any
+    formatter?: (value, context) => FormTableValue
     emptyText?: string
   }
   behavior?: {
     visible?: boolean | ((context) => boolean)
-    defaultValue?: any | ((context) => any)
+    defaultValue?: FormTableValue | ((context) => FormTableValue)
     onValueChange?: (context) => Partial<TableRow> | void
   }
-  rules?: any[]
+  rules?: ValidationRule[]
   label?: string
   labelWidth?: string
 }
