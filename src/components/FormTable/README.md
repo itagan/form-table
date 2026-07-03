@@ -46,6 +46,11 @@ props.tableData → el-table 渲染
 | 文件 | 职责 |
 | ------ | ------ |
 | `types.ts` | 类型定义 + provide/inject Symbol keys |
+| `composables/useFormTableModel.ts` | formModel、运行时上下文、tableData/formData 同步 |
+| `composables/useFormTableSchema.ts` | columns 归一化、字段索引、可见字段校验路径 |
+| `composables/useFormTableRows.ts` | 字段提交、同步联动、行增删改移、actions |
+| `composables/useFormTableValidation.ts` | 隐藏字段校验清理和 validateField 包装 |
+| `composables/useFormTableEvents.ts` | 内部更新命令和外部业务事件分流 |
 | `utils/attrs.ts` | 从 $attrs 按白名单提取 el-form/el-table/el-column 属性 |
 | `utils/componentProps.ts` | 解析 FormItemConfig 为组件类型 + 合并属性 |
 | `utils/schema.ts` | 归一化 columns，生成字段索引 |
@@ -58,8 +63,9 @@ props.tableData → el-table 渲染
 
 1. `types.ts` - 理解数据结构
 2. `index.vue` - 理解入口和数据流
-3. `FormTableColumn.vue` → `FormTableRow.vue` → `FormTableItem.vue` → `ComponentWrapper.vue` - 理解渲染链路
-4. `utils/` 和 `configs/` - 理解配置解析
+3. `composables/` - 理解模型、schema、事件、行操作和校验如何编排
+4. `FormTableColumn.vue` → `FormTableRow.vue` → `FormTableItem.vue` → `ComponentWrapper.vue` - 理解渲染链路
+5. `utils/` 和 `configs/` - 理解配置解析
 
 ## 示例参考
 
@@ -79,6 +85,7 @@ props.tableData → el-table 渲染
 - 内部字段编辑会触发 `update:tableData`
 - 同时也会触发 `update:formData`，并自动带上最新的 `tableData`
 - 因显隐切换而隐藏的字段会自动清理已有校验状态
+- 隐藏字段默认保留值，不会自动从行数据中删除
 
 ## 行操作
 

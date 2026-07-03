@@ -17,6 +17,73 @@
 
 - `src/components/FormTable/index.vue`
 
+## 当前架构
+
+`FormTable` 当前按“入口组装 + 分层渲染 + composable 编排”的方式组织。
+
+核心数据流：
+
+```text
+props.tableData
+  -> el-table / el-form 渲染
+  -> 内置组件、slot 或自定义组件触发 dispatch('update:row')
+  -> commitRowChange 解析路径 patch 和同步字段联动
+  -> emit('update:tableData') + emit('update:formData')
+  -> emit('field-change') / row-* / validate 等业务事件
+```
+
+渲染链路：
+
+```text
+FormTable/index.vue
+  -> FormTableColumn
+    -> FormTableRow
+      -> FormTableItem
+        -> ComponentWrapper
+```
+
+各层职责：
+
+| 层级 | 职责 |
+|------|------|
+| `index.vue` | 组装 props/emits、provide、ref API 和各 composable |
+| `FormTableColumn` | 渲染 `el-table-column`，展开列内多行布局 |
+| `FormTableRow` | 渲染 `el-row` / `el-col`，处理行和字段显隐 |
+| `FormTableItem` | 渲染 `el-form-item`，合并规则、slot、tooltip 和字段上下文 |
+| `ComponentWrapper` | 根据 `type` 渲染 Element UI 或自定义组件，并统一 v-model 更新 |
+
+内部职责已按模块收口：
+
+| 模块 | 职责 |
+|------|------|
+| `useFormTableModel` | 维护 `formModel`、运行时上下文、`tableData` 与 `formData.tableData` 同步 |
+| `useFormTableSchema` | 归一化 columns，维护字段索引、可见列和校验路径 |
+| `useFormTableRows` | 处理字段提交、联动 patch、行增删改移和行级 actions |
+| `useFormTableValidation` | 调度隐藏字段校验清理和字段校验 |
+| `useFormTableEvents` | 区分内部更新命令和外部业务事件，保留统一 `event` 归档 |
+
+`tableData` 是行编辑的主数据源。组件会在行数据变化后同步发出 `update:formData`，其中 `formData.tableData` 始终使用最新表格数据，方便外层以完整表单模型提交。
+
+## 功能语义
+
+- 字段更新统一入口：内置组件、slot、自定义组件都应通过 `dispatch('update:row')` 或 slot 暴露的 `setValue/updateRow` 进入 `commitRowChange`。
+- 字段联动保持同步模型：`behavior.onValueChange` 返回当前行 patch，不引入异步联动队列。
+- 隐藏字段策略：字段隐藏后保留原值，但会清理 Element UI 上残留的校验状态。
+- 路径字段策略：`profile.city` 这类 key 贯穿取值、更新、默认值、联动和校验路径。
+- 事件策略：具体业务事件保持原参数，同时 `event` 事件用于日志、埋点或统一调试归档。
+
+## Demo 能力归类
+
+当前示例页面覆盖以下能力：
+
+- 基础编辑：`src/views/FormTableView.vue`
+- 自定义组件：`PhoneInput`、`StatusTag`、`TestComponent`、`SimpleTest`
+- slot 操作列：`src/views/FormTableAdvancedView.vue`
+- 动态显隐和字段联动：`src/views/DynamicSlotTestView.vue`
+- 调试排查：`src/views/DebugView.vue`
+
+后续清理建议：高级示例中仍保留少量开发调试块和 inline style，可在 demo 产品化时统一收敛，但不影响当前组件 API。
+
 ## 配置原则
 
 - 结构字段直接配置，比如 `label`、`rules`

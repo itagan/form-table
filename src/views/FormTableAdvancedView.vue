@@ -16,8 +16,8 @@
     <div class="demo-section">
       <h2>基础用法</h2>
       
-      <!-- 直接测试自定义组件 -->
-      <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ccc;">
+      <!-- TODO(demo-cleanup): 当前保留为自定义组件排查入口，后续 demo 产品化时可移到 DebugView。 -->
+      <div class="custom-component-debug">
         <h3>直接测试自定义组件</h3>
         <SimpleTest v-model="tableData[0].simpleTest" />
         <p>当前值: {{ tableData[0].simpleTest }}</p>
@@ -618,6 +618,12 @@ const toggleLoading = () => {
       border-radius: 4px;
       font-size: 12px;
       overflow-x: auto;
+    }
+
+    .custom-component-debug {
+      margin-bottom: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
     }
   }
 }
