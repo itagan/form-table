@@ -33,6 +33,15 @@
         />
         <p>当前值: {{ testValue }}</p>
       </div>
+
+      <div class="component-test">
+        <h3>SimpleTest 组件</h3>
+        <SimpleTest
+          v-model="simpleValue"
+          @change="handleSimpleChange"
+        />
+        <p>当前值: {{ simpleValue }}</p>
+      </div>
     </div>
     
     <div class="debug-section">
@@ -58,19 +67,22 @@ import FormTable from '@/components/FormTable/index.vue'
 import PhoneInput from '@/components/CustomComponents/PhoneInput.vue'
 import StatusTag from '@/components/CustomComponents/StatusTag.vue'
 import TestComponent from '@/components/CustomComponents/TestComponent.vue'
+import SimpleTest from '@/components/CustomComponents/SimpleTest.vue'
 import type { ColumnConfig, CustomComponentConfig, TableRow } from '@/components/FormTable/types'
 
 // 测试数据
 const phoneValue = ref('13800138000')
 const statusValue = ref('processing')
 const testValue = ref('test')
+const simpleValue = ref('simple')
 
 const tableData = ref<TableRow[]>([
   { 
     name: '张三', 
     phone: '13800138000',
     status: 'processing',
-    test: 'test'
+    test: 'test',
+    simple: 'simple'
   }
 ])
 
@@ -95,6 +107,10 @@ const customComponents = ref<CustomComponentConfig[]>([
   {
     name: 'TestComponent',
     component: TestComponent
+  },
+  {
+    name: 'SimpleTest',
+    component: SimpleTest
   }
 ])
 const debugLogs = ref<string[]>([])
@@ -179,6 +195,24 @@ const columns = ref<ColumnConfig[]>([
         }
       ]
     }]
+  },
+  {
+    name: '简单测试',
+    props: { width: '150px' },
+    children: [{
+      children: [
+        {
+          key: 'simple',
+          type: 'custom',
+          layout: {
+            span: 24
+          },
+          component: {
+            customComponent: 'SimpleTest'
+          }
+        }
+      ]
+    }]
   }
 ])
 
@@ -193,6 +227,10 @@ const handleStatusChange = (value: string) => {
 
 const handleTestChange = (value: string) => {
   recordDebugLog(`TestComponent changed: ${value}`)
+}
+
+const handleSimpleChange = (value: string) => {
+  recordDebugLog(`SimpleTest changed: ${value}`)
 }
 
 const handleTableDataUpdate = (newData: TableRow[]) => {
