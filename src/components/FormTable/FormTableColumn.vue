@@ -1,5 +1,12 @@
 <template>
   <el-table-column
+    v-if="isNativeRenderColumn"
+    :label="column.name"
+    v-bind="columnAttrs"
+  />
+
+  <el-table-column
+    v-else
     :label="column.name"
     v-bind="columnAttrs"
   >
@@ -88,6 +95,11 @@ const columnAttrs = computed(() => ({
   ...extractColumnAttrs(attrs),
   ...(resolveDynamicValue(props.column.props, runtimeContext.value) || {})
 }))
+
+const nativeRenderColumnTypes = new Set(['index', 'selection', 'expand'])
+const isNativeRenderColumn = computed(() => {
+  return nativeRenderColumnTypes.has(columnAttrs.value.type)
+})
 
 const headerSlotName = computed(() => props.column.headerSlot)
 const headerSlotFn = computed(() => {

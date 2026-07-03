@@ -7,6 +7,10 @@
       <p>本示例展示了如何使用 slot 插槽来自定义表格列的内容：</p>
       <ul>
         <li>
+          <strong>索引列</strong>: 使用 Element UI 原生
+          <code>type: 'index'</code> 渲染序号
+        </li>
+        <li>
           <strong>表头插槽 (#basic-info-header)</strong>: 使用模板自定义列头内容
         </li>
         <li><strong>required</strong>: 在默认表头或表头插槽中展示必填标识</li>
@@ -255,6 +259,16 @@ const rules = ref({
 })
 
 const columns = ref<ColumnConfig[]>([
+  {
+    name: '序号',
+    props: {
+      type: 'index',
+      width: '70px',
+      align: 'center',
+      index: (index: number) => index + 1,
+    },
+    children: [],
+  },
   {
     name: '基本信息',
     required: true,

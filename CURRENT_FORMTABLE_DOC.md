@@ -85,6 +85,27 @@ FormTable/index.vue
 
 不推荐在 slot 或自定义组件里直接修改 `row.xxx`。直接写入虽然可能让当前渲染短暂变化，但会绕过路径 patch、`onValueChange`、`field-change` 和 `update:formData` 同步。
 
+### 索引列
+
+索引列复用 Element UI 原生 `el-table-column` 能力，通过 `column.props.type = 'index'` 配置。FormTable 会跳过单元格表单布局，让 Element UI 自己渲染索引内容。
+
+表格内表单行通常是动态高度，不建议给索引列配置 `fixed`；Element UI 固定列克隆在复杂行高下可能出现高度不同步。
+
+```ts
+const columns = [
+  {
+    name: '序号',
+    props: {
+      type: 'index',
+      width: '70px',
+      align: 'center',
+      index: (index) => index + 1
+    },
+    children: []
+  }
+]
+```
+
 ### 表头渲染
 
 列头渲染优先级为：`props.renderHeader` > `headerSlot` > 默认表头。默认表头会在 `required: true` 时展示必填标识。
