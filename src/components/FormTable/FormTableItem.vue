@@ -47,7 +47,9 @@ import type {
   FormTableActions,
   FormItemConfig,
   FormTableBaseContext,
+  FormTableRecord,
   FormTableSlotContext,
+  FormTableValue,
   ValidationRule
 } from './types'
 import {
@@ -56,6 +58,7 @@ import {
   FORM_TABLE_DISPATCH_KEY,
   FORM_TABLE_RULES_KEY,
   FORM_TABLE_SLOTS_KEY,
+  type ComponentBind,
   type DispatchFn
 } from './types'
 import { createRuntimeContext } from './utils/dynamic'
@@ -92,7 +95,7 @@ interface Props {
   rules?: any[]
   label?: string
   labelWidth?: string
-  row: Record<string, any>
+  row: FormTableRecord
   index: number
   config: FormItemConfig
 }
@@ -124,7 +127,7 @@ const slotFn = computed(() => {
  * 插槽和内置组件都通过 dispatch 进入 FormTable 主组件，确保字段联动、
  * field-change 事件和 update:tableData 的行为一致。
  */
-const setValue = (value: any) => {
+const setValue = (value: FormTableValue) => {
   if (getValueByPath(props.row, props.config.key) === value) {
     return
   }
@@ -142,7 +145,7 @@ const setValue = (value: any) => {
  *
  * slot 自定义内容可以通过它提交多个字段的 patch，而不需要直接修改 row。
  */
-const updateRow = (patch: Record<string, any>) => {
+const updateRow = (patch: Partial<FormTableRecord>) => {
   if (dispatch) {
     dispatch('update:row-data', props.index, patch)
     return
@@ -157,11 +160,11 @@ const runtimeContext = computed(() => createRuntimeContext(formTableContext.valu
   fieldKey: props.config.key
 }))
 
-const resolvedTooltipProps = computed<Record<string, any>>(() => {
+const resolvedTooltipProps = computed<ComponentBind>(() => {
   return resolveFormItemTooltipProps(props.config, runtimeContext.value)
 })
 
-const resolvedBind = computed<Record<string, any>>(() => {
+const resolvedBind = computed<ComponentBind>(() => {
   return resolveFormItemBind(props.config, runtimeContext.value)
 })
 
@@ -192,9 +195,9 @@ const slotProps = computed<FormTableSlotContext>(() => ({
   setValue,
   updateRow,
   removeCurrentRow: () => formTableActions.removeRow(props.index),
-  copyCurrentRow: (patch?: Partial<Record<string, any>>) => formTableActions.copyRow(props.index, patch),
-  insertBefore: (rowData?: Partial<Record<string, any>>) => formTableActions.insertRow(props.index, rowData),
-  insertAfter: (rowData?: Partial<Record<string, any>>) => formTableActions.insertRow(props.index + 1, rowData),
+  copyCurrentRow: (patch?: Partial<FormTableRecord>) => formTableActions.copyRow(props.index, patch),
+  insertBefore: (rowData?: Partial<FormTableRecord>) => formTableActions.insertRow(props.index, rowData),
+  insertAfter: (rowData?: Partial<FormTableRecord>) => formTableActions.insertRow(props.index + 1, rowData),
   moveCurrentRow: (toIndex: number) => formTableActions.moveRow(props.index, toIndex),
   moveUp: () => formTableActions.moveRow(props.index, props.index - 1),
   moveDown: () => formTableActions.moveRow(props.index, props.index + 1),

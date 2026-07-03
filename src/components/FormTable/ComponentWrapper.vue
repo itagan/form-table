@@ -90,19 +90,23 @@ import {
   FORM_TABLE_CONTEXT_KEY,
   FORM_TABLE_CUSTOM_COMPONENTS_KEY,
   FORM_TABLE_DISPATCH_KEY,
+  type ComponentBind,
+  type CustomComponentsMap,
   type DispatchFn,
   type FormTableActions,
   type FormItemOption,
-  type FormTableBaseContext
+  type FormTableBaseContext,
+  type FormTableRecord,
+  type FormTableValue
 } from './types'
 
 interface Props {
   type: string
   fieldKey: string
-  row: Record<string, any>
+  row: FormTableRecord
   rowIndex: number
   customComponent?: string
-  bind?: Record<string, any>
+  bind?: ComponentBind
   [key: string]: any
 }
 
@@ -113,7 +117,7 @@ const formTableContext = inject<ComputedRef<FormTableBaseContext>>(
   computed(() => ({ formData: {}, tableData: [] }))
 )
 const formTableActions = inject<FormTableActions>(FORM_TABLE_ACTIONS_KEY, createFallbackFormTableActions())
-const customComponentsMap = inject<ComputedRef<Record<string, any>>>(FORM_TABLE_CUSTOM_COMPONENTS_KEY, computed(() => ({})))
+const customComponentsMap = inject<ComputedRef<CustomComponentsMap>>(FORM_TABLE_CUSTOM_COMPONENTS_KEY, computed(() => ({})))
 const dispatch = inject<DispatchFn>(FORM_TABLE_DISPATCH_KEY)
 
 // 底层组件和业务 listeners 共用同一份字段上下文，确保读到的是当前行、当前字段。
@@ -185,11 +189,11 @@ const textContent = computed(() => {
   )
 })
 
-const updateRow = (patch: Record<string, any>) => {
+const updateRow = (patch: Partial<FormTableRecord>) => {
   formTableActions.updateRow(props.rowIndex, patch)
 }
 
-const setValue = (value: any) => {
+const setValue = (value: FormTableValue) => {
   if (getValueByPath(props.row, props.fieldKey) !== value && dispatch) {
     dispatch('update:row', props.rowIndex, props.row, props.fieldKey, value)
   }

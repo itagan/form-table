@@ -1,9 +1,9 @@
-import type { TableRow } from '../types'
+import type { FormTableRecord, FormTableValue, TableRow } from '../types'
 
 /**
  * 判断值是否可以继续按对象路径读取。
  */
-function isObjectLike(value: unknown): value is Record<string, any> {
+function isObjectLike(value: unknown): value is FormTableRecord {
   return value !== null && typeof value === 'object'
 }
 
@@ -22,9 +22,9 @@ function normalizePath(path: string): string[] {
  *
  * 支持点路径和数组下标写法，如 `profile.city`、`items[0].name`。
  */
-export function getValueByPath(source: Record<string, any>, path: string) {
+export function getValueByPath(source: FormTableRecord, path: string): FormTableValue | undefined {
   const segments = normalizePath(path)
-  let current: any = source
+  let current: FormTableValue = source
 
   for (const segment of segments) {
     if (!isObjectLike(current) && !Array.isArray(current)) {
@@ -45,18 +45,18 @@ export function getValueByPath(source: Record<string, any>, path: string) {
  *
  * 写入过程中会浅拷贝路径上的对象/数组，避免直接修改原始行数据。
  */
-export function setValueByPath<T extends Record<string, any>>(
+export function setValueByPath<T extends FormTableRecord>(
   source: T,
   path: string,
-  value: any
+  value: FormTableValue
 ): T {
   const segments = normalizePath(path)
   if (segments.length === 0) {
     return source
   }
 
-  const nextSource: Record<string, any> = Array.isArray(source) ? [...source] : { ...source }
-  let current: Record<string, any> = nextSource
+  const nextSource: FormTableRecord = Array.isArray(source) ? [...source] : { ...source }
+  let current: FormTableRecord = nextSource
 
   segments.forEach((segment, index) => {
     const isLast = index === segments.length - 1

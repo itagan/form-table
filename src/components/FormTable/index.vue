@@ -48,6 +48,7 @@ import type {
   CustomComponentConfig,
   FormTableEmitFn,
   FormTableFieldChangePayload,
+  FormTableRecord,
   ValidationRule,
   TableRow
 } from './types'
@@ -67,7 +68,7 @@ const props = withDefaults(defineProps<{
   tableData: TableRow[]
   columns: ColumnConfig[]
   rules: Record<string, ValidationRule[]>
-  formData: Record<string, any>
+  formData: FormTableRecord
   customComponents?: CustomComponentConfig[]
   loading?: boolean
 }>(), {
@@ -83,7 +84,7 @@ const props = withDefaults(defineProps<{
 // 内部 composables 仍通过 FormTableEmitFn 复用 types.ts 中的事件参数映射。
 const emit = defineEmits<{
   (e: 'update:tableData', data: TableRow[]): void
-  (e: 'update:formData', data: Record<string, any>): void
+  (e: 'update:formData', data: FormTableRecord): void
   (e: 'field-change', payload: FormTableFieldChangePayload): void
   (e: 'row-add', row: TableRow, index: number): void
   (e: 'row-copy', row: TableRow, index: number): void

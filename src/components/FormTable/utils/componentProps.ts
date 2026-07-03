@@ -6,6 +6,7 @@
  */
 
 import { getDefaultConfig, getComponentType } from '../configs/defaultComponentConfigs'
+import type { ComponentBind, CustomComponentsMap } from '../types'
 
 const NO_CLEARABLE_TYPES = new Set(['switch', 'radio', 'checkbox', 'rate', 'slider', 'color', 'upload'])
 
@@ -17,8 +18,8 @@ const NO_CLEARABLE_TYPES = new Set(['switch', 'radio', 'checkbox', 'rate', 'slid
 export interface ComponentPropsOptions {
   type: string
   customComponent?: string
-  customComponents?: Record<string, any>
-  bind?: Record<string, any>
+  customComponents?: CustomComponentsMap
+  bind?: ComponentBind
   [key: string]: any
 }
 
@@ -27,7 +28,7 @@ export interface ComponentPropsOptions {
  *
  * 这些值只提供体验默认值，业务方仍可通过 `component.bind` 覆盖。
  */
-const ELEMENT_UI_DEFAULTS: Record<string, Record<string, any>> = {
+const ELEMENT_UI_DEFAULTS: Record<string, ComponentBind> = {
   'el-input': {
     placeholder: '请输入',
     clearable: true
@@ -66,7 +67,7 @@ const ELEMENT_UI_DEFAULTS: Record<string, Record<string, any>> = {
  */
 export function processComponentProps(options: ComponentPropsOptions): {
   componentType: any
-  componentProps: Record<string, any>
+  componentProps: ComponentBind
 } {
   const {
     type,

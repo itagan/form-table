@@ -1,9 +1,11 @@
+export type FormTableValue = any
+export type FormTableRecord = Record<string, FormTableValue>
+export type ComponentBind = Record<string, any>
+
 /**
  * 表格行数据结构，键值对形式，key 对应 FormItemConfig.key
  */
-export interface TableRow {
-  [key: string]: any
-}
+export interface TableRow extends FormTableRecord {}
 
 /**
  * 自定义组件注册项，通过 props.customComponents 传入
@@ -13,8 +15,10 @@ export interface CustomComponentConfig {
   component: any
 }
 
+export type CustomComponentsMap = Record<string, any>
+
 export interface FormTableBaseContext {
-  formData: Record<string, any>
+  formData: FormTableRecord
   tableData: TableRow[]
 }
 
@@ -25,15 +29,15 @@ export interface FormTableRuntimeContext extends FormTableBaseContext {
 }
 
 export interface FormTableFieldContext extends FormTableRuntimeContext {
-  value: any
-  setValue: (value: any) => void
-  updateRow: (patch: Record<string, any>) => void
+  value: FormTableValue
+  setValue: (value: FormTableValue) => void
+  updateRow: (patch: Partial<TableRow>) => void
 }
 
 export interface FormTableFieldChangeContext extends FormTableRuntimeContext {
-  value: any
-  previousValue: any
-  getValue: (path: string) => any
+  value: FormTableValue
+  previousValue: FormTableValue
+  getValue: (path: string) => FormTableValue
 }
 
 export type DynamicValue<T> = T | ((context: FormTableRuntimeContext) => T)
@@ -56,13 +60,13 @@ export interface OptionPropsConfig {
 
 export interface FormItemLayoutConfig {
   span?: number | string
-  colProps?: DynamicValue<Record<string, any>>
+  colProps?: DynamicValue<ComponentBind>
 }
 
 export interface FormItemComponentConfig {
   customComponent?: string
   slotName?: string
-  bind?: DynamicValue<Record<string, any>>
+  bind?: DynamicValue<ComponentBind>
   listeners?: Record<string, FormTableFieldListener>
   options?: DynamicValue<FormItemOption[]>
   optionProps?: DynamicValue<OptionPropsConfig>
@@ -70,18 +74,18 @@ export interface FormItemComponentConfig {
 
 export interface FormItemTooltipConfig {
   enabled?: boolean
-  props?: DynamicValue<Record<string, any>>
+  props?: DynamicValue<ComponentBind>
 }
 
 export interface FormItemDisplayConfig {
   tooltip?: boolean | FormItemTooltipConfig
-  formatter?: (value: any, context: FormTableRuntimeContext) => any
+  formatter?: (value: FormTableValue, context: FormTableRuntimeContext) => any
   emptyText?: string
 }
 
 export interface FormItemBehaviorConfig {
   visible?: DynamicValue<boolean>
-  defaultValue?: DynamicValue<any>
+  defaultValue?: DynamicValue<FormTableValue>
   onValueChange?: FormTableFieldChangeHandler
 }
 
@@ -137,8 +141,8 @@ export interface FormItemConfig {
 export interface RowConfig {
   key?: string
   visible?: DynamicValue<boolean>
-  bind?: DynamicValue<Record<string, any>>
-  props?: DynamicValue<Record<string, any>>
+  bind?: DynamicValue<ComponentBind>
+  props?: DynamicValue<ComponentBind>
   gutter?: number
   children: FormItemConfig[]
 }
@@ -150,7 +154,7 @@ export interface ColumnConfig {
   key?: string
   name: string
   visible?: DynamicValue<boolean>
-  props?: DynamicValue<Record<string, any>>
+  props?: DynamicValue<ComponentBind>
   children: RowConfig[]
 }
 
@@ -178,7 +182,7 @@ export interface FormTableProps {
   tableData: TableRow[]
   columns: ColumnConfig[]
   rules: Record<string, ValidationRule[]>
-  formData: Record<string, any>
+  formData: FormTableRecord
   customComponents?: CustomComponentConfig[]
   loading?: boolean
 }
@@ -205,10 +209,10 @@ export interface FormTableSlotContext {
   fieldKey: string
   propPath: string
   value: any
-  formData: Record<string, any>
+  formData: FormTableRecord
   tableData: TableRow[]
-  setValue: (value: any) => void
-  updateRow: (patch: Record<string, any>) => void
+  setValue: (value: FormTableValue) => void
+  updateRow: (patch: Partial<TableRow>) => void
   removeCurrentRow: () => void
   copyCurrentRow: (patch?: Partial<TableRow>) => void
   insertBefore: (rowData?: Partial<TableRow>) => void
@@ -255,13 +259,13 @@ export interface FormTableExpose {
   moveRow: (fromIndex: number, toIndex: number) => void
   getRow: (index: number) => TableRow | undefined
   removeRow: (index: number) => void
-  getFormData: () => Record<string, any>
-  setFormData: (data: Record<string, any>) => void
+  getFormData: () => FormTableRecord
+  setFormData: (data: FormTableRecord) => void
 }
 
 export interface FormTableEmits {
   'update:tableData': [data: TableRow[]]
-  'update:formData': [data: Record<string, any>]
+  'update:formData': [data: FormTableRecord]
   'field-change': [payload: FormTableFieldChangePayload]
   'row-add': [row: TableRow, index: number]
   'row-copy': [row: TableRow, index: number]

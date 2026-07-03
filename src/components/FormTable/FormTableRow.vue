@@ -35,7 +35,7 @@
  */
 import { computed, inject, type ComputedRef } from 'vue'
 import FormTableItem from './FormTableItem.vue'
-import type { FormItemConfig, FormTableBaseContext, RowConfig, TableRow } from './types'
+import type { ComponentBind, FormItemConfig, FormTableBaseContext, RowConfig, TableRow } from './types'
 import { FORM_TABLE_CONTEXT_KEY } from './types'
 import { createRuntimeContext, resolveDynamicValue, resolveVisible } from './utils/dynamic'
 import {
@@ -62,10 +62,10 @@ const runtimeContext = computed(() => createRuntimeContext(formTableContext.valu
 
 // 行级 visible 使用当前表格行作为上下文；隐藏行不会渲染其内部字段和校验项。
 const isVisible = computed(() => resolveVisible(props.rowConfig.visible, runtimeContext.value))
-const resolvedRowBind = computed<Record<string, any>>(() => {
+const resolvedRowBind = computed<ComponentBind>(() => {
   return resolveDynamicValue(props.rowConfig.bind, runtimeContext.value) || {}
 })
-const resolvedRowProps = computed<Record<string, any>>(() => {
+const resolvedRowProps = computed<ComponentBind>(() => {
   return resolveDynamicValue(props.rowConfig.props, runtimeContext.value) || {}
 })
 const gutter = computed(() => props.rowConfig.gutter || resolvedRowBind.value.gutter || 0)
@@ -83,12 +83,12 @@ const rowProps = computed(() => ({
 const visibleItems = computed<Array<{
   config: FormItemConfig
   span: number | string
-  colProps?: Record<string, any>
+  colProps?: ComponentBind
 }>>(() => {
   return props.rowConfig.children.reduce<Array<{
     config: FormItemConfig
     span: number | string
-    colProps?: Record<string, any>
+    colProps?: ComponentBind
   }>>((items, item) => {
     const itemContext = createRuntimeContext(formTableContext.value, {
       row: props.row,

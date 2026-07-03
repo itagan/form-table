@@ -1,5 +1,11 @@
 import type { ComputedRef, Ref } from 'vue'
-import type { FormTableActions, FormTableEmits, FormTableExpose, TableRow } from '../types'
+import type {
+  FormTableActions,
+  FormTableEmits,
+  FormTableExpose,
+  FormTableRecord,
+  TableRow
+} from '../types'
 
 type ValidateEvent = 'validate'
 type UpdateFormDataEvent = 'update:formData'
@@ -10,7 +16,7 @@ interface UseFormTableExposeOptions {
     tableData: TableRow[]
   }
   formRef: Ref<any>
-  formModel: ComputedRef<Record<string, any>>
+  formModel: ComputedRef<FormTableRecord>
   formTableActions: FormTableActions
   validateFieldProps: (fieldProp: string | string[]) => Promise<boolean>
   emitTableDataChange: (tableData: TableRow[]) => void
@@ -95,7 +101,7 @@ export function useFormTableExpose(options: UseFormTableExposeOptions): FormTabl
     }),
 
     // setFormData 会同步 tableData；没有传 tableData 时保留当前行数据。
-    setFormData: (data: Record<string, any>) => {
+    setFormData: (data: FormTableRecord) => {
       if (data.tableData) {
         emitTableDataChange(data.tableData)
       }

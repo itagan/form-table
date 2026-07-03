@@ -1,7 +1,9 @@
 import { computed } from 'vue'
 import type {
+  CustomComponentsMap,
   FormTableBaseContext,
   FormTableProps,
+  FormTableRecord,
   TableRow
 } from '../types'
 
@@ -10,7 +12,7 @@ type FormTableModelProps = Pick<FormTableProps, 'tableData' | 'formData' | 'cust
 interface UseFormTableModelOptions {
   props: FormTableModelProps
   emitTableData: (tableData: TableRow[]) => void
-  emitFormData: (formData: Record<string, any>) => void
+  emitFormData: (formData: FormTableRecord) => void
 }
 
 /**
@@ -58,7 +60,7 @@ export function useFormTableModel(options: UseFormTableModelOptions) {
 
   // 子组件通过 name 查找自定义组件，避免在每个字段渲染时重复遍历注册列表。
   const customComponentsMap = computed(() => {
-    const map: Record<string, any> = {}
+    const map: CustomComponentsMap = {}
     ;(props.customComponents || []).forEach((item) => {
       map[item.name] = item.component
     })

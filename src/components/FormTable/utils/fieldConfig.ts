@@ -1,4 +1,5 @@
 import type {
+  ComponentBind,
   DynamicValue,
   FormItemConfig,
   FormItemOption,
@@ -15,7 +16,7 @@ import { resolveDynamicValue, resolveVisible } from './dynamic'
  * 未配置时统一返回空对象，调用方可以直接展开或判断 key 数量。
  */
 function resolveRecord(
-  value: DynamicValue<Record<string, any>> | undefined,
+  value: DynamicValue<ComponentBind> | undefined,
   context: FormTableRuntimeContext
 ) {
   return resolveDynamicValue(value, context) || {}
