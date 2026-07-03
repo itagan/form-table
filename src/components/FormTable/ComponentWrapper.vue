@@ -97,6 +97,7 @@ import {
   type FormTableActions,
   type FormItemOption,
   type FormTableBaseContext,
+  type FormTableListenerArgs,
   type FormTableRecord,
   type FormTableValue
 } from './types'
@@ -219,9 +220,9 @@ const fieldContext = computed(() => ({
  */
 const componentListeners = computed(() => {
   const listeners = props.listeners || {}
-  return Object.keys(listeners).reduce<Record<string, (...args: any[]) => void>>((acc, eventName) => {
+  return Object.keys(listeners).reduce<Record<string, (...args: FormTableListenerArgs) => void>>((acc, eventName) => {
     const listener = listeners[eventName]
-    acc[eventName] = (...args: any[]) => {
+    acc[eventName] = (...args: FormTableListenerArgs) => {
       listener?.(fieldContext.value, ...args)
     }
     return acc

@@ -42,7 +42,8 @@ export interface FormTableFieldChangeContext extends FormTableRuntimeContext {
 }
 
 export type DynamicValue<T> = T | ((context: FormTableRuntimeContext) => T)
-export type FormTableFieldListener = (context: FormTableFieldContext, ...args: any[]) => void
+export type FormTableListenerArgs = unknown[]
+export type FormTableFieldListener = (context: FormTableFieldContext, ...args: FormTableListenerArgs) => void
 export type FormTableFieldChangeHandler = (context: FormTableFieldChangeContext) => Partial<TableRow> | void
 
 export interface FormItemOption {
