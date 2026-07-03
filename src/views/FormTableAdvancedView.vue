@@ -95,6 +95,7 @@ import TestComponent from '@/components/CustomComponents/TestComponent.vue'
 import SimpleTest from '@/components/CustomComponents/SimpleTest.vue'
 import type {
   ColumnConfig,
+  CustomComponentConfig,
   FormTableEventPayload,
   FormTableExpose,
   FormTableFieldChangePayload,
@@ -146,7 +147,7 @@ const loading = ref(false)
 const eventLog = ref<FormTableEventPayload[]>([])
 
 // 自定义组件配置
-const customComponents = ref([
+const customComponents = ref<CustomComponentConfig[]>([
   {
     name: 'PhoneInput',
     component: PhoneInput

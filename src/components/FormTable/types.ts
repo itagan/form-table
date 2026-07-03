@@ -1,6 +1,7 @@
 export type FormTableValue = any
 export type FormTableRecord = Record<string, FormTableValue>
 export type ComponentBind = Record<string, any>
+export type FormTableCustomComponent = string | object
 
 /**
  * 表格行数据结构，键值对形式，key 对应 FormItemConfig.key
@@ -12,10 +13,10 @@ export interface TableRow extends FormTableRecord {}
  */
 export interface CustomComponentConfig {
   name: string
-  component: any
+  component: FormTableCustomComponent
 }
 
-export type CustomComponentsMap = Record<string, any>
+export type CustomComponentsMap = Record<string, FormTableCustomComponent>
 
 export interface FormTableBaseContext {
   formData: FormTableRecord
