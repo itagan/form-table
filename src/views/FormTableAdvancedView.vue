@@ -87,14 +87,21 @@
 
 <script lang="ts" setup>
 import { ref, reactive } from 'vue'
+import { Message } from 'element-ui'
 import FormTable from '@/components/FormTable/index.vue'
 import PhoneInput from '@/components/CustomComponents/PhoneInput.vue'
 import StatusTag from '@/components/CustomComponents/StatusTag.vue'
 import TestComponent from '@/components/CustomComponents/TestComponent.vue'
 import SimpleTest from '@/components/CustomComponents/SimpleTest.vue'
-import type { ColumnConfig } from '@/components/FormTable/types'
+import type {
+  ColumnConfig,
+  FormTableEventPayload,
+  FormTableExpose,
+  FormTableFieldChangePayload,
+  TableRow
+} from '@/components/FormTable/types'
 
-const tableData = ref([
+const tableData = ref<TableRow[]>([
   { 
     name: '张三', 
     age: 25, 
@@ -136,7 +143,7 @@ const formData = reactive({
 })
 
 const loading = ref(false)
-const eventLog = ref<Array<{ type: string; args: any[] }>>([])
+const eventLog = ref<FormTableEventPayload[]>([])
 
 // 自定义组件配置
 const customComponents = ref([
@@ -498,26 +505,20 @@ const columns = ref<ColumnConfig[]>([
   }
 ])
 
-const formTableRef = ref()
+const formTableRef = ref<FormTableExpose>()
 
-const handleTableDataUpdate = (newData: any[]) => {
+const handleTableDataUpdate = (newData: TableRow[]) => {
   tableData.value = newData
 }
 
-const handleFormTableEvent = (payload: { type: string; args: any[] }) => {
+const handleFormTableEvent = (payload: FormTableEventPayload) => {
   if (payload.type === 'field-change') {
     return
   }
   eventLog.value = [payload, ...eventLog.value].slice(0, 8)
 }
 
-const handleFieldChange = (payload: {
-  row: Record<string, any>
-  index: number
-  fieldKey: string
-  value: any
-  previousValue: any
-}) => {
+const handleFieldChange = (payload: FormTableFieldChangePayload) => {
   eventLog.value = [{
     type: 'field-change',
     args: [payload]
@@ -525,12 +526,13 @@ const handleFieldChange = (payload: {
 }
 
 const handleSubmit = async () => {
-  try {
-    await formTableRef.value?.validate()
-    console.log('表单验证通过', tableData.value)
-  } catch (error) {
-    console.log('表单验证失败', error)
+  const valid = await formTableRef.value?.validate()
+  if (valid) {
+    Message.success('表单验证通过')
+    return
   }
+
+  Message.error('表单验证失败，请检查输入')
 }
 
 const handleReset = () => {
@@ -558,8 +560,8 @@ const handleRemoveRow = () => {
 }
 
 const handleEditRow = (index: number) => {
-  console.log('编辑行:', index, tableData.value[index])
-  // 这里可以添加编辑逻辑，比如打开编辑对话框
+  const row = tableData.value[index]
+  Message.info(`编辑第 ${index + 1} 行: ${row?.name ?? ''}`)
 }
 
 const handleDeleteRow = (index: number, removeCurrentRow?: () => void) => {

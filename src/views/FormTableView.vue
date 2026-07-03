@@ -39,10 +39,16 @@
 
 <script lang="ts" setup>
 import { ref, reactive } from 'vue'
+import { Message } from 'element-ui'
 import FormTable from '@/components/FormTable/index.vue'
-import type { ColumnConfig } from '@/components/FormTable/types'
+import type {
+  ColumnConfig,
+  FormTableExpose,
+  FormTableRecord,
+  TableRow
+} from '@/components/FormTable/types'
 
-const tableData = ref([
+const tableData = ref<TableRow[]>([
   { name: '小米', age: 16, sex: '男', school: '县一小' },
   { name: '小2米', age: 32, sex: '男', school: '' }
 ])
@@ -131,23 +137,24 @@ const columns = ref<ColumnConfig[]>([
   }
 ])
 
-const formTableRef = ref()
+const formTableRef = ref<FormTableExpose>()
 
-const handleTableDataUpdate = (newData: any[]) => {
+const handleTableDataUpdate = (newData: TableRow[]) => {
   tableData.value = newData
 }
 
-const handleFormDataUpdate = (newData: any) => {
+const handleFormDataUpdate = (newData: FormTableRecord) => {
   Object.assign(formData, newData)
 }
 
 const handleSubmit = async () => {
-  try {
-    await formTableRef.value?.validate()
-    console.log('表单验证通过', tableData.value)
-  } catch (error) {
-    console.log('表单验证失败', error)
+  const valid = await formTableRef.value?.validate()
+  if (valid) {
+    Message.success('表单验证通过')
+    return
   }
+
+  Message.error('表单验证失败，请检查输入')
 }
 
 const handleReset = () => {

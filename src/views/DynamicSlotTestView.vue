@@ -77,8 +77,9 @@
 import { ref, reactive } from 'vue'
 import { Message } from 'element-ui'
 import FormTable from '@/components/FormTable/index.vue'
+import type { ColumnConfig, FormTableExpose, TableRow } from '@/components/FormTable/types'
 
-const tableData = ref([
+const tableData = ref<TableRow[]>([
   { 
     name: '张三', 
     age: 20, 
@@ -109,7 +110,7 @@ const rules = ref({
   'tableData.*.status': [{ required: true, message: '请选择状态', trigger: 'change' }]
 })
 
-const columns = ref([
+const columns = ref<ColumnConfig[]>([
   {
     name: '基本信息',
     props: { width: '200px' },
@@ -219,23 +220,22 @@ const columns = ref([
       }]
     }]
   }
-] as any)
+])
 
-const formTableRef = ref()
+const formTableRef = ref<FormTableExpose>()
 
-const handleTableDataUpdate = (newData: any[]) => {
+const handleTableDataUpdate = (newData: TableRow[]) => {
   tableData.value = newData
 }
 
 const handleSubmit = async () => {
-  try {
-    await formTableRef.value?.validate()
-    console.log('表单验证通过', tableData.value)
+  const valid = await formTableRef.value?.validate()
+  if (valid) {
     Message.success('表单提交成功！')
-  } catch (error) {
-    console.log('表单验证失败', error)
-    Message.error('表单验证失败，请检查输入')
+    return
   }
+
+  Message.error('表单验证失败，请检查输入')
 }
 
 const handleReset = () => {
@@ -271,13 +271,13 @@ const getStatusText = (status: string) => {
   return status === 'active' ? '激活' : '禁用'
 }
 
-const editRow = (row: any, index: number) => {
+const editRow = (row: TableRow, index: number) => {
   Message.info(`编辑第 ${index + 1} 行: ${row.name}`)
 }
 
-const copyRow = (row: any, index: number) => {
+const copyRow = (row: TableRow, index: number) => {
   const newRow = { ...row, name: row.name + '_副本' }
-  tableData.value.splice(index + 1, 0, newRow)
+  formTableRef.value?.insertRow(index + 1, newRow)
   Message.success(`已复制第 ${index + 1} 行`)
 }
 

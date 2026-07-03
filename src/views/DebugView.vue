@@ -44,6 +44,11 @@
         @update:tableData="handleTableDataUpdate"
       />
     </div>
+
+    <div class="debug-section">
+      <h2>调试日志</h2>
+      <pre>{{ JSON.stringify(debugLogs, null, 2) }}</pre>
+    </div>
   </div>
 </template>
 
@@ -53,14 +58,14 @@ import FormTable from '@/components/FormTable/index.vue'
 import PhoneInput from '@/components/CustomComponents/PhoneInput.vue'
 import StatusTag from '@/components/CustomComponents/StatusTag.vue'
 import TestComponent from '@/components/CustomComponents/TestComponent.vue'
-import type { ColumnConfig } from '@/components/FormTable/types'
+import type { ColumnConfig, CustomComponentConfig, TableRow } from '@/components/FormTable/types'
 
 // 测试数据
 const phoneValue = ref('13800138000')
 const statusValue = ref('processing')
 const testValue = ref('test')
 
-const tableData = ref([
+const tableData = ref<TableRow[]>([
   { 
     name: '张三', 
     phone: '13800138000',
@@ -78,7 +83,7 @@ const statusOptions = [
 ]
 
 // 自定义组件配置
-const customComponents = ref([
+const customComponents = ref<CustomComponentConfig[]>([
   {
     name: 'PhoneInput',
     component: PhoneInput
@@ -92,6 +97,11 @@ const customComponents = ref([
     component: TestComponent
   }
 ])
+const debugLogs = ref<string[]>([])
+
+const recordDebugLog = (message: string) => {
+  debugLogs.value = [message, ...debugLogs.value].slice(0, 6)
+}
 
 // 列配置
 const columns = ref<ColumnConfig[]>([
@@ -174,20 +184,20 @@ const columns = ref<ColumnConfig[]>([
 
 // 事件处理
 const handlePhoneChange = (value: string) => {
-  console.log('PhoneInput changed:', value)
+  recordDebugLog(`PhoneInput changed: ${value}`)
 }
 
 const handleStatusChange = (value: string) => {
-  console.log('StatusTag changed:', value)
+  recordDebugLog(`StatusTag changed: ${value}`)
 }
 
 const handleTestChange = (value: string) => {
-  console.log('TestComponent changed:', value)
+  recordDebugLog(`TestComponent changed: ${value}`)
 }
 
-const handleTableDataUpdate = (newData: any[]) => {
+const handleTableDataUpdate = (newData: TableRow[]) => {
   tableData.value = newData
-  console.log('Table data updated:', newData)
+  recordDebugLog(`Table data updated: ${newData.length} row(s)`)
 }
 </script>
 
