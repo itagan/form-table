@@ -272,6 +272,13 @@ export interface FormTableEmits {
   'event': [payload: FormTableEventPayload]
 }
 
+export type FormTableEventName = keyof FormTableEmits
+export type FormTableArchivedEventName = Exclude<FormTableEventName, 'event'>
+export type FormTableEmitFn = <K extends FormTableEventName>(
+  event: K,
+  ...args: FormTableEmits[K]
+) => void
+
 // provide/inject keys - 使用 Symbol 保证类型安全
 export type DispatchFn = (type: string, ...args: any[]) => void
 

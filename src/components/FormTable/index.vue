@@ -46,6 +46,7 @@ import { extractFormAttrs, extractTableAttrs } from './utils/attrs'
 import type {
   ColumnConfig,
   CustomComponentConfig,
+  FormTableEmitFn,
   FormTableFieldChangePayload,
   ValidationRule,
   TableRow
@@ -78,6 +79,8 @@ const props = withDefaults(defineProps<{
   loading: false
 })
 
+// Vue 2.7 的 SFC 编译器要求 defineEmits 使用本地 call signatures；
+// 内部 composables 仍通过 FormTableEmitFn 复用 types.ts 中的事件参数映射。
 const emit = defineEmits<{
   (e: 'update:tableData', data: TableRow[]): void
   (e: 'update:formData', data: Record<string, any>): void
@@ -124,7 +127,7 @@ const {
   dispatch,
   emitBusinessEvent,
   setInternalEventHandlers
-} = useFormTableEvents(emit)
+} = useFormTableEvents(emit as FormTableEmitFn)
 
 const {
   scheduleHiddenFieldValidationCleanup,

@@ -1,8 +1,9 @@
 import type { ComputedRef, Ref } from 'vue'
-import type { FormTableActions, FormTableExpose, TableRow } from '../types'
+import type { FormTableActions, FormTableEmits, FormTableExpose, TableRow } from '../types'
 
 type ValidateEvent = 'validate'
 type UpdateFormDataEvent = 'update:formData'
+type FormTableExposeEventName = ValidateEvent | UpdateFormDataEvent
 
 interface UseFormTableExposeOptions {
   props: {
@@ -13,9 +14,9 @@ interface UseFormTableExposeOptions {
   formTableActions: FormTableActions
   validateFieldProps: (fieldProp: string | string[]) => Promise<boolean>
   emitTableDataChange: (tableData: TableRow[]) => void
-  emitBusinessEvent: (
-    type: ValidateEvent | UpdateFormDataEvent,
-    ...args: any[]
+  emitBusinessEvent: <K extends FormTableExposeEventName>(
+    type: K,
+    ...args: FormTableEmits[K]
   ) => void
   insertRow: (index: number, rowData?: Partial<TableRow>) => void
   copyRow: (index: number, patch?: Partial<TableRow>) => void

@@ -4,7 +4,7 @@ import type {
   FormItemConfig,
   FormTableActions,
   FormTableBaseContext,
-  FormTableFieldChangePayload,
+  FormTableEmits,
   TableRow
 } from '../types'
 import { buildDefaultRow } from '../utils/dynamic'
@@ -22,7 +22,7 @@ interface FormTableRowsProps {
   formData: Record<string, any>
 }
 
-type FormTableBusinessEvent =
+type FormTableRowsEventName =
   | 'field-change'
   | 'row-add'
   | 'row-copy'
@@ -42,7 +42,10 @@ interface UseFormTableRowsOptions {
   validateFieldProps: (fieldProp: string | string[]) => Promise<boolean>
   emitTableDataChange: (tableData: TableRow[]) => void
   scheduleHiddenFieldValidationCleanup: (tableData: TableRow[]) => void
-  emitBusinessEvent: (type: FormTableBusinessEvent, ...args: any[]) => void
+  emitBusinessEvent: <K extends FormTableRowsEventName>(
+    type: K,
+    ...args: FormTableEmits[K]
+  ) => void
 }
 
 /**
@@ -103,7 +106,7 @@ export function useFormTableRows(options: UseFormTableRowsOptions) {
 
     // 字段联动可能一次改变多个字段，这里逐条派发最终去重后的 field-change。
     resolved.fieldChanges.forEach((change) => {
-      emitBusinessEvent('field-change', change as FormTableFieldChangePayload)
+      emitBusinessEvent('field-change', change)
     })
 
     return resolved
