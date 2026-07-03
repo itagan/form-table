@@ -68,7 +68,7 @@ FormTable/index.vue
 ## 功能语义
 
 - 字段更新统一入口：内置组件、slot、自定义组件都应通过 `dispatch('update:row')` 或 slot 暴露的 `setValue/updateRow` 进入 `commitRowChange`。
-- 列头自定义渲染通过 `column.props.renderHeader` 透传 Element UI 原生能力，未配置时回退到 `column.name`。
+- 列头支持 `required`、`headerSlot` 和 `column.props.renderHeader`；原生 `renderHeader` 优先级最高。
 - 字段联动保持同步模型：`behavior.onValueChange` 返回当前行 patch，不引入异步联动队列。
 - 隐藏字段策略：字段隐藏后保留原值，但会清理 Element UI 上残留的校验状态。
 - 路径字段策略：`profile.city` 这类 key 贯穿取值、更新、默认值、联动和校验路径。
@@ -87,12 +87,39 @@ FormTable/index.vue
 
 ### 表头渲染
 
-FormTable 的 `column.props` 会直接透传给 `el-table-column`，因此可以使用 Element UI 原生 `render-header` 对应的 camelCase 写法 `renderHeader`，不需要新增 FormTable 专用 API。
+列头渲染优先级为：`props.renderHeader` > `headerSlot` > 默认表头。默认表头会在 `required: true` 时展示必填标识。
+
+`required` 只控制列头必填标识，不会自动生成字段校验规则；字段校验仍通过全局 `rules` 或字段自身 `rules` 配置。
 
 ```ts
 const columns = [
   {
     name: '姓名',
+    required: true,
+    headerSlot: 'name-header',
+    children: []
+  }
+]
+```
+
+```vue
+<template #name-header="{ label, required }">
+  <span v-if="required" class="required-mark">*</span>
+  <span>{{ label }}</span>
+  <el-tooltip content="按姓名筛选">
+    <i class="el-icon-search"></i>
+  </el-tooltip>
+</template>
+```
+
+`headerSlot` 的上下文包含 `column`、`columnIndex`、`label`、`required`、`formData` 和 `tableData`。
+
+FormTable 的 `column.props` 会直接透传给 `el-table-column`，因此也可以使用 Element UI 原生 `render-header` 对应的 camelCase 写法 `renderHeader`：
+
+```ts
+const columns = [
+  {
+    name: '联系方式',
     props: {
       renderHeader: (h, { column }) => h('span', [
         h('span', column.label),

@@ -155,6 +155,8 @@ export interface RowConfig {
 export interface ColumnConfig {
   key?: string
   name: string
+  required?: boolean
+  headerSlot?: string
   visible?: DynamicValue<boolean>
   props?: DynamicValue<ComponentBind>
   children: RowConfig[]
@@ -234,7 +236,16 @@ export interface FormTableSlotContext {
   clearCurrentRowValidate: () => void
 }
 
-export type FormTableSlotFn = (slotProps: FormTableSlotContext) => any
+export interface FormTableHeaderSlotContext {
+  column: ColumnConfig
+  columnIndex: number
+  label: string
+  required: boolean
+  formData: FormTableRecord
+  tableData: TableRow[]
+}
+
+export type FormTableSlotFn<T = any> = (slotProps: T) => any
 export type FormTableSlots = Record<string, FormTableSlotFn | undefined>
 
 export interface FormTableActions {

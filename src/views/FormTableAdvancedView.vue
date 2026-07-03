@@ -6,12 +6,14 @@
       <h2>Slot 插槽使用说明</h2>
       <p>本示例展示了如何使用 slot 插槽来自定义表格列的内容：</p>
       <ul>
+        <li><strong>表头插槽 (#basic-info-header)</strong>: 使用模板自定义列头内容</li>
+        <li><strong>required</strong>: 在默认表头或表头插槽中展示必填标识</li>
         <li><strong>renderHeader</strong>: 使用 Element UI 原生 render-header 能力自定义列头</li>
         <li><strong>学校选择插槽 (#table-school)</strong>: 使用 el-select 组件进行学校选择</li>
         <li><strong>性别选择插槽 (#table-gender)</strong>: 使用 el-radio-group 组件进行性别选择</li>
         <li><strong>操作按钮插槽 (#table-actions)</strong>: 使用自定义按钮进行行操作</li>
       </ul>
-      <p>在 columns 配置中，字段使用 <code>type: 'slot'</code> 和 <code>slotName: 'table-xxx'</code> 指定插槽；表头通过 <code>props.renderHeader</code> 使用原生渲染函数。</p>
+      <p>在 columns 配置中，字段使用 <code>type: 'slot'</code> 和 <code>slotName: 'table-xxx'</code> 指定插槽；表头可以使用 <code>headerSlot</code> 模板插槽或 <code>props.renderHeader</code> 原生渲染函数。</p>
     </div>
     
     <div class="demo-section">
@@ -29,6 +31,13 @@
         @field-change="handleFieldChange"
         @event="handleFormTableEvent"
       >
+        <!-- 表头插槽 -->
+        <template #basic-info-header="{ label, required, columnIndex }">
+          <span v-if="required" class="required-mark">*</span>
+          <span>{{ label }}</span>
+          <el-tag size="mini" type="success">第 {{ columnIndex + 1 }} 列</el-tag>
+        </template>
+
         <!-- 学校选择插槽 -->
         <template #table-school="{ value, setValue }">
           <el-select :value="value" placeholder="请选择学校" @input="setValue">
@@ -183,23 +192,9 @@ const rules = ref({
 const columns = ref<ColumnConfig[]>([
   {
     name: '基本信息',
-    props: {
-      width: '400px',
-      renderHeader: (h: any, { column, $index }: { column: any; $index: number }) => {
-        return h('span', [
-          h('span', column.label),
-          h('el-tag', {
-            props: {
-              size: 'mini',
-              type: 'success'
-            },
-            style: {
-              marginLeft: '6px'
-            }
-          }, `第 ${$index + 1} 列`)
-        ])
-      }
-    },
+    required: true,
+    headerSlot: 'basic-info-header',
+    props: { width: '400px' },
     children: [{
       gutter: 10,
       children: [
@@ -246,7 +241,34 @@ const columns = ref<ColumnConfig[]>([
   },
   {
     name: '联系方式',
-    props: { width: '300px' },
+    required: true,
+    props: {
+      width: '300px',
+      renderHeader: (h: any, { column }: { column: any; $index: number }) => {
+        return h('span', [
+          h('span', {
+            style: {
+              color: '#f56c6c',
+              marginRight: '4px'
+            }
+          }, '*'),
+          h('span', column.label),
+          h('el-tooltip', {
+            props: {
+              content: '手机号用于联系和校验',
+              placement: 'top'
+            }
+          }, [
+            h('i', {
+              class: 'el-icon-question',
+              style: {
+                marginLeft: '6px'
+              }
+            })
+          ])
+        ])
+      }
+    },
     children: [{
       children: [
         {
@@ -633,5 +655,11 @@ const toggleLoading = () => {
       overflow-x: auto;
     }
   }
+}
+
+.required-mark {
+  color: #f56c6c;
+  font-weight: 600;
+  margin-right: 4px;
 }
 </style>

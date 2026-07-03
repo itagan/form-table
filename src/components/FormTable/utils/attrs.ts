@@ -101,6 +101,7 @@ export const EL_COLUMN_PROPS = [
   'sortOrders',
   'resizable',
   'formatter',
+  'renderHeader',
   'showOverflowTooltip',
   'align',
   'headerAlign',

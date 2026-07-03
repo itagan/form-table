@@ -38,7 +38,7 @@ props.tableData → el-table 渲染
 - 结构能力按职责放到 `layout`、`component`、`display`、`behavior`
 - 组件属性统一放到 `component.bind`
 - `component.bind`、`layout.colProps`、`component.options` 支持函数写法，可按当前上下文动态返回
-- 列头自定义渲染通过 `column.props.renderHeader` 透传 Element UI 原生能力
+- 列头支持 `required`、`headerSlot` 和 `column.props.renderHeader`
 - 顶层 `attrs` 用来扩展 `el-form` / `el-table` / `el-table-column`
 - 只有 `behavior.visible`、`behavior.defaultValue`、`display.formatter`、`layout.colProps` 这类结构能力额外提供独立配置
 
@@ -78,12 +78,39 @@ props.tableData → el-table 渲染
 
 ## 表头渲染
 
-列配置的 `props` 会直接透传给 `el-table-column`，因此可以使用 Element UI 原生的 `render-header` 对应的 camelCase 写法 `renderHeader`。没有配置时，仍展示 `column.name`。
+列头渲染优先级为：`props.renderHeader` > `headerSlot` > 默认表头。默认表头会在 `required: true` 时展示必填标识。
+
+`required` 只控制列头必填标识，不会自动生成字段校验规则；字段校验仍通过全局 `rules` 或字段自身 `rules` 配置。
 
 ```ts
 const columns = [
   {
     name: '姓名',
+    required: true,
+    headerSlot: 'name-header',
+    children: []
+  }
+]
+```
+
+```vue
+<template #name-header="{ label, required }">
+  <span v-if="required" class="required-mark">*</span>
+  <span>{{ label }}</span>
+  <el-tooltip content="按姓名筛选">
+    <i class="el-icon-search"></i>
+  </el-tooltip>
+</template>
+```
+
+`headerSlot` 的上下文包含 `column`、`columnIndex`、`label`、`required`、`formData` 和 `tableData`。
+
+列配置的 `props` 会直接透传给 `el-table-column`，因此也可以使用 Element UI 原生的 `render-header` 对应的 camelCase 写法 `renderHeader`：
+
+```ts
+const columns = [
+  {
+    name: '联系方式',
     props: {
       renderHeader: (h, { column }) => h('span', [
         h('span', column.label),
