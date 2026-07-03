@@ -37,6 +37,7 @@
 import { computed, provide, ref, useAttrs, useSlots } from 'vue'
 import FormTableColumn from './FormTableColumn.vue'
 import { useFormTableEvents } from './composables/useFormTableEvents'
+import { useFormTableExpose } from './composables/useFormTableExpose'
 import { useFormTableModel } from './composables/useFormTableModel'
 import { useFormTableRows } from './composables/useFormTableRows'
 import { useFormTableSchema } from './composables/useFormTableSchema'
@@ -177,62 +178,20 @@ provide(FORM_TABLE_RULES_KEY, computed(() => props.rules))
 provide(FORM_TABLE_DISPATCH_KEY, dispatch)
 
 // 暴露给业务侧 ref 调用的方法，保持和 Element UI Form 常用 API 风格接近。
-defineExpose({
-  validate: async (callback?: (valid: boolean, errors: any[]) => void) => {
-    try {
-      const valid = await formRef.value?.validate()
-      const errors: any[] = []
-      emitBusinessEvent('validate', valid, errors)
-      callback?.(valid, errors)
-      return valid
-    } catch (error) {
-      const errors: any[] = Array.isArray(error) ? error : [error]
-      emitBusinessEvent('validate', false, errors)
-      callback?.(false, errors)
-      return false
-    }
-  },
-
-  resetFields: () => {
-    formRef.value?.resetFields()
-  },
-
-  validateField: validateFieldProps,
-
-  validateRow: async (index: number) => {
-    return await formTableActions.validateRow(index)
-  },
-
-  clearValidate: formTableActions.clearValidate,
-
-  addRow: formTableActions.addRow,
-
+defineExpose(useFormTableExpose({
+  props,
+  formRef,
+  formModel,
+  formTableActions,
+  validateFieldProps,
+  emitTableDataChange,
+  emitBusinessEvent,
   insertRow,
-
   copyRow,
-
   updateRow,
-
   moveRow,
-
-  getRow: formTableActions.getRow,
-
-  removeRow,
-
-  getFormData: () => ({
-    ...formModel.value
-  }),
-
-  setFormData: (data: Record<string, any>) => {
-    if (data.tableData) {
-      emitTableDataChange(data.tableData)
-    }
-    emitBusinessEvent('update:formData', {
-      ...data,
-      tableData: data.tableData ?? props.tableData
-    })
-  }
-})
+  removeRow
+}))
 </script>
 
 <style lang="less" scoped>

@@ -51,6 +51,7 @@ props.tableData → el-table 渲染
 | `composables/useFormTableRows.ts` | 字段提交、同步联动、行增删改移、actions |
 | `composables/useFormTableValidation.ts` | 隐藏字段校验清理和 validateField 包装 |
 | `composables/useFormTableEvents.ts` | 内部更新命令和外部业务事件分流 |
+| `composables/useFormTableExpose.ts` | 维护业务侧通过 ref 调用的公开方法 |
 | `utils/attrs.ts` | 从 $attrs 按白名单提取 el-form/el-table/el-column 属性 |
 | `utils/componentProps.ts` | 解析 FormItemConfig 为组件类型 + 合并属性 |
 | `utils/schema.ts` | 归一化 columns，生成字段索引 |
