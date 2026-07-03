@@ -38,7 +38,7 @@ props.tableData → el-table 渲染
 - 结构能力按职责放到 `layout`、`component`、`display`、`behavior`
 - 组件属性统一放到 `component.bind`
 - `component.bind`、`layout.colProps`、`component.options` 支持函数写法，可按当前上下文动态返回
-- 列头自定义渲染通过 `column.header.slotName` 指向顶层具名插槽
+- 列头自定义渲染透传 Element UI 的 `header` 插槽
 - 顶层 `attrs` 用来扩展 `el-form` / `el-table` / `el-table-column`
 - 只有 `behavior.visible`、`behavior.defaultValue`、`display.formatter`、`layout.colProps` 这类结构能力额外提供独立配置
 
@@ -78,26 +78,19 @@ props.tableData → el-table 渲染
 
 ## 表头插槽
 
-列配置可以通过 `header.slotName` 指定顶层具名插槽来自定义表头。没有配置或插槽不存在时，仍回退展示 `column.name`。
-
-```ts
-const columns = [
-  {
-    name: '基本信息',
-    header: {
-      slotName: 'header-basic-info'
-    },
-    children: []
-  }
-]
-```
+组件透传 Element UI `el-table-column` 的 `header` 插槽。没有声明 `#header` 时，仍展示 `column.name`。
 
 ```vue
-<template #header-basic-info="{ label, columnIndex, column, formData, tableData }">
-  <span>{{ label }}</span>
-  <el-tag size="mini">第 {{ columnIndex + 1 }} 列</el-tag>
+<template #header="{ label, columnIndex, columnConfig, column, $index, formData, tableData }">
+  <template v-if="columnConfig.name === '基本信息'">
+    <span>{{ label }}</span>
+    <el-tag size="mini">第 {{ columnIndex + 1 }} 列</el-tag>
+  </template>
+  <span v-else>{{ label }}</span>
 </template>
 ```
+
+其中 `column`、`$index` 来自 Element UI 原始 header slot；`columnConfig`、`columnIndex`、`label`、`formData`、`tableData` 是 FormTable 补充的上下文。
 
 ## 规则说明
 

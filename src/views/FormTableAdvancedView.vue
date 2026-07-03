@@ -6,12 +6,12 @@
       <h2>Slot 插槽使用说明</h2>
       <p>本示例展示了如何使用 slot 插槽来自定义表格列的内容：</p>
       <ul>
-        <li><strong>表头插槽 (#header-basic-info)</strong>: 使用自定义内容渲染列头</li>
+        <li><strong>表头插槽 (#header)</strong>: 透传 Element UI 表头插槽能力</li>
         <li><strong>学校选择插槽 (#table-school)</strong>: 使用 el-select 组件进行学校选择</li>
         <li><strong>性别选择插槽 (#table-gender)</strong>: 使用 el-radio-group 组件进行性别选择</li>
         <li><strong>操作按钮插槽 (#table-actions)</strong>: 使用自定义按钮进行行操作</li>
       </ul>
-      <p>在 columns 配置中，字段使用 <code>type: 'slot'</code> 和 <code>slotName: 'table-xxx'</code> 指定插槽；表头使用 <code>header.slotName</code> 指定插槽。</p>
+      <p>在 columns 配置中，字段使用 <code>type: 'slot'</code> 和 <code>slotName: 'table-xxx'</code> 指定插槽；表头直接使用 <code>#header</code> 插槽。</p>
     </div>
     
     <div class="demo-section">
@@ -29,10 +29,13 @@
         @field-change="handleFieldChange"
         @event="handleFormTableEvent"
       >
-        <!-- 表头插槽 -->
-        <template #header-basic-info="{ label, columnIndex }">
-          <span>{{ label }}</span>
-          <el-tag size="mini" type="success">第 {{ columnIndex + 1 }} 列</el-tag>
+        <!-- 表头插槽：透传 Element UI el-table-column header slot -->
+        <template #header="{ label, columnIndex, columnConfig }">
+          <template v-if="columnConfig.name === '基本信息'">
+            <span>{{ label }}</span>
+            <el-tag size="mini" type="success">第 {{ columnIndex + 1 }} 列</el-tag>
+          </template>
+          <span v-else>{{ label }}</span>
         </template>
 
         <!-- 学校选择插槽 -->
@@ -189,9 +192,6 @@ const rules = ref({
 const columns = ref<ColumnConfig[]>([
   {
     name: '基本信息',
-    header: {
-      slotName: 'header-basic-info'
-    },
     props: { width: '400px' },
     children: [{
       gutter: 10,
