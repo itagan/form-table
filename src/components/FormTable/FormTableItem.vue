@@ -41,7 +41,7 @@
  * 2. 带 Tooltip: display.tooltip=true 时，内容超出用 el-tooltip 展示
  * 3. 普通组件: 由 ComponentWrapper 根据 type 动态渲染
  */
-import { computed, defineComponent, h, inject, type ComputedRef, useAttrs } from 'vue'
+import { computed, defineComponent, h, inject, type ComputedRef, type PropType, useAttrs } from 'vue'
 import ComponentWrapper from './ComponentWrapper.vue'
 import type {
   FormTableActions,
@@ -49,6 +49,7 @@ import type {
   FormTableBaseContext,
   FormTableRecord,
   FormTableSlotContext,
+  FormTableSlotFn,
   FormTableSlots,
   FormTableValue,
   ValidationRule
@@ -83,8 +84,14 @@ import { resolveRulesForProp } from './utils/rules'
 // 渲染顶层插槽的包装组件，用 div 包裹以兼容 Vue 2 单根节点要求
 const SlotRenderer = defineComponent({
   props: {
-    slotFn: { type: Function, required: true as true },
-    slotProps: { type: Object, required: true as true }
+    slotFn: {
+      type: Function as PropType<FormTableSlotFn>,
+      required: true
+    },
+    slotProps: {
+      type: Object as PropType<FormTableSlotContext>,
+      required: true
+    }
   },
   setup(props) {
     return () => h('div', props.slotFn(props.slotProps))
@@ -93,7 +100,7 @@ const SlotRenderer = defineComponent({
 
 interface Props {
   propPath: string
-  rules?: any[]
+  rules?: ValidationRule[]
   label?: string
   labelWidth?: string
   row: FormTableRecord
