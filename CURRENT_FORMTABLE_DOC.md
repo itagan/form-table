@@ -72,6 +72,65 @@ FormTable/index.vue
 - 路径字段策略：`profile.city` 这类 key 贯穿取值、更新、默认值、联动和校验路径。
 - 事件策略：具体业务事件保持原参数，同时 `event` 事件用于日志、埋点或统一调试归档。
 
+### 字段更新边界
+
+| 来源 | 推荐入口 | 行为 |
+|------|----------|------|
+| 内置组件 | `dispatch('update:row', rowIndex, row, fieldKey, value)` | 更新当前字段，继续执行同步联动，派发 `field-change` |
+| slot 字段 | `setValue(value)` / `updateRow(patch)` | 复用内部 dispatch 链路，避免直接改 `row` |
+| 自定义组件 | `v-model` / `input` 进入 `ComponentWrapper` | 与内置组件一致，最终收口到 `commitRowChange` |
+| ref 行方法 | `updateRow(index, patch)` | 复用字段提交入口，支持路径 patch 和联动 |
+
+不推荐在 slot 或自定义组件里直接修改 `row.xxx`。直接写入虽然可能让当前渲染短暂变化，但会绕过路径 patch、`onValueChange`、`field-change` 和 `update:formData` 同步。
+
+### 数据同步边界
+
+`tableData` 是行编辑的主数据源。每次行数据变化都会产生新的数组并派发：
+
+1. `update:tableData`
+2. `update:formData`，其中 `formData.tableData` 使用同一份最新表格数据
+
+外层可以只监听 `update:tableData` 管理表格，也可以监听 `update:formData` 作为完整表单提交模型。组件内部不会直接修改传入的 `props.tableData` 数组。
+
+### 联动边界
+
+`behavior.onValueChange` 只处理同步联动：
+
+- 入参提供当前字段值、旧值、当前行、行索引、`formData`、`tableData` 和 `getValue(path)`。
+- 返回值是当前行 patch；返回 `void` 表示不追加变更。
+- patch 支持普通 key 和路径 key，例如 `{ remark: '' }`、`{ 'profile.city': '上海' }`。
+- 多字段联动会合并为一次行更新，再逐项派发最终的 `field-change`。
+
+异步请求、远程选项加载、复杂副作用建议放在业务侧事件或字段组件内部处理，避免把表格提交链路变成不可预测的异步队列。
+
+### 校验和显隐边界
+
+动态显隐只影响渲染和校验状态，不改变行数据里的字段值：
+
+- `visible: false` 后，字段值会保留。
+- 组件会在 `nextTick` 合并清理隐藏字段的 Element UI 校验状态。
+- 行级校验只检查当前可见字段。
+- 规则路径支持精确索引和通配索引：`tableData.0.name`、`tableData.*.name`。
+
+这意味着隐藏字段重新显示时，仍会拿到隐藏前的值；如需清空值，应通过 `onValueChange` 或业务侧显式 patch 完成。
+
+### 事件归档边界
+
+内部命令只负责组件内部更新，不进入统一 `event` 归档：
+
+- `update:row`
+- `update:row-data`
+
+公开业务事件会保持原参数派发，并额外进入 `event`：
+
+- `field-change`
+- `row-add`
+- `row-copy`
+- `row-update`
+- `row-move`
+- `row-remove`
+- `validate`
+
 ## Demo 能力归类
 
 当前示例页面覆盖以下能力：
