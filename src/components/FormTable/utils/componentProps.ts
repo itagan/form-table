@@ -6,9 +6,17 @@
  */
 
 import { getDefaultConfig, getComponentType } from '../configs/defaultComponentConfigs'
-import type { ComponentBind, CustomComponentsMap } from '../types'
+import type { ComponentBind, CustomComponentsMap, FormItemType } from '../types'
 
-const NO_CLEARABLE_TYPES = new Set(['switch', 'radio', 'checkbox', 'rate', 'slider', 'color', 'upload'])
+const NO_CLEARABLE_TYPES = new Set<FormItemType>([
+  'switch',
+  'radio',
+  'checkbox',
+  'rate',
+  'slider',
+  'color',
+  'upload'
+])
 
 /**
  * 组件属性解析入参。
@@ -16,7 +24,7 @@ const NO_CLEARABLE_TYPES = new Set(['switch', 'radio', 'checkbox', 'rate', 'slid
  * 除显式字段外，剩余字段会作为渲染层透传属性参与合并。
  */
 export interface ComponentPropsOptions {
-  type: string
+  type: FormItemType
   customComponent?: string
   customComponents?: CustomComponentsMap
   bind?: ComponentBind

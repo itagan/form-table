@@ -4,12 +4,13 @@
  * - defaultComponentConfigs: 各 type 的默认属性（如日期格式、数字步长等）
  * - componentTypeMap: type → Element 组件名的映射
  */
+import type { FormItemType } from '../types'
 
 export interface DefaultComponentConfig {
   [key: string]: any
 }
 
-export const defaultComponentConfigs: Record<string, DefaultComponentConfig> = {
+export const defaultComponentConfigs: Partial<Record<FormItemType, DefaultComponentConfig>> = {
   // 日期相关组件需要设置默认格式
   date: {
     type: 'date',
@@ -97,7 +98,7 @@ export const defaultComponentConfigs: Record<string, DefaultComponentConfig> = {
  * 组件类型映射表
  * 将配置中的type映射到实际的Element UI组件
  */
-export const componentTypeMap: Record<string, string> = {
+export const componentTypeMap: Record<FormItemType, string> = {
   input: 'el-input',
   select: 'el-select',
   date: 'el-date-picker',
@@ -126,7 +127,7 @@ export const componentTypeMap: Record<string, string> = {
  * @param type 组件类型
  * @returns 默认配置对象
  */
-export function getDefaultConfig(type: string): DefaultComponentConfig {
+export function getDefaultConfig(type: FormItemType): DefaultComponentConfig {
   return defaultComponentConfigs[type] || {}
 }
 
@@ -135,6 +136,6 @@ export function getDefaultConfig(type: string): DefaultComponentConfig {
  * @param type 配置中的类型
  * @returns Element UI组件名称
  */
-export function getComponentType(type: string): string {
+export function getComponentType(type: FormItemType): string {
   return componentTypeMap[type] || 'el-input'
 }

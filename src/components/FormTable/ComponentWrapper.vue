@@ -93,6 +93,7 @@ import {
   type ComponentBind,
   type CustomComponentsMap,
   type DispatchFn,
+  type FormItemType,
   type FormTableActions,
   type FormItemOption,
   type FormTableBaseContext,
@@ -101,7 +102,7 @@ import {
 } from './types'
 
 interface Props {
-  type: string
+  type: FormItemType
   fieldKey: string
   row: FormTableRecord
   rowIndex: number
