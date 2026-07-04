@@ -100,6 +100,18 @@ function archiveValue(value: FormTableValue): FormTableValue {
   return value
 }
 
+function archiveSortChangePayload(payload: FormTableValue): FormTableValue {
+  if (!isObject(payload)) {
+    return payload
+  }
+
+  return {
+    column: archiveValue(payload.column),
+    prop: payload.prop,
+    order: payload.order
+  }
+}
+
 /**
  * 统一事件归档面向日志和调试面板，避免把 DOM/Event/Element UI 列实例
  * 直接暴露给 `@event`，具名事件仍会收到 Element UI 原始参数。
@@ -108,15 +120,41 @@ export function archiveFormTableEventArgs(
   type: FormTableArchivedEventName,
   args: FormTableValue[]
 ): FormTableValue[] {
-  return args.map((arg) => {
-    if (type === 'sort-change' && isObject(arg)) {
-      return {
-        column: archiveValue(arg.column),
-        prop: arg.prop,
-        order: arg.order
-      }
-    }
-
-    return archiveValue(arg)
-  })
+  switch (type) {
+    case 'cell-mouse-enter':
+    case 'cell-mouse-leave':
+    case 'cell-click':
+    case 'cell-dblclick':
+      return [
+        args[0],
+        archiveValue(args[1]),
+        archiveValue(args[2]),
+        archiveValue(args[3])
+      ]
+    case 'row-click':
+    case 'row-contextmenu':
+    case 'row-dblclick':
+      return [
+        args[0],
+        archiveValue(args[1]),
+        archiveValue(args[2])
+      ]
+    case 'header-click':
+    case 'header-contextmenu':
+      return [
+        archiveValue(args[0]),
+        archiveValue(args[1])
+      ]
+    case 'header-dragend':
+      return [
+        args[0],
+        args[1],
+        archiveValue(args[2]),
+        archiveValue(args[3])
+      ]
+    case 'sort-change':
+      return [archiveSortChangePayload(args[0])]
+    default:
+      return args
+  }
 }
