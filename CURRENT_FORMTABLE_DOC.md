@@ -209,6 +209,7 @@ const columns = [
 - `row-move`
 - `row-remove`
 - `validate`
+- Element UI Table 原生事件：`select`、`select-all`、`selection-change`、`cell-mouse-enter`、`cell-mouse-leave`、`cell-click`、`cell-dblclick`、`row-click`、`row-contextmenu`、`row-dblclick`、`header-click`、`header-contextmenu`、`sort-change`、`filter-change`、`current-change`、`header-dragend`、`expand-change`
 
 ## Demo 能力归类
 
