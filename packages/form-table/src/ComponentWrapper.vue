@@ -97,8 +97,10 @@ import {
   type FormTableActions,
   type FormItemOption,
   type FormTableBaseContext,
+  type FormTableFieldListener,
   type FormTableListenerArgs,
   type FormTableRecord,
+  type FormTableRuntimeContext,
   type FormTableValue
 } from './types'
 
@@ -109,6 +111,11 @@ const props = defineProps<{
   rowIndex: number
   customComponent?: string
   bind?: ComponentBind
+  options?: FormItemOption[]
+  optionProps?: ComponentBind
+  listeners?: Record<string, FormTableFieldListener>
+  formatter?: (value: FormTableValue, context: FormTableRuntimeContext) => FormTableValue
+  emptyText?: string
   [key: string]: any
 }>()
 

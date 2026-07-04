@@ -213,6 +213,88 @@ describe('FormTable behavior', () => {
     wrapper.destroy()
   })
 
+  it('passes field context and original event args to custom component listeners', async () => {
+    const ListenerInput = {
+      name: 'ListenerInput',
+      props: {
+        value: {
+          type: String,
+          default: ''
+        }
+      },
+      render(this: any, h: any): any {
+        return h(
+          'button',
+          {
+            class: 'listener-input',
+            attrs: { type: 'button' },
+            on: {
+              click: () => this.$emit('commit', 'listener-updated', { source: 'button' })
+            }
+          },
+          this.value
+        )
+      }
+    }
+    const listener = vi.fn((context, value, meta) => {
+      context.setValue('listener-updated')
+    })
+
+    const wrapper = mountFormTable({
+      tableData: [{ status: 'enabled' }],
+      columns: [
+        {
+          name: '状态',
+          children: [
+            {
+              children: [
+                {
+                  key: 'status',
+                  type: 'custom',
+                  component: {
+                    customComponent: 'ListenerInput',
+                    listeners: {
+                      commit: listener
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      customComponents: [
+        {
+          name: 'ListenerInput',
+          component: ListenerInput
+        }
+      ]
+    })
+    await wrapper.vm.$nextTick()
+
+    await wrapper.find('.listener-input').trigger('click')
+
+    expect(listener).toHaveBeenCalledTimes(1)
+    expect(listener.mock.calls[0][0]).toMatchObject({
+      row: { status: 'enabled' },
+      index: 0,
+      fieldKey: 'status',
+      value: 'enabled'
+    })
+    expect(listener.mock.calls[0][1]).toBe('listener-updated')
+    expect(listener.mock.calls[0][2]).toEqual({ source: 'button' })
+    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([
+      { status: 'listener-updated' }
+    ])
+    expect(wrapper.emitted('field-change')?.[0]?.[0]).toMatchObject({
+      fieldKey: 'status',
+      value: 'listener-updated',
+      previousValue: 'enabled'
+    })
+
+    wrapper.destroy()
+  })
+
   it('exposes row mutation methods and emits row operation events', async () => {
     const wrapper = mountFormTable({
       tableData: [
