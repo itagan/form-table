@@ -8,9 +8,12 @@
     "build": "run-s build:package build:playground",
     "build:package": "pnpm --filter @itagan/form-table build",
     "build:playground": "pnpm --filter formtable-playground build",
+    "docs:dev": "pnpm --dir docs --ignore-workspace dev",
+    "docs:build": "pnpm --dir docs --ignore-workspace build",
+    "docs:preview": "pnpm --dir docs --ignore-workspace preview",
     "pack:dry-run": "cd packages/form-table && npm pack --dry-run",
     "preview": "pnpm --filter formtable-playground preview",
-    "release:check": "run-s test type-check build pack:dry-run",
+    "release:check": "run-s test type-check build docs:build pack:dry-run",
     "test": "pnpm --filter @itagan/form-table test",
     "type-check": "pnpm -r type-check"
   },
@@ -18,7 +21,6 @@
     "@types/node": "^16.11.45",
     "@vitejs/plugin-legacy": "^2.0.0",
     "@vitejs/plugin-vue2": "^1.1.2",
-    "@vue/test-utils": "1.3.6",
     "@vue/tsconfig": "^0.1.3",
     "jsdom": "21.1.2",
     "less": "^4.4.0",
@@ -26,8 +28,7 @@
     "terser": "^5.14.2",
     "typescript": "~4.7.4",
     "vite": "^3.0.2",
-    "vitest": "0.34.6",
-    "vue-template-compiler": "2.7.16",
+    "vue": "2.7.16",
     "vue-tsc": "^0.38.8"
   }
 }

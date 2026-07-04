@@ -1,26 +1,30 @@
-# FormTable Docs
+# FormTable
 
-这个目录用于承载后续文档站内容。当前先保持 Markdown 结构，不引入 VitePress 依赖。
+`FormTable` 是一个基于 `Vue 2.7 + Element UI + TypeScript` 的表格内表单组件，适合后台系统中的可编辑明细、批量录入和复杂行级校验场景。
 
-## 导航
+## 开始使用
 
-- [快速开始](./guide/quick-start.md)
-- [配置 API](./api/configuration.md)
-- [事件与 Ref API](./api/events-and-ref.md)
-- [API 类型边界](./api/types.md)
-- [示例索引](./examples/README.md)
-- [迁移与发布准备](./migration/npm-package.md)
+- [快速开始](./guide/quick-start.md)：安装、引入和最小用法。
+- [配置 API](./api/configuration.md)：`tableData`、`columns`、字段配置和规则路径。
+- [事件与 Ref API](./api/events-and-ref.md)：数据事件、行操作、Element Table 事件和公开方法。
+- [示例索引](./examples/README.md)：playground 页面和复现入口。
 
-## 现有资料
+## 核心能力
 
-- 完整能力文档：`../CURRENT_FORMTABLE_DOC.md`
-- npm 包说明：`../packages/form-table/README.md`
-- 调试示例：`../playground/src/views`
+- 表格内嵌 Element UI Form 校验。
+- 字段配置支持 input、select、date、slot 和自定义组件。
+- `slot` / `customComponents` 统一进入 `update:tableData` 和 `field-change` 更新链路。
+- 行操作支持新增、插入、复制、更新、移动、删除和行级校验。
+- Element Table 原生 props / events / methods 保持透传。
 
-## 发布前检查
+## 本地文档站
 
 ```bash
-pnpm release:check
+pnpm docs:dev
 ```
 
-后续接入 VitePress 时，可以把当前目录作为文档根目录，并逐步把 `CURRENT_FORMTABLE_DOC.md` 中的长文拆到 `guide`、`api` 和 `examples` 下。
+构建文档：
+
+```bash
+pnpm docs:build
+```
