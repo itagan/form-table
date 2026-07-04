@@ -330,4 +330,104 @@ describe('FormTable behavior', () => {
     warnSpy.mockRestore()
     wrapper.destroy()
   })
+
+  it('renders required column headers with the default required mark', async () => {
+    const wrapper = mountFormTable({
+      columns: [
+        {
+          name: '姓名',
+          required: true,
+          children: [
+            {
+              children: [
+                {
+                  key: 'name',
+                  type: 'input'
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    })
+    await wrapper.vm.$nextTick()
+
+    const header = wrapper.find('.form-table-column-header')
+
+    expect(header.exists()).toBe(true)
+    expect(header.find('.form-table-column-header__required').text()).toBe('*')
+    expect(header.text()).toContain('姓名')
+
+    wrapper.destroy()
+  })
+
+  it('renders column header slots with header context', async () => {
+    const wrapper = mountFormTable({
+      columns: [
+        {
+          name: '姓名',
+          required: true,
+          headerSlot: 'name-header',
+          children: [
+            {
+              children: [
+                {
+                  key: 'name',
+                  type: 'input'
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      scopedSlots: {
+        'name-header': '<strong class="custom-header">{{ props.label }}-{{ props.required }}-{{ props.columnIndex }}</strong>'
+      }
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.custom-header').text()).toBe('姓名-true-0')
+
+    wrapper.destroy()
+  })
+
+  it('uses native rendering for index columns and skips configured form children', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const wrapper = mountFormTable({
+      tableData: [{ name: 'Alice' }],
+      columns: [
+        {
+          name: '序号',
+          props: {
+            type: 'index',
+            width: '70px'
+          },
+          children: [
+            {
+              children: [
+                {
+                  key: 'shouldNotRender',
+                  type: 'input',
+                  component: {
+                    bind: {
+                      placeholder: '不应渲染'
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        ...createColumns()
+      ]
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.findAll('input').length).toBe(1)
+    expect(wrapper.text()).not.toContain('不应渲染')
+    expect(wrapper.text()).toContain('1')
+
+    warnSpy.mockRestore()
+    wrapper.destroy()
+  })
 })
