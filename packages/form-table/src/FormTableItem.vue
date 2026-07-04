@@ -67,6 +67,10 @@ import { createRuntimeContext } from './utils/dynamic'
 import { resolveDisplayValue } from './utils/display'
 import { createFallbackFormTableActions } from './utils/actions'
 import {
+  createFieldValueSetter,
+  createRowPatchUpdater
+} from './utils/componentProtocol'
+import {
   getFormItemEmptyText,
   getFormItemFormatter,
   getFormItemSlotName,
@@ -135,32 +139,26 @@ const slotFn = computed(() => {
  * 插槽和内置组件都通过 dispatch 进入 FormTable 主组件，确保字段联动、
  * field-change 事件和 update:tableData 的行为一致。
  */
-const setValue = (value: FormTableValue) => {
-  if (getValueByPath(props.row, props.config.key) === value) {
-    return
+const setValue = createFieldValueSetter({
+  getRow: () => props.row,
+  getRowIndex: () => props.index,
+  getFieldKey: () => props.config.key,
+  dispatch,
+  fallback: (row, fieldKey, value) => {
+    row[fieldKey] = value
   }
-
-  if (dispatch) {
-    dispatch('update:row', props.index, props.row, props.config.key, value)
-    return
-  }
-
-  props.row[props.config.key] = value
-}
+})
 
 /**
  * 批量更新当前行。
  *
  * slot 自定义内容可以通过它提交多个字段的 patch，而不需要直接修改 row。
  */
-const updateRow = (patch: Partial<FormTableRecord>) => {
-  if (dispatch) {
-    dispatch('update:row-data', props.index, patch)
-    return
-  }
-
-  Object.assign(props.row, patch)
-}
+const updateRow = createRowPatchUpdater({
+  getRow: () => props.row,
+  getRowIndex: () => props.index,
+  dispatch
+})
 
 const runtimeContext = computed(() => createRuntimeContext(formTableContext.value, {
   row: props.row,

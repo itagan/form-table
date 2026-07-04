@@ -31,6 +31,7 @@ export function createFieldValueSetter(options: {
   getRowIndex: () => number
   getFieldKey: () => string
   dispatch?: DispatchFn
+  fallback?: (row: FormTableRecord, fieldKey: string, value: FormTableValue) => void
   warn?: (message: string) => void
 }) {
   const warn = options.warn || console.warn
@@ -48,7 +49,27 @@ export function createFieldValueSetter(options: {
       return
     }
 
+    if (options.fallback) {
+      options.fallback(row, fieldKey, value)
+      return
+    }
+
     warn('[FormTable] dispatch not found, value update skipped.')
+  }
+}
+
+export function createRowPatchUpdater(options: {
+  getRow: () => FormTableRecord
+  getRowIndex: () => number
+  dispatch?: DispatchFn
+}) {
+  return (patch: Partial<FormTableRecord>) => {
+    if (options.dispatch) {
+      options.dispatch('update:row-data', options.getRowIndex(), patch)
+      return
+    }
+
+    Object.assign(options.getRow(), patch)
   }
 }
 

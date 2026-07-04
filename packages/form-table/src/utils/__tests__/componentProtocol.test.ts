@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
+  createRowPatchUpdater,
   createFieldValueSetter,
   filterComponentRenderProps,
   wrapComponentListeners
@@ -59,6 +60,25 @@ describe('component protocol utils', () => {
     expect(warn).toHaveBeenCalledWith('[FormTable] dispatch not found, value update skipped.')
   })
 
+  it('uses a custom fallback when dispatch is missing for field value updates', () => {
+    const warn = vi.fn()
+    const row = { name: 'Alice' }
+    const setValue = createFieldValueSetter({
+      getRow: () => row,
+      getRowIndex: () => 0,
+      getFieldKey: () => 'name',
+      fallback: (currentRow, fieldKey, value) => {
+        currentRow[fieldKey] = value
+      },
+      warn
+    })
+
+    setValue('Bob')
+
+    expect(row).toEqual({ name: 'Bob' })
+    expect(warn).not.toHaveBeenCalled()
+  })
+
   it('reads the latest row metadata every time a value is set', () => {
     const dispatch = vi.fn()
     const firstRow = { name: 'Alice' }
@@ -98,5 +118,34 @@ describe('component protocol utils', () => {
     wrapped.commit('disabled', { source: 'button' })
 
     expect(listener).toHaveBeenCalledWith(context, 'disabled', { source: 'button' })
+  })
+
+  it('dispatches row patch updates through the unified row-data command', () => {
+    const dispatch = vi.fn()
+    const updateRow = createRowPatchUpdater({
+      getRow: () => ({ name: 'Alice' }),
+      getRowIndex: () => 4,
+      dispatch
+    })
+
+    updateRow({ name: 'Bob' })
+
+    expect(dispatch).toHaveBeenCalledWith('update:row-data', 4, { name: 'Bob' })
+  })
+
+  it('mutates the latest row when row patch updates have no dispatch', () => {
+    const firstRow = { name: 'Alice' }
+    const secondRow = { name: 'Bob' }
+    let currentRow = firstRow
+    const updateRow = createRowPatchUpdater({
+      getRow: () => currentRow,
+      getRowIndex: () => 0
+    })
+
+    currentRow = secondRow
+    updateRow({ age: 18 })
+
+    expect(firstRow).toEqual({ name: 'Alice' })
+    expect(secondRow).toEqual({ name: 'Bob', age: 18 })
   })
 })
