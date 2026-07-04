@@ -3,7 +3,7 @@
     :prop="propPath" 
     :rules="effectiveRules"
     :label="label"
-    :label-width="labelWidth"
+    :label-width="normalizedLabelWidth"
     v-bind="attrs"
   >
     <!-- 插槽组件: 从 FormTable 顶层注入的 $slots 中取具名插槽 -->
@@ -107,8 +107,7 @@ const props = withDefaults(defineProps<{
   index: number
   config: FormItemConfig
 }>(), {
-  label: '',
-  labelWidth: 'auto'
+  label: ''
 })
 
 const attrs = useAttrs()
@@ -180,6 +179,15 @@ const resolvedOptions = computed(() => {
 
 const resolvedOptionProps = computed(() => {
   return resolveFormItemOptionProps(props.config, runtimeContext.value)
+})
+
+/**
+ * Element UI 的 label-width="auto" 会在 LabelWrap 中注册动态宽度。
+ * 表格行删除会批量销毁 form-item，auto 宽度注销时可能因宽度数组已变化而抛错。
+ * FormTable 单元格默认不参与表单级自动标签宽度计算；需要标签宽度时请传固定值。
+ */
+const normalizedLabelWidth = computed(() => {
+  return props.labelWidth === 'auto' ? undefined : props.labelWidth
 })
 
 /**
