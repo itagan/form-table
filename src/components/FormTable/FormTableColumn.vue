@@ -43,7 +43,7 @@
  * 对应 el-table-column，在每个表格单元格的 scoped slot 中
  * 按 column.children 渲染多行 FormTableRow 布局
  */
-import { computed, defineComponent, h, inject, type ComputedRef, type PropType, useAttrs } from 'vue'
+import { computed, defineComponent, h, inject, type ComputedRef, type PropType, useAttrs, watchEffect } from 'vue'
 import FormTableRow from './FormTableRow.vue'
 import type {
   ColumnConfig,
@@ -55,6 +55,7 @@ import type {
 import { FORM_TABLE_CONTEXT_KEY, FORM_TABLE_SLOTS_KEY } from './types'
 import { extractColumnAttrs } from './utils/attrs'
 import { createRuntimeContext, resolveDynamicValue } from './utils/dynamic'
+import { warnFormTableOnce } from './utils/warnings'
 
 const SlotRenderer = defineComponent({
   props: {
@@ -123,6 +124,39 @@ const getRowKey = (row: ColumnConfig['children'][number], index: number) => {
   const rowProps = resolveDynamicValue(row.props, runtimeContext.value) || {}
   return row.key || rowProps.key || index
 }
+
+const getColumnWarningKey = () => {
+  return props.column.key || props.column.name || String(props.columnIndex)
+}
+
+watchEffect(() => {
+  if (!import.meta.env.DEV) {
+    return
+  }
+
+  const columnKey = getColumnWarningKey()
+
+  if (isNativeRenderColumn.value && props.column.children.length > 0) {
+    warnFormTableOnce(
+      `native-column-children:${columnKey}`,
+      `[FormTable] native table column "${columnKey}" uses type "${columnAttrs.value.type}", so configured children will not be rendered.`
+    )
+  }
+
+  if (headerSlotName.value && !headerSlotFn.value) {
+    warnFormTableOnce(
+      `missing-header-slot:${headerSlotName.value}`,
+      `[FormTable] headerSlot "${headerSlotName.value}" is not provided. Column "${columnKey}" will fall back to column.name.`
+    )
+  }
+
+  if (hasRenderHeader.value && (props.column.required === true || Boolean(headerSlotName.value))) {
+    warnFormTableOnce(
+      `render-header-priority:${columnKey}`,
+      `[FormTable] column "${columnKey}" uses props.renderHeader, so required/headerSlot rendering is handled by renderHeader.`
+    )
+  }
+})
 </script>
 
 <style lang="less" scoped>
