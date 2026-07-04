@@ -2,6 +2,7 @@
   "name": "formtable-workspace",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.11.0",
   "scripts": {
     "dev": "pnpm --filter formtable-playground dev",
     "build": "run-s build:package build:playground",
