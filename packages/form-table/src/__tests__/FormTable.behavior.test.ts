@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { mount, createLocalVue } from '@vue/test-utils'
 import ElementUI from 'element-ui'
 import FormTable from '../index.vue'
-import type { ColumnConfig, CustomComponentConfig, TableRow } from '../types.public'
+import type { ColumnConfig, CustomComponentConfig, FormTableExpose, TableRow } from '../types.public'
 
 const localVue = createLocalVue()
 localVue.use(ElementUI)
@@ -200,6 +200,65 @@ describe('FormTable behavior', () => {
       value: 'disabled',
       previousValue: 'enabled'
     })
+
+    wrapper.destroy()
+  })
+
+  it('exposes row mutation methods and emits row operation events', async () => {
+    const wrapper = mountFormTable({
+      tableData: [
+        { name: 'Alice' },
+        { name: 'Bob' }
+      ]
+    })
+    await wrapper.vm.$nextTick()
+    const formTable = wrapper.vm as unknown as FormTableExpose
+
+    formTable.addRow({ name: 'Carol' })
+    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([
+      { name: 'Alice' },
+      { name: 'Bob' },
+      { name: 'Carol' }
+    ])
+    expect(wrapper.emitted('row-add')?.[0]).toEqual([{ name: 'Carol' }, 2])
+
+    await wrapper.setProps({
+      tableData: wrapper.emitted('update:tableData')?.[0]?.[0]
+    })
+
+    formTable.copyRow(0, { name: 'Alice Copy' })
+    expect(wrapper.emitted('update:tableData')?.[1]?.[0]).toEqual([
+      { name: 'Alice' },
+      { name: 'Alice Copy' },
+      { name: 'Bob' },
+      { name: 'Carol' }
+    ])
+    expect(wrapper.emitted('row-copy')?.[0]).toEqual([{ name: 'Alice Copy' }, 1])
+
+    await wrapper.setProps({
+      tableData: wrapper.emitted('update:tableData')?.[1]?.[0]
+    })
+
+    formTable.moveRow(3, 1)
+    expect(wrapper.emitted('update:tableData')?.[2]?.[0]).toEqual([
+      { name: 'Alice' },
+      { name: 'Carol' },
+      { name: 'Alice Copy' },
+      { name: 'Bob' }
+    ])
+    expect(wrapper.emitted('row-move')?.[0]).toEqual([{ name: 'Carol' }, 3, 1])
+
+    await wrapper.setProps({
+      tableData: wrapper.emitted('update:tableData')?.[2]?.[0]
+    })
+
+    formTable.removeRow(2)
+    expect(wrapper.emitted('update:tableData')?.[3]?.[0]).toEqual([
+      { name: 'Alice' },
+      { name: 'Carol' },
+      { name: 'Bob' }
+    ])
+    expect(wrapper.emitted('row-remove')?.[0]).toEqual([{ name: 'Alice Copy' }, 2])
 
     wrapper.destroy()
   })
