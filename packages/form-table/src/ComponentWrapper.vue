@@ -75,6 +75,11 @@
  */
 import { computed, inject, type ComputedRef } from 'vue'
 import { createFallbackFormTableActions } from './utils/actions'
+import {
+  createFieldValueSetter,
+  filterComponentRenderProps,
+  wrapComponentListeners
+} from './utils/componentProtocol'
 import { processComponentProps } from './utils/componentProps'
 import { createRuntimeContext } from './utils/dynamic'
 import {
@@ -98,7 +103,6 @@ import {
   type FormItemOption,
   type FormTableBaseContext,
   type FormTableFieldListener,
-  type FormTableListenerArgs,
   type FormTableRecord,
   type FormTableRuntimeContext,
   type FormTableValue
@@ -178,8 +182,7 @@ const isSelectLike = computed(() => props.type === 'select' || props.type === 't
  * 过滤只用于 FormTable 内部展示逻辑的字段，避免污染 Element UI 组件 props。
  */
 const componentRenderProps = computed(() => {
-  const { options, formatter, emptyText, optionProps, ...rest } = componentProps.value
-  return rest
+  return filterComponentRenderProps(componentProps.value)
 })
 
 /**
@@ -200,11 +203,12 @@ const updateRow = (patch: Partial<FormTableRecord>) => {
   formTableActions.updateRow(props.rowIndex, patch)
 }
 
-const setValue = (value: FormTableValue) => {
-  if (getValueByPath(props.row, props.fieldKey) !== value && dispatch) {
-    dispatch('update:row', props.rowIndex, props.row, props.fieldKey, value)
-  }
-}
+const setValue = createFieldValueSetter({
+  getRow: () => props.row,
+  getRowIndex: () => props.rowIndex,
+  getFieldKey: () => props.fieldKey,
+  dispatch
+})
 
 /**
  * 传给 component.listeners 的字段上下文。
@@ -224,14 +228,7 @@ const fieldContext = computed(() => ({
  * 底层组件原始事件参数会跟在字段上下文之后传给业务回调。
  */
 const componentListeners = computed(() => {
-  const listeners = props.listeners || {}
-  return Object.keys(listeners).reduce<Record<string, (...args: FormTableListenerArgs) => void>>((acc, eventName) => {
-    const listener = listeners[eventName]
-    acc[eventName] = (...args: FormTableListenerArgs) => {
-      listener?.(fieldContext.value, ...args)
-    }
-    return acc
-  }, {})
+  return wrapComponentListeners(props.listeners, () => fieldContext.value)
 })
 
 /**
@@ -241,14 +238,6 @@ const componentListeners = computed(() => {
  */
 const modelValue = computed({
   get: () => getValueByPath(props.row, props.fieldKey),
-  set: (value) => {
-    if (getValueByPath(props.row, props.fieldKey) !== value) {
-      if (dispatch) {
-        dispatch('update:row', props.rowIndex, props.row, props.fieldKey, value)
-      } else {
-        console.warn('[FormTable] dispatch not found, value update skipped.')
-      }
-    }
-  }
+  set: setValue
 })
 </script>
