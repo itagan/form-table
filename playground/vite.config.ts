@@ -18,5 +18,21 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
       formtable: fileURLToPath(new URL('../packages/form-table/src/index.ts', import.meta.url))
     }
+  },
+  build: {
+    chunkSizeWarningLimit: 1200,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('/node_modules/vue/') || id.includes('/node_modules/vue-router/')) {
+            return 'vue-vendor'
+          }
+
+          if (id.includes('/node_modules/element-ui/')) {
+            return 'element-ui'
+          }
+        }
+      }
+    }
   }
 })
