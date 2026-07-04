@@ -1,0 +1,44 @@
+{
+  "name": "formtable",
+  "version": "0.1.0",
+  "description": "Vue 2.7 + Element UI editable form table component.",
+  "type": "module",
+  "main": "./dist/formtable.umd.cjs",
+  "module": "./dist/formtable.es.js",
+  "types": "./dist/types/public-types.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/public-types.d.ts",
+      "import": "./dist/formtable.es.js",
+      "require": "./dist/formtable.umd.cjs"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "run-s build:lib build:types",
+    "build:lib": "vite build",
+    "build:types": "tsc -p tsconfig.build.json",
+    "type-check": "vue-tsc -p tsconfig.json --noEmit",
+    "prepack": "pnpm build"
+  },
+  "peerDependencies": {
+    "element-ui": "^2.15.14",
+    "vue": "^2.7.7"
+  },
+  "devDependencies": {
+    "element-ui": "^2.15.14",
+    "vue": "^2.7.7"
+  },
+  "keywords": [
+    "vue2",
+    "element-ui",
+    "form",
+    "table"
+  ],
+  "license": "MIT"
+}

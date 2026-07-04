@@ -98,7 +98,7 @@ const SlotRenderer = defineComponent({
   }
 })
 
-interface Props {
+const props = withDefaults(defineProps<{
   propPath: string
   rules?: ValidationRule[]
   label?: string
@@ -106,9 +106,7 @@ interface Props {
   row: FormTableRecord
   index: number
   config: FormItemConfig
-}
-
-const props = withDefaults(defineProps<Props>(), {
+}>(), {
   label: '',
   labelWidth: 'auto'
 })

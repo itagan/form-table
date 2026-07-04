@@ -1,49 +1,68 @@
-# FormTable
+# FormTable Workspace
 
-一个基于 `Vue 2.7 + Element UI + TypeScript` 的表格表单组件，适合后台“表格内嵌表单”场景。
+`FormTable` 是一个基于 `Vue 2.7 + Element UI + TypeScript` 的表格表单组件。仓库已经调整为 npm 包、调试页面和文档说明共存的单体仓库。
 
-## 当前状态
+## 仓库结构
 
-这个仓库现在只保留新版实现。
+```text
+packages/
+  form-table/        # 可发布到 npm 的组件包
+playground/          # 本地调试和示例应用
+docs/                # 仓库级文档入口
+```
 
 核心入口：
 
-- `src/components/FormTable/index.vue`
+- 组件包源码：`packages/form-table/src`
+- npm 包入口：`packages/form-table/src/index.ts`
+- 调试应用：`playground/src`
+- 完整能力文档：`CURRENT_FORMTABLE_DOC.md`
 
-推荐先看：
-
-- [当前完整文档](./CURRENT_FORMTABLE_DOC.md)
-- [更新记录](./CHANGELOG.md)
-- [基础示例](./src/views/FormTableView.vue)
-- [高级示例](./src/views/FormTableAdvancedView.vue)
-
-## 特性
-
-- 配置驱动渲染列、布局和表单项
-- 基于 `el-form` 的统一校验
-- 支持动态显隐、默认值、字段联动和行操作
-- 支持插槽和自定义组件扩展，插槽上下文提供行操作快捷方法
-- 支持通过 `component.bind` 统一配置组件属性
-- 支持统一归档事件 `@event`
-
-## 运行
+## 常用命令
 
 ```bash
 pnpm install
 pnpm dev
-pnpm build
 pnpm type-check
+pnpm build
 ```
 
-## 主要路由
+命令说明：
+
+- `pnpm dev`：启动 `playground`，用于本地调试组件。
+- `pnpm type-check`：检查组件包和 playground。
+- `pnpm build`：先构建 npm 包，再构建 playground。
+- `pnpm --filter formtable build`：只构建可发布 npm 包。
+
+## npm 包使用
+
+```bash
+pnpm add formtable
+```
+
+```ts
+import FormTable from 'formtable'
+import type { ColumnConfig, TableRow } from 'formtable'
+```
+
+使用方需要同时安装并注册 peer dependencies：
+
+- `vue@^2.7.7`
+- `element-ui@^2.15.14`
+
+## 调试页面
+
+本地启动后主要路由：
 
 - `/form-table`
 - `/form-table-advanced`
 - `/dynamic-slot-test`
 - `/debug`
 
-## 文档说明
+`playground` 通过 workspace alias 直接引用 `packages/form-table/src/index.ts`，开发时无需先构建组件包。
 
-详细 API、配置结构、事件、组件属性、自定义组件和插槽用法，统一维护在：
+## 文档
 
-- [CURRENT_FORMTABLE_DOC.md](./CURRENT_FORMTABLE_DOC.md)
+- [完整能力文档](./CURRENT_FORMTABLE_DOC.md)
+- [更新记录](./CHANGELOG.md)
+- [组件包说明](./packages/form-table/README.md)

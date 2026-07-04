@@ -16,7 +16,7 @@
 
 组件入口：
 
-- `src/components/FormTable/index.vue`
+- `packages/form-table/src/index.vue`
 
 ## 当前架构
 
@@ -228,11 +228,11 @@ const columns = [
 
 当前示例页面覆盖以下能力：
 
-- 基础编辑：`src/views/FormTableView.vue`
+- 基础编辑：`playground/src/views/FormTableView.vue`
 - 自定义组件：`PhoneInput`、`StatusTag`、`TestComponent`、`SimpleTest`
-- slot 操作列：`src/views/FormTableAdvancedView.vue`
-- 动态显隐和字段联动：`src/views/DynamicSlotTestView.vue`
-- 调试排查：`src/views/DebugView.vue`
+- slot 操作列：`playground/src/views/FormTableAdvancedView.vue`
+- 动态显隐和字段联动：`playground/src/views/DynamicSlotTestView.vue`
+- 调试排查：`playground/src/views/DebugView.vue`
 
 后续清理建议：高级示例中仍保留少量开发调试块和 inline style，可在 demo 产品化时统一收敛，但不影响当前组件 API。
 
@@ -264,13 +264,13 @@ const columns = [
 
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
-import FormTable from '@/components/FormTable/index.vue'
+import FormTable from 'formtable'
 import type {
   ColumnConfig,
   FormTableEventPayload,
   FormTableRecord,
   TableRow
-} from '@/components/FormTable/types'
+} from 'formtable'
 
 const tableData = ref<TableRow[]>([
   { name: '张三', age: 25, level: 'mid' }
@@ -456,7 +456,7 @@ const handleFormTableEvent = (payload: FormTableEventPayload) => {
 TypeScript 中推荐这样标注：
 
 ```ts
-import type { FormTableExpose } from '@/components/FormTable/types'
+import type { FormTableExpose } from 'formtable'
 
 const formTableRef = ref<FormTableExpose>()
 ```
@@ -772,13 +772,13 @@ const customComponents = [
 
 如果你要看现成示例，优先看：
 
-- `src/views/FormTableView.vue`
-- `src/views/FormTableAdvancedView.vue`
-- `src/views/DynamicSlotTestView.vue`
+- `playground/src/views/FormTableView.vue`
+- `playground/src/views/FormTableAdvancedView.vue`
+- `playground/src/views/DynamicSlotTestView.vue`
 
 如果你要看实现，优先看：
 
-- `src/components/FormTable/index.vue`
-- `src/components/FormTable/FormTableItem.vue`
-- `src/components/FormTable/ComponentWrapper.vue`
-- `src/components/FormTable/types.ts`
+- `packages/form-table/src/index.vue`
+- `packages/form-table/src/FormTableItem.vue`
+- `packages/form-table/src/ComponentWrapper.vue`
+- `packages/form-table/src/types.ts`

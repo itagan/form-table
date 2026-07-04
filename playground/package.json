@@ -1,0 +1,18 @@
+{
+  "name": "formtable-playground",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "run-p type-check build-only",
+    "preview": "vite preview --port 4173",
+    "build-only": "vite build",
+    "type-check": "vue-tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "element-ui": "^2.15.14",
+    "formtable": "workspace:*",
+    "vue": "^2.7.7",
+    "vue-router": "^3.5.4"
+  }
+}

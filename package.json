@@ -1,17 +1,14 @@
 {
-  "name": "formtable",
+  "name": "formtable-workspace",
   "version": "0.1.0",
+  "private": true,
   "scripts": {
-    "dev": "vite",
-    "build": "run-p type-check build-only",
-    "preview": "vite preview --port 4173",
-    "build-only": "vite build",
-    "type-check": "vue-tsc --noEmit"
-  },
-  "dependencies": {
-    "element-ui": "^2.15.14",
-    "vue": "^2.7.7",
-    "vue-router": "^3.5.4"
+    "dev": "pnpm --filter formtable-playground dev",
+    "build": "run-s build:package build:playground",
+    "build:package": "pnpm --filter formtable build",
+    "build:playground": "pnpm --filter formtable-playground build",
+    "preview": "pnpm --filter formtable-playground preview",
+    "type-check": "pnpm -r type-check"
   },
   "devDependencies": {
     "@types/node": "^16.11.45",

@@ -63,12 +63,12 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import FormTable from '@/components/FormTable/index.vue'
+import FormTable from 'formtable'
 import PhoneInput from '@/components/CustomComponents/PhoneInput.vue'
 import StatusTag from '@/components/CustomComponents/StatusTag.vue'
 import TestComponent from '@/components/CustomComponents/TestComponent.vue'
 import SimpleTest from '@/components/CustomComponents/SimpleTest.vue'
-import type { ColumnConfig, CustomComponentConfig, TableRow } from '@/components/FormTable/types'
+import type { ColumnConfig, CustomComponentConfig, TableRow } from 'formtable'
 
 // 测试数据
 const phoneValue = ref('13800138000')

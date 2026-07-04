@@ -77,12 +77,10 @@ const SlotRenderer = defineComponent({
   }
 })
 
-interface Props {
+const props = defineProps<{
   column: ColumnConfig
   columnIndex: number
-}
-
-const props = defineProps<Props>()
+}>()
 const attrs = useAttrs()
 const formTableContext = inject<ComputedRef<FormTableBaseContext>>(
   FORM_TABLE_CONTEXT_KEY,

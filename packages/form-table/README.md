@@ -1,10 +1,37 @@
-# FormTable 组件说明
+# FormTable
 
-当前组件详细文档统一维护在仓库根目录：
+基于 `Vue 2.7 + Element UI + TypeScript` 的表格表单组件，适合后台“表格内嵌表单”场景。
+
+## 安装
+
+```bash
+pnpm add formtable
+```
+
+使用方需要安装并注册 peer dependencies：
+
+- `vue@^2.7.7`
+- `element-ui@^2.15.14`
+
+## 使用
+
+```ts
+import FormTable from 'formtable'
+import type { ColumnConfig, TableRow } from 'formtable'
+```
+
+也可以注册为全局组件：
+
+```ts
+import Vue from 'vue'
+import { FormTablePlugin } from 'formtable'
+
+Vue.use(FormTablePlugin)
+```
+
+完整 API 文档维护在仓库根目录：
 
 - `CURRENT_FORMTABLE_DOC.md`
-
-这份文件只保留实现导航，API 和示例以根目录文档为准。
 
 ## 组件架构
 
@@ -84,10 +111,10 @@ props.tableData → el-table 渲染
 
 ## 示例参考
 
-- `src/views/FormTableView.vue`
-- `src/views/FormTableAdvancedView.vue`
-- `src/views/DynamicSlotTestView.vue`
-- `src/views/DebugView.vue`
+- `playground/src/views/FormTableView.vue`
+- `playground/src/views/FormTableAdvancedView.vue`
+- `playground/src/views/DynamicSlotTestView.vue`
+- `playground/src/views/DebugView.vue`
 
 ## 索引列
 

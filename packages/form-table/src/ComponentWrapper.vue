@@ -102,7 +102,7 @@ import {
   type FormTableValue
 } from './types'
 
-interface Props {
+const props = defineProps<{
   type: FormItemType
   fieldKey: string
   row: FormTableRecord
@@ -110,9 +110,7 @@ interface Props {
   customComponent?: string
   bind?: ComponentBind
   [key: string]: any
-}
-
-const props = defineProps<Props>()
+}>()
 
 const formTableContext = inject<ComputedRef<FormTableBaseContext>>(
   FORM_TABLE_CONTEXT_KEY,

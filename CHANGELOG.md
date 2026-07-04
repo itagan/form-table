@@ -49,7 +49,7 @@
 
 ### Current Entry Points
 
-- 组件入口：`src/components/FormTable/index.vue`
+- 组件入口：`packages/form-table/src/index.vue`
 - 当前文档：`CURRENT_FORMTABLE_DOC.md`
-- 基础示例：`src/views/FormTableView.vue`
-- 高级示例：`src/views/FormTableAdvancedView.vue`
+- 基础示例：`playground/src/views/FormTableView.vue`
+- 高级示例：`playground/src/views/FormTableAdvancedView.vue`
