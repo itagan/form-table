@@ -128,10 +128,24 @@ props.tableData → el-table 渲染
 
 ## 示例参考
 
-- `playground/src/views/FormTableView.vue`
-- `playground/src/views/FormTableAdvancedView.vue`
-- `playground/src/views/DynamicSlotTestView.vue`
-- `playground/src/views/DebugView.vue`
+- `playground/src/views/FormTableView.vue`：基础编辑和校验。
+- `playground/src/views/FormTableAdvancedView.vue`：插槽、自定义组件、行操作、联动和事件归档。
+- `playground/src/views/DynamicSlotTestView.vue`：动态插槽、显隐和删除行复现。
+- `playground/src/views/DebugView.vue`：自定义组件直连与 FormTable 注册后的行为对照。
+
+## 维护检查
+
+核心行为测试位于 `src/__tests__/FormTable.behavior.test.ts`，用于保护组件级数据流：
+
+- 内置输入组件编辑后应触发 `update:tableData` 和 `field-change`
+- 字段 slot 应通过 `setValue` 进入同一条更新链路
+- `customComponents` 注册的自定义组件应继续支持默认 `v-model`
+
+发布前推荐运行：
+
+```bash
+pnpm release:check
+```
 
 ## 发布前检查
 
