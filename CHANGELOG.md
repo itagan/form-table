@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- 暂无。
+
+## 0.1.0 - 2026-07-04
+
 ### Changed
 
 - 仓库调整为 npm 包、playground、文档说明共存的 pnpm workspace。
@@ -9,11 +13,20 @@
 - playground 首页改为示例导航，移除 Vue 默认脚手架页面和无关组件。
 - `docs` 目录拆分为 guide、api、examples、migration，为后续文档站化做准备。
 - 从完整长文档中拆出配置 API、事件与 Ref API 文档页。
+- npm 包名调整为作用域包 `@itagan/form-table`。
 
 ### Improved
 
 - npm 包补充 `exports`、`types`、`peerDependencies`、`sideEffects`、`publishConfig` 和仓库元信息。
 - 增加公开类型入口和发布前检查说明。
+- 增加 GitHub Actions，在 `master` push 和 PR 时自动运行 `pnpm release:check`。
+- 增加组件行为测试，覆盖 input、slot `setValue`、自定义组件 `v-model` 和字段变更事件。
+- 打磨自定义组件诊断页，支持组件直连和 FormTable 注册后的行为对照。
+
+### Fixed
+
+- 修复删除动态插槽行时 Element UI `label-width="auto"` 清理异常。
+- 修复 `rules`、`formData`、`customComponents` 未传入时的必填 prop 警告。
 
 ## 2026-07-02
 
