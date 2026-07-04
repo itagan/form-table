@@ -7,6 +7,7 @@
 - 仓库调整为 npm 包、playground、文档说明共存的 pnpm workspace。
 - `FormTable` 源码迁移到 `packages/form-table/src`，调试页面迁移到 `playground/src`。
 - playground 首页改为示例导航，移除 Vue 默认脚手架页面和无关组件。
+- `docs` 目录拆分为 guide、api、examples、migration，为后续文档站化做准备。
 
 ### Improved
 

@@ -72,6 +72,7 @@ import type { ColumnConfig, TableRow } from 'formtable'
 - [完整能力文档](./CURRENT_FORMTABLE_DOC.md)
 - [更新记录](./CHANGELOG.md)
 - [组件包说明](./packages/form-table/README.md)
+- [文档站准备目录](./docs/README.md)
 
 ## 发布前检查
 
