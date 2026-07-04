@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { mount, createLocalVue } from '@vue/test-utils'
 import ElementUI from 'element-ui'
 import FormTable from '../index.vue'
-import type { ColumnConfig, TableRow } from '../types.public'
+import type { ColumnConfig, CustomComponentConfig, TableRow } from '../types.public'
 
 const localVue = createLocalVue()
 localVue.use(ElementUI)
@@ -30,15 +30,24 @@ function createColumns(): ColumnConfig[] {
   ]
 }
 
-function mountFormTable(tableData: TableRow[] = [{ name: 'Alice' }]) {
+interface MountFormTableOptions {
+  tableData?: TableRow[]
+  columns?: ColumnConfig[]
+  customComponents?: CustomComponentConfig[]
+  scopedSlots?: Record<string, any>
+}
+
+function mountFormTable(options: MountFormTableOptions = {}) {
   return mount(FormTable as any, {
     localVue,
     propsData: {
-      tableData,
-      columns: createColumns(),
+      tableData: options.tableData || [{ name: 'Alice' }],
+      columns: options.columns || createColumns(),
       rules: {},
-      formData: {}
+      formData: {},
+      customComponents: options.customComponents || []
     },
+    scopedSlots: options.scopedSlots,
     attachTo: document.body
   })
 }
@@ -72,6 +81,124 @@ describe('FormTable behavior', () => {
       fieldKey: 'name',
       value: 'Bob',
       previousValue: 'Alice'
+    })
+
+    wrapper.destroy()
+  })
+
+  it('updates row data through a field slot setValue helper', async () => {
+    const wrapper = mountFormTable({
+      tableData: [{ school: '第一中学' }],
+      columns: [
+        {
+          name: '学校',
+          children: [
+            {
+              children: [
+                {
+                  key: 'school',
+                  type: 'slot',
+                  component: {
+                    slotName: 'school-field'
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      scopedSlots: {
+        'school-field': '<button type="button" class="slot-setter" @click="props.setValue(\'第二中学\')">{{ props.value }}</button>'
+      }
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.slot-setter').text()).toBe('第一中学')
+
+    await wrapper.find('.slot-setter').trigger('click')
+
+    const tableDataEvents = wrapper.emitted('update:tableData')
+    const fieldChangeEvents = wrapper.emitted('field-change')
+
+    expect(tableDataEvents?.[0]?.[0]).toEqual([{ school: '第二中学' }])
+    expect(fieldChangeEvents?.[0]?.[0]).toEqual({
+      row: { school: '第二中学' },
+      index: 0,
+      fieldKey: 'school',
+      value: '第二中学',
+      previousValue: '第一中学'
+    })
+
+    wrapper.destroy()
+  })
+
+  it('updates row data from a registered custom component v-model', async () => {
+    const StatusInput = {
+      name: 'StatusInput',
+      props: {
+        value: {
+          type: String,
+          default: ''
+        }
+      },
+      render(this: any, h: any): any {
+        return h(
+          'button',
+          {
+            class: 'status-input',
+            attrs: { type: 'button' },
+            on: {
+              click: () => this.$emit('input', 'disabled')
+            }
+          },
+          this.value
+        )
+      }
+    }
+
+    const wrapper = mountFormTable({
+      tableData: [{ status: 'enabled' }],
+      columns: [
+        {
+          name: '状态',
+          children: [
+            {
+              children: [
+                {
+                  key: 'status',
+                  type: 'custom',
+                  component: {
+                    customComponent: 'StatusInput'
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      customComponents: [
+        {
+          name: 'StatusInput',
+          component: StatusInput
+        }
+      ]
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.status-input').text()).toBe('enabled')
+
+    await wrapper.find('.status-input').trigger('click')
+
+    const tableDataEvents = wrapper.emitted('update:tableData')
+    const fieldChangeEvents = wrapper.emitted('field-change')
+
+    expect(tableDataEvents?.[0]?.[0]).toEqual([{ status: 'disabled' }])
+    expect(fieldChangeEvents?.[0]?.[0]).toEqual({
+      row: { status: 'disabled' },
+      index: 0,
+      fieldKey: 'status',
+      value: 'disabled',
+      previousValue: 'enabled'
     })
 
     wrapper.destroy()
