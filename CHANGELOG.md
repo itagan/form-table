@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- 仓库调整为 npm 包、playground、文档说明共存的 pnpm workspace。
+- `FormTable` 源码迁移到 `packages/form-table/src`，调试页面迁移到 `playground/src`。
+- playground 首页改为示例导航，移除 Vue 默认脚手架页面和无关组件。
+
+### Improved
+
+- npm 包补充 `exports`、`types`、`peerDependencies`、`sideEffects`、`publishConfig` 和仓库元信息。
+- 增加公开类型入口和发布前检查说明。
+
 ## 2026-07-02
 
 ### Changed

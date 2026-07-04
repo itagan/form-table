@@ -6,6 +6,10 @@
   "main": "./dist/formtable.umd.cjs",
   "module": "./dist/formtable.es.js",
   "types": "./dist/types/public-types.d.ts",
+  "sideEffects": [
+    "*.css",
+    "**/*.css"
+  ],
   "exports": {
     ".": {
       "types": "./dist/types/public-types.d.ts",
@@ -16,9 +20,20 @@
   },
   "files": [
     "dist",
-    "README.md",
-    "CHANGELOG.md"
+    "README.md"
   ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitee.com/itagan/form-table.git",
+    "directory": "packages/form-table"
+  },
+  "homepage": "https://gitee.com/itagan/form-table#readme",
+  "bugs": {
+    "url": "https://gitee.com/itagan/form-table/issues"
+  },
   "scripts": {
     "build": "run-s build:lib build:types",
     "build:lib": "vite build",
@@ -36,9 +51,12 @@
   },
   "keywords": [
     "vue2",
+    "vue",
     "element-ui",
+    "editable-table",
     "form",
-    "table"
+    "table",
+    "typescript"
   ],
   "license": "MIT"
 }

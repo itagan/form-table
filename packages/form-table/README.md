@@ -16,6 +16,8 @@ pnpm add formtable
 ## 使用
 
 ```ts
+import 'element-ui/lib/theme-chalk/index.css'
+import 'formtable/style.css'
 import FormTable from 'formtable'
 import type { ColumnConfig, TableRow } from 'formtable'
 ```
@@ -28,6 +30,15 @@ import { FormTablePlugin } from 'formtable'
 
 Vue.use(FormTablePlugin)
 ```
+
+## 构建产物
+
+包发布时只包含以下内容：
+
+- `dist/formtable.es.js`：ES module 入口
+- `dist/formtable.umd.cjs`：CommonJS / UMD 入口
+- `dist/style.css`：组件样式
+- `dist/types/public-types.d.ts`：公开类型入口
 
 完整 API 文档维护在仓库根目录：
 
@@ -115,6 +126,13 @@ props.tableData → el-table 渲染
 - `playground/src/views/FormTableAdvancedView.vue`
 - `playground/src/views/DynamicSlotTestView.vue`
 - `playground/src/views/DebugView.vue`
+
+## 发布前检查
+
+```bash
+pnpm --filter formtable build
+npm pack --dry-run
+```
 
 ## 索引列
 

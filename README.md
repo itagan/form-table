@@ -41,6 +41,8 @@ pnpm add formtable
 ```
 
 ```ts
+import 'element-ui/lib/theme-chalk/index.css'
+import 'formtable/style.css'
 import FormTable from 'formtable'
 import type { ColumnConfig, TableRow } from 'formtable'
 ```
@@ -66,3 +68,10 @@ import type { ColumnConfig, TableRow } from 'formtable'
 - [完整能力文档](./CURRENT_FORMTABLE_DOC.md)
 - [更新记录](./CHANGELOG.md)
 - [组件包说明](./packages/form-table/README.md)
+
+## 发布前检查
+
+```bash
+pnpm --filter formtable build
+(cd packages/form-table && npm pack --dry-run)
+```
