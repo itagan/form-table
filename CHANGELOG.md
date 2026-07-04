@@ -8,6 +8,7 @@
 - `FormTable` 源码迁移到 `packages/form-table/src`，调试页面迁移到 `playground/src`。
 - playground 首页改为示例导航，移除 Vue 默认脚手架页面和无关组件。
 - `docs` 目录拆分为 guide、api、examples、migration，为后续文档站化做准备。
+- 从完整长文档中拆出配置 API、事件与 Ref API 文档页。
 
 ### Improved
 

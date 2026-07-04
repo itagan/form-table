@@ -2,6 +2,8 @@
 
 这份文档以当前仓库代码为准，适用于 `Vue 2.7 + Element UI + TypeScript`。
 
+文档站拆分版入口见 `docs/README.md`。当前文件仍保留完整长文，便于集中检索。
+
 ## 组件定位
 
 `FormTable` 是一个“表格内嵌表单”组件。

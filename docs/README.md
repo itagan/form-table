@@ -5,6 +5,8 @@
 ## 导航
 
 - [快速开始](./guide/quick-start.md)
+- [配置 API](./api/configuration.md)
+- [事件与 Ref API](./api/events-and-ref.md)
 - [API 类型边界](./api/types.md)
 - [示例索引](./examples/README.md)
 - [迁移与发布准备](./migration/npm-package.md)
