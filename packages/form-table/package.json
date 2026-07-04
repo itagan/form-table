@@ -38,6 +38,7 @@
     "build": "run-s build:lib build:types",
     "build:lib": "vite build",
     "build:types": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
     "type-check": "vue-tsc -p tsconfig.json --noEmit",
     "prepack": "pnpm build"
   },
