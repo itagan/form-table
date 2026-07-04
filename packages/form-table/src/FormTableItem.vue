@@ -64,7 +64,6 @@ import {
   type DispatchFn
 } from './types'
 import { createRuntimeContext } from './utils/dynamic'
-import { resolveDisplayValue } from './utils/display'
 import { createFallbackFormTableActions } from './utils/actions'
 import {
   createFieldValueSetter,
@@ -83,8 +82,10 @@ import {
 import {
   createComponentWrapperProps,
   createFormTableSlotContext,
+  hasFormItemTooltipContent,
   mergeFormItemRules,
-  normalizeFormItemLabelWidth
+  normalizeFormItemLabelWidth,
+  resolveFormItemTooltipContent
 } from './utils/formItemRender'
 import { getValueByPath } from './utils/path'
 
@@ -245,23 +246,20 @@ const isTooltipEnabled = computed(() => isFormItemTooltipEnabled(props.config))
  * tooltip 在空值时不展示，避免出现空浮层。
  */
 const hasContent = computed(() => {
-  const value = getValueByPath(props.row, props.config.key)
-  return value !== null && value !== undefined && value !== ''
+  return hasFormItemTooltipContent(getValueByPath(props.row, props.config.key))
 })
 
 /**
  * tooltip 展示内容复用 text 类型的展示解析逻辑。
  */
 const tooltipContent = computed(() => {
-  const displayValue = resolveDisplayValue(
-    getValueByPath(props.row, props.config.key),
-    resolvedOptions.value,
-    resolvedOptionProps.value,
-    getFormItemFormatter(props.config),
-    getFormItemEmptyText(props.config),
-    runtimeContext.value
-  )
-
-  return displayValue !== null && displayValue !== undefined ? String(displayValue) : ''
+  return resolveFormItemTooltipContent({
+    value: getValueByPath(props.row, props.config.key),
+    options: resolvedOptions.value,
+    optionProps: resolvedOptionProps.value,
+    formatter: getFormItemFormatter(props.config),
+    emptyText: getFormItemEmptyText(props.config),
+    context: runtimeContext.value
+  })
 })
 </script>

@@ -3,8 +3,10 @@ import type { FormItemConfig, FormTableActions, ValidationRule } from '../../typ
 import {
   createComponentWrapperProps,
   createFormTableSlotContext,
+  hasFormItemTooltipContent,
   mergeFormItemRules,
-  normalizeFormItemLabelWidth
+  normalizeFormItemLabelWidth,
+  resolveFormItemTooltipContent
 } from '../formItemRender'
 
 function createActions(): FormTableActions {
@@ -29,6 +31,55 @@ describe('form item render utils', () => {
     expect(normalizeFormItemLabelWidth('auto')).toBeUndefined()
     expect(normalizeFormItemLabelWidth('120px')).toBe('120px')
     expect(normalizeFormItemLabelWidth()).toBeUndefined()
+  })
+
+  it('detects whether tooltip has displayable raw content', () => {
+    expect(hasFormItemTooltipContent('text')).toBe(true)
+    expect(hasFormItemTooltipContent(0)).toBe(true)
+    expect(hasFormItemTooltipContent(false)).toBe(true)
+    expect(hasFormItemTooltipContent('')).toBe(false)
+    expect(hasFormItemTooltipContent(null)).toBe(false)
+    expect(hasFormItemTooltipContent(undefined)).toBe(false)
+  })
+
+  it('resolves tooltip content with formatter, options and empty text', () => {
+    expect(resolveFormItemTooltipContent({
+      value: 'enabled',
+      options: [
+        { label: '启用', value: 'enabled' }
+      ],
+      context: {
+        row: { status: 'enabled' },
+        index: 0,
+        fieldKey: 'status',
+        formData: {},
+        tableData: []
+      }
+    })).toBe('启用')
+
+    expect(resolveFormItemTooltipContent({
+      value: 'enabled',
+      formatter: (value) => `状态:${value}`,
+      context: {
+        row: { status: 'enabled' },
+        index: 0,
+        fieldKey: 'status',
+        formData: {},
+        tableData: []
+      }
+    })).toBe('状态:enabled')
+
+    expect(resolveFormItemTooltipContent({
+      value: '',
+      emptyText: '-',
+      context: {
+        row: { status: '' },
+        index: 0,
+        fieldKey: 'status',
+        formData: {},
+        tableData: []
+      }
+    })).toBe('-')
   })
 
   it('merges inherited and local validation rules and omits empty rule lists', () => {

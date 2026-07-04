@@ -5,6 +5,7 @@ import type {
   FormTableActions,
   FormTableBaseContext,
   FormTableRecord,
+  FormTableRuntimeContext,
   FormTableSlotContext,
   FormTableValue,
   OptionPropsConfig,
@@ -16,11 +17,36 @@ import {
   getFormItemFormatter,
   getFormItemListeners
 } from './fieldConfig'
+import { resolveDisplayValue } from './display'
 import { getValueByPath } from './path'
 import { resolveRulesForProp } from './rules'
 
 export function normalizeFormItemLabelWidth(labelWidth?: string) {
   return labelWidth === 'auto' ? undefined : labelWidth
+}
+
+export function hasFormItemTooltipContent(value: FormTableValue) {
+  return value !== null && value !== undefined && value !== ''
+}
+
+export function resolveFormItemTooltipContent(options: {
+  value: FormTableValue
+  options?: FormItemOption[]
+  optionProps?: OptionPropsConfig
+  formatter?: (value: FormTableValue, context: FormTableRuntimeContext) => FormTableValue
+  emptyText?: string
+  context: FormTableRuntimeContext
+}) {
+  const displayValue = resolveDisplayValue(
+    options.value,
+    options.options,
+    options.optionProps,
+    options.formatter,
+    options.emptyText,
+    options.context
+  )
+
+  return displayValue !== null && displayValue !== undefined ? String(displayValue) : ''
 }
 
 export function mergeFormItemRules(options: {
