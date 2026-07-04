@@ -1,8 +1,15 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { mount, createLocalVue } from '@vue/test-utils'
 import ElementUI from 'element-ui'
 import FormTable from '../index.vue'
-import type { ColumnConfig, CustomComponentConfig, FormTableExpose, TableRow } from '../types.public'
+import type {
+  ColumnConfig,
+  CustomComponentConfig,
+  FormTableExpose,
+  FormTableRecord,
+  TableRow,
+  ValidationRule
+} from '../types.public'
 
 const localVue = createLocalVue()
 localVue.use(ElementUI)
@@ -33,6 +40,8 @@ function createColumns(): ColumnConfig[] {
 interface MountFormTableOptions {
   tableData?: TableRow[]
   columns?: ColumnConfig[]
+  rules?: Record<string, ValidationRule[]>
+  formData?: FormTableRecord
   customComponents?: CustomComponentConfig[]
   scopedSlots?: Record<string, any>
 }
@@ -43,8 +52,8 @@ function mountFormTable(options: MountFormTableOptions = {}) {
     propsData: {
       tableData: options.tableData || [{ name: 'Alice' }],
       columns: options.columns || createColumns(),
-      rules: {},
-      formData: {},
+      rules: options.rules || {},
+      formData: options.formData || {},
       customComponents: options.customComponents || []
     },
     scopedSlots: options.scopedSlots,
@@ -260,6 +269,65 @@ describe('FormTable behavior', () => {
     ])
     expect(wrapper.emitted('row-remove')?.[0]).toEqual([{ name: 'Alice Copy' }, 2])
 
+    wrapper.destroy()
+  })
+
+  it('exposes form data helpers and keeps tableData synchronized', async () => {
+    const wrapper = mountFormTable({
+      tableData: [{ name: 'Alice' }],
+      formData: {
+        owner: 'tester'
+      }
+    })
+    await wrapper.vm.$nextTick()
+    const formTable = wrapper.vm as unknown as FormTableExpose
+
+    expect(formTable.getFormData()).toEqual({
+      owner: 'tester',
+      tableData: [{ name: 'Alice' }]
+    })
+
+    formTable.setFormData({
+      owner: 'next',
+      tableData: [{ name: 'Bob' }]
+    })
+
+    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{ name: 'Bob' }])
+    expect(wrapper.emitted('update:formData')?.[1]?.[0]).toEqual({
+      owner: 'next',
+      tableData: [{ name: 'Bob' }]
+    })
+
+    wrapper.destroy()
+  })
+
+  it('validates visible row fields through the exposed validateRow method', async () => {
+    const wrapper = mountFormTable({
+      tableData: [{ name: '' }],
+      rules: {
+        'tableData.*.name': [
+          {
+            required: true,
+            message: '请输入姓名',
+            trigger: 'blur'
+          }
+        ]
+      }
+    })
+    await wrapper.vm.$nextTick()
+    const formTable = wrapper.vm as unknown as FormTableExpose
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    await expect(formTable.validateRow(0)).resolves.toBe(false)
+
+    await wrapper.setProps({
+      tableData: [{ name: 'Alice' }]
+    })
+    await wrapper.vm.$nextTick()
+
+    await expect(formTable.validateRow(0)).resolves.toBe(true)
+
+    warnSpy.mockRestore()
     wrapper.destroy()
   })
 })
