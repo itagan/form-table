@@ -427,6 +427,17 @@ const handleFormTableEvent = (payload: FormTableEventPayload) => {
 - `removeRow(index)`
 - `getFormData()`
 - `setFormData(data)`
+- `clearSelection()`
+- `toggleRowSelection(row, selected?)`
+- `toggleAllSelection()`
+- `toggleRowExpansion(row, expanded?)`
+- `setCurrentRow(row?)`
+- `clearSort()`
+- `clearFilter(columnKeys?)`
+- `doLayout()`
+- `sort(prop, order)`
+- `getNativeFormRef()`
+- `getNativeTableRef()`
 
 TypeScript 中推荐这样标注：
 

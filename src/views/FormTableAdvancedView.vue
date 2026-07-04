@@ -126,6 +126,7 @@
         <el-button @click="handleAddRow">添加行</el-button>
         <el-button @click="handleRemoveRow">删除行</el-button>
         <el-button @click="toggleLoading">切换加载状态</el-button>
+        <el-button @click="handleDoLayout">重排表格</el-button>
       </div>
     </div>
 
@@ -690,6 +691,11 @@ const handleSubmit = async () => {
 
 const handleReset = () => {
   formTableRef.value?.resetFields()
+}
+
+const handleDoLayout = () => {
+  formTableRef.value?.doLayout()
+  Message.success('已调用原生 el-table doLayout')
 }
 
 const handleAddRow = () => {

@@ -2,6 +2,7 @@ import type { ComputedRef, Ref } from 'vue'
 import type {
   FormTableActions,
   FormTableElementFormRef,
+  FormTableElementTableRef,
   FormTableEmits,
   FormTableExpose,
   FormTableRecord,
@@ -18,6 +19,7 @@ interface UseFormTableExposeOptions {
     tableData: TableRow[]
   }
   formRef: Ref<FormTableElementFormRef | null>
+  tableRef: Ref<FormTableElementTableRef | null>
   formModel: ComputedRef<FormTableRecord>
   formTableActions: FormTableActions
   validateFieldProps: (fieldProp: string | string[]) => Promise<boolean>
@@ -43,6 +45,7 @@ export function useFormTableExpose(options: UseFormTableExposeOptions): FormTabl
   const {
     props,
     formRef,
+    tableRef,
     formModel,
     formTableActions,
     validateFieldProps,
@@ -112,6 +115,46 @@ export function useFormTableExpose(options: UseFormTableExposeOptions): FormTabl
         ...data,
         tableData: data.tableData ?? props.tableData
       })
-    }
+    },
+
+    clearSelection: () => {
+      tableRef.value?.clearSelection?.()
+    },
+
+    toggleRowSelection: (row: TableRow, selected?: boolean) => {
+      tableRef.value?.toggleRowSelection?.(row, selected)
+    },
+
+    toggleAllSelection: () => {
+      tableRef.value?.toggleAllSelection?.()
+    },
+
+    toggleRowExpansion: (row: TableRow, expanded?: boolean) => {
+      tableRef.value?.toggleRowExpansion?.(row, expanded)
+    },
+
+    setCurrentRow: (row?: TableRow) => {
+      tableRef.value?.setCurrentRow?.(row)
+    },
+
+    clearSort: () => {
+      tableRef.value?.clearSort?.()
+    },
+
+    clearFilter: (columnKeys?: string[]) => {
+      tableRef.value?.clearFilter?.(columnKeys)
+    },
+
+    doLayout: () => {
+      tableRef.value?.doLayout?.()
+    },
+
+    sort: (prop: string, order: 'ascending' | 'descending' | null) => {
+      tableRef.value?.sort?.(prop, order)
+    },
+
+    getNativeFormRef: () => formRef.value,
+
+    getNativeTableRef: () => tableRef.value
   }
 }

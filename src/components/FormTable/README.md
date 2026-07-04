@@ -164,9 +164,12 @@ const columns = [
 - 因显隐切换而隐藏的字段会自动清理已有校验状态
 - 隐藏字段默认保留值，不会自动从行数据中删除
 
-## 行操作
+## ref 方法
 
-- `ref` 现在支持 `insertRow`、`copyRow`、`updateRow`、`moveRow`、`getRow`、`validateField`、`validateRow`
+- 表单方法：`validate`、`resetFields`、`clearValidate`、`validateField`
+- 表格原生方法：`clearSelection`、`toggleRowSelection`、`toggleAllSelection`、`toggleRowExpansion`、`setCurrentRow`、`clearSort`、`clearFilter`、`doLayout`、`sort`
+- 原生实例：`getNativeFormRef`、`getNativeTableRef`
+- 行操作：`addRow`、`insertRow`、`copyRow`、`updateRow`、`moveRow`、`getRow`、`removeRow`、`validateRow`
 - `slot` 上下文也提供当前行的快捷方法，如 `removeCurrentRow`、`copyCurrentRow`、`insertBefore`、`insertAfter`
 - `slot` 上下文也提供 `isFirstRow`、`isLastRow`、`moveUp`、`moveDown`，更适合直接写操作列
 

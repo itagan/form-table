@@ -7,6 +7,7 @@
       v-bind="formAttrs"
     >
       <el-table
+        ref="tableRef"
         :data="props.tableData"
         v-bind="tableAttrs"
         v-loading="props.loading"
@@ -48,6 +49,7 @@ import type {
   CustomComponentConfig,
   FormTableEmitFn,
   FormTableElementFormRef,
+  FormTableElementTableRef,
   FormTableEventPayload,
   FormTableFieldChangePayload,
   FormTableRecord,
@@ -100,6 +102,7 @@ const emit = defineEmits<{
 }>()
 
 const formRef = ref<FormTableElementFormRef | null>(null)
+const tableRef = ref<FormTableElementTableRef | null>(null)
 const formAttrs = computed(() => extractFormAttrs(attrs))
 const tableAttrs = computed(() => extractTableAttrs(attrs))
 
@@ -189,6 +192,7 @@ provide(FORM_TABLE_DISPATCH_KEY, dispatch)
 defineExpose(useFormTableExpose({
   props,
   formRef,
+  tableRef,
   formModel,
   formTableActions,
   validateFieldProps,

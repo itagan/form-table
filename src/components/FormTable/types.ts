@@ -280,6 +280,24 @@ export interface FormTableElementFormRef {
 }
 
 /**
+ * 内部持有的 Element UI Table 实例能力边界。
+ *
+ * 这里只列出 FormTable 直接透出的常用原生方法；业务侧仍可通过
+ * getNativeTableRef 获取完整实例能力。
+ */
+export interface FormTableElementTableRef {
+  clearSelection?: () => void
+  toggleRowSelection?: (row: TableRow, selected?: boolean) => void
+  toggleAllSelection?: () => void
+  toggleRowExpansion?: (row: TableRow, expanded?: boolean) => void
+  setCurrentRow?: (row?: TableRow) => void
+  clearSort?: () => void
+  clearFilter?: (columnKeys?: string[]) => void
+  doLayout?: () => void
+  sort?: (prop: string, order: 'ascending' | 'descending' | null) => void
+}
+
+/**
  * FormTable 通过 ref 暴露给业务侧的公开方法。
  *
  * 保持接近 Element UI Form 的使用习惯，同时补充表格行操作和数据读写能力。
@@ -299,6 +317,17 @@ export interface FormTableExpose {
   removeRow: (index: number) => void
   getFormData: () => FormTableRecord
   setFormData: (data: FormTableRecord) => void
+  clearSelection: () => void
+  toggleRowSelection: (row: TableRow, selected?: boolean) => void
+  toggleAllSelection: () => void
+  toggleRowExpansion: (row: TableRow, expanded?: boolean) => void
+  setCurrentRow: (row?: TableRow) => void
+  clearSort: () => void
+  clearFilter: (columnKeys?: string[]) => void
+  doLayout: () => void
+  sort: (prop: string, order: 'ascending' | 'descending' | null) => void
+  getNativeFormRef: () => FormTableElementFormRef | null
+  getNativeTableRef: () => FormTableElementTableRef | null
 }
 
 export interface FormTableEmits {
