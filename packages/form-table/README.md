@@ -130,7 +130,8 @@ props.tableData → el-table 渲染
 ## 发布前检查
 
 ```bash
-pnpm --filter formtable build
+pnpm test
+pnpm build
 npm pack --dry-run
 ```
 

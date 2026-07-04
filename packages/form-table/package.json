@@ -40,7 +40,8 @@
     "build:types": "tsc -p tsconfig.build.json",
     "test": "vitest run",
     "type-check": "vue-tsc -p tsconfig.json --noEmit",
-    "prepack": "pnpm build"
+    "prepack": "pnpm build",
+    "prepublishOnly": "pnpm test && pnpm build"
   },
   "peerDependencies": {
     "element-ui": "^2.15.14",

@@ -24,14 +24,18 @@ docs/                # 仓库级文档入口
 pnpm install
 pnpm dev
 pnpm type-check
+pnpm test
 pnpm build
+pnpm release:check
 ```
 
 命令说明：
 
 - `pnpm dev`：启动 `playground`，用于本地调试组件。
 - `pnpm type-check`：检查组件包和 playground。
+- `pnpm test`：运行组件包核心逻辑单测。
 - `pnpm build`：先构建 npm 包，再构建 playground。
+- `pnpm release:check`：执行测试、类型检查、构建和 npm 打包预检。
 - `pnpm --filter formtable build`：只构建可发布 npm 包。
 
 ## npm 包使用
@@ -72,6 +76,5 @@ import type { ColumnConfig, TableRow } from 'formtable'
 ## 发布前检查
 
 ```bash
-pnpm --filter formtable build
-(cd packages/form-table && npm pack --dry-run)
+pnpm release:check
 ```
