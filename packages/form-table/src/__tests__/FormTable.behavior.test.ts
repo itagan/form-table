@@ -572,6 +572,49 @@ describe('FormTable behavior', () => {
     wrapper.destroy()
   })
 
+  it('validates remaining rows with recalculated paths after removing a row', async () => {
+    const wrapper = mountFormTable({
+      tableData: [
+        { name: 'Alice' },
+        { name: '' }
+      ],
+      rules: {
+        'tableData.*.name': [
+          {
+            required: true,
+            message: '请输入姓名',
+            trigger: 'blur'
+          }
+        ]
+      }
+    })
+    await wrapper.vm.$nextTick()
+    const formTable = wrapper.vm as unknown as FormTableExpose
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    formTable.removeRow(0)
+    const nextTableData = wrapper.emitted('update:tableData')?.[0]?.[0] as TableRow[]
+
+    expect(nextTableData).toEqual([{ name: '' }])
+
+    await wrapper.setProps({
+      tableData: nextTableData
+    })
+    await wrapper.vm.$nextTick()
+
+    await expect(formTable.validateRow(0)).resolves.toBe(false)
+
+    await wrapper.setProps({
+      tableData: [{ name: 'Bob' }]
+    })
+    await wrapper.vm.$nextTick()
+
+    await expect(formTable.validateRow(0)).resolves.toBe(true)
+
+    warnSpy.mockRestore()
+    wrapper.destroy()
+  })
+
   it('applies field linkage patches when an input changes', async () => {
     const wrapper = mountFormTable({
       tableData: [{ name: 'Alice', slug: '' }],
