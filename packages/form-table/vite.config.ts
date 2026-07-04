@@ -5,6 +5,10 @@ import vue2 from '@vitejs/plugin-vue2'
 
 export default defineConfig({
   plugins: [vue2()],
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/__tests__/setup.ts']
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
