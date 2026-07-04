@@ -61,13 +61,14 @@ import { useFormTableRows } from './composables/useFormTableRows'
 import { useFormTableSchema } from './composables/useFormTableSchema'
 import { useFormTableValidation } from './composables/useFormTableValidation'
 import { extractFormAttrs, extractTableAttrs } from './utils/attrs'
+import { archiveFormTableEventArgs } from './utils/eventArchive'
 import type {
   ColumnConfig,
   CustomComponentConfig,
   FormTableEmitFn,
   FormTableElementFormRef,
   FormTableElementTableRef,
-  FormTableEventName,
+  FormTableArchivedEventName,
   FormTableEventPayload,
   FormTableFieldChangePayload,
   FormTableRecord,
@@ -141,14 +142,12 @@ const tableRef = ref<FormTableElementTableRef | null>(null)
 const formAttrs = computed(() => extractFormAttrs(attrs))
 const tableAttrs = computed(() => extractTableAttrs(attrs))
 
-type TablePassthroughEventName = Exclude<FormTableEventName, 'event'>
-
 const emitTableEvent = (
-  type: TablePassthroughEventName,
+  type: FormTableArchivedEventName,
   ...args: any[]
 ) => {
   ;(emit as any)(type, ...args)
-  emit('event', { type, args })
+  emit('event', { type, args: archiveFormTableEventArgs(type, args) })
 }
 
 const handleTableSelect = (selection: TableRow[], row: TableRow) => {
