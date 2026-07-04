@@ -246,6 +246,8 @@ const columns = [
 
 ## 基础用法
 
+`formtable` 包入口只导出业务侧稳定使用的公开类型。内部 provide/inject key、dispatch 和内部事件命令保留在源码内部，不作为 npm 包 API 承诺。
+
 ```vue
 <template>
   <FormTable

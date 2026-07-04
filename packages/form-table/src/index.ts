@@ -1,7 +1,7 @@
 import type { PluginObject } from 'vue'
 import FormTable from './index.vue'
 
-export * from './types'
+export * from './types.public'
 export * from './configs'
 export { FormTable }
 

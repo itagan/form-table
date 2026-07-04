@@ -40,6 +40,12 @@ Vue.use(FormTablePlugin)
 - `dist/style.css`：组件样式
 - `dist/types/public-types.d.ts`：公开类型入口
 
+## 类型边界
+
+包入口只导出业务侧稳定使用的公开类型，例如 `ColumnConfig`、`FormItemConfig`、`TableRow`、`FormTableExpose`、`FormTableEventPayload` 和 `FormTableFieldChangePayload`。
+
+内部 provide/inject key、dispatch、内部事件命令和组件编排类型不会从 `formtable` 包入口导出。
+
 完整 API 文档维护在仓库根目录：
 
 - `CURRENT_FORMTABLE_DOC.md`
