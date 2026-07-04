@@ -34,6 +34,12 @@ const router = new VueRouter({
       component: () => import('../views/FormTableAdvancedView.vue')
     },
     {
+      path: '/form-table-docs',
+      name: 'form-table-docs',
+      // FormTable 能力文档页面
+      component: () => import('../views/FormTableDocsView.vue')
+    },
+    {
       path: '/dynamic-slot-test',
       name: 'dynamic-slot-test',
       // 动态插槽功能测试页面

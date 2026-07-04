@@ -1,6 +1,11 @@
 <template>
   <div class="form-table-advanced-demo">
-    <h1>FormTable 高级示例</h1>
+    <div class="page-header">
+      <h1>FormTable 高级示例</h1>
+      <el-button type="primary" plain @click="$router.push('/form-table-docs')">
+        能力文档
+      </el-button>
+    </div>
 
     <div class="demo-section">
       <h2>Slot 插槽使用说明</h2>
@@ -748,9 +753,17 @@ const toggleLoading = () => {
   margin: 0 auto;
 
   h1 {
+    margin: 0;
     color: #303133;
-    margin-bottom: 30px;
     text-align: center;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 30px;
   }
 
   .demo-section {
