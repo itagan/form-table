@@ -489,4 +489,107 @@ describe('FormTable behavior', () => {
     warnSpy.mockRestore()
     wrapper.destroy()
   })
+
+  it('applies field linkage patches when an input changes', async () => {
+    const wrapper = mountFormTable({
+      tableData: [{ name: 'Alice', slug: '' }],
+      columns: [
+        {
+          name: '信息',
+          children: [
+            {
+              children: [
+                {
+                  key: 'name',
+                  type: 'input',
+                  behavior: {
+                    onValueChange: ({ value }) => ({
+                      slug: String(value).toLowerCase()
+                    })
+                  }
+                },
+                {
+                  key: 'slug',
+                  type: 'input'
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    })
+    await wrapper.vm.$nextTick()
+
+    await wrapper.find('input').setValue('Bob')
+
+    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([
+      { name: 'Bob', slug: 'bob' }
+    ])
+    expect(wrapper.emitted('field-change')?.[0]?.[0]).toMatchObject({
+      fieldKey: 'name',
+      value: 'Bob',
+      previousValue: 'Alice'
+    })
+    expect(wrapper.emitted('field-change')?.[1]?.[0]).toMatchObject({
+      fieldKey: 'slug',
+      value: 'bob',
+      previousValue: ''
+    })
+
+    wrapper.destroy()
+  })
+
+  it('applies field linkage when rows are added or copied', async () => {
+    const wrapper = mountFormTable({
+      tableData: [{ name: 'Alice', slug: 'alice' }],
+      columns: [
+        {
+          name: '信息',
+          children: [
+            {
+              children: [
+                {
+                  key: 'name',
+                  type: 'input',
+                  behavior: {
+                    defaultValue: 'Draft',
+                    onValueChange: ({ value }) => ({
+                      slug: String(value).toLowerCase()
+                    })
+                  }
+                },
+                {
+                  key: 'slug',
+                  type: 'input'
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    })
+    await wrapper.vm.$nextTick()
+    const formTable = wrapper.vm as unknown as FormTableExpose
+
+    formTable.addRow()
+    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([
+      { name: 'Alice', slug: 'alice' },
+      { name: 'Draft', slug: 'draft' }
+    ])
+    expect(wrapper.emitted('row-add')?.[0]).toEqual([{ name: 'Draft', slug: 'draft' }, 1])
+
+    await wrapper.setProps({
+      tableData: wrapper.emitted('update:tableData')?.[0]?.[0]
+    })
+
+    formTable.copyRow(0, { name: 'Copied' })
+    expect(wrapper.emitted('update:tableData')?.[1]?.[0]).toEqual([
+      { name: 'Alice', slug: 'alice' },
+      { name: 'Copied', slug: 'copied' },
+      { name: 'Draft', slug: 'draft' }
+    ])
+    expect(wrapper.emitted('row-copy')?.[0]).toEqual([{ name: 'Copied', slug: 'copied' }, 1])
+
+    wrapper.destroy()
+  })
 })
