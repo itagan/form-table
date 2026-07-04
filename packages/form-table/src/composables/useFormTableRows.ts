@@ -69,6 +69,8 @@ export function useFormTableRows(options: UseFormTableRowsOptions) {
     emitBusinessEvent
   } = options
 
+  const getResolvedFormData = () => props.formData || {}
+
   /**
    * 提交单行 patch。
    *
@@ -86,7 +88,7 @@ export function useFormTableRows(options: UseFormTableRowsOptions) {
         rowIndex,
         currentRow,
         tableData: props.tableData,
-        formData: props.formData,
+        formData: getResolvedFormData(),
         getFieldConfig: getFieldConfigByKey
       },
       {
@@ -137,7 +139,7 @@ export function useFormTableRows(options: UseFormTableRowsOptions) {
         rowIndex: insertIndex,
         currentRow: draftRow,
         tableData: props.tableData,
-        formData: props.formData,
+        formData: getResolvedFormData(),
         getFieldConfig: getFieldConfigByKey
       },
       {
@@ -189,7 +191,7 @@ export function useFormTableRows(options: UseFormTableRowsOptions) {
         rowIndex: insertIndex,
         currentRow: copiedRow,
         tableData: props.tableData,
-        formData: props.formData,
+        formData: getResolvedFormData(),
         getFieldConfig: getFieldConfigByKey
       },
       {

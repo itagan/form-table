@@ -49,6 +49,8 @@
       <FormTable
         :table-data="tableData"
         :columns="columns"
+        :rules="rules"
+        :form-data="formData"
         :custom-components="customComponents"
         @update:tableData="handleTableDataUpdate"
       />
@@ -85,6 +87,8 @@ const tableData = ref<TableRow[]>([
     simple: 'simple'
   }
 ])
+const rules = ref({})
+const formData = ref({})
 
 // 状态选项
 const statusOptions = [

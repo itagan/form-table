@@ -189,8 +189,8 @@ export interface ValidationRule {
 export interface FormTableProps {
   tableData: TableRow[]
   columns: ColumnConfig[]
-  rules: Record<string, ValidationRule[]>
-  formData: FormTableRecord
+  rules?: Record<string, ValidationRule[]>
+  formData?: FormTableRecord
   customComponents?: CustomComponentConfig[]
   loading?: boolean
 }
