@@ -248,7 +248,7 @@ const columns = [
 
 ## 基础用法
 
-`formtable` 包入口只导出业务侧稳定使用的公开类型。内部 provide/inject key、dispatch 和内部事件命令保留在源码内部，不作为 npm 包 API 承诺。
+`@itagan/form-table` 包入口只导出业务侧稳定使用的公开类型。内部 provide/inject key、dispatch 和内部事件命令保留在源码内部，不作为 npm 包 API 承诺。
 
 ```vue
 <template>
@@ -268,13 +268,13 @@ const columns = [
 
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
-import FormTable from 'formtable'
+import FormTable from '@itagan/form-table'
 import type {
   ColumnConfig,
   FormTableEventPayload,
   FormTableRecord,
   TableRow
-} from 'formtable'
+} from '@itagan/form-table'
 
 const tableData = ref<TableRow[]>([
   { name: '张三', age: 25, level: 'mid' }
@@ -460,7 +460,7 @@ const handleFormTableEvent = (payload: FormTableEventPayload) => {
 TypeScript 中推荐这样标注：
 
 ```ts
-import type { FormTableExpose } from 'formtable'
+import type { FormTableExpose } from '@itagan/form-table'
 
 const formTableRef = ref<FormTableExpose>()
 ```

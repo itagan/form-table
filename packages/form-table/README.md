@@ -5,7 +5,7 @@
 ## 安装
 
 ```bash
-pnpm add formtable
+pnpm add @itagan/form-table
 ```
 
 使用方需要安装并注册 peer dependencies：
@@ -17,16 +17,16 @@ pnpm add formtable
 
 ```ts
 import 'element-ui/lib/theme-chalk/index.css'
-import 'formtable/style.css'
-import FormTable from 'formtable'
-import type { ColumnConfig, TableRow } from 'formtable'
+import '@itagan/form-table/style.css'
+import FormTable from '@itagan/form-table'
+import type { ColumnConfig, TableRow } from '@itagan/form-table'
 ```
 
 也可以注册为全局组件：
 
 ```ts
 import Vue from 'vue'
-import { FormTablePlugin } from 'formtable'
+import { FormTablePlugin } from '@itagan/form-table'
 
 Vue.use(FormTablePlugin)
 ```
@@ -44,7 +44,7 @@ Vue.use(FormTablePlugin)
 
 包入口只导出业务侧稳定使用的公开类型，例如 `ColumnConfig`、`FormItemConfig`、`TableRow`、`FormTableExpose`、`FormTableEventPayload` 和 `FormTableFieldChangePayload`。
 
-内部 provide/inject key、dispatch、内部事件命令和组件编排类型不会从 `formtable` 包入口导出。
+内部 provide/inject key、dispatch、内部事件命令和组件编排类型不会从 `@itagan/form-table` 包入口导出。
 
 完整 API 文档维护在仓库根目录：
 

@@ -76,8 +76,8 @@
 <script lang="ts" setup>
 import { ref, reactive } from 'vue'
 import { Message } from 'element-ui'
-import FormTable from 'formtable'
-import type { ColumnConfig, FormTableExpose, TableRow } from 'formtable'
+import FormTable from '@itagan/form-table'
+import type { ColumnConfig, FormTableExpose, TableRow } from '@itagan/form-table'
 
 const tableData = ref<TableRow[]>([
   { 

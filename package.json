@@ -5,12 +5,12 @@
   "scripts": {
     "dev": "pnpm --filter formtable-playground dev",
     "build": "run-s build:package build:playground",
-    "build:package": "pnpm --filter formtable build",
+    "build:package": "pnpm --filter @itagan/form-table build",
     "build:playground": "pnpm --filter formtable-playground build",
     "pack:dry-run": "cd packages/form-table && npm pack --dry-run",
     "preview": "pnpm --filter formtable-playground preview",
     "release:check": "run-s test type-check build pack:dry-run",
-    "test": "pnpm --filter formtable test",
+    "test": "pnpm --filter @itagan/form-table test",
     "type-check": "pnpm -r type-check"
   },
   "devDependencies": {

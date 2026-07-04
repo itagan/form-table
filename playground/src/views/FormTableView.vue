@@ -40,13 +40,13 @@
 <script lang="ts" setup>
 import { ref, reactive } from 'vue'
 import { Message } from 'element-ui'
-import FormTable from 'formtable'
+import FormTable from '@itagan/form-table'
 import type {
   ColumnConfig,
   FormTableExpose,
   FormTableRecord,
   TableRow
-} from 'formtable'
+} from '@itagan/form-table'
 
 const tableData = ref<TableRow[]>([
   { name: '小米', age: 16, sex: '男', school: '县一小' },

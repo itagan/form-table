@@ -50,7 +50,7 @@ function handleFormTableEvent(payload: FormTableEventPayload) {
 ## Ref 方法
 
 ```ts
-import type { FormTableExpose } from 'formtable'
+import type { FormTableExpose } from '@itagan/form-table'
 
 const formTableRef = ref<FormTableExpose>()
 ```

@@ -62,12 +62,12 @@ importers:
 
   playground:
     dependencies:
+      '@itagan/form-table':
+        specifier: workspace:*
+        version: link:../packages/form-table
       element-ui:
         specifier: ^2.15.14
         version: 2.15.14(vue@2.7.16)
-      formtable:
-        specifier: workspace:*
-        version: link:../packages/form-table
       vue:
         specifier: ^2.7.7
         version: 2.7.16

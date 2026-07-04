@@ -152,7 +152,7 @@
 <script lang="ts" setup>
 import { ref, reactive } from 'vue'
 import { Message } from 'element-ui'
-import FormTable from 'formtable'
+import FormTable from '@itagan/form-table'
 import PhoneInput from '@/components/CustomComponents/PhoneInput.vue'
 import StatusTag from '@/components/CustomComponents/StatusTag.vue'
 import TestComponent from '@/components/CustomComponents/TestComponent.vue'
@@ -164,7 +164,7 @@ import type {
   FormTableExpose,
   FormTableFieldChangePayload,
   TableRow,
-} from 'formtable'
+} from '@itagan/form-table'
 
 const tableData = ref<TableRow[]>([
   {

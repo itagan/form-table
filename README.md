@@ -36,19 +36,19 @@ pnpm release:check
 - `pnpm test`：运行组件包核心逻辑单测。
 - `pnpm build`：先构建 npm 包，再构建 playground。
 - `pnpm release:check`：执行测试、类型检查、构建和 npm 打包预检。
-- `pnpm --filter formtable build`：只构建可发布 npm 包。
+- `pnpm --filter @itagan/form-table build`：只构建可发布 npm 包。
 
 ## npm 包使用
 
 ```bash
-pnpm add formtable
+pnpm add @itagan/form-table
 ```
 
 ```ts
 import 'element-ui/lib/theme-chalk/index.css'
-import 'formtable/style.css'
-import FormTable from 'formtable'
-import type { ColumnConfig, TableRow } from 'formtable'
+import '@itagan/form-table/style.css'
+import FormTable from '@itagan/form-table'
+import type { ColumnConfig, TableRow } from '@itagan/form-table'
 ```
 
 使用方需要同时安装并注册 peer dependencies：

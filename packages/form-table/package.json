@@ -1,5 +1,5 @@
 {
-  "name": "formtable",
+  "name": "@itagan/form-table",
   "version": "0.1.0",
   "description": "Vue 2.7 + Element UI editable form table component.",
   "type": "module",
@@ -23,8 +23,10 @@
     "README.md"
   ],
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
+  "author": "itagan",
   "repository": {
     "type": "git",
     "url": "git+https://gitee.com/itagan/form-table.git",

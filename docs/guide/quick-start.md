@@ -3,7 +3,7 @@
 ## 安装
 
 ```bash
-pnpm add formtable
+pnpm add @itagan/form-table
 ```
 
 使用方项目需要安装并注册：
@@ -15,9 +15,9 @@ pnpm add formtable
 
 ```ts
 import 'element-ui/lib/theme-chalk/index.css'
-import 'formtable/style.css'
-import FormTable from 'formtable'
-import type { ColumnConfig, TableRow } from 'formtable'
+import '@itagan/form-table/style.css'
+import FormTable from '@itagan/form-table'
+import type { ColumnConfig, TableRow } from '@itagan/form-table'
 ```
 
 ## 最小用法

@@ -123,12 +123,12 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import FormTable from 'formtable'
+import FormTable from '@itagan/form-table'
 import PhoneInput from '@/components/CustomComponents/PhoneInput.vue'
 import StatusTag from '@/components/CustomComponents/StatusTag.vue'
 import TestComponent from '@/components/CustomComponents/TestComponent.vue'
 import SimpleTest from '@/components/CustomComponents/SimpleTest.vue'
-import type { ColumnConfig, CustomComponentConfig, TableRow } from 'formtable'
+import type { ColumnConfig, CustomComponentConfig, TableRow } from '@itagan/form-table'
 
 const createDefaultTableData = (): TableRow[] => [
   {
