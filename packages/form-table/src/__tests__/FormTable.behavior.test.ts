@@ -430,4 +430,63 @@ describe('FormTable behavior', () => {
     warnSpy.mockRestore()
     wrapper.destroy()
   })
+
+  it('excludes hidden fields from row validation when visibility changes', async () => {
+    const wrapper = mountFormTable({
+      tableData: [{ name: 'Alice', remark: '' }],
+      formData: {
+        showRemark: true
+      },
+      rules: {
+        'tableData.*.remark': [
+          {
+            required: true,
+            message: '请输入备注',
+            trigger: 'blur'
+          }
+        ]
+      },
+      columns: [
+        {
+          name: '信息',
+          children: [
+            {
+              children: [
+                {
+                  key: 'name',
+                  type: 'input'
+                },
+                {
+                  key: 'remark',
+                  type: 'input',
+                  behavior: {
+                    visible: ({ formData }) => formData.showRemark === true
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    })
+    await wrapper.vm.$nextTick()
+    const formTable = wrapper.vm as unknown as FormTableExpose
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    expect(wrapper.findAll('input').length).toBe(2)
+    await expect(formTable.validateRow(0)).resolves.toBe(false)
+
+    await wrapper.setProps({
+      formData: {
+        showRemark: false
+      }
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.findAll('input').length).toBe(1)
+    await expect(formTable.validateRow(0)).resolves.toBe(true)
+
+    warnSpy.mockRestore()
+    wrapper.destroy()
+  })
 })
