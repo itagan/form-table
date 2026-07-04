@@ -67,10 +67,8 @@ import { createRuntimeContext } from './utils/dynamic'
 import { resolveDisplayValue } from './utils/display'
 import { createFallbackFormTableActions } from './utils/actions'
 import {
-  getFormItemCustomComponent,
   getFormItemEmptyText,
   getFormItemFormatter,
-  getFormItemListeners,
   getFormItemSlotName,
   isFormItemTooltipEnabled,
   resolveFormItemBind,
@@ -78,8 +76,13 @@ import {
   resolveFormItemOptionProps,
   resolveFormItemTooltipProps
 } from './utils/fieldConfig'
+import {
+  createComponentWrapperProps,
+  createFormTableSlotContext,
+  mergeFormItemRules,
+  normalizeFormItemLabelWidth
+} from './utils/formItemRender'
 import { getValueByPath } from './utils/path'
-import { resolveRulesForProp } from './utils/rules'
 
 // 渲染顶层插槽的包装组件，用 div 包裹以兼容 Vue 2 单根节点要求
 const SlotRenderer = defineComponent({
@@ -187,7 +190,7 @@ const resolvedOptionProps = computed(() => {
  * FormTable 单元格默认不参与表单级自动标签宽度计算；需要标签宽度时请传固定值。
  */
 const normalizedLabelWidth = computed(() => {
-  return props.labelWidth === 'auto' ? undefined : props.labelWidth
+  return normalizeFormItemLabelWidth(props.labelWidth)
 })
 
 /**
@@ -195,31 +198,18 @@ const normalizedLabelWidth = computed(() => {
  *
  * 除基础行信息外，也暴露行操作和校验快捷方法，让操作列可以保持声明式配置。
  */
-const slotProps = computed<FormTableSlotContext>(() => ({
-  row: props.row,
-  index: props.index,
-  rowCount: formTableContext.value.tableData.length,
-  isFirstRow: props.index === 0,
-  isLastRow: props.index === formTableContext.value.tableData.length - 1,
-  fieldKey: props.config.key,
-  propPath: props.propPath,
-  value: getValueByPath(props.row, props.config.key),
-  formData: formTableContext.value.formData,
-  tableData: formTableContext.value.tableData,
-  setValue,
-  updateRow,
-  removeCurrentRow: () => formTableActions.removeRow(props.index),
-  copyCurrentRow: (patch?: Partial<FormTableRecord>) => formTableActions.copyRow(props.index, patch),
-  insertBefore: (rowData?: Partial<FormTableRecord>) => formTableActions.insertRow(props.index, rowData),
-  insertAfter: (rowData?: Partial<FormTableRecord>) => formTableActions.insertRow(props.index + 1, rowData),
-  moveCurrentRow: (toIndex: number) => formTableActions.moveRow(props.index, toIndex),
-  moveUp: () => formTableActions.moveRow(props.index, props.index - 1),
-  moveDown: () => formTableActions.moveRow(props.index, props.index + 1),
-  validateCurrentField: async () => await formTableActions.validateField(props.propPath),
-  validateCurrentRow: async () => await formTableActions.validateRow(props.index),
-  clearCurrentFieldValidate: () => formTableActions.clearValidate(props.propPath),
-  clearCurrentRowValidate: () => formTableActions.clearRowValidate(props.index)
-}))
+const slotProps = computed<FormTableSlotContext>(() => {
+  return createFormTableSlotContext({
+    row: props.row,
+    rowIndex: props.index,
+    config: props.config,
+    propPath: props.propPath,
+    formTableContext: formTableContext.value,
+    actions: formTableActions,
+    setValue,
+    updateRow
+  })
+})
 
 /**
  * 合并全局 rules 和字段自身 rules。
@@ -227,11 +217,11 @@ const slotProps = computed<FormTableSlotContext>(() => ({
  * 全局 rules 支持通配路径，字段 rules 适合写局部、一次性的补充规则。
  */
 const effectiveRules = computed(() => {
-  const inheritedRules = resolveRulesForProp(formRules.value, props.propPath)
-  const localRules = props.rules || []
-  const mergedRules = [...inheritedRules, ...localRules]
-
-  return mergedRules.length > 0 ? mergedRules : undefined
+  return mergeFormItemRules({
+    formRules: formRules.value,
+    propPath: props.propPath,
+    localRules: props.rules
+  })
 })
 
 /**
@@ -241,31 +231,14 @@ const effectiveRules = computed(() => {
  * 继续下传到底层 Element UI 组件。
  */
 const wrapperProps = computed(() => {
-  const {
-    key,
-    type,
-    component,
-    rules,
-    label,
-    labelWidth,
-    layout,
-    display,
-    behavior
-  } = props.config
-
-  return {
-    type,
-    fieldKey: key,
+  return createComponentWrapperProps({
+    config: props.config,
     row: props.row,
     rowIndex: props.index,
-    customComponent: getFormItemCustomComponent(props.config),
     bind: resolvedBind.value,
     options: resolvedOptions.value,
-    optionProps: resolvedOptionProps.value,
-    listeners: getFormItemListeners(props.config),
-    formatter: getFormItemFormatter(props.config),
-    emptyText: getFormItemEmptyText(props.config)
-  }
+    optionProps: resolvedOptionProps.value
+  })
 })
 
 const isTooltipEnabled = computed(() => isFormItemTooltipEnabled(props.config))
