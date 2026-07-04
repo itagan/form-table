@@ -36,6 +36,8 @@
         <code>slotName: 'table-xxx'</code> 指定插槽；表头可以使用
         <code>headerSlot</code> 模板插槽或
         <code>props.renderHeader</code> 原生渲染函数。
+        Element Table 已有的列能力优先通过 <code>column.props</code> 透传使用，
+        表格内表单相关的值更新、校验、行操作再使用 FormTable 扩展能力。
       </p>
     </div>
 

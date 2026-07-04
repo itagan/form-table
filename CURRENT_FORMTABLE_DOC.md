@@ -65,6 +65,19 @@ FormTable/index.vue
 
 `tableData` 是行编辑的主数据源。组件会在行数据变化后同步发出 `update:formData`，其中 `formData.tableData` 始终使用最新表格数据，方便外层以完整表单模型提交。
 
+## 能力矩阵
+
+| 能力 | 使用方式 | 说明 |
+|------|----------|------|
+| FormTable 自有 props | `tableData`、`columns`、`rules`、`formData`、`customComponents`、`loading` | 管理表格内表单的数据、结构、校验和扩展组件 |
+| Element Form props | 顶层 attrs，如 `label-width`、`size`、`disabled` | 通过白名单透传给内部 `el-form` |
+| Element Table props | 顶层 attrs，如 `border`、`stripe`、`height`、`max-height` | 通过白名单透传给内部 `el-table` |
+| Element Table events | 直接监听同名事件，如 `@row-click`、`@selection-change`、`@sort-change` | 参数保持 Element UI 原生格式，同时进入 `@event` 安全归档 |
+| Element Form methods | `ref.validate()`、`ref.resetFields()`、`ref.clearValidate()`、`ref.getNativeFormRef()` | FormTable ref 汇总常用方法，也可取原生实例 |
+| Element Table methods | `ref.clearSelection()`、`ref.doLayout()`、`ref.sort()`、`ref.getNativeTableRef()` | FormTable ref 汇总常用方法，也可取原生实例 |
+| Element Table Column props | `column.props`，如 `width`、`align`、`type`、`renderHeader` | 透传给 `el-table-column`；`type=index/selection/expand` 使用原生列渲染 |
+| FormTable 扩展能力 | 字段 slot、表头 slot、`required`、行操作、路径字段、显隐和联动 | 解决表格内表单场景中 Element UI 原生 API 不直接覆盖的部分 |
+
 ## 功能语义
 
 - 字段更新统一入口：内置组件、slot、自定义组件都应通过 `dispatch('update:row')` 或 slot 暴露的 `setValue/updateRow` 进入 `commitRowChange`。
