@@ -177,7 +177,7 @@ describe('FormTable behavior', () => {
                   key: 'status',
                   type: 'custom',
                   component: {
-                    customComponent: 'StatusInput'
+                    name: 'StatusInput'
                   }
                 }
               ]
@@ -252,7 +252,7 @@ describe('FormTable behavior', () => {
                   key: 'status',
                   type: 'custom',
                   component: {
-                    customComponent: 'ListenerInput',
+                    name: 'ListenerInput',
                     listeners: {
                       commit: listener
                     }

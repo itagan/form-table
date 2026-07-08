@@ -67,7 +67,7 @@
  * ComponentWrapper - 动态组件渲染器
  *
  * 根据 type 解析为对应的 Element 组件，通过 v-model 双向绑定行数据。
- * 支持 input/select/date 等内置类型，也支持通过 customComponent 注入自定义组件。
+ * 支持 input/select/date 等内置类型，也支持通过 component.name 注入自定义组件。
  *
  * v-model 数据流:
  *   get → row[fieldKey] 读取当前值
@@ -113,7 +113,7 @@ const props = defineProps<{
   fieldKey: string
   row: FormTableRecord
   rowIndex: number
-  customComponent?: string
+  componentName?: string
   bind?: ComponentBind
   options?: FormItemOption[]
   optionProps?: ComponentBind
@@ -151,7 +151,7 @@ const resolvedOptions = computed<FormItemOption[]>(() => {
 const resolved = computed(() => {
   const {
     type,
-    customComponent,
+    componentName,
     bind,
     options,
     optionProps,
@@ -163,7 +163,7 @@ const resolved = computed(() => {
 
   return processComponentProps({
     type,
-    customComponent,
+    componentName,
     customComponents: customComponentsMap.value,
     bind: props.bind || {},
     options: resolvedOptions.value,

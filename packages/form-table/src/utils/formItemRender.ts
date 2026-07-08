@@ -12,7 +12,7 @@ import type {
   ValidationRule
 } from '../types'
 import {
-  getFormItemCustomComponent,
+  getFormItemComponentName,
   getFormItemEmptyText,
   getFormItemFormatter,
   getFormItemListeners
@@ -74,7 +74,7 @@ export function createComponentWrapperProps(options: {
     fieldKey: options.config.key,
     row: options.row,
     rowIndex: options.rowIndex,
-    customComponent: getFormItemCustomComponent(options.config),
+    componentName: getFormItemComponentName(options.config),
     bind: options.bind,
     options: options.options,
     optionProps: options.optionProps,

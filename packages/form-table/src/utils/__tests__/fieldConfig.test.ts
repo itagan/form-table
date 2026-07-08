@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import type { FormItemConfig, FormTableRuntimeContext } from '../../types'
 import {
   getFormItemColSpan,
-  getFormItemCustomComponent,
+  getFormItemComponentName,
   getFormItemEmptyText,
   getFormItemFormatter,
   getFormItemListeners,
@@ -185,7 +185,7 @@ describe('field config utils', () => {
         }
       },
       component: {
-        customComponent: 'SchoolSelect',
+        name: 'SchoolSelect',
         slotName: 'school-slot',
         listeners: {
           change: listener
@@ -209,7 +209,7 @@ describe('field config utils', () => {
 
     expect(getFormItemColSpan(item)).toBe(12)
     expect(resolveFormItemColProps(item, context)).toEqual({ offset: 1 })
-    expect(getFormItemCustomComponent(item)).toBe('SchoolSelect')
+    expect(getFormItemComponentName(item)).toBe('SchoolSelect')
     expect(getFormItemSlotName(item)).toBe('school-slot')
     expect(getFormItemListeners(item)).toEqual({ change: listener })
     expect(getFormItemFormatter(item)).toBe(formatter)

@@ -31,7 +31,7 @@ const NO_CLEARABLE_TYPES = new Set<FormItemType>([
  */
 export interface ComponentPropsOptions {
   type: FormItemType
-  customComponent?: string
+  componentName?: string
   customComponents?: CustomComponentsMap
   bind?: ComponentBind
   [key: string]: FormTableValue
@@ -85,7 +85,7 @@ export function processComponentProps(options: ComponentPropsOptions): {
 } {
   const {
     type,
-    customComponent,
+    componentName,
     customComponents,
     bind,
     fieldKey,
@@ -96,10 +96,10 @@ export function processComponentProps(options: ComponentPropsOptions): {
   
   // 1. 获取组件类型
   let componentType: FormTableCustomComponent
-  if (type === 'custom' && customComponent) {
-    const customComponentInstance = customComponents?.[customComponent]
+  if (type === 'custom' && componentName) {
+    const customComponentInstance = customComponents?.[componentName]
     if (!customComponentInstance) {
-      console.warn(`Custom component "${customComponent}" not found. Available:`, Object.keys(customComponents || {}))
+      console.warn(`Custom component "${componentName}" not found. Available:`, Object.keys(customComponents || {}))
       componentType = 'div'
     } else {
       componentType = customComponentInstance

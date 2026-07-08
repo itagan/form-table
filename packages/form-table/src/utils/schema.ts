@@ -28,8 +28,8 @@ function validateFormItemConfig(item: FormItemConfig) {
     console.warn(`[FormTable] slot field "${item.key}" requires component.slotName.`)
   }
 
-  if (item.type === 'custom' && !item.component?.customComponent) {
-    console.warn(`[FormTable] custom field "${item.key}" requires component.customComponent.`)
+  if (item.type === 'custom' && !item.component?.name) {
+    console.warn(`[FormTable] custom field "${item.key}" requires component.name.`)
   }
 }
 

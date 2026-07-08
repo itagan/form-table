@@ -152,8 +152,8 @@ export function resolveFormItemDefaultValue(
 /**
  * 获取自定义组件注册名。
  */
-export function getFormItemCustomComponent(item: FormItemConfig) {
-  return item.component?.customComponent
+export function getFormItemComponentName(item: FormItemConfig) {
+  return item.component?.name
 }
 
 /**

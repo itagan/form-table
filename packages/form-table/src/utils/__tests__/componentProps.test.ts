@@ -38,7 +38,7 @@ describe('component props utils', () => {
     const CustomInput = { name: 'CustomInput' }
     const result = processComponentProps({
       type: 'custom',
-      customComponent: 'CustomInput',
+      componentName: 'CustomInput',
       customComponents: {
         CustomInput
       },
@@ -58,7 +58,7 @@ describe('component props utils', () => {
 
     const result = processComponentProps({
       type: 'custom',
-      customComponent: 'MissingInput',
+      componentName: 'MissingInput',
       customComponents: {}
     })
 
