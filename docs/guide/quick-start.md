@@ -38,7 +38,6 @@ Vue.use(FormTablePlugin)
   <FormTable
     :table-data="tableData"
     :columns="columns"
-    :rules="rules"
     border
     @update:tableData="tableData = $event"
   />
@@ -47,7 +46,7 @@ Vue.use(FormTablePlugin)
 <script lang="ts">
 import Vue from 'vue'
 import FormTable from '@itagan/form-table'
-import type { ColumnConfig, TableRow, ValidationRule } from '@itagan/form-table'
+import type { ColumnConfig, TableRow } from '@itagan/form-table'
 
 export default Vue.extend({
   components: { FormTable },
@@ -66,9 +65,9 @@ export default Vue.extend({
           children: [{
             key: 'name',
             type: 'input',
-            component: {
-              bind: { placeholder: '请输入姓名' }
-            }
+            placeholder: '请输入姓名',
+            required: true,
+            requiredMessage: '请输入姓名'
           }]
         }]
       },
@@ -79,6 +78,8 @@ export default Vue.extend({
           children: [{
             key: 'age',
             type: 'number',
+            required: true,
+            requiredMessage: '请输入年龄',
             component: {
               bind: { min: 1, max: 120 }
             }
@@ -91,26 +92,20 @@ export default Vue.extend({
           children: [{
             key: 'school',
             type: 'select',
-            component: {
-              bind: { placeholder: '请选择学校' },
-              options: [
-                { label: '县一小', value: '县一小' },
-                { label: '县二中', value: '县二中' },
-                { label: '市一中', value: '市一中' }
-              ]
-            }
+            placeholder: '请选择学校',
+            required: true,
+            requiredMessage: '请选择学校',
+            options: [
+              { label: '县一小', value: '县一小' },
+              { label: '县二中', value: '县二中' },
+              { label: '市一中', value: '市一中' }
+            ]
           }]
         }]
       }
     ]
 
-    const rules: Record<string, ValidationRule[]> = {
-      'tableData.*.name': [{ required: true, message: '请输入姓名', trigger: 'blur' }],
-      'tableData.*.age': [{ required: true, message: '请输入年龄', trigger: 'blur' }],
-      'tableData.*.school': [{ required: true, message: '请选择学校', trigger: 'change' }]
-    }
-
-    return { tableData, columns, rules }
+    return { tableData, columns }
   }
 })
 </script>

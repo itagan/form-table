@@ -128,11 +128,20 @@ export type FormItemType =
 export interface FormItemConfig {
   key: string
   type: FormItemType
+  placeholder?: string
+  disabled?: boolean
+  clearable?: boolean
+  readonly?: boolean
+  options?: DynamicValue<FormItemOption[]>
+  optionProps?: DynamicValue<OptionPropsConfig>
+  required?: boolean
+  requiredMessage?: string
+  trigger?: string | string[]
   layout?: FormItemLayoutConfig
   component?: FormItemComponentConfig
   display?: FormItemDisplayConfig
   behavior?: FormItemBehaviorConfig
-  rules?: any[]
+  rules?: ValidationRule[]
   label?: string
   labelWidth?: string
 }

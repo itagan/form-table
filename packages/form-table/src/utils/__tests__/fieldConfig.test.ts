@@ -7,6 +7,7 @@ import {
   getFormItemFormatter,
   getFormItemListeners,
   getFormItemOnValueChange,
+  getFormItemRules,
   getFormItemSlotName,
   isFormItemTooltipEnabled,
   resolveFormItemBind,
@@ -61,6 +62,92 @@ describe('field config utils', () => {
     })
     expect(resolveFormItemOptions(item, context)).toEqual([
       { label: 'senior', value: 'senior' }
+    ])
+    expect(resolveFormItemOptionProps(item, context)).toEqual({
+      label: 'name',
+      value: 'id'
+    })
+  })
+
+  it('maps top-level common field config into bind, options and rules', () => {
+    const item: FormItemConfig = {
+      key: 'status',
+      type: 'select',
+      label: '状态',
+      placeholder: '请选择状态',
+      disabled: true,
+      clearable: false,
+      readonly: true,
+      required: true,
+      requiredMessage: '请选择状态',
+      trigger: 'change',
+      options: [
+        { label: '启用', value: 'enabled' }
+      ],
+      optionProps: {
+        label: 'name',
+        value: 'id'
+      }
+    }
+
+    expect(resolveFormItemBind(item, context)).toEqual({
+      placeholder: '请选择状态',
+      disabled: true,
+      clearable: false,
+      readonly: true
+    })
+    expect(resolveFormItemOptions(item, context)).toEqual([
+      { label: '启用', value: 'enabled' }
+    ])
+    expect(resolveFormItemOptionProps(item, context)).toEqual({
+      label: 'name',
+      value: 'id'
+    })
+    expect(getFormItemRules(item)).toEqual([
+      {
+        required: true,
+        message: '请选择状态',
+        trigger: 'change'
+      }
+    ])
+  })
+
+  it('lets grouped component config override top-level common config', () => {
+    const item: FormItemConfig = {
+      key: 'status',
+      type: 'select',
+      placeholder: '顶层占位',
+      clearable: true,
+      options: [
+        { label: '顶层', value: 'top' }
+      ],
+      optionProps: {
+        label: 'label',
+        value: 'value'
+      },
+      component: {
+        bind: {
+          placeholder: '分组占位',
+          clearable: false,
+          filterable: true
+        },
+        options: [
+          { label: '分组', value: 'grouped' }
+        ],
+        optionProps: {
+          label: 'name',
+          value: 'id'
+        }
+      }
+    }
+
+    expect(resolveFormItemBind(item, context)).toEqual({
+      placeholder: '分组占位',
+      clearable: false,
+      filterable: true
+    })
+    expect(resolveFormItemOptions(item, context)).toEqual([
+      { label: '分组', value: 'grouped' }
     ])
     expect(resolveFormItemOptionProps(item, context)).toEqual({
       label: 'name',

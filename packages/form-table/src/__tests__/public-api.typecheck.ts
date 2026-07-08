@@ -30,16 +30,16 @@ const columns: ColumnConfig[] = [
             key: 'name',
             type: 'input',
             label: '姓名',
-            component: {
-              bind: {
-                placeholder: '请输入姓名'
-              }
-            }
+            placeholder: '请输入姓名',
+            clearable: true,
+            required: true,
+            requiredMessage: '请输入姓名'
           },
           {
             key: 'age',
             type: 'number',
             label: '年龄',
+            disabled: false,
             behavior: {
               defaultValue: 18
             }

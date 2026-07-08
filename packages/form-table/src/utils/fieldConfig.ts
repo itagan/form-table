@@ -6,7 +6,8 @@ import type {
   FormTableFieldChangeHandler,
   FormTableFieldListener,
   FormTableRuntimeContext,
-  OptionPropsConfig
+  OptionPropsConfig,
+  ValidationRule
 } from '../types'
 import { resolveDynamicValue, resolveVisible } from './dynamic'
 
@@ -57,7 +58,28 @@ export function resolveFormItemBind(
   item: FormItemConfig,
   context: FormTableRuntimeContext
 ) {
-  return resolveRecord(item.component?.bind, context)
+  const topLevelBind: ComponentBind = {}
+
+  if (item.placeholder !== undefined) {
+    topLevelBind.placeholder = item.placeholder
+  }
+
+  if (item.disabled !== undefined) {
+    topLevelBind.disabled = item.disabled
+  }
+
+  if (item.clearable !== undefined) {
+    topLevelBind.clearable = item.clearable
+  }
+
+  if (item.readonly !== undefined) {
+    topLevelBind.readonly = item.readonly
+  }
+
+  return {
+    ...topLevelBind,
+    ...resolveRecord(item.component?.bind, context)
+  }
 }
 
 /**
@@ -67,7 +89,7 @@ export function resolveFormItemOptions(
   item: FormItemConfig,
   context: FormTableRuntimeContext
 ): FormItemOption[] | undefined {
-  return resolveDynamicValue(item.component?.options, context)
+  return resolveDynamicValue(item.component?.options ?? item.options, context)
 }
 
 /**
@@ -77,8 +99,26 @@ export function resolveFormItemOptionProps(
   item: FormItemConfig,
   context: FormTableRuntimeContext
 ): OptionPropsConfig | undefined {
-  const optionProps = resolveRecord(item.component?.optionProps, context)
+  const optionProps = resolveRecord(item.component?.optionProps ?? item.optionProps, context)
   return Object.keys(optionProps).length > 0 ? optionProps : undefined
+}
+
+export function getFormItemRules(item: FormItemConfig): ValidationRule[] | undefined {
+  const rules: ValidationRule[] = []
+
+  if (item.required) {
+    rules.push({
+      required: true,
+      message: item.requiredMessage || `${item.label || item.key}不能为空`,
+      trigger: item.trigger || (item.type === 'input' || item.type === 'textarea' ? 'blur' : 'change')
+    })
+  }
+
+  if (item.rules?.length) {
+    rules.push(...item.rules)
+  }
+
+  return rules.length > 0 ? rules : undefined
 }
 
 /**

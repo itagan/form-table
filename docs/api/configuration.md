@@ -46,7 +46,7 @@ const columns: ColumnConfig[] = [{
 }]
 ```
 
-列头渲染优先级为 `props.renderHeader` > `headerSlot` > 默认表头。`required` 只控制表头必填标记，不会自动生成校验规则。
+列头渲染优先级为 `props.renderHeader` > `headerSlot` > 默认表头。`ColumnConfig.required` 只控制表头必填标记；字段校验可以通过字段顶层 `required`、全局 `rules` 或字段自身 `rules` 配置。
 
 ## RowConfig
 
@@ -69,11 +69,20 @@ interface RowConfig {
 interface FormItemConfig {
   key: string
   type: FormItemType
+  placeholder?: string
+  disabled?: boolean
+  clearable?: boolean
+  readonly?: boolean
+  options?: DynamicValue<FormItemOption[]>
+  optionProps?: DynamicValue<OptionPropsConfig>
+  required?: boolean
+  requiredMessage?: string
+  trigger?: string | string[]
   layout?: FormItemLayoutConfig
   component?: FormItemComponentConfig
   display?: FormItemDisplayConfig
   behavior?: FormItemBehaviorConfig
-  rules?: any[]
+  rules?: ValidationRule[]
   label?: string
   labelWidth?: string
 }
@@ -81,10 +90,40 @@ interface FormItemConfig {
 
 配置职责建议：
 
+- 顶层常用字段：控制基础组件属性、选项和必填校验，例如 `placeholder`、`disabled`、`options`、`required`
 - `layout`：控制字段布局，例如 `span`、`colProps`
 - `component`：控制字段组件，例如 `bind`、`options`、`listeners`、`slotName`
 - `display`：控制展示行为，例如 `tooltip`、`formatter`、`emptyText`
 - `behavior`：控制运行时行为，例如 `visible`、`defaultValue`、`onValueChange`
+
+顶层常用字段适合基础场景，`component.bind` 适合高级属性和覆盖。组件属性合并优先级为：组件默认值 < 顶层常用字段 < `component.bind`。
+
+```ts
+const columns: ColumnConfig[] = [{
+  name: '基础信息',
+  children: [{
+    children: [{
+      key: 'status',
+      type: 'select',
+      label: '状态',
+      placeholder: '请选择状态',
+      clearable: true,
+      required: true,
+      requiredMessage: '请选择状态',
+      options: [
+        { label: '启用', value: 'enabled' },
+        { label: '停用', value: 'disabled' }
+      ],
+      component: {
+        bind: {
+          filterable: true,
+          clearable: false
+        }
+      }
+    }]
+  }]
+}]
+```
 
 ## 字段类型
 
@@ -113,7 +152,7 @@ interface FormItemConfig {
 
 ## 动态配置
 
-`visible`、`props`、`layout.colProps`、`component.bind`、`component.options`、`component.optionProps` 都支持函数写法。函数会收到运行时上下文：
+`visible`、`props`、`layout.colProps`、`component.bind`、`component.options`、`component.optionProps`、顶层 `options` 和顶层 `optionProps` 都支持函数写法。函数会收到运行时上下文：
 
 ```ts
 const columns: ColumnConfig[] = [{
@@ -187,7 +226,7 @@ const rules = {
 }
 ```
 
-字段自身也可以配置 `rules`。当全局 `rules` 和字段 `rules` 同时存在时，组件会合并到对应的 `el-form-item` 校验路径。
+字段自身也可以配置 `rules`。当全局 `rules`、顶层 `required` 和字段 `rules` 同时存在时，组件会合并到对应的 `el-form-item` 校验路径。
 
 ## 自定义组件
 
