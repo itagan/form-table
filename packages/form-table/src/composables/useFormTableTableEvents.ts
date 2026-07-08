@@ -1,16 +1,18 @@
 import type {
   FormTableArchivedEventName,
+  FormTableEmits,
   FormTableEmitFn,
+  FormTableValue,
   TableRow
 } from '../types'
 import { archiveFormTableEventArgs } from '../utils/eventArchive'
 
 export function useFormTableTableEvents(emit: FormTableEmitFn) {
-  const emitTableEvent = (
-    type: FormTableArchivedEventName,
-    ...args: any[]
+  const emitTableEvent = <K extends FormTableArchivedEventName>(
+    type: K,
+    ...args: FormTableEmits[K]
   ) => {
-    ;(emit as any)(type, ...args)
+    emit(type, ...args)
     emit('event', { type, args: archiveFormTableEventArgs(type, args) })
   }
 
@@ -28,7 +30,7 @@ export function useFormTableTableEvents(emit: FormTableEmitFn) {
 
   const handleTableCellMouseEnter = (
     row: TableRow,
-    column: any,
+    column: FormTableValue,
     cell: HTMLElement,
     event: Event
   ) => {
@@ -37,7 +39,7 @@ export function useFormTableTableEvents(emit: FormTableEmitFn) {
 
   const handleTableCellMouseLeave = (
     row: TableRow,
-    column: any,
+    column: FormTableValue,
     cell: HTMLElement,
     event: Event
   ) => {
@@ -46,7 +48,7 @@ export function useFormTableTableEvents(emit: FormTableEmitFn) {
 
   const handleTableCellClick = (
     row: TableRow,
-    column: any,
+    column: FormTableValue,
     cell: HTMLElement,
     event: Event
   ) => {
@@ -55,38 +57,38 @@ export function useFormTableTableEvents(emit: FormTableEmitFn) {
 
   const handleTableCellDblclick = (
     row: TableRow,
-    column: any,
+    column: FormTableValue,
     cell: HTMLElement,
     event: Event
   ) => {
     emitTableEvent('cell-dblclick', row, column, cell, event)
   }
 
-  const handleTableRowClick = (row: TableRow, column: any, event: Event) => {
+  const handleTableRowClick = (row: TableRow, column: FormTableValue, event: Event) => {
     emitTableEvent('row-click', row, column, event)
   }
 
-  const handleTableRowContextmenu = (row: TableRow, column: any, event: Event) => {
+  const handleTableRowContextmenu = (row: TableRow, column: FormTableValue, event: Event) => {
     emitTableEvent('row-contextmenu', row, column, event)
   }
 
-  const handleTableRowDblclick = (row: TableRow, column: any, event: Event) => {
+  const handleTableRowDblclick = (row: TableRow, column: FormTableValue, event: Event) => {
     emitTableEvent('row-dblclick', row, column, event)
   }
 
-  const handleTableHeaderClick = (column: any, event: Event) => {
+  const handleTableHeaderClick = (column: FormTableValue, event: Event) => {
     emitTableEvent('header-click', column, event)
   }
 
-  const handleTableHeaderContextmenu = (column: any, event: Event) => {
+  const handleTableHeaderContextmenu = (column: FormTableValue, event: Event) => {
     emitTableEvent('header-contextmenu', column, event)
   }
 
-  const handleTableSortChange = (payload: any) => {
+  const handleTableSortChange = (payload: FormTableValue) => {
     emitTableEvent('sort-change', payload)
   }
 
-  const handleTableFilterChange = (filters: any) => {
+  const handleTableFilterChange = (filters: FormTableValue) => {
     emitTableEvent('filter-change', filters)
   }
 
@@ -100,7 +102,7 @@ export function useFormTableTableEvents(emit: FormTableEmitFn) {
   const handleTableHeaderDragend = (
     newWidth: number,
     oldWidth: number,
-    column: any,
+    column: FormTableValue,
     event: Event
   ) => {
     emitTableEvent('header-dragend', newWidth, oldWidth, column, event)
