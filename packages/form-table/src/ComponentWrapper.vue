@@ -99,6 +99,7 @@ import {
   type CustomComponentsMap,
   type DispatchFn,
   type FormItemType,
+  type FormTableCustomComponent,
   type FormTableActions,
   type FormItemOption,
   type FormTableBaseContext,
@@ -113,7 +114,7 @@ const props = defineProps<{
   fieldKey: string
   row: FormTableRecord
   rowIndex: number
-  componentName?: string
+  componentName?: FormTableCustomComponent
   bind?: ComponentBind
   options?: FormItemOption[]
   optionProps?: ComponentBind

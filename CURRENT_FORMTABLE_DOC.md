@@ -756,12 +756,10 @@ interface FormItemConfig {
 
 ## 自定义组件扩展
 
-注册：
+推荐直接传当前页面导入的组件对象：
 
 ```ts
-const customComponents = [
-  { name: 'PhoneInput', component: PhoneInput }
-]
+import PhoneInput from './PhoneInput.vue'
 ```
 
 配置：
@@ -771,7 +769,7 @@ const customComponents = [
   key: 'phone',
   type: 'custom',
   component: {
-    name: 'PhoneInput',
+    name: PhoneInput,
     bind: {
       placeholder: '请输入手机号',
       clearable: true
@@ -779,6 +777,29 @@ const customComponents = [
   }
 }
 ```
+
+如果 columns 来自远端 JSON 或需要多表格共享组件，也可以用字符串配合 `customComponents` 注册表：
+
+```ts
+const customComponents = [
+  { name: 'PhoneInput', component: PhoneInput }
+]
+
+const columns = [{
+  name: '手机号',
+  children: [{
+    children: [{
+      key: 'phone',
+      type: 'custom',
+      component: {
+        name: 'PhoneInput'
+      }
+    }]
+  }]
+}]
+```
+
+字符串没有命中 `customComponents` 时，会交给 Vue 动态组件按全局组件名解析。
 
 ## 当前推荐参考
 

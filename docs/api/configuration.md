@@ -230,7 +230,29 @@ const rules = {
 
 ## 自定义组件
 
-自定义字段由 `customComponents` 注册，再在字段里使用 `type: 'custom'` 和 `component.name` 引用：
+自定义字段使用 `type: 'custom'`，推荐在 `component.name` 里直接传当前页面导入的组件对象：
+
+```ts
+import PhoneInput from './PhoneInput.vue'
+
+const columns: ColumnConfig[] = [{
+  name: '手机号',
+  children: [{
+    children: [{
+      key: 'phone',
+      type: 'custom',
+      component: {
+        name: PhoneInput,
+        bind: {
+          placeholder: '请输入手机号'
+        }
+      }
+    }]
+  }]
+}]
+```
+
+`component.name` 也可以传字符串。字符串会先从 `customComponents` 注册表查找；如果没有匹配项，会交给 Vue 动态组件按全局组件名解析：
 
 ```ts
 const customComponents = [
@@ -244,10 +266,7 @@ const columns: ColumnConfig[] = [{
       key: 'phone',
       type: 'custom',
       component: {
-        name: 'PhoneInput',
-        bind: {
-          placeholder: '请输入手机号'
-        }
+        name: 'PhoneInput'
       }
     }]
   }]

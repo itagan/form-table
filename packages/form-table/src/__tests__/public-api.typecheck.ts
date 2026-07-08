@@ -20,6 +20,10 @@ const rows: TableRow[] = [
   }
 ]
 
+const InlineInput: Component = {
+  name: 'InlineInput'
+}
+
 const columns: ColumnConfig[] = [
   {
     name: '基本信息',
@@ -42,6 +46,14 @@ const columns: ColumnConfig[] = [
             disabled: false,
             behavior: {
               defaultValue: 18
+            }
+          },
+          {
+            key: 'inline',
+            type: 'custom',
+            label: '内联组件',
+            component: {
+              name: InlineInput
             }
           }
         ]
