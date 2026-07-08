@@ -4,10 +4,10 @@
  * - defaultComponentConfigs: 各 type 的默认属性（如日期格式、数字步长等）
  * - componentTypeMap: type → Element 组件名的映射
  */
-import type { FormItemType } from '../types'
+import type { FormItemType, FormTableValue } from '../types'
 
 export interface DefaultComponentConfig {
-  [key: string]: any
+  [key: string]: FormTableValue
 }
 
 export const defaultComponentConfigs: Partial<Record<FormItemType, DefaultComponentConfig>> = {

@@ -372,7 +372,7 @@ export interface FormTableInternalCommandPayloads {
     rowIndex: number,
     row: TableRow,
     fieldKey: string,
-    value: any
+    value: FormTableValue
   ]
   'update:row-data': [
     rowIndex: number,
