@@ -52,6 +52,7 @@ import type {
   FormTableSlotFn,
   FormTableSlots
 } from './types'
+import type { NormalizedColumnConfig } from './utils/schema'
 import { FORM_TABLE_CONTEXT_KEY, FORM_TABLE_SLOTS_KEY } from './types'
 import { extractColumnAttrs } from './utils/attrs'
 import { createRuntimeContext, resolveDynamicValue } from './utils/dynamic'
@@ -78,7 +79,7 @@ const SlotRenderer = defineComponent({
 })
 
 const props = defineProps<{
-  column: ColumnConfig
+  column: NormalizedColumnConfig
   columnIndex: number
 }>()
 const attrs = useAttrs()
@@ -118,7 +119,7 @@ const headerSlotProps = computed<FormTableHeaderSlotContext>(() => ({
   tableData: formTableContext.value.tableData
 }))
 
-const getRowKey = (row: ColumnConfig['children'][number], index: number) => {
+const getRowKey = (row: NormalizedColumnConfig['children'][number], index: number) => {
   const rowProps = resolveDynamicValue(row.props, runtimeContext.value) || {}
   return row.key || rowProps.key || index
 }

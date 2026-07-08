@@ -27,11 +27,33 @@ interface ColumnConfig {
   headerSlot?: string
   visible?: DynamicValue<boolean>
   props?: DynamicValue<ComponentBind>
-  children: RowConfig[]
+  fields?: FormItemConfig[]
+  children?: RowConfig[]
 }
 ```
 
-`ColumnConfig` 对应一个 `el-table-column`。`props` 会透传给 `el-table-column`，例如：
+`ColumnConfig` 对应一个 `el-table-column`。简单场景可以直接用 `fields` 配置一行字段：
+
+```ts
+const columns: ColumnConfig[] = [{
+  name: '基础信息',
+  fields: [
+    {
+      key: 'name',
+      type: 'input',
+      label: '姓名',
+      placeholder: '请输入姓名'
+    },
+    {
+      key: 'age',
+      type: 'number',
+      label: '年龄'
+    }
+  ]
+}]
+```
+
+需要在一个表格单元格里排多行时，再使用 `children`。`props` 会透传给 `el-table-column`，例如：
 
 ```ts
 const columns: ColumnConfig[] = [{
@@ -61,7 +83,7 @@ interface RowConfig {
 }
 ```
 
-`RowConfig` 对应单元格里的一个 `el-row`。一个列可以配置多行布局，每行的 `children` 对应若干字段。
+`RowConfig` 对应单元格里的一个 `el-row`。一个列可以配置多行布局，每行的 `children` 对应若干字段。`fields` 等价于 `children: [{ children: fields }]`。
 
 ## FormItemConfig
 

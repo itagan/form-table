@@ -61,21 +61,21 @@ export default Vue.extend({
         name: '姓名',
         required: true,
         props: { width: '180px' },
-        children: [{
-          children: [{
+        fields: [
+          {
             key: 'name',
             type: 'input',
             placeholder: '请输入姓名',
             required: true,
             requiredMessage: '请输入姓名'
-          }]
-        }]
+          }
+        ]
       },
       {
         name: '年龄',
         props: { width: '160px' },
-        children: [{
-          children: [{
+        fields: [
+          {
             key: 'age',
             type: 'number',
             required: true,
@@ -83,13 +83,13 @@ export default Vue.extend({
             component: {
               bind: { min: 1, max: 120 }
             }
-          }]
-        }]
+          }
+        ]
       },
       {
         name: '学校',
-        children: [{
-          children: [{
+        fields: [
+          {
             key: 'school',
             type: 'select',
             placeholder: '请选择学校',
@@ -100,8 +100,8 @@ export default Vue.extend({
               { label: '县二中', value: '县二中' },
               { label: '市一中', value: '市一中' }
             ]
-          }]
-        }]
+          }
+        ]
       }
     ]
 
