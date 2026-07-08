@@ -376,7 +376,7 @@ const columns = ref<ColumnConfig[]>([
               span: 24,
             },
             component: {
-              customComponent: 'PhoneInput',
+              name: 'PhoneInput',
               bind: {
                 placeholder: '请输入手机号',
                 clearable: true,
@@ -542,7 +542,7 @@ const columns = ref<ColumnConfig[]>([
               span: 24,
             },
             component: {
-              customComponent: 'StatusTag',
+              name: 'StatusTag',
               options: [
                 { value: 'processing', label: '处理中', type: 'info' },
                 { value: 'pending', label: '待处理', type: 'warning' },
@@ -571,7 +571,7 @@ const columns = ref<ColumnConfig[]>([
               span: 24,
             },
             component: {
-              customComponent: 'TestComponent',
+              name: 'TestComponent',
             },
           },
         ],
@@ -591,7 +591,7 @@ const columns = ref<ColumnConfig[]>([
               span: 24,
             },
             component: {
-              customComponent: 'SimpleTest',
+              name: 'SimpleTest',
             },
           },
         ],

@@ -111,7 +111,7 @@ describe('form item render utils', () => {
         span: 12
       },
       component: {
-        customComponent: 'PhoneInput',
+        name: 'PhoneInput',
         listeners: {
           commit: listener
         }
@@ -140,7 +140,7 @@ describe('form item render utils', () => {
       fieldKey: 'phone',
       row,
       rowIndex: 2,
-      customComponent: 'PhoneInput',
+      componentName: 'PhoneInput',
       bind: {
         placeholder: '请输入手机号'
       },

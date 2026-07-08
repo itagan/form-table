@@ -66,7 +66,7 @@ export interface FormItemLayoutConfig {
 }
 
 export interface FormItemComponentConfig {
-  customComponent?: string
+  name?: string
   slotName?: string
   bind?: DynamicValue<ComponentBind>
   listeners?: Record<string, FormTableFieldListener>

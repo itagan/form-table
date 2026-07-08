@@ -226,7 +226,7 @@ const columns = ref<ColumnConfig[]>([
             span: 24
           },
           component: {
-            customComponent: 'PhoneInput'
+            name: 'PhoneInput'
           }
         }
       ]
@@ -244,7 +244,7 @@ const columns = ref<ColumnConfig[]>([
             span: 24
           },
           component: {
-            customComponent: 'StatusTag',
+            name: 'StatusTag',
             options: statusOptions
           }
         }
@@ -263,7 +263,7 @@ const columns = ref<ColumnConfig[]>([
             span: 24
           },
           component: {
-            customComponent: 'TestComponent'
+            name: 'TestComponent'
           }
         }
       ]
@@ -281,7 +281,7 @@ const columns = ref<ColumnConfig[]>([
             span: 24
           },
           component: {
-            customComponent: 'SimpleTest'
+            name: 'SimpleTest'
           }
         }
       ]

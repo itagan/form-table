@@ -506,7 +506,7 @@ interface FormItemConfig {
     colProps?: ComponentBind | ((context) => ComponentBind)
   }
   component?: {
-    customComponent?: string
+    name?: string
     slotName?: string
     bind?: ComponentBind | ((context) => ComponentBind)
     listeners?: Record<string, FormTableFieldListener>
@@ -771,7 +771,7 @@ const customComponents = [
   key: 'phone',
   type: 'custom',
   component: {
-    customComponent: 'PhoneInput',
+    name: 'PhoneInput',
     bind: {
       placeholder: '请输入手机号',
       clearable: true

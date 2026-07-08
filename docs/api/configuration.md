@@ -230,7 +230,7 @@ const rules = {
 
 ## 自定义组件
 
-自定义字段由 `customComponents` 注册，再在字段里使用 `type: 'custom'` 和 `component.customComponent` 引用：
+自定义字段由 `customComponents` 注册，再在字段里使用 `type: 'custom'` 和 `component.name` 引用：
 
 ```ts
 const customComponents = [
@@ -244,7 +244,7 @@ const columns: ColumnConfig[] = [{
       key: 'phone',
       type: 'custom',
       component: {
-        customComponent: 'PhoneInput',
+        name: 'PhoneInput',
         bind: {
           placeholder: '请输入手机号'
         }
