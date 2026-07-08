@@ -28,7 +28,7 @@ interface UseFormTableSchemaOptions {
 export function useFormTableSchema(options: UseFormTableSchemaOptions) {
   const { props, formTableContext, createTableBaseContext } = options
 
-  // schema 只建立字段索引和字段顺序，不深拷贝外部 columns，保持 props 驱动更新。
+  // schema 建立字段索引和字段顺序，并把 fields 简写归一化为单行 children。
   const schema = computed(() => normalizeColumns(props.columns))
 
   // 列级 visible 只能拿到表格级上下文，此处不包含具体 row。

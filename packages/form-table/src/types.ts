@@ -123,7 +123,7 @@ export type FormItemType =
   | 'tag-input'
 
 /**
- * 表单项配置 - 结构能力按职责分组，组件属性统一放到 component.bind
+ * 表单项配置 - 常用字段可扁平配置，高级结构能力按职责分组。
  */
 export interface FormItemConfig {
   key: string
@@ -168,7 +168,8 @@ export interface ColumnConfig {
   headerSlot?: string
   visible?: DynamicValue<boolean>
   props?: DynamicValue<ComponentBind>
-  children: RowConfig[]
+  fields?: FormItemConfig[]
+  children?: RowConfig[]
 }
 
 /**

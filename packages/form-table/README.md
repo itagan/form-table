@@ -106,8 +106,8 @@ props.tableData → el-table 渲染
 ```ts
 const columns = [{
   name: '基础信息',
-  children: [{
-    children: [{
+  fields: [
+    {
       key: 'status',
       type: 'select',
       label: '状态',
@@ -118,8 +118,8 @@ const columns = [{
         { label: '启用', value: 'enabled' },
         { label: '停用', value: 'disabled' }
       ]
-    }]
-  }]
+    }
+  ]
 }]
 ```
 

@@ -3,6 +3,7 @@ import type {
   DynamicValue,
   FormTableBaseContext,
   FormTableRuntimeContext,
+  RowConfig,
   TableRow
 } from '../types'
 import { applyRowPatch, getValueByPath, setValueByPath } from './path'
@@ -54,6 +55,22 @@ export function resolveVisible(
   return resolveDynamicValue(value, context) !== false
 }
 
+function getColumnRows(column: ColumnConfig): RowConfig[] {
+  if (column.children) {
+    return column.children
+  }
+
+  if (column.fields) {
+    return [
+      {
+        children: column.fields
+      }
+    ]
+  }
+
+  return []
+}
+
 /**
  * 根据 columns 配置构造一条新行的默认数据。
  *
@@ -78,7 +95,7 @@ export function buildDefaultRow(
       return
     }
 
-    column.children.forEach((rowConfig) => {
+    getColumnRows(column).forEach((rowConfig) => {
       const rowContext = createRuntimeContext(baseContext, {
         row: draftRow,
         index: rowIndex

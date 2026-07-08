@@ -27,36 +27,32 @@ const InlineInput: Component = {
 const columns: ColumnConfig[] = [
   {
     name: '基本信息',
-    children: [
+    fields: [
       {
-        children: [
-          {
-            key: 'name',
-            type: 'input',
-            label: '姓名',
-            placeholder: '请输入姓名',
-            clearable: true,
-            required: true,
-            requiredMessage: '请输入姓名'
-          },
-          {
-            key: 'age',
-            type: 'number',
-            label: '年龄',
-            disabled: false,
-            behavior: {
-              defaultValue: 18
-            }
-          },
-          {
-            key: 'inline',
-            type: 'custom',
-            label: '内联组件',
-            component: {
-              name: InlineInput
-            }
-          }
-        ]
+        key: 'name',
+        type: 'input',
+        label: '姓名',
+        placeholder: '请输入姓名',
+        clearable: true,
+        required: true,
+        requiredMessage: '请输入姓名'
+      },
+      {
+        key: 'age',
+        type: 'number',
+        label: '年龄',
+        disabled: false,
+        behavior: {
+          defaultValue: 18
+        }
+      },
+      {
+        key: 'inline',
+        type: 'custom',
+        label: '内联组件',
+        component: {
+          name: InlineInput
+        }
       }
     ]
   }

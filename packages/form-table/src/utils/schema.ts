@@ -1,4 +1,4 @@
-import type { ColumnConfig, FormItemConfig } from '../types'
+import type { ColumnConfig, FormItemConfig, RowConfig } from '../types'
 import { componentTypeMap } from '../configs/defaultComponentConfigs'
 
 /**
@@ -7,9 +7,13 @@ import { componentTypeMap } from '../configs/defaultComponentConfigs'
  * `fieldMap` 用于按字段 key 快速找到配置，`fieldKeys` 用于生成整行校验路径。
  */
 export interface NormalizedFormTableSchema {
-  columns: ColumnConfig[]
+  columns: NormalizedColumnConfig[]
   fieldMap: Map<string, FormItemConfig>
   fieldKeys: string[]
+}
+
+export interface NormalizedColumnConfig extends ColumnConfig {
+  children: RowConfig[]
 }
 
 const knownFormItemTypes = new Set(Object.keys(componentTypeMap))
@@ -33,16 +37,37 @@ function validateFormItemConfig(item: FormItemConfig) {
   }
 }
 
+function normalizeColumnRows(column: ColumnConfig): RowConfig[] {
+  if (column.children) {
+    return column.children
+  }
+
+  if (column.fields) {
+    return [
+      {
+        children: column.fields
+      }
+    ]
+  }
+
+  return []
+}
+
 /**
  * 将外部 columns 配置归一化为渲染和运行时查询都能复用的 schema。
  *
- * 当前不做深拷贝，保留原始 columns 引用；调用方仍然按 props 驱动更新。
+ * 这里只做列级浅归一化：`fields` 会转换成单行 `children`，字段配置仍保留原始引用。
+ * 调用方仍然按 props 驱动更新。
  */
 export function normalizeColumns(columns: ColumnConfig[]): NormalizedFormTableSchema {
   const fieldMap = new Map<string, FormItemConfig>()
   const fieldKeys: string[] = []
+  const normalizedColumns = columns.map<NormalizedColumnConfig>((column) => ({
+    ...column,
+    children: normalizeColumnRows(column)
+  }))
 
-  columns.forEach((column) => {
+  normalizedColumns.forEach((column) => {
     column.children.forEach((rowConfig) => {
       rowConfig.children.forEach((item) => {
         if (import.meta.env.DEV && fieldMap.has(item.key)) {
@@ -63,7 +88,7 @@ export function normalizeColumns(columns: ColumnConfig[]): NormalizedFormTableSc
   })
 
   return {
-    columns,
+    columns: normalizedColumns,
     fieldMap,
     fieldKeys
   }

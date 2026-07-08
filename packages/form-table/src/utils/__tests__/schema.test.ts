@@ -42,10 +42,41 @@ describe('schema utils', () => {
     const columns = createColumns()
     const schema = normalizeColumns(columns)
 
-    expect(schema.columns).toBe(columns)
+    expect(schema.columns).toEqual(columns)
     expect(schema.fieldKeys).toEqual(['name', 'profile.city', 'remark'])
     expect(schema.fieldMap.get('name')?.type).toBe('input')
     expect(schema.fieldMap.get('profile.city')?.type).toBe('select')
+  })
+
+  it('normalizes column fields shorthand into a single row', () => {
+    const columns: ColumnConfig[] = [
+      {
+        name: '基础信息',
+        fields: [
+          {
+            key: 'name',
+            type: 'input'
+          },
+          {
+            key: 'age',
+            type: 'number'
+          }
+        ]
+      }
+    ]
+
+    const schema = normalizeColumns(columns)
+
+    expect(schema.columns[0].children).toEqual([
+      {
+        children: columns[0].fields
+      }
+    ])
+    expect(schema.fieldKeys).toEqual(['name', 'age'])
+    expect(getSchemaFieldProps(schema, 0)).toEqual([
+      'tableData.0.name',
+      'tableData.0.age'
+    ])
   })
 
   it('generates Element UI form prop paths for a row', () => {
@@ -61,15 +92,16 @@ describe('schema utils', () => {
   it('keeps first field key order when duplicate keys are present', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
     const columns = createColumns()
-    columns[1].children[0].children.push({
+    const duplicatedItem = {
       key: 'name',
       type: 'input'
-    })
+    } as const
+    columns[1].children?.[0].children.push(duplicatedItem)
 
     const schema = normalizeColumns(columns)
 
     expect(schema.fieldKeys).toEqual(['name', 'profile.city', 'remark'])
-    expect(schema.fieldMap.get('name')).toBe(columns[1].children[0].children[1])
+    expect(schema.fieldMap.get('name')).toBe(duplicatedItem)
     warnSpy.mockRestore()
   })
 })
