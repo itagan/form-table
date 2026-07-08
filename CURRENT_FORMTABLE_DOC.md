@@ -125,7 +125,7 @@ const columns = [
 
 列头渲染优先级为：`props.renderHeader` > `headerSlot` > 默认表头。默认表头会在 `required: true` 时展示必填标识。
 
-`required` 只控制列头必填标识，不会自动生成字段校验规则；字段校验仍通过全局 `rules` 或字段自身 `rules` 配置。
+`ColumnConfig.required` 只控制列头必填标识；字段校验可以通过字段顶层 `required`、全局 `rules` 或字段自身 `rules` 配置。
 
 ```ts
 const columns = [
@@ -240,8 +240,8 @@ const columns = [
 
 ## 配置原则
 
-- 结构字段直接配置，比如 `label`、`rules`
-- 组件属性统一通过 `component.bind` 配置
+- 常用字段直接配置，比如 `label`、`placeholder`、`required`、`options`
+- 组件高级属性通过 `component.bind` 配置，并可覆盖顶层常用字段
 - 结构能力按职责分组到 `layout`、`component`、`display`、`behavior`
 - 顶层 `attrs` 继续负责 `el-form` / `el-table` / `el-table-column` 的通用扩展
 - 只有 `visible`、`defaultValue`、`formatter`、`layout.colProps` 这类透传本身解决不了的结构能力，才额外提供配置项
@@ -300,26 +300,22 @@ const columns = ref<ColumnConfig[]>([
           key: 'name',
           type: 'input',
           layout: { span: 12 },
-          component: {
-            bind: {
-              placeholder: '请输入姓名'
-            }
-          }
+          placeholder: '请输入姓名',
+          required: true,
+          requiredMessage: '请输入姓名'
         },
         {
           key: 'level',
           type: 'select',
           layout: { span: 12 },
-          component: {
-            bind: {
-              placeholder: '请选择职级'
-            },
-            options: [
-              { label: '初级', value: 'junior' },
-              { label: '中级', value: 'mid' },
-              { label: '高级', value: 'senior' }
-            ]
-          }
+          placeholder: '请选择职级',
+          required: true,
+          requiredMessage: '请选择职级',
+          options: [
+            { label: '初级', value: 'junior' },
+            { label: '中级', value: 'mid' },
+            { label: '高级', value: 'senior' }
+          ]
         }
       ]
     }]
@@ -496,6 +492,15 @@ interface RowConfig {
 interface FormItemConfig {
   key: string
   type: FormItemType
+  placeholder?: string
+  disabled?: boolean
+  clearable?: boolean
+  readonly?: boolean
+  options?: FormItemOption[] | ((context) => FormItemOption[])
+  optionProps?: OptionPropsConfig | ((context) => OptionPropsConfig)
+  required?: boolean
+  requiredMessage?: string
+  trigger?: string | string[]
   layout?: {
     span?: number | string
     colProps?: ComponentBind | ((context) => ComponentBind)
@@ -643,8 +648,10 @@ interface FormItemConfig {
 
 建议按这个规则使用：
 
-- 组件属性统一放进 `component.bind`
+- 常用字段可直接放在顶层，高级组件属性放进 `component.bind`
 - 行列显隐、默认值、文本展示这类结构能力再使用独立配置
+
+组件属性覆盖优先级为：组件默认值 < 顶层常用字段 < `component.bind`。
 
 ### 组件属性
 
@@ -652,10 +659,11 @@ interface FormItemConfig {
 {
   key: 'name',
   type: 'input',
+  placeholder: '请输入姓名',
+  disabled: false,
   component: {
     bind: {
-      placeholder: '请输入姓名',
-      disabled: false
+      clearable: true
     }
   }
 }

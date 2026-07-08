@@ -78,9 +78,9 @@ props.tableData → el-table 渲染
 
 ## 配置约定
 
-- 结构字段直接配置，比如 `label`、`rules`
+- 常用字段直接配置，比如 `label`、`placeholder`、`required`、`options`
 - 结构能力按职责放到 `layout`、`component`、`display`、`behavior`
-- 组件属性统一放到 `component.bind`
+- 组件高级属性放到 `component.bind`，并且会覆盖顶层常用字段
 - `component.bind`、`layout.colProps`、`component.options` 支持函数写法，可按当前上下文动态返回
 - 列头支持 `required`、`headerSlot` 和 `column.props.renderHeader`
 - 顶层 `attrs` 用来扩展 `el-form` / `el-table` / `el-table-column`
@@ -98,6 +98,47 @@ props.tableData → el-table 渲染
 | Element Table methods | `ref.clearSelection()`、`ref.doLayout()`、`ref.sort()`、`ref.getNativeTableRef()` | FormTable ref 汇总常用方法，也可取原生实例 |
 | Element Table Column props | `column.props`，如 `width`、`align`、`type`、`renderHeader` | 透传给 `el-table-column`；`type=index/selection/expand` 使用原生列渲染 |
 | FormTable 扩展能力 | 字段 slot、表头 slot、`required`、行操作、路径字段、显隐和联动 | 解决表格内表单场景中 Element UI 原生 API 不直接覆盖的部分 |
+
+## 字段快捷配置
+
+高频字段配置可以直接写在 `FormItemConfig` 顶层，降低基础场景的配置量：
+
+```ts
+const columns = [{
+  name: '基础信息',
+  children: [{
+    children: [{
+      key: 'status',
+      type: 'select',
+      label: '状态',
+      placeholder: '请选择状态',
+      required: true,
+      requiredMessage: '请选择状态',
+      options: [
+        { label: '启用', value: 'enabled' },
+        { label: '停用', value: 'disabled' }
+      ]
+    }]
+  }]
+}]
+```
+
+覆盖优先级为：组件默认值 < 顶层常用字段 < `component.bind`。高级属性或需要动态解析的属性继续放到分组里：
+
+```ts
+{
+  key: 'status',
+  type: 'select',
+  placeholder: '请选择状态',
+  clearable: true,
+  component: {
+    bind: {
+      clearable: false,
+      filterable: true
+    }
+  }
+}
+```
 
 ## 关键模块
 
@@ -180,7 +221,7 @@ const columns = [
 
 列头渲染优先级为：`props.renderHeader` > `headerSlot` > 默认表头。默认表头会在 `required: true` 时展示必填标识。
 
-`required` 只控制列头必填标识，不会自动生成字段校验规则；字段校验仍通过全局 `rules` 或字段自身 `rules` 配置。
+`ColumnConfig.required` 只控制列头必填标识；字段校验可以通过字段顶层 `required`、全局 `rules` 或字段自身 `rules` 配置。
 
 ```ts
 const columns = [

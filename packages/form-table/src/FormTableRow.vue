@@ -13,7 +13,7 @@
       <!-- 统一的字段渲染 -->
       <FormTableItem
         :prop-path="`tableData.${rowIndex}.${itemEntry.config.key}`"
-        :rules="itemEntry.config.rules"
+        :rules="getFormItemRules(itemEntry.config)"
         :label="itemEntry.config.label"
         :label-width="itemEntry.config.labelWidth"
         :row="row"
@@ -40,6 +40,7 @@ import { FORM_TABLE_CONTEXT_KEY } from './types'
 import { createRuntimeContext, resolveDynamicValue, resolveVisible } from './utils/dynamic'
 import {
   getFormItemColSpan,
+  getFormItemRules,
   resolveFormItemColProps,
   resolveFormItemVisible
 } from './utils/fieldConfig'
