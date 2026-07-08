@@ -6,7 +6,13 @@
  */
 
 import { getDefaultConfig, getComponentType } from '../configs/defaultComponentConfigs'
-import type { ComponentBind, CustomComponentsMap, FormItemType } from '../types'
+import type {
+  ComponentBind,
+  CustomComponentsMap,
+  FormItemType,
+  FormTableCustomComponent,
+  FormTableValue
+} from '../types'
 
 const NO_CLEARABLE_TYPES = new Set<FormItemType>([
   'switch',
@@ -28,7 +34,7 @@ export interface ComponentPropsOptions {
   customComponent?: string
   customComponents?: CustomComponentsMap
   bind?: ComponentBind
-  [key: string]: any
+  [key: string]: FormTableValue
 }
 
 /**
@@ -74,7 +80,7 @@ const ELEMENT_UI_DEFAULTS: Record<string, ComponentBind> = {
  * @returns 处理后的组件属性
  */
 export function processComponentProps(options: ComponentPropsOptions): {
-  componentType: any
+  componentType: FormTableCustomComponent
   componentProps: ComponentBind
 } {
   const {
@@ -89,7 +95,7 @@ export function processComponentProps(options: ComponentPropsOptions): {
   } = options
   
   // 1. 获取组件类型
-  let componentType: any
+  let componentType: FormTableCustomComponent
   if (type === 'custom' && customComponent) {
     const customComponentInstance = customComponents?.[customComponent]
     if (!customComponentInstance) {
@@ -104,7 +110,9 @@ export function processComponentProps(options: ComponentPropsOptions): {
   
   // 2. 获取默认配置
   const defaultConfig = getDefaultConfig(type)
-  const elementUIDefaults = ELEMENT_UI_DEFAULTS[componentType] || {}
+  const elementUIDefaults = typeof componentType === 'string'
+    ? ELEMENT_UI_DEFAULTS[componentType] || {}
+    : {}
   
   // 3. 合并属性（按优先级）
   const componentProps = {
