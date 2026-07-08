@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { processComponentProps } from '../componentProps'
 
 describe('component props utils', () => {
@@ -53,18 +53,24 @@ describe('component props utils', () => {
     })
   })
 
-  it('falls back to div and warns when a custom component is missing', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-
+  it('keeps unregistered string custom components for Vue global resolution', () => {
     const result = processComponentProps({
       type: 'custom',
-      componentName: 'MissingInput',
+      componentName: 'GlobalInput',
       customComponents: {}
     })
 
-    expect(result.componentType).toBe('div')
-    expect(warnSpy).toHaveBeenCalledWith('Custom component "MissingInput" not found. Available:', [])
+    expect(result.componentType).toBe('GlobalInput')
+  })
 
-    warnSpy.mockRestore()
+  it('uses inline custom component objects directly', () => {
+    const InlineInput = { name: 'InlineInput' }
+    const result = processComponentProps({
+      type: 'custom',
+      componentName: InlineInput,
+      customComponents: {}
+    })
+
+    expect(result.componentType).toBe(InlineInput)
   })
 })

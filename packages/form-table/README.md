@@ -180,7 +180,7 @@ const columns = [{
 
 - 内置输入组件编辑后应触发 `update:tableData` 和 `field-change`
 - 字段 slot 应通过 `setValue` 进入同一条更新链路
-- `customComponents` 注册的自定义组件应继续支持默认 `v-model`
+- 自定义组件应继续支持默认 `v-model`
 
 发布前推荐运行：
 
