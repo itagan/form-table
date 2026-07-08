@@ -72,6 +72,7 @@ import type {
   FormTableFieldChangePayload,
   FormTableRecord,
   FormTableSlots,
+  FormTableValue,
   FormTableValidationErrors,
   ValidationRule,
   TableRow
@@ -119,19 +120,19 @@ const emit = defineEmits<{
   (e: 'select', selection: TableRow[], row: TableRow): void
   (e: 'select-all', selection: TableRow[]): void
   (e: 'selection-change', selection: TableRow[]): void
-  (e: 'cell-mouse-enter', row: TableRow, column: any, cell: HTMLElement, event: Event): void
-  (e: 'cell-mouse-leave', row: TableRow, column: any, cell: HTMLElement, event: Event): void
-  (e: 'cell-click', row: TableRow, column: any, cell: HTMLElement, event: Event): void
-  (e: 'cell-dblclick', row: TableRow, column: any, cell: HTMLElement, event: Event): void
-  (e: 'row-click', row: TableRow, column: any, event: Event): void
-  (e: 'row-contextmenu', row: TableRow, column: any, event: Event): void
-  (e: 'row-dblclick', row: TableRow, column: any, event: Event): void
-  (e: 'header-click', column: any, event: Event): void
-  (e: 'header-contextmenu', column: any, event: Event): void
-  (e: 'sort-change', payload: any): void
-  (e: 'filter-change', filters: any): void
+  (e: 'cell-mouse-enter', row: TableRow, column: FormTableValue, cell: HTMLElement, event: Event): void
+  (e: 'cell-mouse-leave', row: TableRow, column: FormTableValue, cell: HTMLElement, event: Event): void
+  (e: 'cell-click', row: TableRow, column: FormTableValue, cell: HTMLElement, event: Event): void
+  (e: 'cell-dblclick', row: TableRow, column: FormTableValue, cell: HTMLElement, event: Event): void
+  (e: 'row-click', row: TableRow, column: FormTableValue, event: Event): void
+  (e: 'row-contextmenu', row: TableRow, column: FormTableValue, event: Event): void
+  (e: 'row-dblclick', row: TableRow, column: FormTableValue, event: Event): void
+  (e: 'header-click', column: FormTableValue, event: Event): void
+  (e: 'header-contextmenu', column: FormTableValue, event: Event): void
+  (e: 'sort-change', payload: FormTableValue): void
+  (e: 'filter-change', filters: FormTableValue): void
   (e: 'current-change', currentRow: TableRow | null, oldCurrentRow: TableRow | null): void
-  (e: 'header-dragend', newWidth: number, oldWidth: number, column: any, event: Event): void
+  (e: 'header-dragend', newWidth: number, oldWidth: number, column: FormTableValue, event: Event): void
   (e: 'expand-change', row: TableRow, expandedRows: TableRow[]): void
   (e: 'event', payload: FormTableEventPayload): void
 }>()
