@@ -1,6 +1,7 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ColumnConfig } from '../../types'
 import { getSchemaFieldProps, normalizeColumns } from '../schema'
+import { resetFormTableWarnings } from '../warnings'
 
 function createColumns(): ColumnConfig[] {
   return [
@@ -15,7 +16,10 @@ function createColumns(): ColumnConfig[] {
             },
             {
               key: 'profile.city',
-              type: 'select'
+              type: 'select',
+              options: [
+                { label: '上海', value: 'shanghai' }
+              ]
             }
           ]
         }
@@ -38,6 +42,11 @@ function createColumns(): ColumnConfig[] {
 }
 
 describe('schema utils', () => {
+  afterEach(() => {
+    resetFormTableWarnings()
+    vi.restoreAllMocks()
+  })
+
   it('normalizes columns into a field map and ordered field keys', () => {
     const columns = createColumns()
     const schema = normalizeColumns(columns)
@@ -114,6 +123,97 @@ describe('schema utils', () => {
 
     expect(schema.fieldKeys).toEqual(['name', 'profile.city', 'remark'])
     expect(schema.fieldMap.get('name')).toBe(duplicatedItem)
-    warnSpy.mockRestore()
+    expect(warnSpy).toHaveBeenCalledWith('[FormTable] duplicate field key "name" detected.')
+  })
+
+  it('warns about confusing column shorthand combinations', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    normalizeColumns([
+      {
+        name: '混合配置',
+        fieldRow: {
+          gutter: 8
+        },
+        fields: [
+          {
+            key: 'name',
+            type: 'input'
+          }
+        ],
+        children: [
+          {
+            children: [
+              {
+                key: 'name',
+                type: 'input'
+              }
+            ]
+          }
+        ]
+      },
+      {
+        name: '无效 fieldRow',
+        fieldRow: {
+          gutter: 8
+        }
+      }
+    ])
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[FormTable] column "混合配置" configures both children and fields; children will be used.'
+    )
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[FormTable] column "无效 fieldRow" configures fieldRow without fields; fieldRow will not be used.'
+    )
+  })
+
+  it('warns about common field config mistakes', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    normalizeColumns([
+      {
+        name: '错误字段',
+        fields: [
+          {
+            key: '',
+            type: 'input'
+          },
+          {
+            key: 'unknown',
+            type: 'unknown' as never
+          },
+          {
+            key: 'slotField',
+            type: 'slot'
+          },
+          {
+            key: 'customField',
+            type: 'custom'
+          },
+          {
+            key: 'status',
+            type: 'select'
+          },
+          {
+            key: 'name',
+            type: 'input',
+            required: true,
+            rules: [
+              {
+                required: true
+              }
+            ]
+          }
+        ]
+      }
+    ])
+
+    expect(warnSpy).toHaveBeenCalledWith('[FormTable] field config requires a non-empty key.')
+    expect(warnSpy).toHaveBeenCalledWith('[FormTable] unknown field type "unknown" for field "unknown".')
+    expect(warnSpy).toHaveBeenCalledWith('[FormTable] slot field "slotField" requires component.slotName.')
+    expect(warnSpy).toHaveBeenCalledWith('[FormTable] custom field "customField" requires component.name.')
+    expect(warnSpy).toHaveBeenCalledWith('[FormTable] select field "status" has no options configured.')
+    expect(warnSpy).toHaveBeenCalledWith('[FormTable] field "name" has both top-level required and a required rule.')
   })
 })

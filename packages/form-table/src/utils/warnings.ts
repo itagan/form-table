@@ -8,3 +8,7 @@ export function warnFormTableOnce(key: string, message: string) {
   warnedKeys.add(key)
   console.warn(message)
 }
+
+export function resetFormTableWarnings() {
+  warnedKeys.clear()
+}
