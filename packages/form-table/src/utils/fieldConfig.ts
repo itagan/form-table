@@ -11,6 +11,19 @@ import type {
 } from '../types'
 import { resolveDynamicValue, resolveVisible } from './dynamic'
 
+interface CachedTopLevelBind {
+  signature: string
+  value: ComponentBind
+}
+
+interface CachedFormItemRules {
+  signature: string
+  value: ValidationRule[] | undefined
+}
+
+const topLevelBindCache = new WeakMap<FormItemConfig, CachedTopLevelBind>()
+const formItemRulesCache = new WeakMap<FormItemConfig, CachedFormItemRules>()
+
 /**
  * 解析对象型动态配置。
  *
@@ -21,6 +34,62 @@ function resolveRecord(
   context: FormTableRuntimeContext
 ) {
   return resolveDynamicValue(value, context) || {}
+}
+
+function getCachedTopLevelBind(item: FormItemConfig) {
+  const signature = [
+    item.placeholder,
+    item.disabled,
+    item.clearable,
+    item.readonly
+  ].join('|')
+  const cachedBind = topLevelBindCache.get(item)
+
+  if (cachedBind?.signature === signature) {
+    return cachedBind.value
+  }
+
+  const topLevelBind: ComponentBind = {}
+
+  if (item.placeholder !== undefined) {
+    topLevelBind.placeholder = item.placeholder
+  }
+
+  if (item.disabled !== undefined) {
+    topLevelBind.disabled = item.disabled
+  }
+
+  if (item.clearable !== undefined) {
+    topLevelBind.clearable = item.clearable
+  }
+
+  if (item.readonly !== undefined) {
+    topLevelBind.readonly = item.readonly
+  }
+
+  topLevelBindCache.set(item, {
+    signature,
+    value: topLevelBind
+  })
+
+  return topLevelBind
+}
+
+function getRulesSignature(item: FormItemConfig) {
+  return [
+    item.required,
+    item.requiredMessage,
+    item.label,
+    item.key,
+    item.type,
+    item.trigger,
+    item.rules,
+    item.rules?.length
+  ].join('|')
+}
+
+function hasKeys(value: ComponentBind) {
+  return Object.keys(value).length > 0
 }
 
 /**
@@ -58,28 +127,19 @@ export function resolveFormItemBind(
   item: FormItemConfig,
   context: FormTableRuntimeContext
 ) {
-  const topLevelBind: ComponentBind = {}
+  const topLevelBind = getCachedTopLevelBind(item)
+  const componentBind = resolveRecord(item.component?.bind, context)
 
-  if (item.placeholder !== undefined) {
-    topLevelBind.placeholder = item.placeholder
+  if (!hasKeys(componentBind)) {
+    return topLevelBind
   }
 
-  if (item.disabled !== undefined) {
-    topLevelBind.disabled = item.disabled
-  }
-
-  if (item.clearable !== undefined) {
-    topLevelBind.clearable = item.clearable
-  }
-
-  if (item.readonly !== undefined) {
-    topLevelBind.readonly = item.readonly
-  }
-
-  return {
-    ...topLevelBind,
-    ...resolveRecord(item.component?.bind, context)
-  }
+  return hasKeys(topLevelBind)
+    ? {
+        ...topLevelBind,
+        ...componentBind
+      }
+    : componentBind
 }
 
 /**
@@ -104,6 +164,13 @@ export function resolveFormItemOptionProps(
 }
 
 export function getFormItemRules(item: FormItemConfig): ValidationRule[] | undefined {
+  const signature = getRulesSignature(item)
+  const cachedRules = formItemRulesCache.get(item)
+
+  if (cachedRules?.signature === signature) {
+    return cachedRules.value
+  }
+
   const rules: ValidationRule[] = []
 
   if (item.required) {
@@ -118,7 +185,13 @@ export function getFormItemRules(item: FormItemConfig): ValidationRule[] | undef
     rules.push(...item.rules)
   }
 
-  return rules.length > 0 ? rules : undefined
+  const normalizedRules = rules.length > 0 ? rules : undefined
+  formItemRulesCache.set(item, {
+    signature,
+    value: normalizedRules
+  })
+
+  return normalizedRules
 }
 
 /**
