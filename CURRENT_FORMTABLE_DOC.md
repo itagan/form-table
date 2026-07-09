@@ -241,6 +241,9 @@ const columns = [
 ## 配置原则
 
 - 常用字段直接配置，比如 `label`、`placeholder`、`required`、`options`
+- 简单单行单元格优先使用 `columns[].fields`
+- 行级布局通过 `columns[].fieldRow` 覆盖，比如 `gutter`、`justify`、`align`
+- 单元格内需要多行布局时，再升级为 `columns[].children`
 - 组件高级属性通过 `component.bind` 配置，并可覆盖顶层常用字段
 - 结构能力按职责分组到 `layout`、`component`、`display`、`behavior`
 - 顶层 `attrs` 继续负责 `el-form` / `el-table` / `el-table-column` 的通用扩展

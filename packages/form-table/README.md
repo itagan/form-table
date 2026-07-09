@@ -164,11 +164,11 @@ const columns = [{
 
 ## 推荐阅读顺序
 
-1. `types.ts` - 理解数据结构
-2. `index.vue` - 理解入口和数据流
-3. `composables/` - 理解模型、schema、事件、行操作和校验如何编排
-4. `FormTableColumn.vue` → `FormTableRow.vue` → `FormTableItem.vue` → `ComponentWrapper.vue` - 理解渲染链路
-5. `utils/` 和 `configs/` - 理解配置解析
+1. `docs/guide/quick-start.md` - 先用 `fields` 跑通最小配置
+2. `docs/api/configuration.md` - 理解顶层常用字段、`fieldRow` 和复杂 `children`
+3. `playground/src/views/FormTableView.vue` - 对照基础编辑、校验和选项字段
+4. `playground/src/views/FormTableAdvancedView.vue` - 再看插槽、自定义组件、联动和行操作
+5. 源码维护时再读 `types.ts`、`index.vue`、`composables/` 和渲染链路组件
 
 ## 示例参考
 

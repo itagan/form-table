@@ -25,7 +25,7 @@ interface ArchivedDomEvent {
 
 const tableColumnKeys = ['id', 'columnKey', 'property', 'label', 'type', 'index']
 
-function isObject(value: unknown): value is Record<string, any> {
+function isObject(value: unknown): value is Record<string, FormTableValue> {
   return value !== null && typeof value === 'object'
 }
 
@@ -42,7 +42,7 @@ function isHtmlElement(value: unknown): value is HTMLElement {
   return typeof HTMLElement !== 'undefined' && value instanceof HTMLElement
 }
 
-function isTableColumn(value: unknown): value is Record<string, any> {
+function isTableColumn(value: unknown): value is Record<string, FormTableValue> {
   if (!isObject(value) || isDomEvent(value) || isHtmlElement(value)) {
     return false
   }
@@ -73,7 +73,7 @@ function archiveElement(element: HTMLElement): ArchivedElement {
   }
 }
 
-function archiveColumn(column: Record<string, any>): ArchivedColumn {
+function archiveColumn(column: Record<string, FormTableValue>): ArchivedColumn {
   return {
     id: column.id,
     columnKey: column.columnKey,
