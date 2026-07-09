@@ -15,6 +15,14 @@ FormTable 的配置核心由 `tableData`、`columns`、`rules`、`formData` 和 
 
 除 FormTable 自有 props 外，常用 Element UI 属性会通过白名单透传给内部组件。例如 `border`、`stripe`、`height` 会进入 `el-table`，`label-width`、`size`、`disabled` 会进入 `el-form`。
 
+## 推荐配置路径
+
+1. 最小场景优先使用 `columns[].fields`，字段常用能力直接写在字段顶层。
+2. 一行字段需要配置间距或对齐时，使用 `columns[].fieldRow`。
+3. 一个表格单元格需要多行布局时，再使用 `columns[].children`。
+4. 组件私有属性、事件和自定义组件入口放到 `component`。
+5. 跨字段联动、动态显隐和动态选项再补充 `behavior`、`visible` 或函数式配置。
+
 ## 数据结构
 
 ## ColumnConfig

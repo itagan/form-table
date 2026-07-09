@@ -121,7 +121,7 @@ const props = defineProps<{
   listeners?: Record<string, FormTableFieldListener>
   formatter?: (value: FormTableValue, context: FormTableRuntimeContext) => FormTableValue
   emptyText?: string
-  [key: string]: any
+  [key: string]: FormTableValue
 }>()
 
 const formTableContext = inject<ComputedRef<FormTableBaseContext>>(

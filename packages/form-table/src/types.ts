@@ -1,6 +1,6 @@
 export type FormTableValue = any
 export type FormTableRecord = Record<string, FormTableValue>
-export type ComponentBind = Record<string, any>
+export type ComponentBind = Record<string, FormTableValue>
 export type FormTableCustomComponent = string | object
 
 /**
@@ -256,7 +256,7 @@ export interface FormTableHeaderSlotContext {
   tableData: TableRow[]
 }
 
-export type FormTableSlotFn<T = any> = (slotProps: T) => any
+export type FormTableSlotFn<T = FormTableValue> = (slotProps: T) => FormTableValue
 export type FormTableSlots = Record<string, FormTableSlotFn | undefined>
 
 export interface FormTableActions {

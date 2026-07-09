@@ -119,20 +119,20 @@ export const EL_COLUMN_PROPS = [
 /**
  * 提取 el-form 可接收的透传属性。
  */
-export function extractFormAttrs<T extends Record<string, any>>(attrs: T) {
+export function extractFormAttrs<T extends ComponentBind>(attrs: T) {
   return pick(normalizeAttrs(attrs), EL_FORM_PROPS)
 }
 
 /**
  * 提取 el-table 可接收的透传属性。
  */
-export function extractTableAttrs<T extends Record<string, any>>(attrs: T) {
+export function extractTableAttrs<T extends ComponentBind>(attrs: T) {
   return pick(normalizeAttrs(attrs), EL_TABLE_PROPS)
 }
 
 /**
  * 提取 el-table-column 可接收的透传属性。
  */
-export function extractColumnAttrs<T extends Record<string, any>>(attrs: T) {
+export function extractColumnAttrs<T extends ComponentBind>(attrs: T) {
   return pick(normalizeAttrs(attrs), EL_COLUMN_PROPS)
 }

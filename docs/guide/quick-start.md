@@ -111,6 +111,8 @@ export default Vue.extend({
 </script>
 ```
 
+多数表格单元格只有一行字段时，优先使用 `fields`。需要给这一行加 `gutter`、`align` 等行级布局时补充 `fieldRow`；只有单元格内部需要多行字段时再使用 `children`。
+
 ## 插槽字段
 
 字段设置为 `type: 'slot'` 后，使用 `component.slotName` 指定插槽名。插槽里推荐通过 `setValue` 更新字段，这样会进入和内置组件一致的 `update:tableData`、`field-change`、校验清理链路。

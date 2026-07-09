@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
+import type { VueConstructor } from 'vue'
 import FormTable, { FormTable as NamedFormTable, FormTablePlugin } from '../index'
 
 describe('public package entry', () => {
@@ -12,7 +13,7 @@ describe('public package entry', () => {
 
     FormTablePlugin.install?.({
       component
-    } as any)
+    } as unknown as VueConstructor)
 
     expect(component).toHaveBeenCalledWith('FormTable', FormTable)
   })
