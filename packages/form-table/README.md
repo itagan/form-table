@@ -106,6 +106,9 @@ props.tableData → el-table 渲染
 ```ts
 const columns = [{
   name: '基础信息',
+  fieldRow: {
+    gutter: 8
+  },
   fields: [
     {
       key: 'status',

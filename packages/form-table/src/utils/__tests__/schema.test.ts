@@ -52,6 +52,13 @@ describe('schema utils', () => {
     const columns: ColumnConfig[] = [
       {
         name: '基础信息',
+        fieldRow: {
+          key: 'base-row',
+          gutter: 8,
+          props: {
+            justify: 'space-between'
+          }
+        },
         fields: [
           {
             key: 'name',
@@ -69,6 +76,11 @@ describe('schema utils', () => {
 
     expect(schema.columns[0].children).toEqual([
       {
+        key: 'base-row',
+        gutter: 8,
+        props: {
+          justify: 'space-between'
+        },
         children: columns[0].fields
       }
     ])

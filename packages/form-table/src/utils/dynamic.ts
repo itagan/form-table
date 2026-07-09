@@ -63,6 +63,7 @@ function getColumnRows(column: ColumnConfig): RowConfig[] {
   if (column.fields) {
     return [
       {
+        ...column.fieldRow,
         children: column.fields
       }
     ]

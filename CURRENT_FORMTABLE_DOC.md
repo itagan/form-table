@@ -470,12 +470,13 @@ interface ColumnConfig {
   name: string
   visible?: boolean | ((context) => boolean)
   props?: ComponentBind | ((context) => ComponentBind)
+  fieldRow?: Omit<RowConfig, 'children'>
   fields?: FormItemConfig[]
   children?: RowConfig[]
 }
 ```
 
-简单单行字段可以使用 `fields`；它等价于 `children: [{ children: fields }]`。需要单元格内多行布局时使用 `children`。
+简单单行字段可以使用 `fields`；它等价于 `children: [{ ...fieldRow, children: fields }]`。需要单元格内多行布局时使用 `children`。
 
 ### RowConfig
 
