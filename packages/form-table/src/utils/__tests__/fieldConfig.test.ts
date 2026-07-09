@@ -155,6 +155,55 @@ describe('field config utils', () => {
     })
   })
 
+  it('caches static top-level bind and invalidates when the config changes', () => {
+    const item: FormItemConfig = {
+      key: 'name',
+      type: 'input',
+      placeholder: '请输入姓名'
+    }
+
+    const firstBind = resolveFormItemBind(item, context)
+    const secondBind = resolveFormItemBind(item, context)
+
+    expect(secondBind).toBe(firstBind)
+
+    item.placeholder = '请输入真实姓名'
+
+    const nextBind = resolveFormItemBind(item, context)
+
+    expect(nextBind).not.toBe(firstBind)
+    expect(nextBind).toEqual({
+      placeholder: '请输入真实姓名'
+    })
+  })
+
+  it('caches generated rules and invalidates when the config changes', () => {
+    const item: FormItemConfig = {
+      key: 'name',
+      type: 'input',
+      label: '姓名',
+      required: true
+    }
+
+    const firstRules = getFormItemRules(item)
+    const secondRules = getFormItemRules(item)
+
+    expect(secondRules).toBe(firstRules)
+
+    item.requiredMessage = '请填写姓名'
+
+    const nextRules = getFormItemRules(item)
+
+    expect(nextRules).not.toBe(firstRules)
+    expect(nextRules).toEqual([
+      {
+        required: true,
+        message: '请填写姓名',
+        trigger: 'blur'
+      }
+    ])
+  })
+
   it('returns undefined for empty col props and option props', () => {
     const item: FormItemConfig = {
       key: 'name',
