@@ -1,5 +1,6 @@
 import type { ColumnConfig, FormItemConfig, RowConfig } from '../types'
 import { componentTypeMap } from '../configs/defaultComponentConfigs'
+import { warnFormTableOnce } from './warnings'
 
 /**
  * 归一化后的表格 schema。
@@ -17,6 +18,7 @@ export interface NormalizedColumnConfig extends ColumnConfig {
 }
 
 const knownFormItemTypes = new Set(Object.keys(componentTypeMap))
+const optionFieldTypes = new Set(['select', 'radio', 'checkbox', 'tag-input'])
 
 /**
  * 开发环境下的字段配置校验。
@@ -24,16 +26,67 @@ const knownFormItemTypes = new Set(Object.keys(componentTypeMap))
  * 这里只做非阻塞告警，避免运行时因为局部配置错误导致整张表无法渲染。
  */
 function validateFormItemConfig(item: FormItemConfig) {
+  if (!item.key) {
+    warnFormTableOnce(
+      'field-empty-key',
+      '[FormTable] field config requires a non-empty key.'
+    )
+  }
+
   if (!knownFormItemTypes.has(item.type)) {
-    console.warn(`[FormTable] unknown field type "${item.type}" for field "${item.key}".`)
+    warnFormTableOnce(
+      `unknown-field-type:${item.key}:${item.type}`,
+      `[FormTable] unknown field type "${item.type}" for field "${item.key}".`
+    )
   }
 
   if (item.type === 'slot' && !item.component?.slotName) {
-    console.warn(`[FormTable] slot field "${item.key}" requires component.slotName.`)
+    warnFormTableOnce(
+      `missing-slot-name:${item.key}`,
+      `[FormTable] slot field "${item.key}" requires component.slotName.`
+    )
   }
 
   if (item.type === 'custom' && !item.component?.name) {
-    console.warn(`[FormTable] custom field "${item.key}" requires component.name.`)
+    warnFormTableOnce(
+      `missing-component-name:${item.key}`,
+      `[FormTable] custom field "${item.key}" requires component.name.`
+    )
+  }
+
+  if (optionFieldTypes.has(item.type) && !item.options && !item.component?.options) {
+    warnFormTableOnce(
+      `missing-options:${item.key}`,
+      `[FormTable] ${item.type} field "${item.key}" has no options configured.`
+    )
+  }
+
+  if (
+    item.required &&
+    item.rules?.some((rule) => rule.required)
+  ) {
+    warnFormTableOnce(
+      `duplicate-required-rule:${item.key}`,
+      `[FormTable] field "${item.key}" has both top-level required and a required rule.`
+    )
+  }
+}
+
+function validateColumnConfig(column: ColumnConfig) {
+  const columnKey = column.key || column.name
+
+  if (column.children && column.fields) {
+    warnFormTableOnce(
+      `children-fields-priority:${columnKey}`,
+      `[FormTable] column "${columnKey}" configures both children and fields; children will be used.`
+    )
+  }
+
+  if (column.fieldRow && !column.fields) {
+    warnFormTableOnce(
+      `field-row-without-fields:${columnKey}`,
+      `[FormTable] column "${columnKey}" configures fieldRow without fields; fieldRow will not be used.`
+    )
   }
 }
 
@@ -68,11 +121,18 @@ export function normalizeColumns(columns: ColumnConfig[]): NormalizedFormTableSc
     children: normalizeColumnRows(column)
   }))
 
+  if (import.meta.env.DEV) {
+    columns.forEach(validateColumnConfig)
+  }
+
   normalizedColumns.forEach((column) => {
     column.children.forEach((rowConfig) => {
       rowConfig.children.forEach((item) => {
         if (import.meta.env.DEV && fieldMap.has(item.key)) {
-          console.warn(`[FormTable] duplicate field key "${item.key}" detected.`)
+          warnFormTableOnce(
+            `duplicate-field-key:${item.key}`,
+            `[FormTable] duplicate field key "${item.key}" detected.`
+          )
         }
 
         if (import.meta.env.DEV) {
