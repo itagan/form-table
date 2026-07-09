@@ -168,6 +168,7 @@ export interface ColumnConfig {
   headerSlot?: string
   visible?: DynamicValue<boolean>
   props?: DynamicValue<ComponentBind>
+  fieldRow?: Omit<RowConfig, 'children'>
   fields?: FormItemConfig[]
   children?: RowConfig[]
 }

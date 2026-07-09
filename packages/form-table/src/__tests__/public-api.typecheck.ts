@@ -27,6 +27,9 @@ const InlineInput: Component = {
 const columns: ColumnConfig[] = [
   {
     name: '基本信息',
+    fieldRow: {
+      gutter: 8
+    },
     fields: [
       {
         key: 'name',

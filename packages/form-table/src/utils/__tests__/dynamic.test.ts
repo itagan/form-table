@@ -7,6 +7,9 @@ describe('dynamic utils', () => {
     const columns: ColumnConfig[] = [
       {
         name: '基础信息',
+        fieldRow: {
+          gutter: 8
+        },
         fields: [
           {
             key: 'name',
@@ -20,6 +23,21 @@ describe('dynamic utils', () => {
             type: 'input',
             behavior: {
               defaultValue: ({ index }: FormTableRuntimeContext) => `city-${index}`
+            }
+          }
+        ]
+      },
+      {
+        name: '隐藏字段',
+        fieldRow: {
+          visible: false
+        },
+        fields: [
+          {
+            key: 'hidden',
+            type: 'input',
+            behavior: {
+              defaultValue: 'hidden'
             }
           }
         ]
