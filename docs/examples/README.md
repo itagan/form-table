@@ -21,7 +21,8 @@ pnpm dev
 
 | 我想验证 | 优先页面 | 关注点 |
 | --- | --- | --- |
-| 最小表格表单是否可用 | `/form-table` | `tableData`、`columns`、`rules`、`update:tableData` |
+| 最小表格表单是否可用 | `/form-table` | `tableData`、`columns[].fields`、`rules`、`update:tableData` |
+| 单行字段布局是否符合预期 | `/form-table` | `fieldRow`、字段 `layout`、Element Table column props |
 | slot 更新是否会同步到外层 | `/form-table-advanced` | `setValue`、`field-change`、校验触发 |
 | 删除行时报错或校验路径残留 | `/dynamic-slot-test` | `removeCurrentRow`、动态显隐、隐藏字段校验清理 |
 | 自定义组件无法回写值 | `/debug` | `customComponents`、Vue 2 `value`/`input` 约定 |

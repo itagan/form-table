@@ -240,6 +240,8 @@ const columns = [
 
 ## 配置原则
 
+配置按复杂度逐层进入，多数场景只需要 `fields` 和字段顶层常用配置：
+
 - 常用字段直接配置，比如 `label`、`placeholder`、`required`、`options`
 - 简单单行单元格优先使用 `columns[].fields`
 - 行级布局通过 `columns[].fieldRow` 覆盖，比如 `gutter`、`justify`、`align`

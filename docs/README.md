@@ -9,6 +9,13 @@
 - [事件与 Ref API](./api/events-and-ref.md)：数据事件、行操作、Element Table 事件和公开方法。
 - [示例索引](./examples/README.md)：playground 页面和复现入口。
 
+## 使用路径
+
+1. 简单字段：从 `columns[].fields` 开始，字段常用配置直接写顶层。
+2. 行级布局：一行里多个字段需要间距或对齐时，加 `columns[].fieldRow`。
+3. 复杂单元格：单元格里需要多行布局时，再使用 `columns[].children`。
+4. 扩展能力：自定义组件、插槽、动态显隐和联动按需进入高级配置。
+
 ## 核心能力
 
 - 表格内嵌 Element UI Form 校验。
