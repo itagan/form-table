@@ -126,6 +126,8 @@ const columns = [{
 }]
 ```
 
+配置可以按复杂度逐层进入：简单字段使用 `fields`；需要调整这一行布局时加 `fieldRow`；单元格内需要多行布局时再使用 `children`；组件私有属性、动态联动和展示态再放入 `component`、`behavior`、`display`。
+
 覆盖优先级为：组件默认值 < 顶层常用字段 < `component.bind`。高级属性或需要动态解析的属性继续放到分组里：
 
 ```ts

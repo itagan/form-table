@@ -49,14 +49,14 @@ import type { ColumnConfig } from '@itagan/form-table'
 
 const columns: ColumnConfig[] = [{
   name: '基础信息',
-  children: [{
-    children: [
-      { key: 'name', type: 'input' },
-      { key: 'age', type: 'number' }
-    ]
-  }]
+  fields: [
+    { key: 'name', type: 'input' },
+    { key: 'age', type: 'number' }
+  ]
 }]
 ```
+
+`fields` 是推荐的简单入口。只有单元格内需要多行布局时，再把列配置升级为 `children`。
 
 ### Ref 标注
 

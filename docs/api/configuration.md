@@ -15,13 +15,18 @@ FormTable 的配置核心由 `tableData`、`columns`、`rules`、`formData` 和 
 
 除 FormTable 自有 props 外，常用 Element UI 属性会通过白名单透传给内部组件。例如 `border`、`stripe`、`height` 会进入 `el-table`，`label-width`、`size`、`disabled` 会进入 `el-form`。
 
-## 推荐配置路径
+## API 分层
 
-1. 最小场景优先使用 `columns[].fields`，字段常用能力直接写在字段顶层。
-2. 一行字段需要配置间距或对齐时，使用 `columns[].fieldRow`。
-3. 一个表格单元格需要多行布局时，再使用 `columns[].children`。
-4. 组件私有属性、事件和自定义组件入口放到 `component`。
-5. 跨字段联动、动态显隐和动态选项再补充 `behavior`、`visible` 或函数式配置。
+FormTable 的配置按使用成本分层。多数业务只需要前两层，复杂场景再进入完整结构。
+
+| 层级 | 配置入口 | 适用场景 |
+| --- | --- | --- |
+| 主推荐 API | `columns[].fields`、字段顶层常用配置 | 一列里只有一行字段，字段只需要基础属性、选项和必填校验 |
+| 布局增强 API | `columns[].fieldRow`、字段 `layout` | 一行里多个字段需要 `gutter`、`justify`、`align`、`span` |
+| 高级结构 API | `columns[].children` | 一个表格单元格里需要多行字段布局 |
+| 扩展 API | `component`、`display`、`behavior`、`customComponents`、slot | 自定义组件、动态显隐、联动、格式化和业务插槽 |
+
+推荐从 `fields` 开始；当简单结构表达不了布局时，再逐步补充 `fieldRow`、`children` 或扩展配置。
 
 ## 数据结构
 
@@ -41,7 +46,7 @@ interface ColumnConfig {
 }
 ```
 
-`ColumnConfig` 对应一个 `el-table-column`。简单场景可以直接用 `fields` 配置一行字段：
+`ColumnConfig` 对应一个 `el-table-column`。简单场景直接用 `fields` 配置一行字段：
 
 ```ts
 const columns: ColumnConfig[] = [{
@@ -65,7 +70,7 @@ const columns: ColumnConfig[] = [{
 }]
 ```
 
-`fieldRow` 会作为这行字段的行级配置，等价于 `children: [{ ...fieldRow, children: fields }]`。需要在一个表格单元格里排多行时，再使用 `children`。`props` 会透传给 `el-table-column`，例如：
+`fieldRow` 会作为这行字段的行级配置，等价于 `children: [{ ...fieldRow, children: fields }]`。需要在一个表格单元格里排多行时，再使用 `children`。只有表格列自身属性需要调整时，再配置 `props`，例如：
 
 ```ts
 const columns: ColumnConfig[] = [{
@@ -122,13 +127,13 @@ interface FormItemConfig {
 }
 ```
 
-配置职责建议：
+配置职责建议按简单到高级阅读：
 
-- 顶层常用字段：控制基础组件属性、选项和必填校验，例如 `placeholder`、`disabled`、`options`、`required`
-- `layout`：控制字段布局，例如 `span`、`colProps`
-- `component`：控制字段组件，例如 `bind`、`options`、`listeners`、`slotName`
-- `display`：控制展示行为，例如 `tooltip`、`formatter`、`emptyText`
-- `behavior`：控制运行时行为，例如 `visible`、`defaultValue`、`onValueChange`
+- 顶层常用字段：优先使用，控制基础组件属性、选项和必填校验，例如 `placeholder`、`disabled`、`options`、`required`
+- `layout`：字段自身布局，例如 `span`、`colProps`
+- `component`：组件私有能力，例如 `bind`、`listeners`、`slotName` 或自定义组件 `name`
+- `display`：展示行为，例如 `tooltip`、`formatter`、`emptyText`
+- `behavior`：运行时行为，例如 `visible`、`defaultValue`、`onValueChange`
 
 顶层常用字段适合基础场景，`component.bind` 适合高级属性和覆盖。组件属性合并优先级为：组件默认值 < 顶层常用字段 < `component.bind`。
 

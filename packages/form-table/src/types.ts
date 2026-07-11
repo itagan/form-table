@@ -122,12 +122,10 @@ export type FormItemType =
   | 'autocomplete'
   | 'tag-input'
 
-/**
- * 表单项配置 - 常用字段可扁平配置，高级结构能力按职责分组。
- */
 export interface FormItemConfig {
   key: string
   type: FormItemType
+  /** 常用组件属性可以直接配置在顶层，适合大多数简单字段。 */
   placeholder?: string
   disabled?: boolean
   clearable?: boolean
@@ -137,18 +135,19 @@ export interface FormItemConfig {
   required?: boolean
   requiredMessage?: string
   trigger?: string | string[]
+  /** 字段级布局配置，例如 span 或 el-col props。 */
   layout?: FormItemLayoutConfig
+  /** 组件私有配置，例如 component.bind、listeners、slotName 或 custom 组件名。 */
   component?: FormItemComponentConfig
+  /** 展示态配置，例如 tooltip、formatter、emptyText。 */
   display?: FormItemDisplayConfig
+  /** 运行时行为配置，例如显隐、默认值和字段联动。 */
   behavior?: FormItemBehaviorConfig
   rules?: ValidationRule[]
   label?: string
   labelWidth?: string
 }
 
-/**
- * 行配置 - 对应 el-row，包含多个表单项（el-col）
- */
 export interface RowConfig {
   key?: string
   visible?: DynamicValue<boolean>
@@ -159,7 +158,9 @@ export interface RowConfig {
 }
 
 /**
- * 列配置 - 对应 el-table-column，内含多行布局
+ * 列配置 - 对应 el-table-column。
+ * 简单单行单元格优先使用 fields；需要配置这一行布局时补充 fieldRow。
+ * 只有单元格内需要多行布局时，再使用 children。
  */
 export interface ColumnConfig {
   key?: string
@@ -168,8 +169,11 @@ export interface ColumnConfig {
   headerSlot?: string
   visible?: DynamicValue<boolean>
   props?: DynamicValue<ComponentBind>
+  /** fields 自动生成的单行 RowConfig 配置，例如 gutter、justify、align。 */
   fieldRow?: Omit<RowConfig, 'children'>
+  /** 推荐的简单配置入口：一列里只有一行字段时使用。 */
   fields?: FormItemConfig[]
+  /** 高级布局入口：一列里需要多行字段时使用。 */
   children?: RowConfig[]
 }
 
