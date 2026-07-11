@@ -12,15 +12,7 @@
         :form-data="formData"
         @update:tableData="handleTableDataUpdate"
         @update:formData="handleFormDataUpdate"
-      >
-        <template #table-school="{ value, setValue }">
-          <el-select :value="value" placeholder="请选择学校" @input="setValue">
-            <el-option label="县一小" value="县一小"></el-option>
-            <el-option label="县二中" value="县二中"></el-option>
-            <el-option label="市一中" value="市一中"></el-option>
-          </el-select>
-        </template>
-      </FormTable>
+      />
       
       <div class="actions">
         <el-button type="primary" @click="handleSubmit">提交表单</el-button>
@@ -71,69 +63,52 @@ const columns = ref<ColumnConfig[]>([
   {
     name: '姓名和年龄',
     props: { width: '300px' },
-    children: [{
-      gutter: 10,
-      children: [
-        {
-          key: 'name',
-          type: 'input',
-          layout: {
-            span: 12
-          },
-          component: {
-            bind: {
-              placeholder: '请输入姓名'
-            }
-          }
-        },
-        {
-          key: 'age',
-          type: 'number',
-          layout: {
-            span: 12
-          },
-          component: {
-            bind: {
-              placeholder: '请输入年龄'
-            }
-          }
-        }
-      ]
-    }]
+    fieldRow: { gutter: 10 },
+    fields: [
+      {
+        key: 'name',
+        type: 'input',
+        placeholder: '请输入姓名',
+        required: true,
+        layout: { span: 12 }
+      },
+      {
+        key: 'age',
+        type: 'number',
+        placeholder: '请输入年龄',
+        required: true,
+        layout: { span: 12 }
+      }
+    ]
   },
   {
     name: '性别',
     props: { width: '150px' },
-    children: [{
-      children: [{
+    fields: [
+      {
         key: 'sex',
         type: 'input',
-        display: {
-          tooltip: true
-        },
-        component: {
-          bind: {
-            placeholder: '请输入性别'
-          }
-        }
-      }]
-    }]
+        placeholder: '请输入性别',
+        required: true
+      }
+    ]
   },
   {
     name: '学校',
     props: { width: '200px' },
-    children: [{
-      children: [{
+    fields: [
+      {
         key: 'school',
-        type: 'slot',
-        display: {
-          tooltip: false
-        },
-        component: {
-          slotName: 'table-school'
-        }
-      }]
-    }]
+        type: 'select',
+        placeholder: '请选择学校',
+        required: true,
+        options: [
+          { label: '县一小', value: '县一小' },
+          { label: '县二中', value: '县二中' },
+          { label: '市一中', value: '市一中' }
+        ]
+      }
+    ]
   }
 ])
 
