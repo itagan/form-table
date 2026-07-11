@@ -79,10 +79,7 @@ export default Vue.extend({
             key: 'age',
             type: 'number',
             required: true,
-            requiredMessage: '请输入年龄',
-            component: {
-              bind: { min: 1, max: 120 }
-            }
+            requiredMessage: '请输入年龄'
           }
         ]
       },
@@ -120,15 +117,15 @@ export default Vue.extend({
 ```ts
 const columns: ColumnConfig[] = [{
   name: '学校',
-  children: [{
-    children: [{
+  fields: [
+    {
       key: 'school',
       type: 'slot',
       component: {
         slotName: 'table-school'
       }
-    }]
-  }]
+    }
+  ]
 }]
 ```
 

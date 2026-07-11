@@ -140,8 +140,8 @@ interface FormItemConfig {
 ```ts
 const columns: ColumnConfig[] = [{
   name: '基础信息',
-  children: [{
-    children: [{
+  fields: [
+    {
       key: 'status',
       type: 'select',
       label: '状态',
@@ -159,8 +159,8 @@ const columns: ColumnConfig[] = [{
           clearable: false
         }
       }
-    }]
-  }]
+    }
+  ]
 }]
 ```
 
