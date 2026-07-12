@@ -680,12 +680,14 @@ interface FormItemConfig {
 
 ## 校验规则说明
 
-支持这两种规则写法：
+校验配置建议按复杂度选择入口：
 
-- 精确路径：`tableData.0.name`
-- 通配路径：`tableData.*.name`
+- 只校验必填：字段顶层 `required` 和 `requiredMessage`
+- 单字段复杂校验：字段自身 `rules`
+- 动态行统一规则：顶层通配路径，如 `tableData.*.name`
+- 精确到某一行：顶层精确路径，如 `tableData.0.name`
 
-推荐在动态行场景中优先使用通配路径，组件内部会按当前行索引自动匹配到对应字段。
+字段顶层 `required`、字段 `rules` 和顶层 `rules` 会合并到同一个 `el-form-item` 校验路径。动态行场景中推荐优先使用通配路径，组件内部会按当前行索引自动匹配到对应字段。
 
 ### 更多组件属性
 

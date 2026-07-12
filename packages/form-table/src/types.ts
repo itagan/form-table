@@ -132,6 +132,7 @@ export interface FormItemConfig {
   readonly?: boolean
   options?: DynamicValue<FormItemOption[]>
   optionProps?: DynamicValue<OptionPropsConfig>
+  /** 简单必填校验优先使用 required；复杂校验再使用字段 rules。 */
   required?: boolean
   requiredMessage?: string
   trigger?: string | string[]
@@ -143,6 +144,7 @@ export interface FormItemConfig {
   display?: FormItemDisplayConfig
   /** 运行时行为配置，例如显隐、默认值和字段联动。 */
   behavior?: FormItemBehaviorConfig
+  /** 字段自身的完整 Element UI rules；适合单字段复杂校验。 */
   rules?: ValidationRule[]
   label?: string
   labelWidth?: string
@@ -204,6 +206,7 @@ export interface ValidationRule {
 export interface FormTableProps {
   tableData: TableRow[]
   columns: ColumnConfig[]
+  /** 集中式 rules，适合跨行通配或统一维护；动态行推荐使用 tableData.*.fieldKey。 */
   rules?: Record<string, ValidationRule[]>
   formData?: FormTableRecord
   customComponents?: CustomComponentConfig[]

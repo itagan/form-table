@@ -278,8 +278,10 @@ const columns = [
 
 ## 规则说明
 
-- 支持精确规则路径，如 `tableData.0.name`
-- 支持通配规则路径，如 `tableData.*.name`
+- 只校验必填时，优先使用字段顶层 `required` 和 `requiredMessage`
+- 单字段复杂校验使用字段自身 `rules`
+- 动态行统一规则使用顶层通配路径，如 `tableData.*.name`
+- 精确到某一行时使用顶层精确路径，如 `tableData.0.name`
 - `FormItemConfig.key` 也支持路径写法，如 `profile.city`
 
 ## 同步说明

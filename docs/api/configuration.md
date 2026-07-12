@@ -247,7 +247,46 @@ const columns: ColumnConfig[] = [{
 
 返回的 patch 会合并到当前行，并继续通过 `update:tableData` 通知外层。
 
-## 规则路径
+## 校验规则
+
+校验配置建议按复杂度选择入口：
+
+1. 只校验必填：优先使用字段顶层 `required` 和 `requiredMessage`。
+2. 单字段复杂校验：使用字段自身 `rules`。
+3. 动态行统一规则：使用顶层 `rules` 的 `tableData.*.fieldKey` 通配路径。
+4. 精确到某一行：使用顶层 `rules` 的 `tableData.0.fieldKey` 精确路径。
+
+### 必填校验
+
+```ts
+const columns: ColumnConfig[] = [{
+  name: '姓名',
+  fields: [{
+    key: 'name',
+    type: 'input',
+    required: true,
+    requiredMessage: '请输入姓名'
+  }]
+}]
+```
+
+### 字段 rules
+
+```ts
+const columns: ColumnConfig[] = [{
+  name: '年龄',
+  fields: [{
+    key: 'age',
+    type: 'number',
+    rules: [
+      { required: true, message: '请输入年龄', trigger: 'blur' },
+      { type: 'number', min: 1, max: 120, message: '年龄范围 1-120', trigger: 'blur' }
+    ]
+  }]
+}]
+```
+
+### 顶层 rules
 
 支持精确路径：
 
@@ -265,7 +304,7 @@ const rules = {
 }
 ```
 
-字段自身也可以配置 `rules`。当全局 `rules`、顶层 `required` 和字段 `rules` 同时存在时，组件会合并到对应的 `el-form-item` 校验路径。
+字段顶层 `required`、字段 `rules` 和顶层 `rules` 会合并到同一个 `el-form-item` 校验路径。为了降低重复配置，通常不要在同一个字段同时写 `required: true` 和 `rules: [{ required: true }]`。
 
 ## 自定义组件
 
