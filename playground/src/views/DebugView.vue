@@ -105,6 +105,31 @@
       />
     </section>
 
+    <section class="debug-section diagnostics-section">
+      <div class="section-heading">
+        <div>
+          <h2>配置诊断</h2>
+          <p>按需挂载一组错误配置，用于确认开发环境 warning 是否覆盖常见误用。</p>
+        </div>
+        <el-button size="small" type="warning" plain @click="toggleDiagnostics">
+          {{ showDiagnostics ? '隐藏诊断表格' : '触发配置诊断' }}
+        </el-button>
+      </div>
+      <el-alert
+        title="打开浏览器控制台查看 FormTable warning。诊断表格使用刻意写错的配置，不作为推荐写法。"
+        type="warning"
+        :closable="false"
+        show-icon
+      />
+      <FormTable
+        v-if="showDiagnostics"
+        class="diagnostics-table"
+        :table-data="diagnosticTableData"
+        :columns="diagnosticColumns"
+        :rules="diagnosticRules"
+      />
+    </section>
+
     <section class="debug-section logs-section">
       <div class="section-heading">
         <div>
@@ -149,6 +174,7 @@ const simpleValue = ref('默认值')
 const tableData = ref<TableRow[]>(createDefaultTableData())
 const rules = ref({})
 const formData = ref({})
+const showDiagnostics = ref(false)
 
 // 状态选项
 const statusOptions = [
@@ -289,6 +315,84 @@ const columns = ref<ColumnConfig[]>([
   }
 ])
 
+const diagnosticTableData = ref<TableRow[]>([
+  {
+    duplicated: '',
+    status: '',
+    slotOnly: '',
+    customOnly: '',
+    name: ''
+  }
+])
+
+const diagnosticColumns = ref<ColumnConfig[]>([
+  {
+    name: '混合配置',
+    fieldRow: {
+      gutter: 8
+    },
+    fields: [
+      {
+        key: 'ignoredByChildren',
+        type: 'input'
+      }
+    ],
+    children: [
+      {
+        children: [
+          {
+            key: 'duplicated',
+            type: 'input',
+            required: true,
+            rules: [
+              { required: true, message: '重复必填规则' }
+            ]
+          },
+          {
+            key: 'duplicated',
+            type: 'input'
+          }
+        ]
+      }
+    ]
+  },
+  {
+    name: '缺少配置',
+    fields: [
+      {
+        key: 'status',
+        type: 'select'
+      },
+      {
+        key: 'slotOnly',
+        type: 'slot'
+      },
+      {
+        key: 'customOnly',
+        type: 'custom'
+      }
+    ]
+  },
+  {
+    name: '无效 fieldRow',
+    fieldRow: {
+      gutter: 8
+    }
+  }
+])
+
+const diagnosticRules = ref({
+  name: [
+    { required: true, message: '路径格式错误' }
+  ],
+  'tableData.*.missing': [
+    { required: true, message: '字段不存在' }
+  ],
+  'tableData.*.duplicated': [
+    { required: true, message: '请输入内容' }
+  ]
+})
+
 // 事件处理
 const handlePhoneChange = (value: string) => {
   recordDebugLog(`PhoneInput changed: ${value}`)
@@ -314,6 +418,11 @@ const handleTableDataUpdate = (newData: TableRow[]) => {
 const resetTableData = () => {
   tableData.value = createDefaultTableData()
   recordDebugLog('Table data reset')
+}
+
+const toggleDiagnostics = () => {
+  showDiagnostics.value = !showDiagnostics.value
+  recordDebugLog(showDiagnostics.value ? 'Config diagnostics mounted' : 'Config diagnostics hidden')
 }
 </script>
 
@@ -446,6 +555,12 @@ const resetTableData = () => {
 
   .table-section {
     overflow: hidden;
+  }
+
+  .diagnostics-section {
+    .diagnostics-table {
+      margin-top: 14px;
+    }
   }
 
   .log-list {
