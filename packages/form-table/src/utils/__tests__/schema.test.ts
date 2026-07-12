@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ColumnConfig } from '../../types'
-import { getSchemaFieldProps, normalizeColumns } from '../schema'
+import { getSchemaFieldProps, normalizeColumns, validateRulePaths } from '../schema'
 import { resetFormTableWarnings } from '../warnings'
 
 function createColumns(): ColumnConfig[] {
@@ -215,5 +215,32 @@ describe('schema utils', () => {
     expect(warnSpy).toHaveBeenCalledWith('[FormTable] custom field "customField" requires component.name.')
     expect(warnSpy).toHaveBeenCalledWith('[FormTable] select field "status" has no options configured.')
     expect(warnSpy).toHaveBeenCalledWith('[FormTable] field "name" has both top-level required and a required rule.')
+  })
+
+  it('warns about invalid or unknown top-level rule paths', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const schema = normalizeColumns(createColumns())
+
+    validateRulePaths(schema, {
+      name: [
+        { required: true }
+      ],
+      'tableData.*.missing': [
+        { required: true }
+      ],
+      'tableData.0.profile.city': [
+        { required: true }
+      ]
+    })
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[FormTable] rules path "name" should use "tableData.*.fieldKey" or "tableData.0.fieldKey".'
+    )
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[FormTable] rules path "tableData.*.missing" points to unknown field "missing".'
+    )
+    expect(warnSpy).not.toHaveBeenCalledWith(
+      '[FormTable] rules path "tableData.0.profile.city" points to unknown field "profile.city".'
+    )
   })
 })

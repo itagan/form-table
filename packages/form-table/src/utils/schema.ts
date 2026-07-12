@@ -1,4 +1,4 @@
-import type { ColumnConfig, FormItemConfig, RowConfig } from '../types'
+import type { ColumnConfig, FormItemConfig, RowConfig, ValidationRule } from '../types'
 import { componentTypeMap } from '../configs/defaultComponentConfigs'
 import { warnFormTableOnce } from './warnings'
 
@@ -19,6 +19,7 @@ export interface NormalizedColumnConfig extends ColumnConfig {
 
 const knownFormItemTypes = new Set(Object.keys(componentTypeMap))
 const optionFieldTypes = new Set(['select', 'radio', 'checkbox', 'tag-input'])
+const rulePathPattern = /^tableData\.(\*|\d+)\.(.+)$/
 
 /**
  * 开发环境下的字段配置校验。
@@ -153,6 +154,42 @@ export function normalizeColumns(columns: ColumnConfig[]): NormalizedFormTableSc
     fieldMap,
     fieldKeys
   }
+}
+
+/**
+ * 开发环境下校验顶层 rules 路径是否能匹配到已配置字段。
+ *
+ * 支持 `tableData.*.fieldKey` 和 `tableData.0.fieldKey`。字段 key 本身允许包含点号，
+ * 例如 `profile.city` 会对应 `tableData.*.profile.city`。
+ */
+export function validateRulePaths(
+  schema: NormalizedFormTableSchema,
+  rulesMap: Record<string, ValidationRule[]> | undefined
+) {
+  if (!import.meta.env.DEV || !rulesMap) {
+    return
+  }
+
+  Object.keys(rulesMap).forEach((rulePath) => {
+    const matched = rulePath.match(rulePathPattern)
+
+    if (!matched) {
+      warnFormTableOnce(
+        `invalid-rule-path:${rulePath}`,
+        `[FormTable] rules path "${rulePath}" should use "tableData.*.fieldKey" or "tableData.0.fieldKey".`
+      )
+      return
+    }
+
+    const fieldKey = matched[2]
+
+    if (!schema.fieldMap.has(fieldKey)) {
+      warnFormTableOnce(
+        `unknown-rule-field:${rulePath}`,
+        `[FormTable] rules path "${rulePath}" points to unknown field "${fieldKey}".`
+      )
+    }
+  })
 }
 
 /**

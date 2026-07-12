@@ -9,9 +9,9 @@ import type {
 } from '../types'
 import { createRuntimeContext, resolveDynamicValue, resolveVisible } from '../utils/dynamic'
 import { resolveFormItemVisible } from '../utils/fieldConfig'
-import { getSchemaFieldProps, normalizeColumns } from '../utils/schema'
+import { getSchemaFieldProps, normalizeColumns, validateRulePaths } from '../utils/schema'
 
-type FormTableSchemaProps = Pick<FormTableProps, 'columns' | 'tableData'>
+type FormTableSchemaProps = Pick<FormTableProps, 'columns' | 'rules' | 'tableData'>
 
 interface UseFormTableSchemaOptions {
   props: FormTableSchemaProps
@@ -29,7 +29,11 @@ export function useFormTableSchema(options: UseFormTableSchemaOptions) {
   const { props, formTableContext, createTableBaseContext } = options
 
   // schema 建立字段索引和字段顺序，并把 fields 简写归一化为单行 children。
-  const schema = computed(() => normalizeColumns(props.columns))
+  const schema = computed(() => {
+    const normalizedSchema = normalizeColumns(props.columns)
+    validateRulePaths(normalizedSchema, props.rules)
+    return normalizedSchema
+  })
 
   // 列级 visible 只能拿到表格级上下文，此处不包含具体 row。
   const visibleColumns = computed(() => {

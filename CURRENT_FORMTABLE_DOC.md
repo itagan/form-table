@@ -689,6 +689,8 @@ interface FormItemConfig {
 
 字段顶层 `required`、字段 `rules` 和顶层 `rules` 会合并到同一个 `el-form-item` 校验路径。动态行场景中推荐优先使用通配路径，组件内部会按当前行索引自动匹配到对应字段。
 
+开发环境会对顶层 `rules` 做非阻塞诊断：路径格式不是 `tableData.*.fieldKey` / `tableData.0.fieldKey`，或路径里的 `fieldKey` 没有出现在 `columns` 字段配置中时，会输出 warning。
+
 ### 更多组件属性
 
 ```ts
