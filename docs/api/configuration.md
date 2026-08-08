@@ -298,6 +298,150 @@ component: {
 
 组件执行 `$emit('change', nextValue)` 时，配置回调依次收到 `ActionContext, nextValue`。`value` 是事件执行时的当前值，`nextValue` 才是组件传出的新值。
 
+### 实际回传数据示例
+
+以下示例都基于同一行数据和配置：
+
+```ts
+const tableData = [{
+  id: 1,
+  province: 'zhejiang',
+  city: 'hangzhou',
+  locked: false
+}]
+
+const itemConfig = {
+  key: 'city-field',
+  fieldKey: 'city',
+  type: 'slot',
+  component: {
+    renderer: 'city-editor',
+    props: ({ row }) => ({ disabled: row.locked }),
+    options: [{ label: '杭州', value: 'hangzhou' }]
+  }
+}
+
+const rowConfig = {
+  key: 'region-row',
+  props: { gutter: 8 },
+  children: [itemConfig]
+}
+
+const columnConfig = {
+  key: 'region-column',
+  label: '地区',
+  children: [rowConfig]
+}
+```
+
+各字段在运行时的示例值：
+
+| 字段 | 示例值 | 含义 |
+| --- | --- | --- |
+| `tableData` | `[{ id: 1, province: 'zhejiang', city: 'hangzhou', locked: false }]` | 完整业务数据数组 |
+| `row` | `{ id: 1, province: 'zhejiang', city: 'hangzhou', locked: false }` | `tableData[0]` 当前业务数据行 |
+| `index` | `0` | 当前业务数据行下标 |
+| `fieldKey` | `'city'` | `itemConfig.fieldKey` 字段路径 |
+| `value` | `'hangzhou'` | 根据 `row + fieldKey` 读取的当前值 |
+| `columnConfig` | 上面的 `region-column` 对象 | 当前原始列配置引用 |
+| `rowConfig` | 上面的 `region-row` 对象 | 当前原始布局行配置引用 |
+| `itemConfig` | 上面的 `city-field` 对象 | 当前原始字段配置引用 |
+| `setValue` | `(nextValue) => void` | 更新当前 `city` 字段 |
+| `updateRow` | `(patch) => void` | 合并更新当前第 0 行 |
+| `propPath` | `'tableData.0.city'` | `el-form-item` 完整校验路径 |
+| `component` | 见下方 Slot 示例 | 当前行解析后的组件配置 |
+
+Column 回调实际收到：
+
+```ts
+{
+  tableData,
+  columnConfig
+}
+```
+
+Row 回调实际收到：
+
+```ts
+{
+  tableData,
+  columnConfig,
+  row: tableData[0],
+  index: 0,
+  rowConfig
+}
+```
+
+Item 动态配置实际收到：
+
+```ts
+{
+  tableData,
+  columnConfig,
+  row: tableData[0],
+  index: 0,
+  rowConfig,
+  fieldKey: 'city',
+  value: 'hangzhou',
+  itemConfig
+}
+```
+
+组件 listener 的第一个参数实际收到：
+
+```ts
+{
+  tableData,
+  columnConfig,
+  row: tableData[0],
+  index: 0,
+  rowConfig,
+  fieldKey: 'city',
+  value: 'hangzhou',
+  itemConfig,
+  setValue: Function,
+  updateRow: Function
+}
+```
+
+字段 Slot 实际收到：
+
+```ts
+{
+  tableData,
+  columnConfig,
+  row: tableData[0],
+  index: 0,
+  rowConfig,
+  fieldKey: 'city',
+  value: 'hangzhou',
+  itemConfig,
+  setValue: Function,
+  updateRow: Function,
+  propPath: 'tableData.0.city',
+  component: {
+    renderer: 'city-editor',
+    props: { disabled: false },
+    listeners: {},
+    options: [{ label: '杭州', value: 'hangzhou' }],
+    optionProps: undefined
+  }
+}
+```
+
+表头 Slot 实际收到：
+
+```ts
+{
+  tableData,
+  columnConfig,
+  columnIndex: 0,
+  label: '地区'
+}
+```
+
+这里的三个 `*Config` 与调用方传入 `columns` 中的对应对象是同一引用，不是深拷贝；`component` 则是 FormTable 为当前业务数据行生成的新解析结果。
+
 ### 动态显隐
 
 `visible` 可传布尔值或返回布尔值的函数，并在响应式依赖变化时重新计算：

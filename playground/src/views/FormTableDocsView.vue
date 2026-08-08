@@ -222,6 +222,10 @@
       </div>
       <pre>{{ callbackContextExample }}</pre>
 
+      <h3>实际回传对象示例</h3>
+      <p>以下对象基于第 1 行的 <code>city</code> 字段。三个 <code>*Config</code> 是 columns 中的原始对象引用，<code>component</code> 是当前行解析结果。</p>
+      <pre>{{ returnedContextExample }}</pre>
+
       <h3>组合使用示例</h3>
       <pre>{{ contextExample }}</pre>
     </section>
@@ -319,6 +323,61 @@ component: {
       setValue(nextValue)
     }
   }
+}`
+
+const returnedContextExample = `// Column callback
+{
+  tableData,
+  columnConfig // { key: 'region-column', label: '地区', ... }
+}
+
+// Row callback
+{
+  tableData,
+  columnConfig,
+  row: tableData[0], // { id: 1, province: 'zhejiang', city: 'hangzhou' }
+  index: 0,
+  rowConfig // { key: 'region-row', children: [...] }
+}
+
+// Item dynamic callback
+{
+  tableData,
+  columnConfig,
+  row: tableData[0],
+  index: 0,
+  rowConfig,
+  fieldKey: 'city',
+  value: 'hangzhou',
+  itemConfig // { key: 'city-field', fieldKey: 'city', type: 'slot', ... }
+}
+
+// component listener first argument
+{
+  ...itemContext,
+  setValue: Function,
+  updateRow: Function
+}
+
+// Field Slot
+{
+  ...actionContext,
+  propPath: 'tableData.0.city',
+  component: {
+    renderer: 'city-editor',
+    props: { disabled: false },
+    listeners: {},
+    options: [{ label: '杭州', value: 'hangzhou' }],
+    optionProps: undefined
+  }
+}
+
+// Header Slot
+{
+  tableData,
+  columnConfig,
+  columnIndex: 0,
+  label: '地区'
 }`
 
 const refExample = `await formTableRef.value?.validate()
