@@ -205,9 +205,44 @@ const validate = async (callback?: (valid: boolean, fields?: FormTableValue) => 
   }
 }
 
+interface ResettableFormField {
+  prop?: string
+  initialValue: FormTableValue
+}
+
+const resetFields = () => {
+  // Element FormItem 已记录挂载时的 initialValue；读取这些状态来保持原生
+  // resetFields 语义，但通过新数组回传，避免原生方法直接修改受控 props。
+  const nativeForm = formRef.value as (FormTableElementFormRef & {
+    fields?: ResettableFormField[]
+  }) | null
+  const fields = nativeForm?.fields || []
+  const sourceTableData = synchronousUpdateBase || props.tableData
+  let nextModel: { tableData: TableRow[] } = { tableData: sourceTableData }
+  let changed = false
+
+  fields.forEach((field) => {
+    if (!field.prop) return
+    const initialValue = Array.isArray(field.initialValue)
+      ? [...field.initialValue]
+      : field.initialValue
+    const currentValue = getValueByPath(nextModel, field.prop)
+    if (Object.is(currentValue, initialValue)) return
+    nextModel = setValueByPath(nextModel, field.prop, initialValue)
+    changed = true
+  })
+
+  nativeForm?.clearValidate?.()
+  if (!changed) return
+
+  synchronousUpdateBase = nextModel.tableData
+  scheduleUpdateBaseReset()
+  emit('update:tableData', nextModel.tableData)
+}
+
 defineExpose({
   validate,
-  resetFields: () => formRef.value?.resetFields?.(),
+  resetFields,
   clearValidate: (fieldProps?: string | string[]) => formRef.value?.clearValidate?.(fieldProps),
   getFormRef: () => formRef.value,
   getTableRef: () => tableRef.value

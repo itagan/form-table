@@ -244,6 +244,7 @@
     <section>
       <h2>公开事件和 Ref</h2>
       <p>组件事件只有 <code>update:tableData</code> 和 <code>field-change</code>；Table 原生事件直接透传。</p>
+      <p><code>resetFields()</code> 通过 <code>update:tableData</code> 返回不可变重置结果；单字段校验继续使用 <code>getFormRef().validateField()</code>。</p>
       <pre>{{ refExample }}</pre>
     </section>
   </main>
@@ -403,7 +404,9 @@ component: {
 }`
 
 const refExample = `await formTableRef.value?.validate()
+formTableRef.value?.resetFields()
 formTableRef.value?.clearValidate()
+formTableRef.value?.getFormRef()?.validateField('tableData.0.name')
 formTableRef.value?.getFormRef()
 formTableRef.value?.getTableRef()`
 </script>

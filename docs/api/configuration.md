@@ -65,6 +65,64 @@ tableData.value = tableData.value.filter((_, index) => index !== deleteIndex)
 - Item 的 `key` 是可选渲染身份，`fieldKey` 是必填的数据路径；`colProps` 与 `formItemProps` 分别传给 `el-col` 和 `el-form-item`。
 - 动态增删、排序、切换渲染器或重复使用同一 `fieldKey` 时建议提供稳定的 Item `key`；否则默认使用 `fieldKey`。
 
+## 校验规则
+
+字段校验直接使用 Element UI `el-form-item` 的 `rules`。FormTable 只负责根据当前行下标和 `fieldKey` 生成完整 `prop`，不重新定义 required、pattern 或 validator 协议：
+
+```ts
+{
+  fieldKey: 'phone',
+  type: 'input',
+  formItemProps: {
+    rules: [
+      { required: true, message: '请输入手机号', trigger: 'blur' },
+      { pattern: /^1\d{10}$/, message: '手机号格式不正确', trigger: 'blur' },
+      { min: 11, max: 11, message: '手机号长度应为 11 位', trigger: 'blur' }
+    ]
+  }
+}
+```
+
+嵌套字段同样会生成正确路径。例如 `fieldKey: 'profile.phone'` 在第一行对应 `tableData.0.profile.phone`。
+
+异步 validator 继续使用 Element UI callback 协议：
+
+```ts
+formItemProps: {
+  rules: [{
+    validator(rule, value, callback) {
+      checkPhoneExists(value)
+        .then(exists => {
+          callback(exists ? new Error('手机号已存在') : undefined)
+        })
+        .catch(() => callback(new Error('校验请求失败')))
+    },
+    trigger: 'blur'
+  }]
+}
+```
+
+规则可以根据当前行动态生成：
+
+```ts
+formItemProps: ({ row }) => ({
+  rules: row.contactType === 'phone'
+    ? [{ required: true, message: '请输入手机号', trigger: 'blur' }]
+    : []
+})
+```
+
+推荐把动态表格规则配置在 Item 的 `formItemProps.rules`。虽然 `formProps.rules` 会直接传给 `el-form`，但表单级规则必须与 `tableData.0.name` 等动态下标路径对应，行增删和排序时维护成本更高。
+
+内置 Element UI 表单组件会自动派发 `blur/change` 校验。Slot 或自定义组件如果内部仍使用 `el-input/el-select` 等组件，也能沿用这套机制；只使用原生控件或只调用 `setValue` 时，应在业务提交后显式校验：
+
+```ts
+const formRef = formTableRef.value?.getFormRef()
+formRef?.validateField?.(propPath)
+```
+
+删除、插入、复制或移动行会改变校验路径中的数组下标。更新 `tableData` 后应在 `nextTick` 中调用 `clearValidate()`，避免旧错误状态落在新行上。
+
 ## 渲染模式
 
 ```ts
