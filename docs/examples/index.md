@@ -1,12 +1,20 @@
 # 示例索引
 
-本地开发建议分别启动两个固定端口的站点：
+本地开发推荐在项目根目录用一条命令同时启动调试台和文档站：
 
 ```bash
-# http://localhost:5173
-pnpm dev
+pnpm site:dev
+```
 
-# http://localhost:5174
+命令会同时启动以下两个固定端口的站点：
+
+- Playground 调试台：<http://localhost:5173/>
+- VitePress 文档总站：<http://localhost:5174/>
+
+需要单独调试某个站点时，也可以分别启动：
+
+```bash
+pnpm dev
 pnpm docs:dev
 ```
 

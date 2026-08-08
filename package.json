@@ -5,6 +5,7 @@
   "packageManager": "pnpm@10.11.0",
   "scripts": {
     "dev": "pnpm --filter formtable-playground dev",
+    "site:dev": "run-p dev docs:dev",
     "build": "run-s build:package build:playground",
     "build:package": "pnpm --filter @itagan/form-table build",
     "build:playground": "pnpm --filter formtable-playground build",

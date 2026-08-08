@@ -5,8 +5,8 @@ export default defineConfig({
   description: 'Vue 2.7 + Element UI editable form table component.',
   lang: 'zh-CN',
   cleanUrls: true,
-  // Playground 是独立的本地开发服务，VitePress 构建阶段无法解析其客户端路由。
-  ignoreDeadLinks: [/^http:\/\/localhost:5173(?:\/|$)/],
+  // 本地 Playground 与文档开发服务不属于静态构建产物，构建阶段无法解析这些地址。
+  ignoreDeadLinks: [/^http:\/\/localhost:517[34](?:\/|$)/],
   themeConfig: {
     logo: '/logo.svg',
     nav: [
