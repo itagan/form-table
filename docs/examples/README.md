@@ -10,6 +10,7 @@
 | `/enterprise-components` | 企业全局组件、局部业务组件、自定义绑定协议与复杂事件联动 |
 | `/dynamic-slot-test` | 动态显隐和 slot 更新助手 |
 | `/row-column-operations` | 行增删复制移动、动态列和业务处理后延迟提交 |
+| `/cell-merge` | 分组纵向合并、汇总行横向合并、稳定列定位和表头隐藏 |
 | `/debug` | 自定义组件事件和原生 Ref |
 | `/form-table-docs` | 精简 API 速查 |
 

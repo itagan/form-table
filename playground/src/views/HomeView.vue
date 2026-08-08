@@ -43,6 +43,13 @@ const examples = [
     tags: ['row operations', 'columns', 'delayed commit']
   },
   {
+    title: '单元格合并',
+    description: '演示分组纵向合并、汇总行横向合并、稳定列定位和表头隐藏。',
+    path: '/cell-merge',
+    type: 'primary',
+    tags: ['spanMethod', 'rowspan', 'colspan']
+  },
+  {
     title: '能力文档',
     description: '在调试应用内查看 props、事件、ref 方法和推荐配置约定。',
     path: '/form-table-docs',
