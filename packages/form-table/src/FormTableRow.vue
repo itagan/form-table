@@ -2,14 +2,11 @@
   <el-row v-if="isVisible" v-bind="rowProps">
     <el-col
       v-for="(item, itemIndex) in visibleItems"
-      :key="item.config.key || item.config.fieldKey || itemIndex"
+      :key="item.config.key || `${item.config.fieldKey}:${itemIndex}`"
       v-bind="item.colProps"
     >
       <FormTableItem
-        :row="row"
-        :row-index="rowIndex"
-        :column-config="columnConfig"
-        :row-config="rowConfig"
+        :row-context="rowContext"
         :config="item.config"
       />
     </el-col>
@@ -19,7 +16,14 @@
 <script lang="ts" setup>
 import { computed, inject, type ComputedRef } from 'vue'
 import FormTableItem from './FormTableItem.vue'
-import type { ColumnConfig, FormItemConfig, FormTableTableContext, RowConfig, TableRow } from './types'
+import type {
+  ColumnConfig,
+  FormItemConfig,
+  FormTableRowContext,
+  FormTableTableContext,
+  RowConfig,
+  TableRow
+} from './types'
 import { FORM_TABLE_CONTEXT_KEY } from './types'
 import {
   createColumnContext,
@@ -40,7 +44,7 @@ const formTableContext = inject<ComputedRef<FormTableTableContext>>(
   FORM_TABLE_CONTEXT_KEY,
   computed(() => ({ tableData: [] }))
 )
-const rowContext = computed(() => createRowContext(
+const rowContext = computed<FormTableRowContext>(() => createRowContext(
   createColumnContext(formTableContext.value, props.columnConfig),
   props.row,
   props.rowIndex,

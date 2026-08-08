@@ -27,7 +27,7 @@ export function getValueByPath(source: FormTableRecord, path: string): FormTable
   let current: FormTableValue = source
 
   for (const segment of segments) {
-    if (!isObjectLike(current) && !Array.isArray(current)) {
+    if (!isObjectLike(current)) {
       return undefined
     }
 

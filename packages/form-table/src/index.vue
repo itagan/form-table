@@ -133,6 +133,7 @@ const resolveUpdateRowIndex = (
 
   const referenceIndex = sourceTableData.indexOf(targetRow)
   if (referenceIndex >= 0) return referenceIndex
+  // 仅跟踪本次同步更新链产生的行，不能用已过期的渲染下标匹配新数据。
   return synchronousRowIndexes.get(targetRow) ?? -1
 }
 
@@ -141,9 +142,7 @@ const updateRow = (targetRow: TableRow, _fallbackIndex: number, patch: Partial<T
   const rowIndex = resolveUpdateRowIndex(sourceTableData, targetRow)
   if (rowIndex < 0) return
   const currentRow = sourceTableData[rowIndex]
-  if (!currentRow) {
-    return
-  }
+  if (!currentRow) return
 
   let nextRow = currentRow
   const changes: Array<{

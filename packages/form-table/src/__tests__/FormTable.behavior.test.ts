@@ -270,6 +270,7 @@ describe('FormTable core behavior', () => {
 
   it('renders a directly supplied component and wraps its listeners', async () => {
     const listener = vi.fn((context) => context.setValue('disabled'))
+    const componentProps = vi.fn(() => ({ marker: 'status' }))
     const StatusInput = {
       props: ['value'],
       render(this: any, h: any) {
@@ -290,6 +291,7 @@ describe('FormTable core behavior', () => {
             type: 'component',
             component: {
               renderer: StatusInput,
+              props: componentProps,
               listeners: { commit: listener }
             }
           }]
@@ -297,6 +299,7 @@ describe('FormTable core behavior', () => {
       }]
     })
     await wrapper.vm.$nextTick()
+    expect(componentProps).toHaveBeenCalledTimes(1)
     await wrapper.find('.status-input').trigger('click')
 
     expect(listener).toHaveBeenCalledTimes(1)

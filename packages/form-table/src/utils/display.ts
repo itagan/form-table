@@ -7,24 +7,25 @@ const DEFAULT_OPTION_PROPS: Required<OptionPropsConfig> = {
   key: 'value'
 }
 
-function normalizeOptionProps(optionProps?: OptionPropsConfig) {
-  return {
-    ...DEFAULT_OPTION_PROPS,
-    ...(optionProps || {})
-  }
+function getOptionProp(
+  optionProps: OptionPropsConfig | undefined,
+  prop: keyof Required<OptionPropsConfig>
+) {
+  return optionProps?.[prop] ?? DEFAULT_OPTION_PROPS[prop]
 }
 
 export function getOptionValue(option: FormItemOption, optionProps?: OptionPropsConfig) {
-  return option[normalizeOptionProps(optionProps).value]
+  return option[getOptionProp(optionProps, 'value')]
 }
 
 export function getOptionLabel(option: FormItemOption, optionProps?: OptionPropsConfig) {
-  const props = normalizeOptionProps(optionProps)
-  return option[props.label] ?? option[props.value] ?? ''
+  return option[getOptionProp(optionProps, 'label')]
+    ?? option[getOptionProp(optionProps, 'value')]
+    ?? ''
 }
 
 export function getOptionDisabled(option: FormItemOption, optionProps?: OptionPropsConfig) {
-  return Boolean(option[normalizeOptionProps(optionProps).disabled])
+  return Boolean(option[getOptionProp(optionProps, 'disabled')])
 }
 
 export function getOptionKey(
@@ -32,6 +33,8 @@ export function getOptionKey(
   index: number,
   optionProps?: OptionPropsConfig
 ) {
-  const props = normalizeOptionProps(optionProps)
-  return option[props.key] ?? option[props.value] ?? option[props.label] ?? index
+  return option[getOptionProp(optionProps, 'key')]
+    ?? option[getOptionProp(optionProps, 'value')]
+    ?? option[getOptionProp(optionProps, 'label')]
+    ?? index
 }

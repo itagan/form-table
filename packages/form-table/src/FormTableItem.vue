@@ -9,68 +9,52 @@
     <span v-else-if="renderMode === 'display'">{{ slotContext.value }}</span>
     <ComponentWrapper
       v-else
-      :row="row"
-      :row-index="rowIndex"
-      :column-config="columnConfig"
-      :row-config="rowConfig"
-      :config="config"
+      :type="config.type"
+      :value="fieldContext.value"
+      :component="resolvedComponent"
+      @input="fieldContext.setValue"
     />
   </el-form-item>
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, type ComputedRef } from 'vue'
+import { computed, inject } from 'vue'
 import ComponentWrapper from './ComponentWrapper.vue'
 import SlotRenderer from './SlotRenderer'
+import { getComponentType, getRequiredProps } from './configs/defaultComponentConfigs'
 import type {
-  ColumnConfig,
+  BuiltinFormItemType,
   FormItemConfig,
   FormItemOption,
   FormTableFieldContext,
-  FormTableTableContext,
+  FormTableRowContext,
   FormTableSlotContext,
   FormTableSlots,
   FormTableUpdateApi,
   OptionPropsConfig,
   ResolvedComponentConfig,
-  RowConfig,
   TableRow
 } from './types'
 import {
-  FORM_TABLE_CONTEXT_KEY,
   FORM_TABLE_SLOTS_KEY,
   FORM_TABLE_UPDATE_KEY
 } from './types'
 import {
-  createColumnContext,
   createFieldRenderContext,
-  createRowContext,
   resolveDynamicValue
 } from './utils/dynamic'
 import { resolveFieldRenderMode } from './utils/renderMode'
 
 const props = defineProps<{
-  row: TableRow
-  rowIndex: number
-  columnConfig: ColumnConfig
-  rowConfig: RowConfig
+  rowContext: FormTableRowContext
   config: FormItemConfig
 }>()
 
-const formTableContext = inject<ComputedRef<FormTableTableContext>>(
-  FORM_TABLE_CONTEXT_KEY,
-  computed(() => ({ tableData: [] }))
-)
 const updateApi = inject<FormTableUpdateApi>(FORM_TABLE_UPDATE_KEY)
 const parentSlots = inject<FormTableSlots>(FORM_TABLE_SLOTS_KEY, {})
-const propPath = computed(() => `tableData.${props.rowIndex}.${props.config.fieldKey}`)
+const propPath = computed(() => `tableData.${props.rowContext.index}.${props.config.fieldKey}`)
 const runtimeContext = computed(() => createFieldRenderContext(
-  createRowContext(
-    createColumnContext(formTableContext.value, props.columnConfig),
-    props.row,
-    props.rowIndex,
-    props.rowConfig
-  ),
+  props.rowContext,
   props.config
 ))
 const renderMode = computed(() => resolveFieldRenderMode(props.config))
@@ -81,18 +65,24 @@ const resolvedFormItemProps = computed(() => ({
 const slotFn = computed(() => props.config.type === 'slot'
   ? parentSlots[props.config.component.renderer] || null
   : null)
-const value = computed(() => runtimeContext.value.value)
 const fieldContext = computed<FormTableFieldContext>(() => {
-  const targetRow = props.row
-  const targetIndex = props.rowIndex
+  const targetRow = props.rowContext.row as TableRow
+  const targetIndex = props.rowContext.index
   const targetFieldKey = props.config.fieldKey
   return {
     ...runtimeContext.value,
-    value: value.value,
     setValue: nextValue => updateApi?.setValue(targetRow, targetIndex, targetFieldKey, nextValue),
     updateRow: patch => updateApi?.updateRow(targetRow, targetIndex, patch)
   }
 })
+
+const builtinType = computed<BuiltinFormItemType | null>(() => {
+  return props.config.type === 'component' || props.config.type === 'slot'
+    ? null
+    : props.config.type
+})
+
+/** 动态字段配置集中解析一次，渲染层只消费结果，避免重复执行用户回调。 */
 const resolvedComponent = computed<ResolvedComponentConfig>(() => {
   const component = props.config.component
   const listeners = component?.listeners || {}
@@ -102,8 +92,13 @@ const resolvedComponent = computed<ResolvedComponentConfig>(() => {
   }, {})
 
   return {
-    renderer: component?.renderer,
-    props: resolveDynamicValue(component?.props, runtimeContext.value) || {},
+    renderer: props.config.type === 'component' || props.config.type === 'slot'
+      ? component?.renderer
+      : getComponentType(builtinType.value as BuiltinFormItemType),
+    props: {
+      ...(builtinType.value ? getRequiredProps(builtinType.value) : {}),
+      ...(resolveDynamicValue(component?.props, runtimeContext.value) || {})
+    },
     listeners: resolvedListeners,
     options: resolveDynamicValue(component?.options, runtimeContext.value) as FormItemOption[] || [],
     optionProps: resolveDynamicValue(component?.optionProps, runtimeContext.value) as OptionPropsConfig | undefined
