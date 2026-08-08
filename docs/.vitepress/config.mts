@@ -33,7 +33,8 @@ export default defineConfig({
         text: '示例',
         items: [
           { text: '示例索引', link: '/examples/' },
-          { text: '企业复杂组件接入', link: '/examples/enterprise-components' }
+          { text: '企业复杂组件接入', link: '/examples/enterprise-components' },
+          { text: '单元格合并', link: '/examples/cell-merge' }
         ]
       },
       {
