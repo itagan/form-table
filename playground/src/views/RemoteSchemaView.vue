@@ -90,8 +90,10 @@ const columns = enhanceFormTableColumns(remoteColumns, {
         props: remoteComponent?.props,
         listeners: {
           change(context, value) {
-            context.setValue(value)
-            context.updateRow({ phoneTouched: true })
+            context.updateRow({
+              [context.fieldKey]: value,
+              phoneTouched: true
+            })
           }
         }
       }

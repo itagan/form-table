@@ -2,7 +2,7 @@
   <main class="demo-page">
     <router-link to="/">← 返回</router-link>
     <h1>Slot 与动态显隐</h1>
-    <p>Slot 保留 el-col 和 el-form-item，复杂渲染完全交给调用方。</p>
+    <p>Slot 保留 el-col、el-form-item 和字段更新能力，内部模板由调用方控制；visible 可在 Column、Row、Item 三层按需判断。</p>
 
     <section class="demo-card">
       <FormTable
@@ -12,7 +12,12 @@
         @update:tableData="tableData = $event"
       >
         <template #score="{ value, setValue, component }">
-          <el-rate v-bind="component.props" :value="value" @input="setValue" />
+          <el-rate
+            v-bind="component.props"
+            v-on="component.listeners"
+            :value="value"
+            @input="setValue"
+          />
         </template>
 
         <template #detail="{ row, updateRow, component }">
@@ -34,6 +39,31 @@
     <section class="demo-card">
       <h2>组件配置</h2>
       <pre>{{ columnsCode }}</pre>
+    </section>
+
+    <section class="demo-card docs-section">
+      <h2>Slot 如何绑定</h2>
+      <p><code>component.renderer</code> 是具名 Slot 的 key。配置中的 props、listeners 和 options 会先解析，再通过 Slot 上下文的 <code>component</code> 返回。</p>
+      <pre>{{ slotCode }}</pre>
+      <ul>
+        <li><code>value / setValue</code> 负责当前字段的读取与更新。</li>
+        <li><code>updateRow</code> 用于一次更新当前行的多个字段。</li>
+        <li>配置不会自动绑定到 Slot 内部组件，应按组件接口使用 <code>v-bind</code>、<code>v-on</code> 或显式属性。</li>
+      </ul>
+    </section>
+
+    <section class="demo-card docs-section">
+      <h2>动态显隐层级</h2>
+      <table>
+        <thead><tr><th>层级</th><th>隐藏范围</th><th>可用上下文</th></tr></thead>
+        <tbody>
+          <tr><td>Column</td><td>整列</td><td><code>tableData</code></td></tr>
+          <tr><td>Row</td><td>单元格内整行布局</td><td><code>tableData, row, index</code></td></tr>
+          <tr><td>Item</td><td>当前字段及 el-col</td><td><code>tableData, row, index, fieldKey, value</code></td></tr>
+        </tbody>
+      </table>
+      <p>显隐只改变渲染，不会删除字段值。需要关闭时清空详情，应由业务事件更新数据，不要在 visible 判断中修改 row。</p>
+      <pre>{{ visibleCode }}</pre>
     </section>
   </main>
 </template>
@@ -103,6 +133,27 @@ const columns: ColumnConfig[] = [
   }
 ]
 const columnsCode = formatFormTableConfig(columns)
+const slotCode = `<template #score="{ value, setValue, component }">
+  <el-rate
+    v-bind="component.props"
+    v-on="component.listeners"
+    :value="value"
+    @input="setValue"
+  />
+</template>`
+const visibleCode = `{
+  label: '内容',
+  visible: ({ tableData }) => tableData.length > 0, // Column
+  children: [{
+    visible: ({ row }) => row.enabled !== false,   // Row
+    children: [{
+      fieldKey: 'detail',
+      type: 'slot',
+      component: { renderer: 'detail' },
+      visible: ({ row }) => row.showDetail === true // Item
+    }]
+  }]
+}`
 
 const addRow = () => {
   tableData.value = [...tableData.value, { title: '', showDetail: true, detail: '', score: 0 }]
@@ -117,4 +168,8 @@ const removeRow = (index: number) => {
 .demo-card { margin-top: 20px; padding: 24px; background: #fff; border-radius: 12px; }
 .add-button { margin-top: 20px; }
 pre { padding: 16px; overflow: auto; background: #f6f8fa; border-radius: 8px; }
+.docs-section p, .docs-section li { line-height: 1.7; }
+.docs-section table { width: 100%; border-collapse: collapse; }
+.docs-section th, .docs-section td { padding: 10px 12px; border: 1px solid #e5e7eb; text-align: left; }
+.docs-section th { background: #f6f8fa; }
 </style>

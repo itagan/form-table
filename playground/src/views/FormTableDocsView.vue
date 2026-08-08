@@ -75,7 +75,7 @@
             <tr>
               <td><code>headerSlot</code></td>
               <td>表头 scoped slot</td>
-              <td>接收 <code>label/column/columnIndex/tableData</code>。</td>
+              <td>接收 <code>label/column/columnIndex/tableData</code>；columnIndex 是显隐过滤后的可见列下标。</td>
             </tr>
             <tr>
               <td><code>visible</code></td>
@@ -120,7 +120,7 @@
               <td><code>fieldKey</code></td>
               <td>行数据字段路径</td>
               <td>支持 <code>name</code>、<code>profile.city</code>、<code>items[0].name</code>。</td>
-              <td rowspan="6" class="context-cell"><code>tableData</code><br><code>row</code><br><code>index</code><br><code>fieldKey</code></td>
+              <td rowspan="6" class="context-cell"><code>tableData</code><br><code>row</code><br><code>index</code><br><code>fieldKey</code><br><code>value</code></td>
             </tr>
             <tr>
               <td><code>visible</code></td>
@@ -155,7 +155,7 @@
               <td><code>renderer</code></td>
               <td>渲染目标</td>
               <td>component 模式为组件对象/名称；slot 模式为具名 slot 名称。</td>
-              <td rowspan="4" class="context-cell"><code>tableData</code><br><code>row</code><br><code>index</code><br><code>fieldKey</code></td>
+              <td rowspan="4" class="context-cell"><code>tableData</code><br><code>row</code><br><code>index</code><br><code>fieldKey</code><br><code>value</code></td>
             </tr>
             <tr>
               <td><code>props</code></td>
@@ -176,7 +176,7 @@
               <td><code>listeners</code></td>
               <td>实际组件事件</td>
               <td>首参为字段上下文，后续参数保持组件原始事件参数。</td>
-              <td class="context-cell"><code>Item 上下文</code><br>+ <code>value</code><br><code>setValue</code><br><code>updateRow</code></td>
+              <td class="context-cell"><code>Item 上下文</code><br>+ <code>setValue</code><br><code>updateRow</code></td>
             </tr>
           </tbody>
         </table>
@@ -184,6 +184,12 @@
 
       <h3>完整结构</h3>
       <pre>{{ propsExample }}</pre>
+    </section>
+
+    <section>
+      <h2>上下文回传示例</h2>
+      <p><code>row</code> 是当前数据行，<code>index</code> 是数据下标，<code>fieldKey</code> 是当前字段路径；不会返回完整的 Column、Row 或 Item 配置对象。</p>
+      <pre>{{ contextExample }}</pre>
     </section>
 
     <section>
@@ -217,6 +223,36 @@ const propsExample = `{
         props: { clearable: true },
         listeners: {},
         options: []
+      }
+    }]
+  }]
+}`
+
+const contextExample = `{
+  label: '地区',
+  visible: ({ tableData }) => tableData.length > 0,
+  props: ({ tableData }) => ({ minWidth: tableData.length > 5 ? 360 : 280 }),
+  children: [{
+    visible: ({ row }) => row.hidden !== true,
+    props: ({ row, index }) => ({
+      gutter: row.compact ? 4 : 12,
+      class: 'data-row-' + index
+    }),
+    children: [{
+      fieldKey: 'city',
+      type: 'select',
+      visible: ({ row, fieldKey, value }) => fieldKey === 'city' && Boolean(row.province) && value !== 'disabled',
+      colProps: ({ index }) => ({ span: index === 0 ? 12 : 8 }),
+      component: {
+        props: ({ row }) => ({ disabled: row.locked }),
+        options: ({ row }) => cityOptions[row.province] || [],
+        listeners: {
+          change({ row, index, fieldKey, value, setValue, updateRow }, nextValue) {
+            console.log('修改前', row, index, fieldKey, value)
+            setValue(nextValue)
+            updateRow({ cityTouched: true })
+          }
+        }
       }
     }]
   }]
