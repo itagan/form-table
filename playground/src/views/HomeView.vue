@@ -61,10 +61,10 @@ const examples = [
   },
   {
     title: '多日议程编排',
-    description: '简化演示日期与主题跨行合并、每日多条议程编辑、组内增删排序和分组提交。',
+    description: '简化演示日期与主题跨行合并、SortableJS 组内拖拽、行操作和分组提交。',
     path: '/itinerary-simple',
     type: 'primary',
-    tags: ['simple demo', 'rowspan', 'group data']
+    tags: ['SortableJS', 'rowspan', 'group data']
   },
   {
     title: '调试台 API 速查',

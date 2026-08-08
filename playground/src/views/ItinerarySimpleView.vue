@@ -9,6 +9,7 @@
         <p>日期和主题属于每日分组，多条议程共用；其余字段仍按行独立编辑。</p>
       </div>
       <div class="heading-actions">
+        <el-switch v-model="dragEnabled" active-text="启用拖拽" />
         <el-button @click="resetRows">恢复示例数据</el-button>
         <el-button type="primary" @click="submitRows">生成提交数据</el-button>
       </div>
@@ -16,11 +17,20 @@
 
     <section class="design-note">
       <strong>实现重点：</strong>
-      <span>合并单元格只渲染分组首行，因此日期和主题通过业务插槽更新同组数据；普通字段继续使用 FormTable 配置。</span>
+      <span>SortableJS 只增强示例页面的主表体；拖拽排序限定在同一天内，合并字段仍由业务数据同步维护。</span>
     </section>
+
+    <el-alert
+      class="drag-tip"
+      title="按住“议程”列左侧手柄拖动；输入控件不会触发拖拽，上下移动按钮仍可作为操作兜底。"
+      type="info"
+      :closable="false"
+      show-icon
+    />
 
     <section class="table-card">
       <FormTable
+        ref="formTableRef"
         :table-data="tableData"
         :columns="columns"
         :form-props="{ size: 'small' }"
@@ -57,7 +67,16 @@
         </template>
 
         <template #sequence-label="{ value }">
-          <el-tag size="small">议程{{ value }}</el-tag>
+          <div class="sequence-cell">
+            <i
+              class="el-icon-rank itinerary-drag-handle"
+              :class="{ 'is-disabled': !dragEnabled }"
+              role="button"
+              aria-label="拖动调整议程顺序"
+              title="拖动调整议程顺序"
+            />
+            <el-tag size="small">议程{{ value }}</el-tag>
+          </div>
         </template>
 
         <template #itinerary-name="{ row }">
@@ -95,10 +114,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { Message } from 'element-ui'
+import Sortable from 'sortablejs'
 import FormTable from '@itagan/form-table'
-import type { ColumnConfig, TableRow } from '@itagan/form-table'
+import type { ColumnConfig, FormTableExpose, TableRow } from '@itagan/form-table'
 
 /** 表格的编辑行；同一 dayId 的行共同组成一天的议程。 */
 interface ItineraryRow extends TableRow {
@@ -132,6 +152,9 @@ const createInitialRows = (): ItineraryRow[] => [
 let rowSequence = 0
 const tableData = ref<ItineraryRow[]>(createInitialRows())
 const submittedRows = ref<unknown[] | null>(null)
+const formTableRef = ref<FormTableExpose>()
+const dragEnabled = ref(true)
+let sortableInstance: Sortable | null = null
 
 /** 预计算连续日期分组跨度，spanMethod 渲染时只读取结果，不重复扫描全表。 */
 const daySpans = computed(() => {
@@ -205,6 +228,71 @@ const columns: ColumnConfig[] = [
 const replaceTableData = (rows: TableRow[]) => {
   tableData.value = rows as ItineraryRow[]
   submittedRows.value = null
+}
+
+/** 获取非固定列对应的主表体，避免把 Sortable 绑定到 Element UI 的固定列副本。 */
+const getMainTableBody = () => {
+  const tableElement = formTableRef.value?.getTableRef()?.$el as HTMLElement | undefined
+  return tableElement?.querySelector<HTMLElement>('.el-table__body-wrapper > table > tbody') || null
+}
+
+/**
+ * 把稳定行标识写到主表体 DOM，供 Sortable 在拖动期间识别源行和目标日期分组。
+ * 这些属性仅用于第三方库适配，不作为业务数据来源。
+ */
+const syncSortableRowMetadata = () => {
+  const tableBody = getMainTableBody()
+  if (!tableBody) return
+  Array.from(tableBody.children).forEach((element, index) => {
+    const row = tableData.value[index]
+    const rowElement = element as HTMLElement
+    rowElement.dataset.id = row?._rowKey || ''
+    rowElement.dataset.dayId = row?.dayId || ''
+  })
+}
+
+/** Sortable 修改 DOM 后，将最终下标转换为受控 tableData 的不可变排序。 */
+const applyDragResult = (oldIndex?: number, newIndex?: number) => {
+  if (oldIndex === undefined || newIndex === undefined || oldIndex === newIndex) return
+  const sourceRow = tableData.value[oldIndex]
+  const targetRow = tableData.value[newIndex]
+
+  if (!sourceRow || !targetRow || sourceRow.dayId !== targetRow.dayId) {
+    // 双重保护：即使外部 DOM 事件绕过 onMove，也恢复为受控数据顺序。
+    sortableInstance?.sort(tableData.value.map(row => row._rowKey), true)
+    Message.warning('议程只能在同一天内拖动排序')
+    return
+  }
+
+  const nextRows = [...tableData.value]
+  const [movedRow] = nextRows.splice(oldIndex, 1)
+  nextRows.splice(newIndex, 0, movedRow)
+  tableData.value = normalizeSequence(nextRows, sourceRow.dayId)
+  submittedRows.value = null
+}
+
+/** 在 FormTable 完成挂载后为主表体初始化独立的 SortableJS 适配层。 */
+const initializeSortable = async () => {
+  await nextTick()
+  const tableBody = getMainTableBody()
+  if (!tableBody || sortableInstance) return
+
+  syncSortableRowMetadata()
+  sortableInstance = Sortable.create(tableBody, {
+    animation: 160,
+    disabled: !dragEnabled.value,
+    forceFallback: true,
+    fallbackOnBody: true,
+    fallbackTolerance: 3,
+    handle: '.itinerary-drag-handle',
+    draggable: 'tr',
+    filter: 'input, textarea, button, .el-select, .el-time-panel',
+    ghostClass: 'itinerary-sortable-ghost',
+    chosenClass: 'itinerary-sortable-chosen',
+    dragClass: 'itinerary-sortable-drag',
+    onMove: event => event.dragged.dataset.dayId === event.related.dataset.dayId,
+    onEnd: event => applyDragResult(event.oldIndex, event.newIndex)
+  })
 }
 
 /** 更新单行插槽字段，同时维持不可变数组更新。 */
@@ -296,6 +384,18 @@ const resetRows = () => {
   tableData.value = createInitialRows()
   submittedRows.value = null
 }
+
+/** 数据增删或重排后等待 Element UI 更新行 DOM，再刷新拖拽识别属性。 */
+watch(tableData, () => nextTick(syncSortableRowMetadata))
+
+/** 开关只更新现有实例配置，避免反复创建 DOM 监听器。 */
+watch(dragEnabled, enabled => sortableInstance?.option('disabled', !enabled))
+
+onMounted(initializeSortable)
+onBeforeUnmount(() => {
+  sortableInstance?.destroy()
+  sortableInstance = null
+})
 </script>
 
 <style scoped>
@@ -307,10 +407,18 @@ h1 { margin: 0; color: #1f2937; }
 .heading-actions, .name-editor, .row-actions { display: flex; align-items: center; gap: 8px; }
 .design-note { margin-top: 20px; padding: 14px 18px; color: #475467; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; }
 .design-note strong { color: #1d4ed8; }
+.drag-tip { margin-top: 14px; }
 .table-card, .result-card { margin-top: 18px; padding: 20px; background: #fff; border-radius: 10px; box-shadow: 0 6px 20px rgba(15, 23, 42, .05); }
 .table-card { overflow: hidden; }
 .name-editor :deep(.el-input) { flex: 1; }
+.sequence-cell { display: inline-flex; align-items: center; gap: 7px; }
+.itinerary-drag-handle { color: #409eff; font-size: 17px; cursor: grab; }
+.itinerary-drag-handle:active { cursor: grabbing; }
+.itinerary-drag-handle.is-disabled { color: #c0c4cc; cursor: not-allowed; }
 .row-actions { justify-content: center; white-space: nowrap; }
+.table-card :deep(.itinerary-sortable-ghost) { opacity: .35; background: #ecf5ff; }
+.table-card :deep(.itinerary-sortable-chosen) { box-shadow: inset 3px 0 #409eff; }
+.table-card :deep(.itinerary-sortable-drag) { background: #fff; }
 .result-card h2 { margin-top: 0; }
 .empty-result { color: #98a2b3; }
 pre { max-height: 420px; padding: 16px; overflow: auto; background: #f8fafc; border-radius: 8px; }

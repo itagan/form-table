@@ -34,11 +34,40 @@ const updateGroupField = (target, field, value) => {
 
 时间、名称、城市和地点都是独立行字段：简单输入框和下拉框直接通过 FormTable 配置；时间范围、内部议程选择器与操作按钮通过插槽接入。
 
+## 使用外部库拖拽排序
+
+Demo 只在 Playground 中依赖 `sortablejs`，FormTable 包本身不增加拖拽依赖。页面通过 `getTableRef()` 获取 Element UI 表格根元素，再把 SortableJS 绑定到非固定列的主表体：
+
+```ts
+const tableElement = formTableRef.value?.getTableRef()?.$el
+const tableBody = tableElement?.querySelector(
+  '.el-table__body-wrapper > table > tbody'
+)
+
+sortableInstance = Sortable.create(tableBody, {
+  handle: '.itinerary-drag-handle',
+  draggable: 'tr',
+  forceFallback: true,
+  filter: 'input, textarea, button, .el-select',
+  onMove: event => (
+    event.dragged.dataset.dayId === event.related.dataset.dayId
+  ),
+  onEnd: event => applyDragResult(event.oldIndex, event.newIndex)
+})
+```
+
+示例启用 `forceFallback`，让鼠标、触屏和自动化环境使用一致的拖动实现。
+
+拖拽手柄位于非固定的“议程”列。Element UI 固定列会复制一份表体 DOM，如果将 Sortable 绑定到固定列副本，视觉顺序和真实数据容易不同步。
+
+`onMove` 根据写入表格行的 `data-day-id` 阻止跨日期移动；`onEnd` 仍会再次校验源行和目标行，避免异常 DOM 事件破坏分组。组件卸载时调用 `destroy()` 清理外部监听器。
+
 ## 行操作边界
 
 - 新增议程时插入当前日期分组末尾，并复制分组字段。
 - 删除后重新生成当天的 `sequence`，每天至少保留一条议程。
 - 上下移动只允许发生在同一天内部，保证相同 `dayId` 始终连续。
+- 拖拽和上下移动使用相同的组内排序规则；按钮同时作为键盘操作和兼容性兜底。
 - `spanMethod` 使用预计算跨度，渲染期间不重复遍历数据。
 
 ## 提交结构
