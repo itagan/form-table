@@ -147,6 +147,34 @@ Slot 上下文说明：
 - `component.listeners` 已包装字段上下文，使用 `v-on="component.listeners"` 后，slot 内组件触发同名事件即可调用配置回调。
 - 找不到 `component.renderer` 对应的具名 slot 时，字段外层布局仍保留，内容为空。
 
+#### `itemConfig.component` 与 `component`
+
+字段 Slot 会同时收到两份看起来相似的内容，但用途不同：
+
+| 对比 | `itemConfig.component` | Slot `component` |
+| --- | --- | --- |
+| 语义 | 调用方传入的原始组件配置 | 当前业务数据行的解析结果 |
+| `props` | 静态对象或动态函数 | 已解析为可直接 `v-bind` 的对象 |
+| `options` | 静态数组或动态函数 | 已解析为当前行的选项数组 |
+| `optionProps` | 静态对象或动态函数 | 已解析的字段映射 |
+| `listeners` | 原始配置回调，首参要求字段上下文 | 已包装函数，可直接使用 `v-on` |
+| 主要用途 | 判断配置来源、读取 `key/type/formItemProps` 等原始信息 | 绑定 Slot 内实际组件 |
+
+```vue
+<template #city="{ itemConfig, component, value, setValue }">
+  <span>{{ itemConfig.key }}</span>
+  <CityEditor
+    v-bind="component.props"
+    v-on="component.listeners"
+    :options="component.options"
+    :value="value"
+    @input="setValue"
+  />
+</template>
+```
+
+即使原始配置全部是静态值，两者内容可能相近，也应保持上述分工。不要在 Slot 中自行执行 `itemConfig.component.props/options` 函数或手动包装 listeners。
+
 `component.options` 与 `component.optionProps` 用于 select/radio/checkbox；它们和各层 props 都支持函数写法。
 
 ```ts

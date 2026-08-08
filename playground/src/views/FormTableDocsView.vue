@@ -206,6 +206,7 @@
         </table>
       </div>
       <p><code>itemConfig.component</code> 可能仍包含动态函数；Slot 的 <code>component</code> 已根据当前数据行解析。配置动态调整时请基于稳定 key 替换 columns，不要直接修改上下文引用。</p>
+      <p><code>itemConfig.component</code> 用于读取原始配置来源，<code>component</code> 用于直接绑定 Slot 内组件。后者已解析动态 props/options，并包装 listeners；不要在 Slot 中自行执行原始配置函数。</p>
 
       <h3>不同回调的上下文</h3>
       <div class="table-scroll">
