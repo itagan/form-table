@@ -12,6 +12,7 @@ export type {
   FormTableElementFormRef,
   FormTableElementTableRef,
   FormTableExpose,
+  FormTableColumnContext,
   FormTableFieldChangePayload,
   FormTableFieldContext,
   FormTableFieldRenderContext,

@@ -24,6 +24,7 @@
         :key="rowConfig.key || rowIndex"
         :row="scope.row"
         :row-index="scope.$index"
+        :column-config="column"
         :row-config="rowConfig"
       />
     </template>
@@ -31,27 +32,18 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineComponent, h, inject, type ComputedRef, type PropType } from 'vue'
+import { computed, inject, type ComputedRef } from 'vue'
 import FormTableRow from './FormTableRow.vue'
+import SlotRenderer from './SlotRenderer'
 import type {
   ColumnConfig,
+  FormTableColumnContext,
   FormTableTableContext,
   FormTableHeaderSlotContext,
-  FormTableSlotFn,
   FormTableSlots
 } from './types'
 import { FORM_TABLE_CONTEXT_KEY, FORM_TABLE_SLOTS_KEY } from './types'
-import { resolveDynamicValue } from './utils/dynamic'
-
-const SlotRenderer = defineComponent({
-  props: {
-    slotFn: { type: Function as PropType<FormTableSlotFn>, required: true },
-    slotProps: { type: Object as PropType<FormTableHeaderSlotContext>, required: true }
-  },
-  setup(props) {
-    return () => h('span', { class: 'form-table-column-header' }, props.slotFn(props.slotProps))
-  }
-})
+import { createColumnContext, resolveDynamicValue } from './utils/dynamic'
 
 const props = defineProps<{
   column: ColumnConfig
@@ -63,7 +55,11 @@ const formTableContext = inject<ComputedRef<FormTableTableContext>>(
   computed(() => ({ tableData: [] }))
 )
 const parentSlots = inject<FormTableSlots>(FORM_TABLE_SLOTS_KEY, {})
-const columnProps = computed(() => resolveDynamicValue(props.column.props, formTableContext.value) || {})
+const columnContext = computed<FormTableColumnContext>(() => createColumnContext(
+  formTableContext.value,
+  props.column
+))
+const columnProps = computed(() => resolveDynamicValue(props.column.props, columnContext.value) || {})
 const isNativeColumn = computed(() => ['index', 'selection', 'expand'].includes(columnProps.value.type))
 const headerSlotFn = computed(() => props.column.headerSlot
   ? parentSlots[props.column.headerSlot] || null
@@ -72,17 +68,9 @@ const shouldRenderHeader = computed(() => {
   return typeof columnProps.value.renderHeader !== 'function' && Boolean(headerSlotFn.value)
 })
 const headerSlotProps = computed<FormTableHeaderSlotContext>(() => ({
-  column: props.column,
+  columnConfig: props.column,
   columnIndex: props.columnIndex,
   label: props.column.label,
   tableData: formTableContext.value.tableData
 }))
 </script>
-
-<style lang="less" scoped>
-.form-table-column-header {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-</style>

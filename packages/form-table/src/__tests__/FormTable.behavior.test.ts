@@ -4,10 +4,11 @@ import { describe, expect, it, vi } from 'vitest'
 import FormTable from '../index.vue'
 import type {
   ColumnConfig,
+  FormItemConfig,
+  FormTableColumnContext,
   FormTableFieldRenderContext,
   FormTableExpose,
   FormTableRowContext,
-  FormTableTableContext,
   TableRow
 } from '../types.public'
 
@@ -36,6 +37,7 @@ const inputColumns: ColumnConfig[] = [
 function mountFormTable(options: {
   tableData?: TableRow[]
   columns?: ColumnConfig[]
+  tableProps?: Record<string, any>
   scopedSlots?: Record<string, any>
   listeners?: Record<string, (...args: any[]) => void>
 } = {}) {
@@ -45,7 +47,7 @@ function mountFormTable(options: {
       tableData: options.tableData || [{ name: 'Alice' }],
       columns: options.columns || inputColumns,
       formProps: { size: 'small' },
-      tableProps: { border: true }
+      tableProps: { border: true, ...options.tableProps }
     },
     scopedSlots: options.scopedSlots,
     listeners: options.listeners,
@@ -124,9 +126,12 @@ describe('FormTable core behavior', () => {
     expect(wrapper.find('.slot-setter').text()).toBe('一中（当前）校区配置')
     expect(componentPropsResolver).toHaveBeenCalledTimes(1)
     expect(Object.keys(componentPropsResolver.mock.calls[0][0]).sort()).toEqual([
+      'columnConfig',
       'fieldKey',
       'index',
+      'itemConfig',
       'row',
+      'rowConfig',
       'tableData',
       'value'
     ])
@@ -139,6 +144,113 @@ describe('FormTable core behavior', () => {
     })
     expect(slotListener.mock.calls[0][1]).toBe('saved')
     expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{ school: '二中' }])
+    wrapper.destroy()
+  })
+
+  it('renders native, component, multiple-root, and empty slots without wrapper elements', async () => {
+    localVue.component('transparent-slot-root', {
+      props: ['value'],
+      render(this: any, h: any) {
+        return h('section', { class: 'transparent-component' }, this.value)
+      }
+    })
+    const wrapper = mountFormTable({
+      tableData: [{ native: '文本', component: '组件', empty: '', missing: '' }],
+      columns: [{
+        label: '透明 Slot',
+        children: [{ children: [
+          {
+            fieldKey: 'native',
+            type: 'slot',
+            component: { renderer: 'native-slot' }
+          },
+          {
+            fieldKey: 'component',
+            type: 'slot',
+            component: { renderer: 'component-slot' }
+          },
+          {
+            fieldKey: 'empty',
+            type: 'slot',
+            component: { renderer: 'empty-slot' }
+          },
+          {
+            fieldKey: 'missing',
+            type: 'slot',
+            component: { renderer: 'missing-slot' }
+          }
+        ] }]
+      }],
+      scopedSlots: {
+        'native-slot': '<span class="transparent-native">{{ props.value }}</span>',
+        'component-slot': '<transparent-slot-root :value="props.value" />',
+        'empty-slot': () => []
+      }
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.transparent-native').text()).toBe('文本')
+    expect(wrapper.find('.transparent-component').text()).toBe('组件')
+    expect(wrapper.find('.should-not-render').exists()).toBe(false)
+    expect(wrapper.findAll('.el-form-item')).toHaveLength(4)
+    expect(wrapper.find('.form-table-slot').exists()).toBe(false)
+    wrapper.destroy()
+  })
+
+  it('renders every root from a template scoped slot without a wrapper element', async () => {
+    const Host = localVue.extend({
+      components: { FormTable },
+      data() {
+        return {
+          tableData: [{ multiple: '' }],
+          columns: [{
+            label: '多根 Slot',
+            children: [{ children: [{
+              fieldKey: 'multiple',
+              type: 'slot',
+              component: { renderer: 'multiple-slot' }
+            }] }]
+          }]
+        }
+      },
+      template: `
+        <FormTable :table-data="tableData" :columns="columns">
+          <template #multiple-slot>
+            <span class="transparent-first">A</span>
+            <span class="transparent-second">B</span>
+          </template>
+        </FormTable>
+      `
+    })
+    const wrapper = mount(Host, { localVue, attachTo: document.body })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.transparent-first').exists()).toBe(true)
+    expect(wrapper.find('.transparent-second').exists()).toBe(true)
+    expect(wrapper.find('.form-table-slot').exists()).toBe(false)
+    wrapper.destroy()
+  })
+
+  it('exposes columnConfig to the header slot without a column alias', async () => {
+    const wrapper = mountFormTable({
+      columns: [{
+        key: 'school-column',
+        label: '学校',
+        headerSlot: 'school-header',
+        children: [{ children: [{ fieldKey: 'name', type: 'input' }] }]
+      }],
+      scopedSlots: {
+        'school-header': `
+          <span class="school-header">
+            {{ props.columnConfig.key }}|{{ props.column === undefined }}
+          </span>
+        `
+      }
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.school-header').text()).toBe('school-column|true')
+    expect(wrapper.find('.form-table-column-header').exists()).toBe(false)
     wrapper.destroy()
   })
 
@@ -192,12 +304,17 @@ describe('FormTable core behavior', () => {
       row: { status: 'enabled' },
       index: 0,
       fieldKey: 'status',
-      value: 'enabled'
+      value: 'enabled',
+      columnConfig: { label: '状态' },
+      itemConfig: { fieldKey: 'status', type: 'component' }
     })
     expect(Object.keys(listener.mock.calls[0][0]).sort()).toEqual([
+      'columnConfig',
       'fieldKey',
       'index',
+      'itemConfig',
       'row',
+      'rowConfig',
       'setValue',
       'tableData',
       'updateRow',
@@ -205,6 +322,135 @@ describe('FormTable core behavior', () => {
     ])
     expect(listener.mock.calls[0].slice(1)).toEqual(['saved', { source: 'button' }])
     expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{ status: 'disabled' }])
+    wrapper.destroy()
+  })
+
+  it('keeps keyed field instances stable when items are reordered', async () => {
+    let nextInstanceId = 0
+    const StatefulField = {
+      props: ['value', 'marker'],
+      data() {
+        return { instanceId: ++nextInstanceId }
+      },
+      render(this: any, h: any) {
+        return h('span', { class: 'stateful-field' }, `${this.marker}:${this.instanceId}`)
+      }
+    }
+    const createItem = (key: string, marker: string) => ({
+      key,
+      fieldKey: 'name',
+      type: 'component' as const,
+      component: { renderer: StatefulField, props: { marker } }
+    })
+    const first = createItem('first-name', 'A')
+    const second = createItem('second-name', 'B')
+    const createColumns = (children: FormItemConfig[]): ColumnConfig[] => [{
+      label: '稳定字段身份',
+      children: [{ children }]
+    }]
+    const wrapper = mountFormTable({ columns: createColumns([first, second]) })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.findAll('.stateful-field').wrappers.map(node => node.text())).toEqual(['A:1', 'B:2'])
+    await wrapper.setProps({ columns: createColumns([second, first]) })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.findAll('.stateful-field').wrappers.map(node => node.text())).toEqual(['B:2', 'A:1'])
+    wrapper.destroy()
+  })
+
+  it('keeps keyed row and column instances aligned when configs are reordered', async () => {
+    let nextInstanceId = 0
+    const StatefulField = {
+      props: ['marker'],
+      data() {
+        return { instanceId: ++nextInstanceId }
+      },
+      render(this: any, h: any) {
+        return h('span', { class: 'dynamic-structure-field' }, `${this.marker}:${this.instanceId}`)
+      }
+    }
+    const createItem = (key: string, marker: string): FormItemConfig => ({
+      key,
+      fieldKey: marker,
+      type: 'component',
+      component: { renderer: StatefulField, props: { marker } }
+    })
+    const firstRow = { key: 'first-row', children: [createItem('row-a', 'row-a')] }
+    const secondRow = { key: 'second-row', children: [createItem('row-b', 'row-b')] }
+    const rowWrapper = mountFormTable({
+      tableData: [{ 'row-a': '', 'row-b': '' }],
+      columns: [{ key: 'rows', label: '布局行', children: [firstRow, secondRow] }]
+    })
+    await rowWrapper.vm.$nextTick()
+    expect(rowWrapper.findAll('.dynamic-structure-field').wrappers.map(node => node.text()))
+      .toEqual(['row-a:1', 'row-b:2'])
+    await rowWrapper.setProps({
+      columns: [{ key: 'rows', label: '布局行', children: [secondRow, firstRow] }]
+    })
+    await rowWrapper.vm.$nextTick()
+    expect(rowWrapper.findAll('.dynamic-structure-field').wrappers.map(node => node.text()))
+      .toEqual(['row-b:2', 'row-a:1'])
+    rowWrapper.destroy()
+
+    nextInstanceId = 0
+    const firstColumn: ColumnConfig = {
+      key: 'first-column',
+      label: '第一列',
+      children: [{ key: 'first-layout', children: [createItem('column-a', 'column-a')] }]
+    }
+    const secondColumn: ColumnConfig = {
+      key: 'second-column',
+      label: '第二列',
+      children: [{ key: 'second-layout', children: [createItem('column-b', 'column-b')] }]
+    }
+    const columnWrapper = mountFormTable({
+      tableData: [{ 'column-a': '', 'column-b': '' }],
+      columns: [firstColumn, secondColumn]
+    })
+    await columnWrapper.vm.$nextTick()
+    expect(columnWrapper.findAll('.dynamic-structure-field').wrappers.map(node => node.text()))
+      .toEqual(['column-a:1', 'column-b:2'])
+    await columnWrapper.setProps({ columns: [secondColumn, firstColumn] })
+    await columnWrapper.vm.$nextTick()
+    const reorderedColumns = columnWrapper.findAll('.dynamic-structure-field').wrappers.map(node => node.text())
+    expect(reorderedColumns.map(text => text.split(':')[0])).toEqual(['column-b', 'column-a'])
+    expect(new Set(reorderedColumns.map(text => text.split(':')[1])).size).toBe(2)
+    columnWrapper.destroy()
+  })
+
+  it('reacts to dynamic column, row, and item visibility changes', async () => {
+    const state = { showColumn: true, showRow: true, showItem: true }
+    const createColumns = (): ColumnConfig[] => [{
+      key: 'dynamic-column',
+      label: '动态列',
+      visible: () => state.showColumn,
+      children: [{
+        key: 'dynamic-row',
+        visible: () => state.showRow,
+        children: [{
+          key: 'dynamic-item',
+          fieldKey: 'name',
+          type: 'input',
+          visible: () => state.showItem
+        }]
+      }]
+    }]
+    const wrapper = mountFormTable({ columns: createColumns() })
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('input').exists()).toBe(true)
+
+    state.showItem = false
+    await wrapper.setProps({ columns: createColumns() })
+    expect(wrapper.find('input').exists()).toBe(false)
+    state.showItem = true
+    state.showRow = false
+    await wrapper.setProps({ columns: createColumns() })
+    expect(wrapper.find('input').exists()).toBe(false)
+    state.showRow = true
+    state.showColumn = false
+    await wrapper.setProps({ columns: createColumns() })
+    expect(wrapper.text()).not.toContain('动态列')
     wrapper.destroy()
   })
 
@@ -289,8 +535,316 @@ describe('FormTable core behavior', () => {
     wrapper.destroy()
   })
 
+  it('does not use a stale row index for an unrelated context in the same update chain', async () => {
+    const contexts: any[] = []
+    const CaptureField = {
+      props: ['value'],
+      render(this: any, h: any) {
+        return h('button', {
+          class: 'capture-unkeyed-row',
+          attrs: { type: 'button' },
+          on: { click: () => this.$emit('capture') }
+        }, this.value)
+      }
+    }
+    const wrapper = mountFormTable({
+      tableData: [{ name: 'Old row' }],
+      columns: [{
+        label: '姓名',
+        children: [{ children: [{
+          fieldKey: 'name',
+          type: 'component',
+          component: {
+            renderer: CaptureField,
+            listeners: { capture: context => contexts.push(context) }
+          }
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+    await wrapper.find('.capture-unkeyed-row').trigger('click')
+
+    await wrapper.setProps({ tableData: [{ name: 'New row' }] })
+    await wrapper.vm.$nextTick()
+    await wrapper.find('.capture-unkeyed-row').trigger('click')
+
+    contexts[1].setValue('Updated row')
+    contexts[0].updateRow({ name: 'Wrong row' })
+
+    expect(wrapper.emitted('update:tableData')).toEqual([[[{ name: 'Updated row' }]]])
+    expect(wrapper.emitted('field-change')).toHaveLength(1)
+    wrapper.destroy()
+  })
+
+  it('ignores updates when a configured rowKey is duplicated', async () => {
+    let savedContext: any
+    const CaptureField = {
+      props: ['value'],
+      render(this: any, h: any) {
+        return h('button', {
+          class: 'capture-duplicate-key',
+          attrs: { type: 'button' },
+          on: { click: () => this.$emit('capture') }
+        }, this.value)
+      }
+    }
+    const wrapper = mountFormTable({
+      tableData: [
+        { id: 1, name: 'First' },
+        { id: 1, name: 'Second' }
+      ],
+      tableProps: { rowKey: 'id' },
+      columns: [{
+        label: '姓名',
+        children: [{ children: [{
+          fieldKey: 'name',
+          type: 'component',
+          component: {
+            renderer: CaptureField,
+            listeners: { capture: context => { savedContext = context } }
+          }
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+    await wrapper.findAll('.capture-duplicate-key').at(0).trigger('click')
+
+    savedContext.setValue('Wrong row')
+
+    expect(wrapper.emitted('update:tableData')).toBeUndefined()
+    expect(wrapper.emitted('field-change')).toBeUndefined()
+    wrapper.destroy()
+  })
+
+  it('updates the original row by rowKey after rows are replaced and reordered', async () => {
+    let savedContext: any
+    const captureContext = vi.fn((context) => {
+      savedContext = context
+    })
+    const CaptureField = {
+      props: ['value'],
+      render(this: any, h: any) {
+        return h('button', {
+          class: 'capture-row-context',
+          attrs: { type: 'button' },
+          on: { click: () => this.$emit('capture') }
+        }, this.value)
+      }
+    }
+    const wrapper = mountFormTable({
+      tableData: [
+        { id: 1, name: 'Alice' },
+        { id: 2, name: 'Bob' }
+      ],
+      tableProps: { rowKey: 'id' },
+      columns: [{
+        label: '姓名',
+        children: [{ children: [{
+          fieldKey: 'name',
+          type: 'component',
+          component: {
+            renderer: CaptureField,
+            listeners: { capture: captureContext }
+          }
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+    await wrapper.findAll('.capture-row-context').at(0).trigger('click')
+
+    await wrapper.setProps({
+      tableData: [
+        { id: 2, name: 'Bob' },
+        { id: 1, name: 'Alice' }
+      ]
+    })
+    await wrapper.vm.$nextTick()
+    savedContext.setValue('Alicia')
+
+    const updates = wrapper.emitted('update:tableData') || []
+    expect(updates[updates.length - 1]?.[0]).toEqual([
+      { id: 2, name: 'Bob' },
+      { id: 1, name: 'Alicia' }
+    ])
+    const fieldChanges = wrapper.emitted('field-change') || []
+    expect(fieldChanges[fieldChanges.length - 1]?.[0]).toMatchObject({
+      index: 1,
+      fieldKey: 'name',
+      value: 'Alicia'
+    })
+    wrapper.destroy()
+  })
+
+  it('updates a reordered unkeyed row when its object reference is preserved', async () => {
+    let savedContext: any
+    const first = { name: 'Alice' }
+    const second = { name: 'Bob' }
+    const CaptureField = {
+      props: ['value'],
+      render(this: any, h: any) {
+        return h('button', {
+          class: 'capture-reordered-reference',
+          attrs: { type: 'button' },
+          on: { click: () => this.$emit('capture') }
+        }, this.value)
+      }
+    }
+    const wrapper = mountFormTable({
+      tableData: [first, second],
+      columns: [{
+        label: '姓名',
+        children: [{ children: [{
+          fieldKey: 'name',
+          type: 'component',
+          component: {
+            renderer: CaptureField,
+            listeners: { capture: context => { savedContext = context } }
+          }
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+    await wrapper.findAll('.capture-reordered-reference').at(0).trigger('click')
+    await wrapper.setProps({ tableData: [second, first] })
+    await wrapper.vm.$nextTick()
+
+    savedContext.setValue('Alicia')
+
+    const updates = wrapper.emitted('update:tableData') || []
+    expect(updates[updates.length - 1]?.[0]).toEqual([second, { name: 'Alicia' }])
+    wrapper.destroy()
+  })
+
+  it.each([
+    ['nested rowKey path', 'meta.identity'],
+    ['rowKey function', (row: TableRow) => row.meta.identity]
+  ])('locates replaced rows using a %s', async (_label, rowKey) => {
+    let savedContext: any
+    const CaptureField = {
+      props: ['value'],
+      render(this: any, h: any) {
+        return h('button', {
+          class: 'capture-key-variant',
+          attrs: { type: 'button' },
+          on: { click: () => this.$emit('capture') }
+        }, this.value)
+      }
+    }
+    const wrapper = mountFormTable({
+      tableData: [{ meta: { identity: 'a' }, name: 'Alice' }],
+      tableProps: { rowKey },
+      columns: [{
+        label: '姓名',
+        children: [{ children: [{
+          fieldKey: 'name',
+          type: 'component',
+          component: {
+            renderer: CaptureField,
+            listeners: { capture: context => { savedContext = context } }
+          }
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+    await wrapper.find('.capture-key-variant').trigger('click')
+    await wrapper.setProps({
+      tableData: [{ meta: { identity: 'a' }, name: 'Refreshed' }]
+    })
+    await wrapper.vm.$nextTick()
+
+    savedContext.setValue('Alicia')
+
+    const updates = wrapper.emitted('update:tableData') || []
+    expect(updates[updates.length - 1]?.[0]).toEqual([
+      { meta: { identity: 'a' }, name: 'Alicia' }
+    ])
+    wrapper.destroy()
+  })
+
+  it('keeps an event context bound to its original field after configs are replaced', async () => {
+    let savedContext: any
+    const CaptureField = {
+      props: ['value'],
+      render(this: any, h: any) {
+        return h('button', {
+          class: 'capture-original-config',
+          attrs: { type: 'button' },
+          on: { click: () => this.$emit('capture') }
+        }, this.value)
+      }
+    }
+    const createColumns = (key: string, fieldKey: string): ColumnConfig[] => [{
+      key: 'identity-column',
+      label: '身份',
+      children: [{ key: 'identity-row', children: [{
+        key,
+        fieldKey,
+        type: 'component',
+        component: {
+          renderer: CaptureField,
+          listeners: { capture: context => { savedContext = context } }
+        }
+      }] }]
+    }]
+    const row = { name: 'Alice', alias: 'A' }
+    const wrapper = mountFormTable({ tableData: [row], columns: createColumns('name-field', 'name') })
+    await wrapper.vm.$nextTick()
+    await wrapper.find('.capture-original-config').trigger('click')
+    await wrapper.setProps({ columns: createColumns('alias-field', 'alias') })
+    await wrapper.vm.$nextTick()
+
+    expect(savedContext.itemConfig.key).toBe('name-field')
+    savedContext.setValue('Alicia')
+
+    const updates = wrapper.emitted('update:tableData') || []
+    expect(updates[updates.length - 1]?.[0]).toEqual([{ name: 'Alicia', alias: 'A' }])
+    wrapper.destroy()
+  })
+
+  it('does not update another row when the bound rowKey no longer exists', async () => {
+    let savedContext: any
+    const CaptureField = {
+      props: ['value'],
+      render(this: any, h: any) {
+        return h('button', {
+          class: 'capture-deleted-row',
+          attrs: { type: 'button' },
+          on: { click: () => this.$emit('capture') }
+        }, this.value)
+      }
+    }
+    const wrapper = mountFormTable({
+      tableData: [
+        { id: 1, name: 'Alice' },
+        { id: 2, name: 'Bob' }
+      ],
+      tableProps: { rowKey: 'id' },
+      columns: [{
+        label: '姓名',
+        children: [{ children: [{
+          fieldKey: 'name',
+          type: 'component',
+          component: {
+            renderer: CaptureField,
+            listeners: { capture: context => { savedContext = context } }
+          }
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+    await wrapper.findAll('.capture-deleted-row').at(0).trigger('click')
+    await wrapper.setProps({ tableData: [{ id: 2, name: 'Bob' }] })
+    await wrapper.vm.$nextTick()
+
+    savedContext.updateRow({ name: 'Wrong row' })
+
+    expect(wrapper.emitted('update:tableData')).toBeUndefined()
+    expect(wrapper.emitted('field-change')).toBeUndefined()
+    wrapper.destroy()
+  })
+
   it('resolves dynamic visibility and options from row context', async () => {
-    const columnVisible = vi.fn((_context: FormTableTableContext) => true)
+    const columnVisible = vi.fn((_context: FormTableColumnContext) => true)
     const rowProps = vi.fn((_context: FormTableRowContext) => ({ gutter: 8 }))
     const fieldVisible = vi.fn(({ row }: FormTableFieldRenderContext) => row.province === 'zhejiang')
     const fieldOptions = vi.fn(({ row }: FormTableFieldRenderContext) => row.province === 'zhejiang'
@@ -328,34 +882,57 @@ describe('FormTable core behavior', () => {
     })
     await wrapper.vm.$nextTick()
     expect(wrapper.findAll('.el-select')).toHaveLength(2)
-    expect(Object.keys(columnVisible.mock.calls[0][0]).sort()).toEqual(['tableData'])
+    expect(Object.keys(columnVisible.mock.calls[0][0]).sort()).toEqual([
+      'columnConfig',
+      'tableData'
+    ])
     expect(Object.keys(rowProps.mock.calls[0][0]).sort()).toEqual([
+      'columnConfig',
       'index',
       'row',
+      'rowConfig',
       'tableData'
     ])
     expect(Object.keys(fieldVisible.mock.calls[0][0]).sort()).toEqual([
+      'columnConfig',
       'fieldKey',
       'index',
+      'itemConfig',
       'row',
+      'rowConfig',
       'tableData',
       'value'
     ])
     expect(Object.keys(fieldOptions.mock.calls[0][0]).sort()).toEqual([
+      'columnConfig',
       'fieldKey',
       'index',
+      'itemConfig',
       'row',
+      'rowConfig',
       'tableData',
       'value'
     ])
     wrapper.destroy()
   })
 
-  it('forwards native table events and exposes native refs', async () => {
+  it('forwards only native table events and exposes native refs', async () => {
     const rowClick = vi.fn()
-    const wrapper = mountFormTable({ listeners: { 'row-click': rowClick } })
+    const fieldChange = vi.fn()
+    const updateTableData = vi.fn()
+    const wrapper = mountFormTable({
+      listeners: {
+        'row-click': rowClick,
+        'field-change': fieldChange,
+        'update:tableData': updateTableData
+      }
+    })
     await wrapper.vm.$nextTick()
-    ;(wrapper.findComponent({ name: 'ElTable' }).vm as any).$emit('row-click', { name: 'Alice' })
+    const table = wrapper.findComponent({ name: 'ElTable' }).vm as any
+    expect(Object.keys(table.$listeners)).toContain('row-click')
+    expect(Object.keys(table.$listeners)).not.toContain('field-change')
+    expect(Object.keys(table.$listeners)).not.toContain('update:tableData')
+    table.$emit('row-click', { name: 'Alice' })
     expect(rowClick).toHaveBeenCalledWith({ name: 'Alice' })
 
     const expose = wrapper.vm as unknown as FormTableExpose

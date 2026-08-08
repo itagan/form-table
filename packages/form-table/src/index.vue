@@ -8,13 +8,13 @@
       <el-table
         ref="tableRef"
         v-bind="props.tableProps"
-        v-on="$listeners"
+        v-on="tableListeners"
         :data="props.tableData"
         v-loading="props.loading"
       >
         <FormTableColumn
           v-for="(column, columnIndex) in visibleColumns"
-          :key="column.key || column.label || columnIndex"
+          :key="`${column.key || column.label || 'column'}:${columnIndex}`"
           :column="column"
           :column-index="columnIndex"
         />
@@ -24,7 +24,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, provide, ref, useSlots } from 'vue'
+import { computed, getCurrentInstance, provide, ref, useSlots } from 'vue'
 import FormTableColumn from './FormTableColumn.vue'
 import type {
   ColumnConfig,
@@ -42,7 +42,7 @@ import {
   FORM_TABLE_SLOTS_KEY,
   FORM_TABLE_UPDATE_KEY
 } from './types'
-import { createTableContext, resolveVisible } from './utils/dynamic'
+import { createColumnContext, createTableContext, resolveVisible } from './utils/dynamic'
 import { getValueByPath, setValueByPath } from './utils/path'
 
 const props = withDefaults(defineProps<{
@@ -67,6 +67,16 @@ const emit = defineEmits<{
 const formRef = ref<FormTableElementFormRef | null>(null)
 const tableRef = ref<FormTableElementTableRef | null>(null)
 const slots = useSlots()
+const instance = getCurrentInstance()
+const tableListeners = computed(() => {
+  const listeners = (instance?.proxy as any)?.$listeners || {}
+  return Object.keys(listeners).reduce<Record<string, (...args: unknown[]) => void>>((result, name) => {
+    if (name !== 'update:tableData' && name !== 'field-change') {
+      result[name] = listeners[name]
+    }
+    return result
+  }, {})
+})
 
 const formModel = computed(() => ({ tableData: props.tableData }))
 const formTableContext = computed(() => ({
@@ -75,12 +85,16 @@ const formTableContext = computed(() => ({
 
 const visibleColumns = computed(() => {
   const tableContext = createTableContext(props.tableData)
-  return props.columns.filter((column) => resolveVisible(column.visible, tableContext))
+  return props.columns.filter((column) => resolveVisible(
+    column.visible,
+    createColumnContext(tableContext, column)
+  ))
 })
 
 // 同一同步调用链中的多次更新必须基于上一次已发出的结果继续计算。
 // 微任务结束后重新以受控 props 为准，避免父组件未接收更新时长期保留内部状态。
 let synchronousUpdateBase: TableRow[] | null = null
+const synchronousRowIndexes = new Map<TableRow, number>()
 let updateBaseResetPending = false
 
 const scheduleUpdateBaseReset = () => {
@@ -88,12 +102,44 @@ const scheduleUpdateBaseReset = () => {
   updateBaseResetPending = true
   Promise.resolve().then(() => {
     synchronousUpdateBase = null
+    synchronousRowIndexes.clear()
     updateBaseResetPending = false
   })
 }
 
-const updateRow = (rowIndex: number, patch: Partial<TableRow>) => {
+const getRowIdentity = (row: TableRow) => {
+  const rowKey = props.tableProps?.rowKey
+  if (typeof rowKey === 'function') return rowKey(row)
+  if (typeof rowKey === 'string' && rowKey) return getValueByPath(row, rowKey)
+  return undefined
+}
+
+const resolveUpdateRowIndex = (
+  sourceTableData: TableRow[],
+  targetRow: TableRow
+) => {
+  const rowKey = props.tableProps?.rowKey
+  if (typeof rowKey === 'function' || (typeof rowKey === 'string' && rowKey)) {
+    const identity = getRowIdentity(targetRow)
+    if (identity === undefined || identity === null) return -1
+    let matchedIndex = -1
+    for (let index = 0; index < sourceTableData.length; index += 1) {
+      if (!Object.is(getRowIdentity(sourceTableData[index]), identity)) continue
+      if (matchedIndex >= 0) return -1
+      matchedIndex = index
+    }
+    return matchedIndex
+  }
+
+  const referenceIndex = sourceTableData.indexOf(targetRow)
+  if (referenceIndex >= 0) return referenceIndex
+  return synchronousRowIndexes.get(targetRow) ?? -1
+}
+
+const updateRow = (targetRow: TableRow, _fallbackIndex: number, patch: Partial<TableRow>) => {
   const sourceTableData = synchronousUpdateBase || props.tableData
+  const rowIndex = resolveUpdateRowIndex(sourceTableData, targetRow)
+  if (rowIndex < 0) return
   const currentRow = sourceTableData[rowIndex]
   if (!currentRow) {
     return
@@ -124,6 +170,9 @@ const updateRow = (rowIndex: number, patch: Partial<TableRow>) => {
   const nextTableData = [...sourceTableData]
   nextTableData[rowIndex] = nextRow
   synchronousUpdateBase = nextTableData
+  synchronousRowIndexes.set(targetRow, rowIndex)
+  synchronousRowIndexes.set(currentRow, rowIndex)
+  synchronousRowIndexes.set(nextRow, rowIndex)
   scheduleUpdateBaseReset()
   emit('update:tableData', nextTableData)
 
@@ -137,7 +186,7 @@ const updateRow = (rowIndex: number, patch: Partial<TableRow>) => {
 }
 
 const updateApi: FormTableUpdateApi = {
-  setValue: (rowIndex, fieldKey, value) => updateRow(rowIndex, { [fieldKey]: value }),
+  setValue: (row, rowIndex, fieldKey, value) => updateRow(row, rowIndex, { [fieldKey]: value }),
   updateRow
 }
 

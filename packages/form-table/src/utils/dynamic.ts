@@ -1,8 +1,12 @@
 import type {
+  ColumnConfig,
   DynamicValue,
+  FormItemConfig,
+  FormTableColumnContext,
   FormTableFieldRenderContext,
   FormTableRowContext,
   FormTableTableContext,
+  RowConfig,
   TableRow
 } from '../types'
 import { getValueByPath } from './path'
@@ -13,26 +17,39 @@ export function createTableContext(
   return { tableData }
 }
 
-export function createRowContext(
+export function createColumnContext(
   tableContext: FormTableTableContext,
-  row: Readonly<TableRow>,
-  index: number
-): FormTableRowContext {
+  columnConfig: Readonly<ColumnConfig>
+): FormTableColumnContext {
   return {
     ...tableContext,
+    columnConfig
+  }
+}
+
+export function createRowContext(
+  columnContext: FormTableColumnContext,
+  row: Readonly<TableRow>,
+  index: number,
+  rowConfig: Readonly<RowConfig>
+): FormTableRowContext {
+  return {
+    ...columnContext,
     row,
-    index
+    index,
+    rowConfig
   }
 }
 
 export function createFieldRenderContext(
   rowContext: FormTableRowContext,
-  fieldKey: string
+  itemConfig: Readonly<FormItemConfig>
 ): FormTableFieldRenderContext {
   return {
     ...rowContext,
-    fieldKey,
-    value: getValueByPath(rowContext.row, fieldKey)
+    fieldKey: itemConfig.fieldKey,
+    value: getValueByPath(rowContext.row, itemConfig.fieldKey),
+    itemConfig
   }
 }
 

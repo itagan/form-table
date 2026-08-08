@@ -8,7 +8,10 @@
 | `/form-table-advanced` | 多行栅格、component.renderer、slot、动态 options、嵌套路径 |
 | `/remote-schema` | 远程纯 JSON 配置与页面本地组件、事件增强 |
 | `/dynamic-slot-test` | 动态显隐和 slot 更新助手 |
+| `/row-column-operations` | 行增删复制移动、动态列和业务处理后延迟提交 |
 | `/debug` | 自定义组件事件和原生 Ref |
 | `/form-table-docs` | 精简 API 速查 |
 
 Playground 直接引用包源码，修改组件后无需先构建 npm 包。
+
+常见行列操作和延迟提交的完整代码模式参考[行、列与延迟提交](../guide/row-column-operations.md)。

@@ -10,14 +10,20 @@ export interface FormTableTableContext {
   tableData: ReadonlyArray<TableRow>
 }
 
-export interface FormTableRowContext extends FormTableTableContext {
+export interface FormTableColumnContext extends FormTableTableContext {
+  columnConfig: Readonly<ColumnConfig>
+}
+
+export interface FormTableRowContext extends FormTableColumnContext {
   row: Readonly<TableRow>
   index: number
+  rowConfig: Readonly<RowConfig>
 }
 
 export interface FormTableFieldRenderContext extends FormTableRowContext {
   fieldKey: string
   value: FormTableValue
+  itemConfig: Readonly<FormItemConfig>
 }
 
 export interface FormTableFieldContext extends FormTableFieldRenderContext {
@@ -83,6 +89,8 @@ export type BuiltinFormItemType =
 export type FormItemType = BuiltinFormItemType | 'component' | 'slot'
 
 interface BaseFormItemConfig {
+  /** 字段渲染身份；动态增删、排序或重复 fieldKey 时建议提供。 */
+  key?: string
   /** 行数据字段路径，例如 `name`、`profile.city`。 */
   fieldKey: string
   visible?: DynamicValue<boolean, FormTableFieldRenderContext>
@@ -131,9 +139,9 @@ export interface ColumnConfig {
   /** el-table-column 的表头文本。 */
   label: string
   headerSlot?: string
-  visible?: DynamicValue<boolean, FormTableTableContext>
+  visible?: DynamicValue<boolean, FormTableColumnContext>
   /** 直接传给 el-table-column。 */
-  props?: DynamicValue<ComponentProps, FormTableTableContext>
+  props?: DynamicValue<ComponentProps, FormTableColumnContext>
   children: RowConfig[]
 }
 
@@ -166,8 +174,7 @@ export interface FormTableSlotContext extends FormTableFieldContext {
   component: ResolvedComponentConfig
 }
 
-export interface FormTableHeaderSlotContext extends FormTableTableContext {
-  column: Readonly<ColumnConfig>
+export interface FormTableHeaderSlotContext extends FormTableColumnContext {
   columnIndex: number
   label: string
 }
@@ -195,8 +202,8 @@ export interface FormTableExpose {
 }
 
 export interface FormTableUpdateApi {
-  setValue: (rowIndex: number, fieldKey: string, value: FormTableValue) => void
-  updateRow: (rowIndex: number, patch: Partial<TableRow>) => void
+  setValue: (row: TableRow, rowIndex: number, fieldKey: string, value: FormTableValue) => void
+  updateRow: (row: TableRow, rowIndex: number, patch: Partial<TableRow>) => void
 }
 
 export const FORM_TABLE_CONTEXT_KEY: unique symbol = Symbol('formTableContext')

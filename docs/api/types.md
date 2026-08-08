@@ -7,7 +7,7 @@
 - `FieldComponentConfig`、`BuiltinFormItemType`、`FormItemType`
 - `FormItemOption`、`OptionPropsConfig`、`ResolvedComponentConfig`
 - `TableRow`、`FormTableRecord`、`FormTableProps`
-- `FormTableTableContext`、`FormTableRowContext`、`FormTableFieldRenderContext`
+- `FormTableTableContext`、`FormTableColumnContext`、`FormTableRowContext`、`FormTableFieldRenderContext`
 - `FormTableFieldContext`、`FormTableSlotContext`
 - `FormTableFieldChangePayload`、`FormTableHeaderSlotContext`
 - `FormTableExpose`、`FormTableElementFormRef`、`FormTableElementTableRef`
@@ -22,6 +22,8 @@ type FormItemConfig =
   | ComponentFormItemConfig
   | SlotFormItemConfig
 ```
+
+三种 Item 都支持可选 `key` 作为稳定渲染身份，并要求 `fieldKey` 指向行数据路径。`key` 不参与取值、更新或表单校验路径计算。
 
 `type` 明确决定模式，`component.renderer` 的类型随模式收窄：
 
@@ -44,13 +46,15 @@ interface SlotFormItemConfig {
 动态配置上下文按层级收敛：
 
 ```text
-Column visible/props     → tableData
-Row visible/props        → tableData, row, index
-Field 动态配置           → tableData, row, index, fieldKey, value
+Column visible/props     → tableData, columnConfig
+Row visible/props        → Column 信息 + row, index, rowConfig
+Field 动态配置           → Row 信息 + fieldKey, value, itemConfig
 component.listeners      → Field 信息 + setValue, updateRow
 字段 slot                → Listener 信息 + propPath, component
 ```
 
-`row` 和 `tableData` 在回调类型中采用浅层只读约束；运行时不会冻结原对象。字段更新使用 `setValue` 或 `updateRow`。
+`FormTableSlotContext.itemConfig.component` 保留调用方传入的原始配置；`FormTableSlotContext.component` 的类型是 `ResolvedComponentConfig`，包含针对当前数据行解析并归一化后的 `props/listeners/options/optionProps`，用于直接绑定 Slot 内组件。
 
-表头 slot 接收 `tableData/label/columnIndex/column`。其中 `column` 类型为 `Readonly<ColumnConfig>`；`columnIndex` 是动态显隐过滤后的可见列下标，不保证等于原始 `columns` 数组下标。
+`row/tableData` 与 `columnConfig/rowConfig/itemConfig` 在回调类型中采用浅层只读约束；运行时不会冻结原对象。字段更新使用 `setValue` 或 `updateRow`，配置调整由调用方替换 `columns`。
+
+表头 slot 接收 `tableData/label/columnIndex/columnConfig`。`columnIndex` 是动态显隐过滤后的可见列下标，不保证等于原始 `columns` 数组下标。

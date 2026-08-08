@@ -9,9 +9,35 @@
 
 Element Table 的 `row-click`、`selection-change`、`sort-change` 等事件直接透传，参数与 Element UI 一致。
 
+事件回调与配置回调的参数边界：
+
+| 回调 | 收到的内容 | 是否包含配置上下文 |
+| --- | --- | --- |
+| `@update:tableData="handler"` | 更新后的 `TableRow[]` | 否 |
+| `@field-change="handler"` | `{ row, index, fieldKey, value, previousValue }` | 否 |
+| `component.listeners[event]` | `ActionContext, ...组件原始事件参数` | 是 |
+| Element Table 原生事件 | Element UI 原始事件参数 | 否 |
+
+```ts
+function handleFieldChange({ row, index, fieldKey, value, previousValue }) {
+  console.log('数据变化', row, index, fieldKey, previousValue, value)
+}
+```
+
 ## Slot 上下文
 
-字段 slot 接收：`row`、`index`、`fieldKey`、`propPath`、`value`、`tableData`、`setValue`、`updateRow`、`component`。其中 `component` 保持配置字段名称，包含解析后的 `renderer/props/listeners/options/optionProps`。
+字段 Slot 在 Item 上下文基础上增加更新能力和解析结果：
+
+| 内容 | 字段 |
+| --- | --- |
+| 数据定位 | `tableData`、`row`、`index`、`fieldKey`、`value` |
+| 原始配置 | `columnConfig`、`rowConfig`、`itemConfig` |
+| 更新能力 | `setValue`、`updateRow` |
+| Slot 专属 | `propPath`、`component` |
+
+其中 `itemConfig.component` 是原始配置，可能仍包含动态函数；`component` 是解析后的 `renderer/props/listeners/options/optionProps`。
+
+因此两者不是替代关系：`itemConfig` 用于读取当前字段的原始配置来源，`component` 用于在 Slot 模板中直接绑定。不要把 `itemConfig.component.props` 直接传给组件，因为它可能仍是一个动态函数。
 
 配置式组件事件保持组件原始参数顺序，并在最前面增加字段上下文：
 
@@ -32,9 +58,10 @@ component: {
 ```ts
 component: {
   listeners: {
-    change({ row, index, fieldKey, value, setValue, updateRow }, nextValue) {
+    change({ row, index, fieldKey, value, itemConfig, setValue, updateRow }, nextValue) {
       console.log('当前数据行', row)
       console.log('数据下标与字段', index, fieldKey)
+      console.log('事件来源配置', itemConfig.key)
       console.log('修改前字段值', value)
 
       setValue(nextValue)
@@ -44,7 +71,7 @@ component: {
 }
 ```
 
-`setValue` 与 `updateRow` 可以在同一同步回调中连续调用，后一次更新会基于前一次结果继续合并。跨异步边界后则始终以父组件最新传回的 `tableData` 为准。
+`setValue` 与 `updateRow` 可以在同一同步回调中连续调用，后一次更新会基于前一次结果继续合并。跨异步边界后始终以父组件最新传回的 `tableData` 为准；配置 `tableProps.rowKey` 后会重新定位触发事件的原数据行。目标行已删除或无法可靠定位时不会发出更新。
 
 ```vue
 <template #actions="{ row, index, updateRow, component }">
@@ -59,7 +86,9 @@ component: {
 
 `component.listeners` 中的函数已经自动注入字段上下文。Slot 内只有显式使用 `v-on="component.listeners"`，自定义组件发出的同名事件才会进入配置 listener；FormTable 不会替 Slot 自动绑定。
 
-`row` 和 `tableData` 是原数据的只读视图约定：TypeScript 提供浅层只读限制，运行时不会冻结对象。请勿直接赋值，统一使用更新助手。
+`row` 是当前业务数据行，`rowConfig` 是当前布局行配置。数据和三个 `*Config` 都是浅层只读约定，运行时不会冻结对象。请勿直接赋值：数据修改使用更新助手，配置调整由调用方替换 `columns`。异步回调中持有的是触发时配置引用，不保证异步结束后仍为最新配置。
+
+`field-change` 是纯数据事件，可能来自一次多字段 `updateRow`，也可能对应多个相同 `fieldKey` 的 Item，因此不返回 `columnConfig/rowConfig/itemConfig`。
 
 ## Ref
 

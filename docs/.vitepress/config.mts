@@ -17,7 +17,8 @@ export default defineConfig({
       {
         text: '指南',
         items: [
-          { text: '快速开始', link: '/guide/quick-start' }
+          { text: '快速开始', link: '/guide/quick-start' },
+          { text: '行、列与延迟提交', link: '/guide/row-column-operations' }
         ]
       },
       {

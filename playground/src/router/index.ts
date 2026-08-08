@@ -39,6 +39,11 @@ const router = new VueRouter({
       component: () => import('../views/DynamicSlotTestView.vue')
     },
     {
+      path: '/row-column-operations',
+      name: 'row-column-operations',
+      component: () => import('../views/RowColumnOperationsView.vue')
+    },
+    {
       path: '/debug',
       name: 'debug',
       component: () => import('../views/DebugView.vue')

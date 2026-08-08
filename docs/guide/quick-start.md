@@ -39,3 +39,5 @@ const columns: ColumnConfig[] = [{
 ```
 
 复杂布局、自定义组件和 slot 参考 Playground 的 `/form-table-advanced`。
+
+行增删、动态列以及确认或接口成功后再修改表格，参考[行、列与延迟提交](./row-column-operations.md)。

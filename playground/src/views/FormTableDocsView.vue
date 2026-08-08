@@ -60,7 +60,7 @@
               <td><code>key</code></td>
               <td>渲染标识</td>
               <td>可选；动态增删或重排列时建议提供。</td>
-              <td rowspan="6" class="context-cell"><code>tableData</code></td>
+              <td rowspan="6" class="context-cell"><code>tableData</code><br><code>columnConfig</code></td>
             </tr>
             <tr>
               <td><code>label</code></td>
@@ -75,7 +75,7 @@
             <tr>
               <td><code>headerSlot</code></td>
               <td>表头 scoped slot</td>
-              <td>接收 <code>label/column/columnIndex/tableData</code>；columnIndex 是显隐过滤后的可见列下标。</td>
+              <td>接收 <code>label/columnConfig/columnIndex/tableData</code>；columnIndex 是显隐过滤后的可见列下标。</td>
             </tr>
             <tr>
               <td><code>visible</code></td>
@@ -95,7 +95,7 @@
               <td><code>key</code></td>
               <td>渲染标识</td>
               <td>可选；同一列内有动态行布局时建议提供。</td>
-              <td rowspan="4" class="context-cell"><code>tableData</code><br><code>row</code><br><code>index</code></td>
+              <td rowspan="4" class="context-cell"><code>tableData</code><br><code>columnConfig</code><br><code>row</code><br><code>index</code><br><code>rowConfig</code></td>
             </tr>
             <tr>
               <td><code>props</code></td>
@@ -116,11 +116,16 @@
 
           <tbody class="layer-group">
             <tr>
-              <th rowspan="6" scope="rowgroup" class="layer-cell">Item</th>
+              <th rowspan="7" scope="rowgroup" class="layer-cell">Item</th>
+              <td><code>key</code></td>
+              <td>渲染标识</td>
+              <td>可选；动态增删、排序或重复 fieldKey 时建议提供。</td>
+              <td rowspan="7" class="context-cell"><code>tableData</code><br><code>columnConfig</code><br><code>row</code><br><code>index</code><br><code>rowConfig</code><br><code>fieldKey</code><br><code>value</code><br><code>itemConfig</code></td>
+            </tr>
+            <tr>
               <td><code>fieldKey</code></td>
               <td>行数据字段路径</td>
               <td>支持 <code>name</code>、<code>profile.city</code>、<code>items[0].name</code>。</td>
-              <td rowspan="6" class="context-cell"><code>tableData</code><br><code>row</code><br><code>index</code><br><code>fieldKey</code><br><code>value</code></td>
             </tr>
             <tr>
               <td><code>visible</code></td>
@@ -155,7 +160,7 @@
               <td><code>renderer</code></td>
               <td>渲染目标</td>
               <td>component 模式为组件对象/名称；slot 模式为具名 slot 名称。</td>
-              <td rowspan="4" class="context-cell"><code>tableData</code><br><code>row</code><br><code>index</code><br><code>fieldKey</code><br><code>value</code></td>
+              <td rowspan="4" class="context-cell"><code>Item 上下文</code><br><code>columnConfig</code><br><code>rowConfig</code><br><code>itemConfig</code></td>
             </tr>
             <tr>
               <td><code>props</code></td>
@@ -188,8 +193,46 @@
 
     <section>
       <h2>上下文回传示例</h2>
-      <p><code>row</code> 是当前数据行，<code>index</code> 是数据下标，<code>fieldKey</code> 是当前字段路径；不会返回完整的 Column、Row 或 Item 配置对象。</p>
+      <p>上下文分为业务数据、原始配置、更新能力和解析结果。<code>row</code> 沿用 Element UI 语义，表示当前业务数据行；<code>rowConfig</code> 才是布局配置。</p>
+      <div class="table-scroll">
+        <table class="context-summary">
+          <thead><tr><th>类别</th><th>字段</th><th>边界</th></tr></thead>
+          <tbody>
+            <tr><td>业务数据</td><td><code>tableData, row, index, fieldKey, value</code></td><td>用于读取当前数据位置</td></tr>
+            <tr><td>原始配置</td><td><code>columnConfig, rowConfig, itemConfig</code></td><td>浅只读的当前配置路径</td></tr>
+            <tr><td>更新能力</td><td><code>setValue, updateRow</code></td><td>listener 和字段 Slot 可用</td></tr>
+            <tr><td>解析结果</td><td><code>component, propPath</code></td><td>仅字段 Slot 可用</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><code>itemConfig.component</code> 可能仍包含动态函数；Slot 的 <code>component</code> 已根据当前数据行解析。配置动态调整时请基于稳定 key 替换 columns，不要直接修改上下文引用。</p>
+      <p><code>itemConfig.component</code> 用于读取原始配置来源，<code>component</code> 用于直接绑定 Slot 内组件。后者已解析动态 props/options，并包装 listeners；不要在 Slot 中自行执行原始配置函数。</p>
+
+      <h3>不同回调的上下文</h3>
+      <div class="table-scroll">
+        <table class="context-summary callback-table">
+          <thead><tr><th>回调</th><th>上下文</th><th>返回值</th></tr></thead>
+          <tbody>
+            <tr><td><code>column.visible / props</code></td><td><code>tableData, columnConfig</code></td><td>boolean / el-table-column props</td></tr>
+            <tr><td><code>rowConfig.visible / props</code></td><td>Column 上下文 + <code>row, index, rowConfig</code></td><td>boolean / el-row props</td></tr>
+            <tr><td><code>itemConfig.visible / colProps / formItemProps</code></td><td>Row 上下文 + <code>fieldKey, value, itemConfig</code></td><td>boolean / 对应 Element props</td></tr>
+            <tr><td><code>component.props / options / optionProps</code></td><td>Item 上下文</td><td>组件 props / 选项 / 字段映射</td></tr>
+            <tr><td><code>component.listeners[event]</code></td><td>Item 上下文 + <code>setValue, updateRow</code>，后接原始事件参数</td><td>无需返回</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <pre>{{ callbackContextExample }}</pre>
+
+      <h3>实际回传对象示例</h3>
+      <p>以下对象基于第 1 行的 <code>city</code> 字段。三个 <code>*Config</code> 是 columns 中的原始对象引用，<code>component</code> 是当前行解析结果。</p>
+      <pre>{{ returnedContextExample }}</pre>
+
+      <h3>组合使用示例</h3>
       <pre>{{ contextExample }}</pre>
+
+      <h3>异步更新与 rowKey</h3>
+      <p><code>rowKey</code> 是可选能力。普通同步输入、增删和保留对象引用的排序不需要配置；只有异步等待期间可能刷新、克隆或替换全部行对象时才建议提供。<code>index</code> 是事件触发时快照，更新助手会重新定位，目标行不存在时忽略更新。</p>
+      <pre>{{ asyncUpdateExample }}</pre>
     </section>
 
     <section>
@@ -213,6 +256,7 @@ const propsExample = `{
   children: [{
     props: { gutter: 8 },      // el-row
     children: [{
+      key: 'primary-name',       // 稳定渲染身份
       fieldKey: 'name',
       type: 'input',
       colProps: { span: 12 },  // el-col
@@ -230,25 +274,28 @@ const propsExample = `{
 
 const contextExample = `{
   label: '地区',
-  visible: ({ tableData }) => tableData.length > 0,
-  props: ({ tableData }) => ({ minWidth: tableData.length > 5 ? 360 : 280 }),
+  visible: ({ tableData, columnConfig }) => columnConfig.key !== 'hidden' && tableData.length > 0,
+  props: ({ tableData, columnConfig }) => ({
+    className: columnConfig.key,
+    minWidth: tableData.length > 5 ? 360 : 280
+  }),
   children: [{
-    visible: ({ row }) => row.hidden !== true,
-    props: ({ row, index }) => ({
+    visible: ({ row, rowConfig }) => rowConfig.key !== 'hidden' && row.hidden !== true,
+    props: ({ row, index, rowConfig }) => ({
       gutter: row.compact ? 4 : 12,
-      class: 'data-row-' + index
+      class: (rowConfig.key || 'data-row') + '-' + index
     }),
     children: [{
       fieldKey: 'city',
       type: 'select',
-      visible: ({ row, fieldKey, value }) => fieldKey === 'city' && Boolean(row.province) && value !== 'disabled',
+      visible: ({ row, fieldKey, value, itemConfig }) => itemConfig.key !== 'hidden' && fieldKey === 'city' && Boolean(row.province) && value !== 'disabled',
       colProps: ({ index }) => ({ span: index === 0 ? 12 : 8 }),
       component: {
         props: ({ row }) => ({ disabled: row.locked }),
         options: ({ row }) => cityOptions[row.province] || [],
         listeners: {
-          change({ row, index, fieldKey, value, setValue, updateRow }, nextValue) {
-            console.log('修改前', row, index, fieldKey, value)
+          change({ row, index, fieldKey, value, itemConfig, setValue, updateRow }, nextValue) {
+            console.log('修改前', row, index, fieldKey, value, itemConfig.key)
             setValue(nextValue)
             updateRow({ cityTouched: true })
           }
@@ -256,6 +303,103 @@ const contextExample = `{
       }
     }]
   }]
+}`
+
+const callbackContextExample = `// Column
+visible: ({ tableData, columnConfig }) => tableData.length > 0 && columnConfig.key !== 'hidden'
+
+// Row
+props: ({ row, index, rowConfig }) => ({
+  gutter: row.compact ? 4 : 12,
+  class: (rowConfig.key || 'row') + '-' + index
+})
+
+// Item / component dynamic config
+component: {
+  props: ({ row, value, itemConfig }) => ({
+    disabled: row.locked || value === 'disabled',
+    fieldId: itemConfig.key
+  }),
+  options: ({ row }) => cityOptions[row.province] || [],
+  listeners: {
+    change({ row, fieldKey, value, columnConfig, rowConfig, itemConfig, setValue }, nextValue) {
+      console.log(row, fieldKey, value)
+      console.log(columnConfig.key, rowConfig.key, itemConfig.key)
+      setValue(nextValue)
+    }
+  }
+}`
+
+const returnedContextExample = `// Column callback
+{
+  tableData,
+  columnConfig // { key: 'region-column', label: '地区', ... }
+}
+
+// Row callback
+{
+  tableData,
+  columnConfig,
+  row: tableData[0], // { id: 1, province: 'zhejiang', city: 'hangzhou' }
+  index: 0,
+  rowConfig // { key: 'region-row', children: [...] }
+}
+
+// Item dynamic callback
+{
+  tableData,
+  columnConfig,
+  row: tableData[0],
+  index: 0,
+  rowConfig,
+  fieldKey: 'city',
+  value: 'hangzhou',
+  itemConfig // { key: 'city-field', fieldKey: 'city', type: 'slot', ... }
+}
+
+// component listener first argument
+{
+  ...itemContext,
+  setValue: Function,
+  updateRow: Function
+}
+
+// Field Slot
+{
+  ...actionContext,
+  propPath: 'tableData.0.city',
+  component: {
+    renderer: 'city-editor',
+    props: { disabled: false },
+    listeners: {},
+    options: [{ label: '杭州', value: 'hangzhou' }],
+    optionProps: undefined
+  }
+}
+
+// Header Slot
+{
+  tableData,
+  columnConfig,
+  columnIndex: 0,
+  label: '地区'
+}`
+
+const asyncUpdateExample = `<FormTable
+  :table-data="tableData"
+  :columns="columns"
+  :table-props="{ rowKey: 'id', border: true }"
+/>
+
+component: {
+  listeners: {
+    async change({ row, index, setValue }, nextValue) {
+      console.log('触发时位置', row.id, index)
+      await saveCity(row.id, nextValue)
+      // 行重排后仍按 id 更新原数据行；已删除则忽略。
+      setValue(nextValue)
+    }
+  }
 }`
 
 const refExample = `await formTableRef.value?.validate()
@@ -271,6 +415,7 @@ pre { padding: 16px; overflow: auto; background: #f6f8fa; border-radius: 8px; }
 li { margin: 8px 0; }
 .table-scroll { overflow-x: auto; }
 table { min-width: 980px; width: 100%; border-collapse: collapse; font-size: 14px; }
+.context-summary { min-width: 760px; margin: 16px 0; }
 th, td { padding: 12px; border: 1px solid #e5e7eb; text-align: left; vertical-align: top; }
 th { background: #f6f8fa; white-space: nowrap; }
 .layer-group + .layer-group { border-top: 3px solid #cbd5e1; }
