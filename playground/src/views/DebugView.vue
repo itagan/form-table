@@ -2,7 +2,7 @@
   <main class="demo-page">
     <router-link to="/">← 返回</router-link>
     <h1>组件直传调试</h1>
-    <p>自定义组件对象直接写入 component.is，不再经过 customComponents 注册表。</p>
+    <p>使用 type: 'component' 和 component.renderer 直接传入组件对象，不经过业务注册表。</p>
 
     <section class="demo-card">
       <FormTable
@@ -39,8 +39,9 @@ const columns: ColumnConfig[] = [
     label: '手机',
     children: [{ children: [{
       fieldKey: 'phone',
+      type: 'component',
       component: {
-        is: PhoneInput,
+        renderer: PhoneInput,
         props: { size: 'small' },
         listeners: { change: ({ value }) => console.log('change', value) }
       }
@@ -50,8 +51,9 @@ const columns: ColumnConfig[] = [
     label: '状态展示',
     children: [{ children: [{
       fieldKey: 'status',
+      type: 'component',
       component: {
-        is: StatusTag,
+        renderer: StatusTag,
         props: {
           options: [
             { label: '启用', value: 'enabled', type: 'success' },

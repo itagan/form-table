@@ -11,22 +11,20 @@
         :table-props="{ border: true }"
         @update:tableData="tableData = $event"
       >
-        <template #score="{ value, setValue }">
-          <el-rate :value="value" @input="setValue" />
+        <template #score="{ value, setValue, component }">
+          <el-rate v-bind="component.props" :value="value" @input="setValue" />
         </template>
 
-        <template #detail="{ row, updateRow }">
+        <template #detail="{ row, updateRow, component }">
           <el-input
+            v-bind="component.props"
             :value="row.detail"
-            type="textarea"
-            :rows="2"
-            placeholder="仅在开启详情时显示"
             @input="updateRow({ detail: $event })"
           />
         </template>
 
-        <template #actions="{ index }">
-          <el-button type="text" @click="removeRow(index)">删除</el-button>
+        <template #actions="{ index, component }">
+          <el-button type="text" @click="removeRow(index)">{{ component.props.label }}</el-button>
         </template>
       </FormTable>
 
@@ -70,7 +68,16 @@ const columns: ColumnConfig[] = [
       {
         children: [{
           fieldKey: 'detail',
-          slot: 'detail',
+          type: 'slot',
+          component: {
+            renderer: 'detail',
+            props: ({ row }) => ({
+              type: 'textarea',
+              rows: 2,
+              disabled: row.locked === true,
+              placeholder: '仅在开启详情时显示'
+            })
+          },
           visible: ({ row }) => row.showDetail === true
         }]
       }
@@ -79,12 +86,20 @@ const columns: ColumnConfig[] = [
   {
     label: '评分',
     props: { width: 180 },
-    children: [{ children: [{ fieldKey: 'score', slot: 'score' }] }]
+    children: [{ children: [{
+      fieldKey: 'score',
+      type: 'slot',
+      component: { renderer: 'score', props: { showScore: true } }
+    }] }]
   },
   {
     label: '操作',
     props: { width: 90, align: 'center' },
-    children: [{ children: [{ fieldKey: '__actions', slot: 'actions' }] }]
+    children: [{ children: [{
+      fieldKey: '__actions',
+      type: 'slot',
+      component: { renderer: 'actions', props: { label: '删除' } }
+    }] }]
   }
 ]
 const columnsCode = formatFormTableConfig(columns)

@@ -93,90 +93,52 @@ describe('FormTable core behavior', () => {
   })
 
   it('renders a named slot and exposes focused update helpers', async () => {
+    const componentPropsResolver = vi.fn(({ row }: FormTableFieldRenderContext) => ({
+      suffix: row.school === '一中' ? '（当前）' : ''
+    }))
+    const slotListener = vi.fn()
     const wrapper = mountFormTable({
       tableData: [{ school: '一中' }],
       columns: [{
         label: '学校',
-        children: [{ children: [{ fieldKey: 'school', slot: 'school' }] }]
+        children: [{ children: [{
+          fieldKey: 'school',
+          type: 'slot',
+          component: {
+            renderer: 'school',
+            props: componentPropsResolver,
+            options: [{ label: '校区配置', value: 'campus' }],
+            listeners: { commit: slotListener }
+          }
+        }] }]
       }],
       scopedSlots: {
-        school: '<button type="button" class="slot-setter" @click="props.setValue(\'二中\')">{{ props.value }}</button>'
+        school: `<button
+          type="button"
+          class="slot-setter"
+          @click="props.setValue('二中'); props.component.listeners.commit('saved')"
+        >{{ props.value }}{{ props.component.props.suffix }}{{ props.component.options[0].label }}</button>`
       }
     })
     await wrapper.vm.$nextTick()
-    expect(wrapper.find('.slot-setter').text()).toBe('一中')
+    expect(wrapper.find('.slot-setter').text()).toBe('一中（当前）校区配置')
+    expect(componentPropsResolver).toHaveBeenCalledTimes(1)
+    expect(Object.keys(componentPropsResolver.mock.calls[0][0]).sort()).toEqual([
+      'fieldKey',
+      'index',
+      'row',
+      'tableData'
+    ])
     await wrapper.find('.slot-setter').trigger('click')
+    expect(slotListener).toHaveBeenCalledTimes(1)
+    expect(slotListener.mock.calls[0][0]).toMatchObject({
+      row: { school: '一中' },
+      fieldKey: 'school',
+      value: '一中'
+    })
+    expect(slotListener.mock.calls[0][1]).toBe('saved')
     expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{ school: '二中' }])
     wrapper.destroy()
-  })
-
-  it('uses deterministic slot > component > type priority for untyped configs', async () => {
-    const warning = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-    const ConflictingInput = {
-      render(this: any, h: any) {
-        return h('button', { class: 'component-winner' }, 'component')
-      }
-    }
-    const wrapper = mountFormTable({
-      columns: [{
-        label: '冲突配置',
-        children: [{
-          children: [{
-            fieldKey: 'name',
-            slot: 'winner',
-            component: { is: ConflictingInput },
-            type: 'input'
-          } as any]
-        }]
-      }],
-      scopedSlots: {
-        winner: '<strong class="slot-winner">{{ props.value }}</strong>'
-      }
-    })
-    await wrapper.vm.$nextTick()
-
-    expect(wrapper.find('.slot-winner').exists()).toBe(true)
-    expect(wrapper.find('.component-winner').exists()).toBe(false)
-    expect(wrapper.find('input').exists()).toBe(false)
-    expect(warning).toHaveBeenCalledTimes(1)
-    expect(warning.mock.calls[0][0]).toContain('slot > component > type')
-
-    wrapper.destroy()
-    warning.mockRestore()
-  })
-
-  it('lets a direct component win over type for untyped remote configs', async () => {
-    const warning = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-    const DirectInput = {
-      props: ['value'],
-      render(this: any, h: any) {
-        return h('button', { class: 'direct-component' }, this.value)
-      }
-    }
-    const wrapper = mountFormTable({
-      columns: [{
-        label: '组件优先',
-        children: [{
-          children: [{
-            fieldKey: 'name',
-            type: 'select',
-            component: {
-              is: DirectInput,
-              options: [{ label: '不应渲染', value: 'ignored' }]
-            }
-          } as any]
-        }]
-      }]
-    })
-    await wrapper.vm.$nextTick()
-
-    expect(wrapper.find('.direct-component').text()).toBe('Alice')
-    expect(wrapper.find('.el-select').exists()).toBe(false)
-    expect(wrapper.find('.el-option').exists()).toBe(false)
-    expect(warning).toHaveBeenCalledTimes(1)
-
-    wrapper.destroy()
-    warning.mockRestore()
   })
 
   it('renders the field value when an untyped config has no renderer', async () => {
@@ -212,8 +174,9 @@ describe('FormTable core behavior', () => {
         children: [{
           children: [{
             fieldKey: 'status',
+            type: 'component',
             component: {
-              is: StatusInput,
+              renderer: StatusInput,
               listeners: { commit: listener }
             }
           }]
@@ -250,7 +213,11 @@ describe('FormTable core behavior', () => {
       tableData: original,
       columns: [{
         label: '批量更新',
-        children: [{ children: [{ fieldKey: 'name', slot: 'batch-update' }] }]
+        children: [{ children: [{
+          fieldKey: 'name',
+          type: 'slot',
+          component: { renderer: 'batch-update' }
+        }] }]
       }],
       scopedSlots: {
         'batch-update': `

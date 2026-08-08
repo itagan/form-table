@@ -24,11 +24,16 @@ const columns: ColumnConfig[] = [{
       },
       {
         fieldKey: 'profile.city',
-        component: { is: CustomInput }
+        type: 'component',
+        component: { renderer: CustomInput }
       },
       {
         fieldKey: 'actions',
-        slot: 'actions'
+        type: 'slot',
+        component: {
+          renderer: 'actions',
+          props: ({ row }) => ({ disabled: Boolean(row.locked) })
+        }
       }
     ]
   }]
@@ -61,14 +66,16 @@ const invalid: ColumnConfig[] = [{
   }]
 }]
 
-const conflictingModes: ColumnConfig[] = [{
-  label: '互斥渲染模式',
+const invalidModes: ColumnConfig[] = [{
+  label: '渲染模式约束',
   children: [{
     children: [
-      // @ts-expect-error typed configs choose one renderer; runtime priority only guards untyped JSON/JS.
-      { fieldKey: 'name', type: 'input', component: { is: CustomInput } },
-      // @ts-expect-error slot cannot be combined with a type in typed configs.
-      { fieldKey: 'actions', slot: 'actions', type: 'text' }
+      // @ts-expect-error builtin modes resolve their own renderer.
+      { fieldKey: 'name', type: 'input', component: { renderer: CustomInput } },
+      // @ts-expect-error component mode requires component.renderer.
+      { fieldKey: 'custom', type: 'component', component: { props: {} } },
+      // @ts-expect-error slot renderer must be a string name.
+      { fieldKey: 'actions', type: 'slot', component: { renderer: CustomInput } }
     ]
   }]
 }]
@@ -86,6 +93,26 @@ const renamedItem: ColumnConfig = {
     children: [
       // @ts-expect-error FormItemConfig uses fieldKey; legacy key is not accepted.
       { key: 'name', type: 'input' }
+    ]
+  }]
+}
+
+const legacySlotString: ColumnConfig = {
+  label: '旧 slot 写法',
+  children: [{
+    children: [
+      // @ts-expect-error standalone slot field was replaced by type: 'slot' + component.renderer.
+      { fieldKey: 'actions', slot: 'actions' }
+    ]
+  }]
+}
+
+const legacyComponentIs: ColumnConfig = {
+  label: '旧组件写法',
+  children: [{
+    children: [
+      // @ts-expect-error component mode requires type: 'component' + component.renderer.
+      { fieldKey: 'custom', component: { is: CustomInput } }
     ]
   }]
 }
@@ -134,7 +161,9 @@ void named
 void plugin
 void useExpose
 void invalid
-void conflictingModes
+void invalidModes
 void renamedColumn
 void renamedItem
+void legacySlotString
+void legacyComponentIs
 void contextBoundaries

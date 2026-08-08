@@ -1,7 +1,9 @@
 export type {
+  BuiltinFormItemConfig,
+  BuiltinFormItemType,
   ColumnConfig,
   ComponentProps,
-  CustomComponentFormItemConfig,
+  ComponentFormItemConfig,
   DynamicValue,
   FieldComponentConfig,
   FormItemConfig,
@@ -21,8 +23,8 @@ export type {
   FormTableTableContext,
   FormTableValue,
   OptionPropsConfig,
+  ResolvedComponentConfig,
   RowConfig,
   SlotFormItemConfig,
-  TableRow,
-  TypeFormItemConfig
+  TableRow
 } from './types'

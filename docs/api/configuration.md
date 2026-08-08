@@ -38,18 +38,39 @@
 ```ts
 { fieldKey: 'name', type: 'input' }
 
-{ fieldKey: 'phone', component: { is: PhoneInput, props: {} } }
+{
+  fieldKey: 'phone',
+  type: 'component',
+  component: { renderer: PhoneInput, props: {} }
+}
 
-{ fieldKey: 'actions', slot: 'actions' }
+{
+  fieldKey: 'actions',
+  type: 'slot',
+  component: {
+    renderer: 'actions',
+    props: ({ row }) => ({ disabled: row.locked })
+  }
+}
 ```
 
-TypeScript 配置要求三种模式互斥。对于未经类型检查的 JavaScript 或远程 JSON 冲突配置，运行时采用固定优先级：
+`type` 是唯一渲染策略：
 
 ```text
-slot > component.is > type > 字段值展示
+input/select/...  → 内置 Element UI 映射
+component         → component.renderer 动态组件
+slot              → component.renderer 具名 slot
 ```
 
-开发环境只会对同一个冲突配置警告一次。`component` 仅包含 props/options/listeners、没有 `is` 时，仍然是 `type` 模式的组件参数，不算模式冲突。
+三种模式共用 `component.props/options/optionProps/listeners`。slot 模式通过上下文返回同名的解析后 `component`，FormTable 不主动绑定：
+
+```vue
+<template #actions="{ row, component, updateRow }">
+  <el-button v-bind="component.props" @click="updateRow({ enabled: !row.enabled })">
+    切换
+  </el-button>
+</template>
+```
 
 `component.options` 与 `component.optionProps` 用于 select/radio/checkbox；它们和各层 props 都支持函数写法。
 
@@ -75,8 +96,9 @@ const columns = enhanceFormTableColumns(remoteColumns, {
     const { type, component, ...layout } = item
     return {
       ...layout,
+      type: 'component',
       component: {
-        is: PhoneInput,
+        renderer: PhoneInput,
         props: component?.props,
         listeners: {
           change(context, value) {

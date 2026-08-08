@@ -12,7 +12,7 @@ const examples = [
     description: '集中演示多行栅格、直接组件、动态 options、嵌套路径和 slot。',
     path: '/form-table-advanced',
     type: 'success',
-    tags: ['slot', 'component.is', 'dynamic']
+    tags: ['slot', 'component.renderer', 'dynamic']
   },
   {
     title: '动态插槽',
@@ -40,7 +40,7 @@ const examples = [
     description: '用于验证自定义组件对象直传、事件和原生 Ref。',
     path: '/debug',
     type: 'danger',
-    tags: ['debug', 'component.is', 'native ref']
+    tags: ['debug', 'component.renderer', 'native ref']
   }
 ]
 </script>

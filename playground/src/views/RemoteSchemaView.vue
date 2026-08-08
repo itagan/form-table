@@ -10,9 +10,9 @@
       :form-props="{ size: 'small' }"
       :table-props="{ border: true }"
     >
-      <template #actions="{ row, updateRow }">
+      <template #actions="{ row, updateRow, component }">
         <el-button type="text" @click="updateRow({ enabled: !row.enabled })">
-          {{ row.enabled ? '停用' : '启用' }}
+          {{ row.enabled ? component.props.activeLabel : component.props.inactiveLabel }}
         </el-button>
       </template>
     </FormTable>
@@ -65,7 +65,11 @@ const remoteSchemaJson = `[
           },
           {
             "fieldKey": "actions",
-            "slot": "actions",
+            "type": "slot",
+            "component": {
+              "renderer": "actions",
+              "props": { "activeLabel": "停用", "inactiveLabel": "启用" }
+            },
             "colProps": { "span": 5 }
           }
         ]
@@ -80,8 +84,9 @@ const columns = enhanceFormTableColumns(remoteColumns, {
     const { type: _remoteFallback, component: remoteComponent, ...layout } = item as any
     return {
       ...layout,
+      type: 'component',
       component: {
-        is: PhoneInput,
+        renderer: PhoneInput,
         props: remoteComponent?.props,
         listeners: {
           change(context, value) {

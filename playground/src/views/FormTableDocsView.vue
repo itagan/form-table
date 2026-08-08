@@ -7,10 +7,9 @@
       <h2>核心边界</h2>
       <ul>
         <li><code>children</code> 描述 Column → Row → Item 布局。</li>
-        <li><code>type</code> 提供 Element UI 常用组件快捷映射。</li>
-        <li><code>component.is</code> 直接接收自定义组件。</li>
-        <li><code>slot</code> 提供完全自定义渲染。</li>
-        <li>非类型化冲突固定按 <code>slot &gt; component.is &gt; type &gt; 字段值展示</code> 处理。</li>
+        <li><code>type</code> 是唯一渲染策略：内置别名、component 或 slot。</li>
+        <li><code>component.renderer</code> 指向动态组件或具名 slot。</li>
+        <li><code>component.props/listeners/options</code> 是三种模式共用的配置。</li>
         <li>行增删、复制和字段联动由业务层维护。</li>
       </ul>
     </section>
@@ -117,11 +116,11 @@
 
           <tbody class="layer-group">
             <tr>
-              <th rowspan="7" scope="rowgroup" class="layer-cell">Item</th>
+              <th rowspan="6" scope="rowgroup" class="layer-cell">Item</th>
               <td><code>fieldKey</code></td>
               <td>行数据字段路径</td>
               <td>支持 <code>name</code>、<code>profile.city</code>、<code>items[0].name</code>。</td>
-              <td rowspan="7" class="context-cell"><code>tableData</code><br><code>row</code><br><code>index</code><br><code>fieldKey</code></td>
+              <td rowspan="6" class="context-cell"><code>tableData</code><br><code>row</code><br><code>index</code><br><code>fieldKey</code></td>
             </tr>
             <tr>
               <td><code>visible</code></td>
@@ -140,27 +139,22 @@
             </tr>
             <tr>
               <td><code>type</code></td>
-              <td>内置组件快捷映射</td>
-              <td>如 input、select、date、switch；与 component.is、slot 三选一。</td>
+              <td>字段渲染策略</td>
+              <td>内置别名，或明确使用 <code>component</code>、<code>slot</code>。</td>
             </tr>
             <tr>
               <td><code>component</code></td>
-              <td>字段组件配置</td>
-              <td>配置直接组件、属性、事件和选项。</td>
-            </tr>
-            <tr>
-              <td><code>slot</code></td>
-              <td>字段 scoped slot</td>
-              <td>完全接管字段内容，仍保留 el-col 和 el-form-item。</td>
+              <td>统一渲染配置</td>
+              <td>配置 renderer、属性、事件和选项；slot 模式通过同名 <code>component</code> 上下文返回。</td>
             </tr>
           </tbody>
 
           <tbody class="layer-group">
             <tr>
               <th rowspan="5" scope="rowgroup" class="layer-cell">Component</th>
-              <td><code>is</code></td>
-              <td>实际组件</td>
-              <td>组件对象或已注册的组件名称；省略时使用 type 映射。</td>
+              <td><code>renderer</code></td>
+              <td>渲染目标</td>
+              <td>component 模式为组件对象/名称；slot 模式为具名 slot 名称。</td>
               <td rowspan="4" class="context-cell"><code>tableData</code><br><code>row</code><br><code>index</code><br><code>fieldKey</code></td>
             </tr>
             <tr>

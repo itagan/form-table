@@ -25,18 +25,18 @@
           </el-tooltip>
         </template>
 
-        <template #status="{ value }">
-          <el-tag :type="value === 'enabled' ? 'success' : 'info'">
+        <template #status="{ value, component }">
+          <el-tag v-bind="component.props">
             {{ value === 'enabled' ? '启用' : '停用' }}
           </el-tag>
         </template>
 
-        <template #actions="{ row, index, updateRow }">
-          <el-button type="text" @click="updateRow({ status: row.status === 'enabled' ? 'disabled' : 'enabled' })">
+        <template #actions="{ row, index, updateRow, component }">
+          <el-button v-bind="component.props" @click="updateRow({ status: row.status === 'enabled' ? 'disabled' : 'enabled' })">
             切换状态
           </el-button>
-          <el-button type="text" @click="copyRow(row, index)">复制</el-button>
-          <el-button type="text" class="danger" @click="removeRow(index)">删除</el-button>
+          <el-button v-bind="component.props" @click="copyRow(row, index)">复制</el-button>
+          <el-button v-bind="component.props" class="danger" @click="removeRow(index)">删除</el-button>
         </template>
       </FormTable>
 
@@ -102,10 +102,11 @@ const columns: ColumnConfig[] = [
           },
           {
             fieldKey: 'phone',
+            type: 'component',
             colProps: { span: 16 },
             formItemProps: { label: '手机', labelWidth: '52px' },
             component: {
-              is: PhoneInput,
+              renderer: PhoneInput,
               props: { size: 'small', clearable: true },
               listeners: { change: ({ value }) => console.log('phone changed', value) }
             }
@@ -148,12 +149,23 @@ const columns: ColumnConfig[] = [
   {
     label: '状态',
     props: { width: 90, align: 'center' },
-    children: [{ children: [{ fieldKey: 'status', slot: 'status' }] }]
+    children: [{ children: [{
+      fieldKey: 'status',
+      type: 'slot',
+      component: {
+        renderer: 'status',
+        props: ({ row }) => ({ type: row.status === 'enabled' ? 'success' : 'info' })
+      }
+    }] }]
   },
   {
     label: '操作',
     props: { width: 210, fixed: 'right', align: 'center' },
-    children: [{ children: [{ fieldKey: '__actions', slot: 'actions' }] }]
+    children: [{ children: [{
+      fieldKey: '__actions',
+      type: 'slot',
+      component: { renderer: 'actions', props: { type: 'text' } }
+    }] }]
   }
 ]
 const columnsCode = formatFormTableConfig(columns)

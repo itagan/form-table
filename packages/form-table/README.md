@@ -25,13 +25,13 @@ const columns = [{
 }]
 ```
 
-三种字段渲染模式：
+字段通过 `type` 明确选择渲染模式：
 
 - `type: 'input'`：常用 Element UI 组件快捷映射。
-- `component: { is: CustomInput }`：直接传入自定义组件。
-- `slot: 'actions'`：完全自定义 scoped slot。
+- `type: 'component' + component.renderer`：直接传入自定义组件。
+- `type: 'slot' + component.renderer`：完全自定义 scoped slot。
 
-TypeScript 下三种渲染模式互斥；普通 JavaScript 或远程 JSON 如果出现冲突，固定按 `slot > component.is > type > 字段值展示` 处理，并在开发环境对该配置警告一次。只有 `component.props/options/listeners`、没有 `component.is` 时仍属于 type 模式。
+`component.props/listeners/options/optionProps` 是三种模式共用的渲染配置。slot 模式会把解析后的 `component` 通过上下文返回，由模板自行绑定。
 
 ## 使用
 
@@ -45,8 +45,8 @@ TypeScript 下三种渲染模式互斥；普通 JavaScript 或远程 JSON 如果
   @field-change="handleFieldChange"
   @selection-change="handleSelectionChange"
 >
-  <template #actions="{ row, index, updateRow }">
-    <el-button @click="updateRow({ enabled: !row.enabled })">切换</el-button>
+  <template #actions="{ row, index, updateRow, component }">
+    <el-button v-bind="component.props" @click="updateRow({ enabled: !row.enabled })">切换</el-button>
     <el-button @click="removeRow(index)">删除</el-button>
   </template>
 </FormTable>
@@ -56,6 +56,6 @@ Table 原生事件直接透传。通过 ref 可调用 `validate()`、`resetField
 
 表头必填标记等展示使用 `headerSlot` 明确渲染；字段是否必填只由 `formItemProps.rules` 决定。
 
-动态配置只获得当前层级有意义的上下文：Column 为 `tableData`，Row 增加 `row/index`，Field 增加 `fieldKey`。组件 listener 额外获得 `value/setValue/updateRow`，不再回传占位字段。
+动态配置只获得当前层级有意义的上下文：Column 为 `tableData`，Row 增加 `row/index`，Field 增加 `fieldKey`。组件 listener 额外获得 `value/setValue/updateRow`；slot 上下文再提供 `propPath/component`，不再回传占位字段。
 
 远程 schema 建议只返回布局、`type`、静态 props/options 等 JSON；组件对象、事件函数与 slot 实现由页面按 `fieldKey` 本地增强。核心不执行远程代码，也不维护业务组件注册表。

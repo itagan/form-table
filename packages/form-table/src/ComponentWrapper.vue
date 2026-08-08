@@ -1,5 +1,5 @@
 <template>
-  <span v-if="renderMode === 'type' && config.type === 'text'">{{ value }}</span>
+  <span v-if="config.type === 'text'">{{ value }}</span>
 
   <component
     v-else-if="isSelectLike"
@@ -18,7 +18,7 @@
   </component>
 
   <component
-    v-else-if="renderMode === 'type' && config.type === 'radio'"
+    v-else-if="config.type === 'radio'"
     :is="resolvedComponent"
     v-model="modelValue"
     v-bind="componentProps"
@@ -35,7 +35,7 @@
   </component>
 
   <component
-    v-else-if="renderMode === 'type' && config.type === 'checkbox'"
+    v-else-if="config.type === 'checkbox'"
     :is="resolvedComponent"
     v-model="modelValue"
     v-bind="componentProps"
@@ -64,6 +64,7 @@
 import { computed, inject, type ComputedRef } from 'vue'
 import { getComponentType, getRequiredProps } from './configs/defaultComponentConfigs'
 import type {
+  BuiltinFormItemType,
   FormItemConfig,
   FormItemOption,
   FormTableTableContext,
@@ -85,13 +86,11 @@ import {
   resolveDynamicValue
 } from './utils/dynamic'
 import { getValueByPath } from './utils/path'
-import type { FieldRenderMode } from './utils/renderMode'
 
 const props = defineProps<{
   row: TableRow
   rowIndex: number
   config: FormItemConfig
-  renderMode: FieldRenderMode
 }>()
 
 const formTableContext = inject<ComputedRef<FormTableTableContext>>(
@@ -103,12 +102,17 @@ const runtimeContext = computed(() => createFieldRenderContext(
   createRowContext(formTableContext.value, props.row, props.rowIndex),
   props.config.fieldKey
 ))
+const builtinType = computed<BuiltinFormItemType | null>(() => {
+  return props.config.type === 'component' || props.config.type === 'slot'
+    ? null
+    : props.config.type
+})
 const resolvedComponent = computed(() => {
-  if (props.renderMode === 'component') return props.config.component?.is || 'span'
-  return props.config.type ? getComponentType(props.config.type) : 'span'
+  if (props.config.type === 'component') return props.config.component.renderer
+  return builtinType.value ? getComponentType(builtinType.value) : 'span'
 })
 const componentProps = computed(() => ({
-  ...(props.renderMode === 'type' && props.config.type ? getRequiredProps(props.config.type) : {}),
+  ...(builtinType.value ? getRequiredProps(builtinType.value) : {}),
   ...(resolveDynamicValue(props.config.component?.props, runtimeContext.value) || {})
 }))
 const options = computed<FormItemOption[]>(() => {
@@ -137,7 +141,5 @@ const modelValue = computed({
   get: () => value.value,
   set: setValue
 })
-const isSelectLike = computed(() => props.renderMode === 'type' && (
-  props.config.type === 'select' || props.config.type === 'tag-input'
-))
+const isSelectLike = computed(() => props.config.type === 'select' || props.config.type === 'tag-input')
 </script>
