@@ -20,6 +20,7 @@ export function createTableContext(
   return { tableData }
 }
 
+/** 在表级上下文上附加当前列配置。 */
 export function createColumnContext(
   tableContext: FormTableTableContext,
   columnConfig: Readonly<ColumnConfig>
@@ -30,6 +31,7 @@ export function createColumnContext(
   }
 }
 
+/** 在列级上下文上附加当前数据行、下标和布局行配置。 */
 export function createRowContext(
   columnContext: FormTableColumnContext,
   row: Readonly<TableRow>,
@@ -44,6 +46,7 @@ export function createRowContext(
   }
 }
 
+/** 在行级上下文上读取字段值并附加当前字段配置。 */
 export function createFieldRenderContext(
   rowContext: FormTableRowContext,
   itemConfig: Readonly<FormItemConfig>
@@ -56,6 +59,7 @@ export function createFieldRenderContext(
   }
 }
 
+/** 统一求值静态配置和基于上下文的动态配置函数。 */
 export function resolveDynamicValue<T, Context>(
   value: DynamicValue<T, Context> | undefined,
   context: Context

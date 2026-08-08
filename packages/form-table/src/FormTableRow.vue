@@ -30,6 +30,7 @@ import {
   resolveVisible
 } from './utils/dynamic'
 
+/** 当前数据行、布局行配置以及上级已解析的列上下文。 */
 const props = defineProps<{
   row: TableRow
   rowIndex: number
@@ -37,13 +38,18 @@ const props = defineProps<{
   rowConfig: RowConfig
 }>()
 
+/** 为当前数据行补充真实表格下标和布局配置。 */
 const rowContext = computed<FormTableRowContext>(() => createRowContext(
   props.columnContext,
   props.row,
   props.rowIndex,
   props.rowConfig
 ))
+
+/** 控制整个布局行是否渲染。 */
 const isVisible = computed(() => resolveVisible(props.rowConfig.visible, rowContext.value))
+
+/** 解析透传给 el-row 的静态或动态属性。 */
 const rowProps = computed(() => resolveDynamicValue(props.rowConfig.props, rowContext.value) || {})
 
 // 在一次遍历中完成显隐过滤和栅格属性解析，模板不再重复执行动态回调。

@@ -35,10 +35,12 @@ const typeRequiredProps: Partial<Record<BuiltinFormItemType, ComponentProps>> = 
   }
 }
 
+/** 将公开的内置字段类型转换为实际 Vue 组件名称。 */
 export function getComponentType(type: BuiltinFormItemType) {
   return componentTypeMap[type]
 }
 
+/** 获取某个类型别名正常工作所需的最小默认属性。 */
 export function getRequiredProps(type: BuiltinFormItemType) {
   return typeRequiredProps[type] || {}
 }

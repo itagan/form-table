@@ -44,25 +44,39 @@ import {
   resolveDynamicValue
 } from './utils/dynamic'
 
+/** 当前字段配置及其所在行的完整动态上下文。 */
 const props = defineProps<{
   rowContext: FormTableRowContext
   config: FormItemConfig
 }>()
 
+/** 根组件下发的数据更新入口。缺失时字段仍可展示，但不会写回数据。 */
 const updateApi = inject<FormTableUpdateApi>(FORM_TABLE_UPDATE_KEY)
+
+/** 父组件具名插槽集合，用于 type="slot" 字段。 */
 const parentSlots = inject<FormTableSlots>(FORM_TABLE_SLOTS_KEY, {})
+
+/** Element UI 表单校验要求的完整模型路径。 */
 const propPath = computed(() => `tableData.${props.rowContext.index}.${props.config.fieldKey}`)
+
+/** 在行上下文上补充字段路径、字段值和字段配置。 */
 const runtimeContext = computed(() => createFieldRenderContext(
   props.rowContext,
   props.config
 ))
+
+/** 合并用户 formItemProps，并强制使用与表单模型一致的 prop。 */
 const resolvedFormItemProps = computed(() => ({
   ...(resolveDynamicValue(props.config.formItemProps, runtimeContext.value) || {}),
   prop: propPath.value
 }))
+
+/** 仅 slot 模式按 renderer 名称查找插槽；未找到时返回 null。 */
 const slotFn = computed(() => props.config.type === 'slot'
   ? parentSlots[props.config.component.renderer] || null
   : null)
+
+/** 在只读渲染上下文上增加安全的数据更新方法，供监听器和插槽使用。 */
 const fieldContext = computed<FormTableFieldContext>(() => {
   const targetRow = props.rowContext.row as TableRow
   const targetFieldKey = props.config.fieldKey
@@ -74,6 +88,7 @@ const fieldContext = computed<FormTableFieldContext>(() => {
   }
 })
 
+/** 内置类型用于查找默认 Element UI 组件；component/slot 使用配置的 renderer。 */
 const builtinType = computed<BuiltinFormItemType | null>(() => {
   return props.config.type === 'component' || props.config.type === 'slot'
     ? null
@@ -102,6 +117,8 @@ const resolvedComponent = computed<ResolvedComponentConfig>(() => {
     optionProps: resolveDynamicValue(component?.optionProps, runtimeContext.value) as OptionPropsConfig | undefined
   }
 })
+
+/** 插槽上下文额外暴露校验路径和已经解析完成的组件配置。 */
 const slotContext = computed<FormTableSlotContext>(() => ({
   ...fieldContext.value,
   propPath: propPath.value,

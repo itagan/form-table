@@ -46,6 +46,7 @@ import {
 import { createColumnContext, createTableContext, resolveVisible } from './utils/dynamic'
 import { getValueByPath, setValueByPath } from './utils/path'
 
+/** FormTable 对外接收的受控数据、列配置以及 Element UI 透传属性。 */
 const props = withDefaults(defineProps<{
   tableData: TableRow[]
   columns: ColumnConfig[]
@@ -60,13 +61,17 @@ const props = withDefaults(defineProps<{
   loading: false
 })
 
+/** 数据更新和字段粒度变更是组件自身负责派发的两个业务事件。 */
 const emit = defineEmits<{
   (event: 'update:tableData', data: TableRow[]): void
   (event: 'field-change', payload: FormTableFieldChangePayload): void
 }>()
 
+/** 暴露给父组件的 Element UI 原始实例引用。 */
 const formRef = ref<FormTableElementFormRef | null>(null)
 const tableRef = ref<FormTableElementTableRef | null>(null)
+
+/** 保存父组件插槽和 Vue 2 组件实例，供后代组件及事件透传使用。 */
 const slots = useSlots()
 const instance = getCurrentInstance()
 
@@ -81,7 +86,10 @@ const tableListeners = computed(() => {
   }, {})
 })
 
+/** el-form 的校验模型；字段 prop 均以 tableData.{rowIndex}.{fieldKey} 开头。 */
 const formModel = computed(() => ({ tableData: props.tableData }))
+
+/** 向列、行、字段组件提供的响应式表级上下文。 */
 const formTableContext = computed<FormTableTableContext>(() => createTableContext(props.tableData))
 
 // 列显隐回调共享同一个表级上下文，避免为每列重复创建 tableContext。
@@ -95,9 +103,12 @@ const visibleColumns = computed(() => {
 // 同一同步调用链中的多次更新必须基于上一次已发出的结果继续计算。
 // 微任务结束后重新以受控 props 为准，避免父组件未接收更新时长期保留内部状态。
 let synchronousUpdateBase: TableRow[] | null = null
+/** 记录同一更新链中新旧行对象对应的下标，用于连续 setValue/updateRow。 */
 const synchronousRowIndexes = new Map<TableRow, number>()
+/** 防止同一个同步调用链重复安排清理微任务。 */
 let updateBaseResetPending = false
 
+/** 在当前调用栈结束后清空临时更新基线，重新以受控 props 为准。 */
 const scheduleUpdateBaseReset = () => {
   if (updateBaseResetPending) return
   updateBaseResetPending = true
@@ -108,6 +119,7 @@ const scheduleUpdateBaseReset = () => {
   })
 }
 
+/** 按 el-table 的 rowKey 配置读取稳定行身份。 */
 const getRowIdentity = (row: TableRow) => {
   const rowKey = props.tableProps?.rowKey
   if (typeof rowKey === 'function') return rowKey(row)
@@ -190,15 +202,21 @@ const updateRow = (targetRow: TableRow, patch: Partial<TableRow>) => {
   })
 }
 
+/** 通过 provide 下发的最小更新能力，后代组件无需感知 emit 和同步合并细节。 */
 const updateApi: FormTableUpdateApi = {
   setValue: (row, fieldKey, value) => updateRow(row, { [fieldKey]: value }),
   updateRow
 }
 
+/** 后代组件共享表数据、更新入口和父级插槽，避免逐层透传无关参数。 */
 provide(FORM_TABLE_CONTEXT_KEY, formTableContext)
 provide(FORM_TABLE_UPDATE_KEY, updateApi)
 provide(FORM_TABLE_SLOTS_KEY, slots as FormTableSlots)
 
+/**
+ * 将 Element UI 的 Promise/callback 两种校验方式统一为 Promise<boolean>，
+ * 校验失败时保留 fields 并传给可选回调。
+ */
 const validate = async (callback?: (valid: boolean, fields?: FormTableValue) => void) => {
   try {
     const valid = Boolean(await formRef.value?.validate?.())
@@ -210,6 +228,7 @@ const validate = async (callback?: (valid: boolean, fields?: FormTableValue) => 
   }
 }
 
+/** 对外只暴露稳定方法，避免父组件依赖 setup 内部状态。 */
 defineExpose({
   validate,
   resetFields: () => formRef.value?.resetFields?.(),

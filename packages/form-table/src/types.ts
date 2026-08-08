@@ -1,9 +1,13 @@
 import type { Component } from 'vue'
 
+/** 表格字段允许承载的任意业务值。 */
 export type FormTableValue = any
+/** FormTable 使用的通用键值对象。 */
 export type FormTableRecord = Record<string, FormTableValue>
+/** 透传给 Vue/Element UI 组件的属性集合。 */
 export type ComponentProps = Record<string, FormTableValue>
 
+/** 单条表格行数据。 */
 export interface TableRow extends FormTableRecord {}
 
 export interface FormTableTableContext {
@@ -41,12 +45,15 @@ export interface FormTableFieldContext extends FormTableFieldRenderContext {
   updateRow: (patch: Partial<TableRow>) => void
 }
 
+/** 支持直接值或根据运行时上下文计算的动态值。 */
 export type DynamicValue<T, Context> = T | ((context: Context) => T)
+/** 字段组件事件监听器签名，第一个参数固定为字段上下文。 */
 export type FormTableFieldListener = (
   context: FormTableFieldContext,
   ...args: unknown[]
 ) => void
 
+/** select、radio、checkbox 等选项型组件的单个选项。 */
 export interface FormItemOption {
   label?: FormTableValue
   value?: FormTableValue
@@ -54,6 +61,7 @@ export interface FormItemOption {
   [key: string]: FormTableValue
 }
 
+/** 将自定义选项对象字段映射到组件所需的标准语义。 */
 export interface OptionPropsConfig {
   label?: string
   value?: string
@@ -68,10 +76,15 @@ export interface OptionPropsConfig {
  * 其余配置只描述实际字段组件，不承载布局、校验或业务行为。
  */
 export interface FieldComponentConfig {
+  /** component 模式为组件；slot 模式为具名插槽名称。 */
   renderer?: string | Component
+  /** 传给字段组件的属性。 */
   props?: DynamicValue<ComponentProps, FormTableFieldRenderContext>
+  /** 字段组件事件及其业务处理器。 */
   listeners?: Record<string, FormTableFieldListener>
+  /** 选项型组件使用的数据源。 */
   options?: DynamicValue<FormItemOption[], FormTableFieldRenderContext>
+  /** 自定义选项字段映射。 */
   optionProps?: DynamicValue<OptionPropsConfig, FormTableFieldRenderContext>
 }
 
@@ -96,8 +109,10 @@ export type BuiltinFormItemType =
   | 'autocomplete'
   | 'tag-input'
 
+/** 字段支持的全部渲染模式。 */
 export type FormItemType = BuiltinFormItemType | 'component' | 'slot'
 
+/** 所有字段配置共享的身份、数据路径、显隐、布局和校验属性。 */
 interface BaseFormItemConfig {
   /** 字段渲染身份；动态增删、排序或重复 fieldKey 时建议提供。 */
   key?: string
@@ -110,6 +125,7 @@ interface BaseFormItemConfig {
   formItemProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext>
 }
 
+/** 使用内置 type 映射渲染的字段配置。 */
 export interface BuiltinFormItemConfig extends BaseFormItemConfig {
   type: BuiltinFormItemType
   component?: FieldComponentConfig & {
@@ -117,6 +133,7 @@ export interface BuiltinFormItemConfig extends BaseFormItemConfig {
   }
 }
 
+/** 使用调用方提供的 Vue 组件渲染的字段配置。 */
 export interface ComponentFormItemConfig extends BaseFormItemConfig {
   type: 'component'
   component: FieldComponentConfig & {
@@ -124,6 +141,7 @@ export interface ComponentFormItemConfig extends BaseFormItemConfig {
   }
 }
 
+/** 使用父组件具名插槽渲染的字段配置。 */
 export interface SlotFormItemConfig extends BaseFormItemConfig {
   type: 'slot'
   component: FieldComponentConfig & {
@@ -131,30 +149,41 @@ export interface SlotFormItemConfig extends BaseFormItemConfig {
   }
 }
 
+/** 通过可辨识联合约束不同渲染模式的 renderer 配置。 */
 export type FormItemConfig =
   | BuiltinFormItemConfig
   | ComponentFormItemConfig
   | SlotFormItemConfig
 
+/** 单个 el-row 布局配置，可包含多个字段。 */
 export interface RowConfig {
+  /** 布局行的稳定渲染身份。 */
   key?: string
+  /** 静态或动态显隐配置。 */
   visible?: DynamicValue<boolean, FormTableRowContext>
   /** 直接传给 el-row。 */
   props?: DynamicValue<ComponentProps, FormTableRowContext>
+  /** 当前布局行包含的字段配置。 */
   children: FormItemConfig[]
 }
 
+/** 单个 el-table-column 配置，可包含多个布局行。 */
 export interface ColumnConfig {
+  /** 列的稳定渲染身份。 */
   key?: string
   /** el-table-column 的表头文本。 */
   label: string
+  /** 自定义表头使用的父组件具名插槽。 */
   headerSlot?: string
+  /** 静态或动态显隐配置。 */
   visible?: DynamicValue<boolean, FormTableColumnContext>
   /** 直接传给 el-table-column。 */
   props?: DynamicValue<ComponentProps, FormTableColumnContext>
+  /** 当前列内的布局行配置。 */
   children: RowConfig[]
 }
 
+/** FormTable 组件的公开 props 类型。 */
 export interface FormTableProps {
   tableData: TableRow[]
   columns: ColumnConfig[]
@@ -163,6 +192,7 @@ export interface FormTableProps {
   loading?: boolean
 }
 
+/** field-change 事件载荷，包含新旧值和更新后的行。 */
 export interface FormTableFieldChangePayload {
   row: TableRow
   index: number
@@ -171,6 +201,7 @@ export interface FormTableFieldChangePayload {
   previousValue: FormTableValue
 }
 
+/** 动态配置求值后交给渲染层和插槽使用的组件配置。 */
 export interface ResolvedComponentConfig {
   renderer?: string | Component
   props: ComponentProps
@@ -179,19 +210,24 @@ export interface ResolvedComponentConfig {
   optionProps?: OptionPropsConfig
 }
 
+/** 字段插槽可使用的完整上下文。 */
 export interface FormTableSlotContext extends FormTableFieldContext {
   propPath: string
   component: ResolvedComponentConfig
 }
 
+/** 自定义表头插槽可使用的列上下文。 */
 export interface FormTableHeaderSlotContext extends FormTableColumnContext {
   columnIndex: number
   label: string
 }
 
+/** Vue 2 scoped slot 的统一函数签名。 */
 export type FormTableSlotFn<T = FormTableValue> = (slotProps: T) => FormTableValue
+/** 以插槽名称索引的父组件插槽集合。 */
 export type FormTableSlots = Record<string, FormTableSlotFn | undefined>
 
+/** 组件对 Element UI el-form 实例能力的最小依赖。 */
 export interface FormTableElementFormRef {
   validate?: (callback?: (valid: boolean, fields?: FormTableValue) => void) => Promise<boolean> | boolean
   validateField?: (fieldProp: string, callback?: (message: string) => void) => void
@@ -199,10 +235,12 @@ export interface FormTableElementFormRef {
   clearValidate?: (fieldProps?: string | string[]) => void
 }
 
+/** Element UI el-table 实例引用；具体能力由使用方按版本读取。 */
 export interface FormTableElementTableRef {
   [key: string]: FormTableValue
 }
 
+/** 通过组件 ref 对外暴露的稳定方法。 */
 export interface FormTableExpose {
   validate: (callback?: (valid: boolean, fields?: FormTableValue) => void) => Promise<boolean>
   resetFields: () => void

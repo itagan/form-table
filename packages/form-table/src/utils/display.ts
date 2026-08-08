@@ -1,5 +1,6 @@
 import type { FormItemOption, OptionPropsConfig } from '../types'
 
+/** 选项对象未声明字段映射时采用的默认键名。 */
 const DEFAULT_OPTION_PROPS: Required<OptionPropsConfig> = {
   label: 'label',
   value: 'value',
@@ -15,20 +16,24 @@ function getOptionProp(
   return optionProps?.[prop] ?? DEFAULT_OPTION_PROPS[prop]
 }
 
+/** 读取选项的实际值。 */
 export function getOptionValue(option: FormItemOption, optionProps?: OptionPropsConfig) {
   return option[getOptionProp(optionProps, 'value')]
 }
 
+/** 读取展示文本，缺少 label 时依次回退到 value 和空字符串。 */
 export function getOptionLabel(option: FormItemOption, optionProps?: OptionPropsConfig) {
   return option[getOptionProp(optionProps, 'label')]
     ?? option[getOptionProp(optionProps, 'value')]
     ?? ''
 }
 
+/** 将配置字段对应的值归一化为禁用状态。 */
 export function getOptionDisabled(option: FormItemOption, optionProps?: OptionPropsConfig) {
   return Boolean(option[getOptionProp(optionProps, 'disabled')])
 }
 
+/** 为 v-for 选择稳定 key，字段均缺失时才回退到数组下标。 */
 export function getOptionKey(
   option: FormItemOption,
   index: number,

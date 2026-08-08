@@ -74,12 +74,14 @@ import {
   getOptionValue
 } from './utils/display'
 
+/** 上层已完成动态解析，本组件只接收渲染所需的最小数据。 */
 const props = defineProps<{
   type: FormItemType
   value: FormTableValue
   component: ResolvedComponentConfig
 }>()
 
+/** 将字段组件的 input 事件交回 FormTableItem 执行不可变更新。 */
 const emit = defineEmits<{
   (event: 'input', value: FormTableValue): void
 }>()
@@ -89,5 +91,7 @@ const modelValue = computed({
   get: () => props.value,
   set: value => emit('input', value)
 })
+
+/** select 与 tag-input 共用 el-option 子节点渲染分支。 */
 const isSelectLike = computed(() => props.type === 'select' || props.type === 'tag-input')
 </script>
