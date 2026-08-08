@@ -44,6 +44,11 @@ const router = new VueRouter({
       component: () => import('../views/RowColumnOperationsView.vue')
     },
     {
+      path: '/cell-merge',
+      name: 'cell-merge',
+      component: () => import('../views/CellMergeView.vue')
+    },
+    {
       path: '/enterprise-components',
       name: 'enterprise-components',
       component: () => import('../views/EnterpriseComponentsView.vue')
