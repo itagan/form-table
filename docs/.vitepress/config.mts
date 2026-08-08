@@ -32,7 +32,8 @@ export default defineConfig({
       {
         text: '示例',
         items: [
-          { text: '示例索引', link: '/examples/' }
+          { text: '示例索引', link: '/examples/' },
+          { text: '企业复杂组件接入', link: '/examples/enterprise-components' }
         ]
       },
       {

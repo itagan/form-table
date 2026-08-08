@@ -44,6 +44,11 @@ const router = new VueRouter({
       component: () => import('../views/RowColumnOperationsView.vue')
     },
     {
+      path: '/enterprise-components',
+      name: 'enterprise-components',
+      component: () => import('../views/EnterpriseComponentsView.vue')
+    },
+    {
       path: '/debug',
       name: 'debug',
       component: () => import('../views/DebugView.vue')

@@ -29,6 +29,13 @@ const examples = [
     tags: ['JSON', 'local enhance', 'registry-free']
   },
   {
+    title: '企业复杂组件接入',
+    description: '实际演示全局内部组件、局部业务组件、非标准绑定协议和复杂事件联动。',
+    path: '/enterprise-components',
+    type: 'primary',
+    tags: ['custom model', 'global component', 'business component']
+  },
+  {
     title: '行列操作与延迟提交',
     description: '演示行增删复制移动、动态列，以及业务检查成功后才写入字段。',
     path: '/row-column-operations',
