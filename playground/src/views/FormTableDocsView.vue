@@ -60,7 +60,7 @@
               <td><code>key</code></td>
               <td>渲染标识</td>
               <td>可选；动态增删或重排列时建议提供。</td>
-              <td rowspan="6" class="context-cell"><code>tableData</code></td>
+              <td rowspan="6" class="context-cell"><code>tableData</code><br><code>columnConfig</code></td>
             </tr>
             <tr>
               <td><code>label</code></td>
@@ -75,7 +75,7 @@
             <tr>
               <td><code>headerSlot</code></td>
               <td>表头 scoped slot</td>
-              <td>接收 <code>label/column/columnIndex/tableData</code>；columnIndex 是显隐过滤后的可见列下标。</td>
+              <td>接收 <code>label/columnConfig/columnIndex/tableData</code>；columnIndex 是显隐过滤后的可见列下标。</td>
             </tr>
             <tr>
               <td><code>visible</code></td>
@@ -95,7 +95,7 @@
               <td><code>key</code></td>
               <td>渲染标识</td>
               <td>可选；同一列内有动态行布局时建议提供。</td>
-              <td rowspan="4" class="context-cell"><code>tableData</code><br><code>row</code><br><code>index</code></td>
+              <td rowspan="4" class="context-cell"><code>tableData</code><br><code>columnConfig</code><br><code>row</code><br><code>index</code><br><code>rowConfig</code></td>
             </tr>
             <tr>
               <td><code>props</code></td>
@@ -120,7 +120,7 @@
               <td><code>key</code></td>
               <td>渲染标识</td>
               <td>可选；动态增删、排序或重复 fieldKey 时建议提供。</td>
-              <td rowspan="7" class="context-cell"><code>tableData</code><br><code>row</code><br><code>index</code><br><code>fieldKey</code><br><code>value</code></td>
+              <td rowspan="7" class="context-cell"><code>tableData</code><br><code>columnConfig</code><br><code>row</code><br><code>index</code><br><code>rowConfig</code><br><code>fieldKey</code><br><code>value</code><br><code>itemConfig</code></td>
             </tr>
             <tr>
               <td><code>fieldKey</code></td>
@@ -160,7 +160,7 @@
               <td><code>renderer</code></td>
               <td>渲染目标</td>
               <td>component 模式为组件对象/名称；slot 模式为具名 slot 名称。</td>
-              <td rowspan="4" class="context-cell"><code>tableData</code><br><code>row</code><br><code>index</code><br><code>fieldKey</code><br><code>value</code></td>
+              <td rowspan="4" class="context-cell"><code>Item 上下文</code><br><code>columnConfig</code><br><code>rowConfig</code><br><code>itemConfig</code></td>
             </tr>
             <tr>
               <td><code>props</code></td>
@@ -193,7 +193,7 @@
 
     <section>
       <h2>上下文回传示例</h2>
-      <p><code>row</code> 是当前数据行，<code>index</code> 是数据下标，<code>fieldKey</code> 是当前字段路径；不会返回完整的 Column、Row 或 Item 配置对象。</p>
+      <p><code>row</code> 是当前业务数据行，<code>rowConfig</code> 是布局配置；<code>columnConfig/rowConfig/itemConfig</code> 返回当前原始配置，Slot 的 <code>component</code> 返回当前行解析后的组件配置。</p>
       <pre>{{ contextExample }}</pre>
     </section>
 
@@ -236,25 +236,28 @@ const propsExample = `{
 
 const contextExample = `{
   label: '地区',
-  visible: ({ tableData }) => tableData.length > 0,
-  props: ({ tableData }) => ({ minWidth: tableData.length > 5 ? 360 : 280 }),
+  visible: ({ tableData, columnConfig }) => columnConfig.key !== 'hidden' && tableData.length > 0,
+  props: ({ tableData, columnConfig }) => ({
+    className: columnConfig.key,
+    minWidth: tableData.length > 5 ? 360 : 280
+  }),
   children: [{
-    visible: ({ row }) => row.hidden !== true,
-    props: ({ row, index }) => ({
+    visible: ({ row, rowConfig }) => rowConfig.key !== 'hidden' && row.hidden !== true,
+    props: ({ row, index, rowConfig }) => ({
       gutter: row.compact ? 4 : 12,
-      class: 'data-row-' + index
+      class: (rowConfig.key || 'data-row') + '-' + index
     }),
     children: [{
       fieldKey: 'city',
       type: 'select',
-      visible: ({ row, fieldKey, value }) => fieldKey === 'city' && Boolean(row.province) && value !== 'disabled',
+      visible: ({ row, fieldKey, value, itemConfig }) => itemConfig.key !== 'hidden' && fieldKey === 'city' && Boolean(row.province) && value !== 'disabled',
       colProps: ({ index }) => ({ span: index === 0 ? 12 : 8 }),
       component: {
         props: ({ row }) => ({ disabled: row.locked }),
         options: ({ row }) => cityOptions[row.province] || [],
         listeners: {
-          change({ row, index, fieldKey, value, setValue, updateRow }, nextValue) {
-            console.log('修改前', row, index, fieldKey, value)
+          change({ row, index, fieldKey, value, itemConfig, setValue, updateRow }, nextValue) {
+            console.log('修改前', row, index, fieldKey, value, itemConfig.key)
             setValue(nextValue)
             updateRow({ cityTouched: true })
           }

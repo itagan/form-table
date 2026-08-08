@@ -129,6 +129,9 @@ const contextBoundaries: ColumnConfig[] = [{
   label: '上下文边界',
   visible: (tableContext) => {
     void tableContext.tableData
+    void tableContext.columnConfig
+    // @ts-expect-error configuration references are read-only.
+    tableContext.columnConfig.label = '修改'
     // @ts-expect-error column callbacks do not have a current row.
     void tableContext.row
     return true
@@ -137,6 +140,8 @@ const contextBoundaries: ColumnConfig[] = [{
     visible: (rowContext) => {
       void rowContext.row
       void rowContext.index
+      void rowContext.columnConfig
+      void rowContext.rowConfig
       // @ts-expect-error row callbacks do not have a current field.
       void rowContext.fieldKey
       return true
@@ -149,6 +154,11 @@ const contextBoundaries: ColumnConfig[] = [{
         void fieldContext.index
         void fieldContext.fieldKey
         void fieldContext.value
+        void fieldContext.columnConfig
+        void fieldContext.rowConfig
+        void fieldContext.itemConfig
+        // @ts-expect-error configuration references are read-only.
+        fieldContext.itemConfig.fieldKey = 'other'
         return true
       },
       component: {
@@ -166,9 +176,11 @@ const contextBoundaries: ColumnConfig[] = [{
 
 declare const headerContext: FormTableHeaderSlotContext
 void headerContext.columnIndex
-void headerContext.column.key
+void headerContext.columnConfig.key
 // @ts-expect-error header slot column configuration is read-only.
-headerContext.column.label = '新表头'
+headerContext.columnConfig.label = '新表头'
+// @ts-expect-error legacy column alias is not exposed.
+void headerContext.column
 
 void props
 void component

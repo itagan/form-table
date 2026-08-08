@@ -57,9 +57,9 @@
       <table>
         <thead><tr><th>层级</th><th>隐藏范围</th><th>可用上下文</th></tr></thead>
         <tbody>
-          <tr><td>Column</td><td>整列</td><td><code>tableData</code></td></tr>
-          <tr><td>Row</td><td>单元格内整行布局</td><td><code>tableData, row, index</code></td></tr>
-          <tr><td>Item</td><td>当前字段及 el-col</td><td><code>tableData, row, index, fieldKey, value</code></td></tr>
+          <tr><td>Column</td><td>整列</td><td><code>tableData, columnConfig</code></td></tr>
+          <tr><td>Row</td><td>单元格内整行布局</td><td><code>Column 上下文 + row, index, rowConfig</code></td></tr>
+          <tr><td>Item</td><td>当前字段及 el-col</td><td><code>Row 上下文 + fieldKey, value, itemConfig</code></td></tr>
         </tbody>
       </table>
       <p>显隐只改变渲染，不会删除字段值。需要关闭时清空详情，应由业务事件更新数据，不要在 visible 判断中修改 row。</p>
@@ -133,7 +133,8 @@ const columns: ColumnConfig[] = [
   }
 ]
 const columnsCode = formatFormTableConfig(columns)
-const slotCode = `<template #score="{ value, setValue, component }">
+const slotCode = `<template #score="{ value, setValue, component, columnConfig, rowConfig, itemConfig }">
+  <!-- 三个 *Config 是原始配置，component 是当前行解析结果 -->
   <el-rate
     v-bind="component.props"
     v-on="component.listeners"

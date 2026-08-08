@@ -138,6 +138,9 @@ Slot 上下文说明：
 | `setValue(value)` | 更新当前字段，支持嵌套路径，并触发 `update:tableData` 与 `field-change` |
 | `updateRow(patch)` | 合并更新当前行的多个字段 |
 | `component` | 解析后的 `renderer/props/listeners/options/optionProps` |
+| `columnConfig` | 当前原始 `ColumnConfig` |
+| `rowConfig` | 当前原始 `RowConfig`，与业务数据 `row` 含义不同 |
+| `itemConfig` | 当前原始 `FormItemConfig` |
 
 - `component.renderer` 只用于定位具名 slot；不会在 slot 内再次渲染组件。
 - `component.props` 等配置不会自动透传，调用方按自定义组件接口选择性绑定。
@@ -154,7 +157,7 @@ component: {
 
 字段 `visible` 同样支持运行时函数。字段联动不在配置中执行，请监听 `field-change` 后更新业务数据。
 
-动态函数只接收当前层级有意义的信息：Column 只有 `tableData`，Row 增加 `row/index`，Field 再增加 `fieldKey/value`。组件 listener 另外获得 `setValue/updateRow`。不会用空 row、`index = -1` 等占位值补齐上下文。
+动态函数只接收当前层级有意义的信息：Column 为 `tableData/columnConfig`，Row 增加 `row/index/rowConfig`，Field 再增加 `fieldKey/value/itemConfig`。组件 listener 另外获得 `setValue/updateRow`。不会用空 row、`index = -1` 或空配置补齐上下文。
 
 ### 动态显隐
 
@@ -162,23 +165,25 @@ component: {
 
 | 配置层级 | 影响范围 | 函数上下文 |
 | --- | --- | --- |
-| Column `visible` | 整个 `el-table-column` | `tableData` |
-| Row `visible` | 当前单元格内的一整行 `el-row` | `tableData`、`row`、`index` |
-| Item `visible` | 当前 `el-col` 和字段内容 | `tableData`、`row`、`index`、`fieldKey`、`value` |
+| Column `visible` | 整个 `el-table-column` | `tableData`、`columnConfig` |
+| Row `visible` | 当前单元格内的一整行 `el-row` | Column 上下文 + `row/index/rowConfig` |
+| Item `visible` | 当前 `el-col` 和字段内容 | Row 上下文 + `fieldKey/value/itemConfig` |
 
 ```ts
 const columns: ColumnConfig[] = [{
   label: '补充信息',
   // 表格没有任何需要补充信息的数据时，隐藏整列。
-  visible: ({ tableData }) => tableData.some(row => row.showExtra),
+  visible: ({ tableData, columnConfig }) => {
+    return columnConfig.key !== 'disabled' && tableData.some(row => row.showExtra)
+  },
   children: [{
     // 只在当前行开启补充信息时渲染这一行布局。
-    visible: ({ row }) => row.showExtra === true,
+    visible: ({ row, rowConfig }) => rowConfig.key !== 'disabled' && row.showExtra === true,
     children: [{
       fieldKey: 'detail',
       type: 'textarea',
       // 再根据当前行状态控制单个字段。
-      visible: ({ row }) => row.detailType !== 'none'
+      visible: ({ row, itemConfig }) => itemConfig.key !== 'disabled' && row.detailType !== 'none'
     }]
   }]
 }]
@@ -196,17 +201,20 @@ const columns: ColumnConfig[] = [{
   label: '联系人',
 
   // Column：当前没有具体数据行，只提供整张表的数据。
-  visible: ({ tableData }) => tableData.length > 0,
-  props: ({ tableData }) => ({
+  visible: ({ tableData, columnConfig }) => {
+    return columnConfig.key !== 'hidden' && tableData.length > 0
+  },
+  props: ({ tableData, columnConfig }) => ({
+    className: columnConfig.key,
     minWidth: tableData.length > 5 ? 360 : 280
   }),
 
   children: [{
     // Row：row 是当前数据行，index 是它在 tableData 中的下标。
-    visible: ({ row }) => row.hidden !== true,
-    props: ({ row, index }) => ({
+    visible: ({ row, rowConfig }) => rowConfig.key !== 'hidden' && row.hidden !== true,
+    props: ({ row, index, rowConfig }) => ({
       gutter: row.compact ? 4 : 12,
-      class: `contact-row-${index}`
+      class: `${rowConfig.key || 'contact-row'}-${index}`
     }),
 
     children: [{
@@ -214,8 +222,8 @@ const columns: ColumnConfig[] = [{
       type: 'select',
 
       // Item：fieldKey 是当前字段路径，不是 ColumnConfig 对象。
-      visible: ({ row, fieldKey, value }) => {
-        return fieldKey === 'city' && Boolean(row.province) && value !== 'disabled'
+      visible: ({ row, fieldKey, value, itemConfig }) => {
+        return itemConfig.key !== 'hidden' && fieldKey === 'city' && Boolean(row.province) && value !== 'disabled'
       },
       colProps: ({ index }) => ({ span: index === 0 ? 12 : 8 }),
       formItemProps: ({ row }) => ({
@@ -230,10 +238,10 @@ const columns: ColumnConfig[] = [{
         options: ({ row }) => cityOptions[row.province] || [],
         listeners: {
           change(
-            { row, index, fieldKey, value, setValue, updateRow },
+            { row, index, fieldKey, value, itemConfig, setValue, updateRow },
             nextValue
           ) {
-            console.log('修改前', row, index, fieldKey, value)
+            console.log('修改前', row, index, fieldKey, value, itemConfig.key)
             // 同一同步回调中可以安全组合两个更新助手。
             setValue(nextValue)
             updateRow({ cityTouched: true })
@@ -245,9 +253,10 @@ const columns: ColumnConfig[] = [{
 }]
 ```
 
-- `row` 是 `tableData[index]` 对应的数据行，不是 `RowConfig`。
+- `row` 是 `tableData[index]` 对应的数据行；`rowConfig` 才是当前布局行配置。
 - `fieldKey` 是当前字段路径，例如 `city` 或 `profile.city`，不是列配置对象。
-- 动态上下文不会返回完整的 `ColumnConfig`、`RowConfig` 或 `FormItemConfig`。
+- `columnConfig/rowConfig/itemConfig` 返回当前原始配置；Slot 中的 `component` 则是针对当前数据行解析后的组件配置。
+- 配置引用是事件触发或渲染时刻的浅只读引用，不应直接修改或跨异步流程当作最新配置长期缓存。
 - `value` 是回调执行时的当前字段值；组件事件产生的新值仍位于上下文之后，例如上面的 `nextValue`。
 - 回调中的 `row/tableData` 用于读取；字段更新使用 `setValue` 或 `updateRow`。两者在同一同步调用链中连续使用时，后一次更新会基于前一次结果继续计算。
 - 组件原始事件参数保持在字段上下文之后，例如上面的 `nextValue`。
@@ -284,8 +293,10 @@ const columns = enhanceFormTableColumns(remoteColumns, {
 列级不提供 `required` 快捷字段。表头标记使用 `headerSlot` 渲染，实际校验配置在字段的 `formItemProps.rules` 中：
 
 ```vue
-<template #contact-header="{ label }">
+<template #contact-header="{ label, columnConfig }">
   <span class="required-mark">*</span>
-  <span>{{ label }}</span>
+  <span :data-column-key="columnConfig.key">{{ label }}</span>
 </template>
 ```
+
+表头 slot 使用 `columnConfig` 返回当前原始列配置。

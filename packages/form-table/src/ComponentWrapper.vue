@@ -65,12 +65,14 @@ import { computed, inject, type ComputedRef } from 'vue'
 import { getComponentType, getRequiredProps } from './configs/defaultComponentConfigs'
 import type {
   BuiltinFormItemType,
+  ColumnConfig,
   FormItemConfig,
   FormItemOption,
   FormTableTableContext,
   FormTableFieldContext,
   FormTableUpdateApi,
   OptionPropsConfig,
+  RowConfig,
   TableRow
 } from './types'
 import { FORM_TABLE_CONTEXT_KEY, FORM_TABLE_UPDATE_KEY } from './types'
@@ -81,6 +83,7 @@ import {
   getOptionValue
 } from './utils/display'
 import {
+  createColumnContext,
   createFieldRenderContext,
   createRowContext,
   resolveDynamicValue
@@ -89,6 +92,8 @@ import {
 const props = defineProps<{
   row: TableRow
   rowIndex: number
+  columnConfig: ColumnConfig
+  rowConfig: RowConfig
   config: FormItemConfig
 }>()
 
@@ -98,8 +103,13 @@ const formTableContext = inject<ComputedRef<FormTableTableContext>>(
 )
 const updateApi = inject<FormTableUpdateApi>(FORM_TABLE_UPDATE_KEY)
 const runtimeContext = computed(() => createFieldRenderContext(
-  createRowContext(formTableContext.value, props.row, props.rowIndex),
-  props.config.fieldKey
+  createRowContext(
+    createColumnContext(formTableContext.value, props.columnConfig),
+    props.row,
+    props.rowIndex,
+    props.rowConfig
+  ),
+  props.config
 ))
 const builtinType = computed<BuiltinFormItemType | null>(() => {
   return props.config.type === 'component' || props.config.type === 'slot'

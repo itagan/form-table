@@ -59,6 +59,6 @@ Table 原生事件直接透传。通过 ref 可调用 `validate()`、`resetField
 
 表头必填标记等展示使用 `headerSlot` 明确渲染；字段是否必填只由 `formItemProps.rules` 决定。
 
-动态配置只获得当前层级有意义的上下文：Column 为 `tableData`，Row 增加 `row/index`，Field 增加 `fieldKey/value`。组件 listener 额外获得 `setValue/updateRow`；slot 上下文再提供 `propPath/component`，不再回传占位字段。`row/tableData` 采用类型层面的浅只读约束，运行时不冻结对象。
+动态配置只获得当前层级有意义的上下文：Column 为 `tableData/columnConfig`，Row 增加 `row/index/rowConfig`，Field 增加 `fieldKey/value/itemConfig`。组件 listener 额外获得 `setValue/updateRow`；slot 上下文再提供 `propPath/component`，不回传占位字段。数据和配置引用采用类型层面的浅只读约束，运行时不冻结对象。
 
 远程 schema 建议只返回布局、`type`、静态 props/options 等 JSON；组件对象、事件函数与 slot 实现由页面按 `fieldKey` 本地增强。核心不执行远程代码，也不维护业务组件注册表。

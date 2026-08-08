@@ -42,7 +42,7 @@ import {
   FORM_TABLE_SLOTS_KEY,
   FORM_TABLE_UPDATE_KEY
 } from './types'
-import { createTableContext, resolveVisible } from './utils/dynamic'
+import { createColumnContext, createTableContext, resolveVisible } from './utils/dynamic'
 import { getValueByPath, setValueByPath } from './utils/path'
 
 const props = withDefaults(defineProps<{
@@ -75,7 +75,10 @@ const formTableContext = computed(() => ({
 
 const visibleColumns = computed(() => {
   const tableContext = createTableContext(props.tableData)
-  return props.columns.filter((column) => resolveVisible(column.visible, tableContext))
+  return props.columns.filter((column) => resolveVisible(
+    column.visible,
+    createColumnContext(tableContext, column)
+  ))
 })
 
 // 同一同步调用链中的多次更新必须基于上一次已发出的结果继续计算。

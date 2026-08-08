@@ -11,7 +11,7 @@ Element Table 的 `row-click`、`selection-change`、`sort-change` 等事件直�
 
 ## Slot 上下文
 
-字段 slot 接收：`row`、`index`、`fieldKey`、`propPath`、`value`、`tableData`、`setValue`、`updateRow`、`component`。其中 `component` 保持配置字段名称，包含解析后的 `renderer/props/listeners/options/optionProps`。
+字段 slot 接收：`row`、`index`、`fieldKey`、`propPath`、`value`、`tableData`、`setValue`、`updateRow`、`component`、`columnConfig`、`rowConfig`、`itemConfig`。其中三个 `*Config` 是当前原始配置，`component` 是解析后的 `renderer/props/listeners/options/optionProps`。
 
 配置式组件事件保持组件原始参数顺序，并在最前面增加字段上下文：
 
@@ -32,9 +32,10 @@ component: {
 ```ts
 component: {
   listeners: {
-    change({ row, index, fieldKey, value, setValue, updateRow }, nextValue) {
+    change({ row, index, fieldKey, value, itemConfig, setValue, updateRow }, nextValue) {
       console.log('当前数据行', row)
       console.log('数据下标与字段', index, fieldKey)
+      console.log('事件来源配置', itemConfig.key)
       console.log('修改前字段值', value)
 
       setValue(nextValue)
@@ -59,7 +60,9 @@ component: {
 
 `component.listeners` 中的函数已经自动注入字段上下文。Slot 内只有显式使用 `v-on="component.listeners"`，自定义组件发出的同名事件才会进入配置 listener；FormTable 不会替 Slot 自动绑定。
 
-`row` 和 `tableData` 是原数据的只读视图约定：TypeScript 提供浅层只读限制，运行时不会冻结对象。请勿直接赋值，统一使用更新助手。
+`row/tableData` 和三个 `*Config` 都是浅层只读约定，运行时不会冻结对象。请勿直接赋值：数据修改使用更新助手，配置调整由调用方替换 `columns`。异步回调中持有的是触发时配置引用，不保证异步结束后仍为最新配置。
+
+`field-change` 是纯数据事件，可能来自一次多字段 `updateRow`，也可能对应多个相同 `fieldKey` 的 Item，因此不返回 `columnConfig/rowConfig/itemConfig`。
 
 ## Ref
 

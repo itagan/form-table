@@ -5,10 +5,10 @@ import FormTable from '../index.vue'
 import type {
   ColumnConfig,
   FormItemConfig,
+  FormTableColumnContext,
   FormTableFieldRenderContext,
   FormTableExpose,
   FormTableRowContext,
-  FormTableTableContext,
   TableRow
 } from '../types.public'
 
@@ -125,9 +125,12 @@ describe('FormTable core behavior', () => {
     expect(wrapper.find('.slot-setter').text()).toBe('一中（当前）校区配置')
     expect(componentPropsResolver).toHaveBeenCalledTimes(1)
     expect(Object.keys(componentPropsResolver.mock.calls[0][0]).sort()).toEqual([
+      'columnConfig',
       'fieldKey',
       'index',
+      'itemConfig',
       'row',
+      'rowConfig',
       'tableData',
       'value'
     ])
@@ -140,6 +143,28 @@ describe('FormTable core behavior', () => {
     })
     expect(slotListener.mock.calls[0][1]).toBe('saved')
     expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{ school: '二中' }])
+    wrapper.destroy()
+  })
+
+  it('exposes columnConfig to the header slot without a column alias', async () => {
+    const wrapper = mountFormTable({
+      columns: [{
+        key: 'school-column',
+        label: '学校',
+        headerSlot: 'school-header',
+        children: [{ children: [{ fieldKey: 'name', type: 'input' }] }]
+      }],
+      scopedSlots: {
+        'school-header': `
+          <span class="school-header">
+            {{ props.columnConfig.key }}|{{ props.column === undefined }}
+          </span>
+        `
+      }
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.school-header').text()).toBe('school-column|true')
     wrapper.destroy()
   })
 
@@ -193,12 +218,17 @@ describe('FormTable core behavior', () => {
       row: { status: 'enabled' },
       index: 0,
       fieldKey: 'status',
-      value: 'enabled'
+      value: 'enabled',
+      columnConfig: { label: '状态' },
+      itemConfig: { fieldKey: 'status', type: 'component' }
     })
     expect(Object.keys(listener.mock.calls[0][0]).sort()).toEqual([
+      'columnConfig',
       'fieldKey',
       'index',
+      'itemConfig',
       'row',
+      'rowConfig',
       'setValue',
       'tableData',
       'updateRow',
@@ -325,7 +355,7 @@ describe('FormTable core behavior', () => {
   })
 
   it('resolves dynamic visibility and options from row context', async () => {
-    const columnVisible = vi.fn((_context: FormTableTableContext) => true)
+    const columnVisible = vi.fn((_context: FormTableColumnContext) => true)
     const rowProps = vi.fn((_context: FormTableRowContext) => ({ gutter: 8 }))
     const fieldVisible = vi.fn(({ row }: FormTableFieldRenderContext) => row.province === 'zhejiang')
     const fieldOptions = vi.fn(({ row }: FormTableFieldRenderContext) => row.province === 'zhejiang'
@@ -363,23 +393,34 @@ describe('FormTable core behavior', () => {
     })
     await wrapper.vm.$nextTick()
     expect(wrapper.findAll('.el-select')).toHaveLength(2)
-    expect(Object.keys(columnVisible.mock.calls[0][0]).sort()).toEqual(['tableData'])
+    expect(Object.keys(columnVisible.mock.calls[0][0]).sort()).toEqual([
+      'columnConfig',
+      'tableData'
+    ])
     expect(Object.keys(rowProps.mock.calls[0][0]).sort()).toEqual([
+      'columnConfig',
       'index',
       'row',
+      'rowConfig',
       'tableData'
     ])
     expect(Object.keys(fieldVisible.mock.calls[0][0]).sort()).toEqual([
+      'columnConfig',
       'fieldKey',
       'index',
+      'itemConfig',
       'row',
+      'rowConfig',
       'tableData',
       'value'
     ])
     expect(Object.keys(fieldOptions.mock.calls[0][0]).sort()).toEqual([
+      'columnConfig',
       'fieldKey',
       'index',
+      'itemConfig',
       'row',
+      'rowConfig',
       'tableData',
       'value'
     ])

@@ -11,6 +11,8 @@
       v-else
       :row="row"
       :row-index="rowIndex"
+      :column-config="columnConfig"
+      :row-config="rowConfig"
       :config="config"
     />
   </el-form-item>
@@ -20,6 +22,7 @@
 import { computed, defineComponent, h, inject, type ComputedRef, type PropType } from 'vue'
 import ComponentWrapper from './ComponentWrapper.vue'
 import type {
+  ColumnConfig,
   FormItemConfig,
   FormItemOption,
   FormTableFieldContext,
@@ -30,6 +33,7 @@ import type {
   FormTableUpdateApi,
   OptionPropsConfig,
   ResolvedComponentConfig,
+  RowConfig,
   TableRow
 } from './types'
 import {
@@ -38,6 +42,7 @@ import {
   FORM_TABLE_UPDATE_KEY
 } from './types'
 import {
+  createColumnContext,
   createFieldRenderContext,
   createRowContext,
   resolveDynamicValue
@@ -57,6 +62,8 @@ const SlotRenderer = defineComponent({
 const props = defineProps<{
   row: TableRow
   rowIndex: number
+  columnConfig: ColumnConfig
+  rowConfig: RowConfig
   config: FormItemConfig
 }>()
 
@@ -68,8 +75,13 @@ const updateApi = inject<FormTableUpdateApi>(FORM_TABLE_UPDATE_KEY)
 const parentSlots = inject<FormTableSlots>(FORM_TABLE_SLOTS_KEY, {})
 const propPath = computed(() => `tableData.${props.rowIndex}.${props.config.fieldKey}`)
 const runtimeContext = computed(() => createFieldRenderContext(
-  createRowContext(formTableContext.value, props.row, props.rowIndex),
-  props.config.fieldKey
+  createRowContext(
+    createColumnContext(formTableContext.value, props.columnConfig),
+    props.row,
+    props.rowIndex,
+    props.rowConfig
+  ),
+  props.config
 ))
 const renderMode = computed(() => resolveFieldRenderMode(props.config))
 const resolvedFormItemProps = computed(() => ({
