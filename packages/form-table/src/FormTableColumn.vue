@@ -24,7 +24,7 @@
         :key="rowConfig.key || rowIndex"
         :row="scope.row"
         :row-index="scope.$index"
-        :column-config="column"
+        :column-context="columnContext"
         :row-config="rowConfig"
       />
     </template>
@@ -60,11 +60,14 @@ const columnContext = computed<FormTableColumnContext>(() => createColumnContext
   props.column
 ))
 const columnProps = computed(() => resolveDynamicValue(props.column.props, columnContext.value) || {})
+
+// Element UI 的功能列由 type 驱动，不应挂载普通字段的 scoped slot。
 const isNativeColumn = computed(() => ['index', 'selection', 'expand'].includes(columnProps.value.type))
 const headerSlotFn = computed(() => props.column.headerSlot
   ? parentSlots[props.column.headerSlot] || null
   : null)
 const shouldRenderHeader = computed(() => {
+  // 原生 renderHeader 的优先级高于 FormTable 的具名表头插槽。
   return typeof columnProps.value.renderHeader !== 'function' && Boolean(headerSlotFn.value)
 })
 const headerSlotProps = computed<FormTableHeaderSlotContext>(() => ({

@@ -1,12 +1,12 @@
 <template>
   <el-form-item v-bind="resolvedFormItemProps">
     <SlotRenderer
-      v-if="renderMode === 'slot' && slotFn"
+      v-if="config.type === 'slot' && slotFn"
       :slot-fn="slotFn"
       :slot-props="slotContext"
     />
-    <span v-else-if="renderMode === 'slot'" />
-    <span v-else-if="renderMode === 'display'">{{ slotContext.value }}</span>
+    <span v-else-if="config.type === 'slot'" />
+    <span v-else-if="!config.type">{{ slotContext.value }}</span>
     <ComponentWrapper
       v-else
       :type="config.type"
@@ -43,7 +43,6 @@ import {
   createFieldRenderContext,
   resolveDynamicValue
 } from './utils/dynamic'
-import { resolveFieldRenderMode } from './utils/renderMode'
 
 const props = defineProps<{
   rowContext: FormTableRowContext
@@ -57,7 +56,6 @@ const runtimeContext = computed(() => createFieldRenderContext(
   props.rowContext,
   props.config
 ))
-const renderMode = computed(() => resolveFieldRenderMode(props.config))
 const resolvedFormItemProps = computed(() => ({
   ...(resolveDynamicValue(props.config.formItemProps, runtimeContext.value) || {}),
   prop: propPath.value
@@ -67,12 +65,12 @@ const slotFn = computed(() => props.config.type === 'slot'
   : null)
 const fieldContext = computed<FormTableFieldContext>(() => {
   const targetRow = props.rowContext.row as TableRow
-  const targetIndex = props.rowContext.index
   const targetFieldKey = props.config.fieldKey
   return {
     ...runtimeContext.value,
-    setValue: nextValue => updateApi?.setValue(targetRow, targetIndex, targetFieldKey, nextValue),
-    updateRow: patch => updateApi?.updateRow(targetRow, targetIndex, patch)
+    // 闭包绑定当前行与字段，配置切换后旧事件不会误更新新字段。
+    setValue: nextValue => updateApi?.setValue(targetRow, targetFieldKey, nextValue),
+    updateRow: patch => updateApi?.updateRow(targetRow, patch)
   }
 })
 

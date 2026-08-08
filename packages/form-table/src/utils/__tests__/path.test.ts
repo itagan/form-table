@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { applyRowPatch, getValueByPath, setValueByPath } from '../path'
+import { getValueByPath, setValueByPath } from '../path'
 
 describe('path utils', () => {
   it('reads dot paths and array index paths', () => {
@@ -51,27 +51,5 @@ describe('path utils', () => {
         }
       }
     })
-  })
-
-  it('applies row patches with path keys', () => {
-    const row = {
-      name: 'Alice',
-      profile: {
-        city: 'Shanghai'
-      }
-    }
-
-    const nextRow = applyRowPatch(row, {
-      name: 'Bob',
-      'profile.city': 'Suzhou'
-    })
-
-    expect(nextRow).toEqual({
-      name: 'Bob',
-      profile: {
-        city: 'Suzhou'
-      }
-    })
-    expect(row.profile.city).toBe('Shanghai')
   })
 })

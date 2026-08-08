@@ -33,6 +33,7 @@ import type {
   FormTableElementTableRef,
   FormTableFieldChangePayload,
   FormTableSlots,
+  FormTableTableContext,
   FormTableUpdateApi,
   FormTableValue,
   TableRow
@@ -68,6 +69,8 @@ const formRef = ref<FormTableElementFormRef | null>(null)
 const tableRef = ref<FormTableElementTableRef | null>(null)
 const slots = useSlots()
 const instance = getCurrentInstance()
+
+// 组件自身事件在本层触发，其余监听器原样交给 el-table。
 const tableListeners = computed(() => {
   const listeners = (instance?.proxy as any)?.$listeners || {}
   return Object.keys(listeners).reduce<Record<string, (...args: unknown[]) => void>>((result, name) => {
@@ -79,15 +82,13 @@ const tableListeners = computed(() => {
 })
 
 const formModel = computed(() => ({ tableData: props.tableData }))
-const formTableContext = computed(() => ({
-  tableData: props.tableData
-}))
+const formTableContext = computed<FormTableTableContext>(() => createTableContext(props.tableData))
 
+// 列显隐回调共享同一个表级上下文，避免为每列重复创建 tableContext。
 const visibleColumns = computed(() => {
-  const tableContext = createTableContext(props.tableData)
   return props.columns.filter((column) => resolveVisible(
     column.visible,
-    createColumnContext(tableContext, column)
+    createColumnContext(formTableContext.value, column)
   ))
 })
 
@@ -114,6 +115,10 @@ const getRowIdentity = (row: TableRow) => {
   return undefined
 }
 
+/**
+ * 通过 rowKey 或对象引用重新定位行，不信任渲染时下标。
+ * rowKey 重复时拒绝更新，避免静默修改错误的数据行。
+ */
 const resolveUpdateRowIndex = (
   sourceTableData: TableRow[],
   targetRow: TableRow
@@ -137,7 +142,8 @@ const resolveUpdateRowIndex = (
   return synchronousRowIndexes.get(targetRow) ?? -1
 }
 
-const updateRow = (targetRow: TableRow, _fallbackIndex: number, patch: Partial<TableRow>) => {
+/** 不修改受控 props，沿字段路径生成新行并集中派发变更事件。 */
+const updateRow = (targetRow: TableRow, patch: Partial<TableRow>) => {
   const sourceTableData = synchronousUpdateBase || props.tableData
   const rowIndex = resolveUpdateRowIndex(sourceTableData, targetRow)
   if (rowIndex < 0) return
@@ -185,7 +191,7 @@ const updateRow = (targetRow: TableRow, _fallbackIndex: number, patch: Partial<T
 }
 
 const updateApi: FormTableUpdateApi = {
-  setValue: (row, rowIndex, fieldKey, value) => updateRow(row, rowIndex, { [fieldKey]: value }),
+  setValue: (row, fieldKey, value) => updateRow(row, { [fieldKey]: value }),
   updateRow
 }
 

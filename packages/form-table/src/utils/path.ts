@@ -1,4 +1,4 @@
-import type { FormTableRecord, FormTableValue, TableRow } from '../types'
+import type { FormTableRecord, FormTableValue } from '../types'
 
 /**
  * 判断值是否可以继续按对象路径读取。
@@ -78,15 +78,4 @@ export function setValueByPath<T extends FormTableRecord>(
   })
 
   return nextSource as T
-}
-
-/**
- * 将一组 patch 应用到行数据。
- *
- * patch 的 key 同样支持路径写法，适合字段联动返回嵌套字段更新。
- */
-export function applyRowPatch(row: TableRow, patch: Partial<TableRow>): TableRow {
-  return Object.keys(patch).reduce((nextRow, key) => {
-    return setValueByPath(nextRow, key, patch[key])
-  }, row)
 }

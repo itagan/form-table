@@ -7,6 +7,7 @@ const DEFAULT_OPTION_PROPS: Required<OptionPropsConfig> = {
   key: 'value'
 }
 
+/** 按自定义字段映射取键名，未配置的部分回退到 Element UI 常用字段。 */
 function getOptionProp(
   optionProps: OptionPropsConfig | undefined,
   prop: keyof Required<OptionPropsConfig>

@@ -14,19 +14,16 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, type ComputedRef } from 'vue'
+import { computed } from 'vue'
 import FormTableItem from './FormTableItem.vue'
 import type {
-  ColumnConfig,
   FormItemConfig,
+  FormTableColumnContext,
   FormTableRowContext,
-  FormTableTableContext,
   RowConfig,
   TableRow
 } from './types'
-import { FORM_TABLE_CONTEXT_KEY } from './types'
 import {
-  createColumnContext,
   createFieldRenderContext,
   createRowContext,
   resolveDynamicValue,
@@ -36,22 +33,20 @@ import {
 const props = defineProps<{
   row: TableRow
   rowIndex: number
-  columnConfig: ColumnConfig
+  columnContext: FormTableColumnContext
   rowConfig: RowConfig
 }>()
 
-const formTableContext = inject<ComputedRef<FormTableTableContext>>(
-  FORM_TABLE_CONTEXT_KEY,
-  computed(() => ({ tableData: [] }))
-)
 const rowContext = computed<FormTableRowContext>(() => createRowContext(
-  createColumnContext(formTableContext.value, props.columnConfig),
+  props.columnContext,
   props.row,
   props.rowIndex,
   props.rowConfig
 ))
 const isVisible = computed(() => resolveVisible(props.rowConfig.visible, rowContext.value))
 const rowProps = computed(() => resolveDynamicValue(props.rowConfig.props, rowContext.value) || {})
+
+// 在一次遍历中完成显隐过滤和栅格属性解析，模板不再重复执行动态回调。
 const visibleItems = computed(() => props.rowConfig.children.reduce<Array<{
   config: FormItemConfig
   colProps: Record<string, unknown>

@@ -84,6 +84,7 @@ const emit = defineEmits<{
   (event: 'input', value: FormTableValue): void
 }>()
 
+// 将任意字段组件的 Vue 2 v-model 统一转换为上层的不可变数据更新。
 const modelValue = computed({
   get: () => props.value,
   set: value => emit('input', value)

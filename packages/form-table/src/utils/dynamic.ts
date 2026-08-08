@@ -11,6 +11,9 @@ import type {
 } from '../types'
 import { getValueByPath } from './path'
 
+/**
+ * 分层构造动态配置上下文，使列、行、字段回调只看到其所在层级的数据。
+ */
 export function createTableContext(
   tableData: ReadonlyArray<TableRow>
 ): FormTableTableContext {
@@ -62,6 +65,7 @@ export function resolveDynamicValue<T, Context>(
     : value
 }
 
+/** 只有显式返回 false 才隐藏，未配置和 undefined 均保持可见。 */
 export function resolveVisible<Context>(
   value: DynamicValue<boolean, Context> | undefined,
   context: Context
