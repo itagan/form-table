@@ -17,10 +17,10 @@ export interface FormTableRowContext extends FormTableTableContext {
 
 export interface FormTableFieldRenderContext extends FormTableRowContext {
   fieldKey: string
+  value: FormTableValue
 }
 
 export interface FormTableFieldContext extends FormTableFieldRenderContext {
-  value: FormTableValue
   setValue: (value: FormTableValue) => void
   updateRow: (patch: Partial<TableRow>) => void
 }
@@ -167,7 +167,7 @@ export interface FormTableSlotContext extends FormTableFieldContext {
 }
 
 export interface FormTableHeaderSlotContext extends FormTableTableContext {
-  column: ColumnConfig
+  column: Readonly<ColumnConfig>
   columnIndex: number
   label: string
 }

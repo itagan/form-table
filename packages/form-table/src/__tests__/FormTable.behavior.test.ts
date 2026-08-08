@@ -127,7 +127,8 @@ describe('FormTable core behavior', () => {
       'fieldKey',
       'index',
       'row',
-      'tableData'
+      'tableData',
+      'value'
     ])
     await wrapper.find('.slot-setter').trigger('click')
     expect(slotListener).toHaveBeenCalledTimes(1)
@@ -256,6 +257,38 @@ describe('FormTable core behavior', () => {
     wrapper.destroy()
   })
 
+  it('composes consecutive field helpers without losing earlier updates', async () => {
+    const original = [{ name: 'Alice', touched: false }]
+    const wrapper = mountFormTable({
+      tableData: original,
+      columns: [{
+        label: '连续更新',
+        children: [{ children: [{
+          fieldKey: 'name',
+          type: 'slot',
+          component: { renderer: 'compose-update' }
+        }] }]
+      }],
+      scopedSlots: {
+        'compose-update': `
+          <button
+            type="button"
+            class="compose-update"
+            @click="props.setValue('Bob'); props.updateRow({ touched: true })"
+          >更新</button>
+        `
+      }
+    })
+    await wrapper.vm.$nextTick()
+    await wrapper.find('.compose-update').trigger('click')
+
+    const updates = wrapper.emitted('update:tableData') || []
+    expect(updates).toHaveLength(2)
+    expect(updates[1]?.[0]).toEqual([{ name: 'Bob', touched: true }])
+    expect(original).toEqual([{ name: 'Alice', touched: false }])
+    wrapper.destroy()
+  })
+
   it('resolves dynamic visibility and options from row context', async () => {
     const columnVisible = vi.fn((_context: FormTableTableContext) => true)
     const rowProps = vi.fn((_context: FormTableRowContext) => ({ gutter: 8 }))
@@ -305,13 +338,15 @@ describe('FormTable core behavior', () => {
       'fieldKey',
       'index',
       'row',
-      'tableData'
+      'tableData',
+      'value'
     ])
     expect(Object.keys(fieldOptions.mock.calls[0][0]).sort()).toEqual([
       'fieldKey',
       'index',
       'row',
-      'tableData'
+      'tableData',
+      'value'
     ])
     wrapper.destroy()
   })

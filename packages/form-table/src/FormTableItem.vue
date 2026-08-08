@@ -42,7 +42,6 @@ import {
   createRowContext,
   resolveDynamicValue
 } from './utils/dynamic'
-import { getValueByPath } from './utils/path'
 import { resolveFieldRenderMode } from './utils/renderMode'
 
 const SlotRenderer = defineComponent({
@@ -80,7 +79,7 @@ const resolvedFormItemProps = computed(() => ({
 const slotFn = computed(() => props.config.type === 'slot'
   ? parentSlots[props.config.component.renderer] || null
   : null)
-const value = computed(() => getValueByPath(props.row, props.config.fieldKey))
+const value = computed(() => runtimeContext.value.value)
 const setValue = (value: unknown) => updateApi?.setValue(props.rowIndex, props.config.fieldKey, value)
 const updateRow = (patch: Partial<TableRow>) => updateApi?.updateRow(props.rowIndex, patch)
 const fieldContext = computed<FormTableFieldContext>(() => ({

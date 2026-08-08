@@ -4,6 +4,7 @@ import FormTable, {
   FormTablePlugin,
   type ColumnConfig,
   type FormTableExpose,
+  type FormTableHeaderSlotContext,
   type FormTableProps,
   type TableRow
 } from '../index'
@@ -140,6 +141,7 @@ const contextBoundaries: ColumnConfig[] = [{
         void fieldContext.row
         void fieldContext.index
         void fieldContext.fieldKey
+        void fieldContext.value
         return true
       },
       component: {
@@ -154,6 +156,12 @@ const contextBoundaries: ColumnConfig[] = [{
     }]
   }]
 }]
+
+declare const headerContext: FormTableHeaderSlotContext
+void headerContext.columnIndex
+void headerContext.column.key
+// @ts-expect-error header slot column configuration is read-only.
+headerContext.column.label = '新表头'
 
 void props
 void component
