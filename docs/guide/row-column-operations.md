@@ -81,6 +81,16 @@ const moveRow = (from: number, to: number) => {
 
 这类排序保留了原行对象引用，普通同步场景不需要额外配置 `rowKey`。
 
+Element UI 的表单校验路径包含数组下标。删除、插入、复制或移动行后，下标可能改变，应在 DOM 更新后清理旧校验状态：
+
+```ts
+tableData.value = nextRows
+await nextTick()
+formTableRef.value?.clearValidate()
+```
+
+如果页面另外维护了按行保存的草稿、loading 或错误信息，应使用稳定行标识同步删除无效状态；行移动时只调整数据顺序，不要把仍有效的草稿改成按新下标存储。
+
 ### 批量修改
 
 跨行更新由调用方直接维护完整数据：
@@ -309,6 +319,60 @@ async commit({ row, updateRow }, draft) {
 ```
 
 这样只提交最终业务状态，不会把中间草稿逐步写入 `tableData`。
+
+## 防止异步结果乱序
+
+同一字段允许连续提交时，旧请求可能晚于新请求返回。可以用 `rowKey + fieldKey` 保存请求序号，只让最后一次请求提交结果：
+
+```ts
+const requestVersions = new Map<string, number>()
+
+async function commit({ row, fieldKey, setValue }, draftValue) {
+  const requestKey = `${row._rowKey}:${fieldKey}`
+  const version = (requestVersions.get(requestKey) || 0) + 1
+  requestVersions.set(requestKey, version)
+
+  const result = await saveScore(row.id, draftValue)
+
+  if (requestVersions.get(requestKey) !== version) return
+  setValue(result.score)
+}
+```
+
+业务不允许重复提交时，更简单的方式是在请求期间禁用当前行按钮，并在 listener 入口再次检查锁，不能只依赖按钮样式：
+
+```ts
+if (savingRowKeys.has(row._rowKey)) return
+savingRowKeys.add(row._rowKey)
+try {
+  const result = await saveRow(row)
+  updateRow(result)
+} finally {
+  savingRowKeys.delete(row._rowKey)
+}
+```
+
+请求接口支持取消时，可以为每个字段保留一个 `AbortController`：
+
+```ts
+const controllers = new Map<string, AbortController>()
+
+async function commit({ row, fieldKey, setValue }, draftValue) {
+  const requestKey = `${row._rowKey}:${fieldKey}`
+  controllers.get(requestKey)?.abort()
+
+  const controller = new AbortController()
+  controllers.set(requestKey, controller)
+  try {
+    const result = await saveScore(draftValue, { signal: controller.signal })
+    if (controllers.get(requestKey) === controller) setValue(result.score)
+  } finally {
+    if (controllers.get(requestKey) === controller) controllers.delete(requestKey)
+  }
+}
+```
+
+这些并发状态属于请求策略，应保留在页面或业务 Store 中。FormTable 只负责在最终调用更新助手时安全定位数据行。
 
 ## 异步保存与行身份
 

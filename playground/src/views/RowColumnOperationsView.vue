@@ -33,6 +33,7 @@
               type="primary"
               plain
               :loading="savingKeys.includes(row._rowKey)"
+              :disabled="savingKeys.includes(row._rowKey)"
               @click="component.listeners.commit(getScoreDraft(row, value))"
             >审核后提交</el-button>
           </div>
@@ -68,7 +69,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { Message, MessageBox } from 'element-ui'
 import FormTable from '@itagan/form-table'
 import type { ColumnConfig, FormTableExpose, TableRow } from '@itagan/form-table'
@@ -121,6 +122,7 @@ const scoreColumn: ColumnConfig = {
       listeners: {
         async commit({ row, setValue }, draftValue) {
           const rowKey = String(row._rowKey)
+          if (savingKeys.value.includes(rowKey)) return
           savingKeys.value = [...savingKeys.value, rowKey]
           try {
             await wait()
@@ -130,6 +132,7 @@ const scoreColumn: ColumnConfig = {
               return
             }
             setValue(score)
+            clearScoreDraft(rowKey)
             Message.success('检查通过，评分已写入表格')
           } finally {
             savingKeys.value = savingKeys.value.filter(key => key !== rowKey)
@@ -191,6 +194,14 @@ const setScoreDraft = (row: TableRow, value: number) => {
     [String(row._rowKey)]: value
   }
 }
+const clearScoreDraft = (rowKey: string) => {
+  const nextDrafts = { ...scoreDrafts.value }
+  delete nextDrafts[rowKey]
+  scoreDrafts.value = nextDrafts
+}
+const clearStructureValidation = () => {
+  nextTick(() => formTableRef.value?.clearValidate())
+}
 
 const addAfterValidate = async () => {
   const valid = await formTableRef.value?.validate()
@@ -203,6 +214,7 @@ const addAfterValidate = async () => {
     ...tableData.value,
     { _rowKey: createRowKey(), name: '', score: 60, remark: '' }
   ]
+  clearStructureValidation()
 }
 
 const copyRow = (source: OperationRow) => {
@@ -219,6 +231,7 @@ const copyRow = (source: OperationRow) => {
     copy,
     ...tableData.value.slice(index + 1)
   ]
+  clearStructureValidation()
 }
 
 const moveRow = (row: OperationRow, offset: number) => {
@@ -229,6 +242,7 @@ const moveRow = (row: OperationRow, offset: number) => {
   const [target] = next.splice(from, 1)
   next.splice(to, 0, target)
   tableData.value = next
+  clearStructureValidation()
 }
 
 const removeAfterConfirm = async (row: OperationRow) => {
@@ -238,10 +252,8 @@ const removeAfterConfirm = async (row: OperationRow) => {
     })
     await wait(200)
     tableData.value = tableData.value.filter(item => item._rowKey !== row._rowKey)
-    const nextDrafts = { ...scoreDrafts.value }
-    delete nextDrafts[row._rowKey]
-    scoreDrafts.value = nextDrafts
-    formTableRef.value?.clearValidate()
+    clearScoreDraft(row._rowKey)
+    clearStructureValidation()
   } catch {
     // 用户取消时保持表格不变。
   }
