@@ -49,6 +49,11 @@ const router = new VueRouter({
       component: () => import('../views/CellMergeView.vue')
     },
     {
+      path: '/heterogeneous-demands',
+      name: 'heterogeneous-demands',
+      component: () => import('../views/HeterogeneousDemandView.vue')
+    },
+    {
       path: '/enterprise-components',
       name: 'enterprise-components',
       component: () => import('../views/EnterpriseComponentsView.vue')
