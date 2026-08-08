@@ -38,15 +38,15 @@
       <div class="explanation-grid">
         <article>
           <h2>全局字符串组件</h2>
-          <p><code>corp-org-selector</code>、<code>biz-approval-status</code></p>
+          <p><code>corp-org-selector</code>、<code>corp-supplier-picker</code>、<code>biz-approval-status</code></p>
         </article>
         <article>
           <h2>局部组件对象</h2>
-          <p><code>BusinessSkuSelector</code>、<code>BusinessAttachmentUploader</code></p>
+          <p><code>BusinessSkuSelector</code>、<code>MoneyInput</code>、<code>BusinessAttachmentUploader</code></p>
         </article>
         <article>
           <h2>绑定协议</h2>
-          <p><code>select-sku</code>、<code>node-select</code>、<code>files-change</code></p>
+          <p><code>select-sku</code>、<code>node-select</code>、<code>supplier-change</code>、<code>amount-change</code>、<code>files-change</code></p>
         </article>
       </div>
 
@@ -65,6 +65,7 @@ import FormTable from '@itagan/form-table'
 import type { ColumnConfig, FormTableExpose, TableRow } from '@itagan/form-table'
 import BusinessSkuSelector from '../components/EnterpriseComponents/BusinessSkuSelector.vue'
 import BusinessAttachmentUploader from '../components/EnterpriseComponents/BusinessAttachmentUploader.vue'
+import MoneyInput from '../components/EnterpriseComponents/MoneyInput.vue'
 
 interface PurchaseRow extends TableRow {
   id: string
@@ -74,8 +75,12 @@ interface PurchaseRow extends TableRow {
   unit: string
   orgCode: string
   orgName: string
+  supplierId: string
+  supplierName: string
+  supplierSource?: 'favorite' | 'search'
   quantity: number
   taxPrice: number
+  taxRate: number
   attachmentIds: string[]
   approvalStatus: 'draft' | 'pending' | 'approved'
   locked: boolean
@@ -94,6 +99,12 @@ interface UploadFile {
   name: string
 }
 
+interface SupplierSelection {
+  id: string
+  name: string
+  taxRate: number
+}
+
 let nextRowId = 1
 const createRow = (): PurchaseRow => ({
   id: `purchase-row-${nextRowId++}`,
@@ -103,8 +114,11 @@ const createRow = (): PurchaseRow => ({
   unit: '',
   orgCode: '',
   orgName: '',
+  supplierId: '',
+  supplierName: '',
   quantity: 1,
   taxPrice: 0,
+  taxRate: 13,
   attachmentIds: [],
   approvalStatus: 'draft',
   locked: false
@@ -170,33 +184,78 @@ const columns: ColumnConfig[] = [
   },
   {
     key: 'organization',
-    label: '采购组织',
-    props: { minWidth: 230 },
-    children: [{ children: [{
-      fieldKey: 'orgCode',
-      type: 'component',
-      formItemProps: {
-        rules: [{ required: true, message: '请选择采购组织', trigger: 'change' }]
-      },
-      component: {
-        // main.ts 模拟公司组件库进行全局注册，此处只传字符串名称。
-        renderer: 'corp-org-selector',
-        model: {
-          prop: 'selectedCode',
-          event: 'node-select',
-          valueFromEvent: (...args) => (args[0] as { code: string }).code
+    label: '组织 / 供应商',
+    props: { minWidth: 430 },
+    children: [{
+      props: { gutter: 8 },
+      children: [
+        {
+          key: 'organization-selector',
+          fieldKey: 'orgCode',
+          type: 'component',
+          colProps: { span: 12 },
+          formItemProps: {
+            label: '采购组织',
+            rules: [{ required: true, message: '请选择采购组织', trigger: 'change' }]
+          },
+          component: {
+            // main.ts 模拟公司组件库进行全局注册，此处只传字符串名称。
+            renderer: 'corp-org-selector',
+            model: {
+              prop: 'selectedCode',
+              event: 'node-select',
+              valueFromEvent: (...args) => (args[0] as { code: string } | null)?.code || ''
+            },
+            props: ({ row }) => ({
+              disabled: !editable.value || asPurchaseRow(row).locked
+            }),
+            listeners: {
+              'node-select'({ updateRow }, selected) {
+                const organization = selected as { code: string; name: string } | null
+                updateRow({
+                  orgName: organization?.name || '',
+                  supplierId: '',
+                  supplierName: ''
+                })
+              }
+            }
+          }
         },
-        props: ({ row }) => ({
-          disabled: !editable.value || asPurchaseRow(row).locked
-        }),
-        listeners: {
-          'node-select'({ updateRow }, selected) {
-            const organization = selected as { code: string; name: string }
-            updateRow({ orgName: organization.name })
+        {
+          key: 'supplier-selector',
+          fieldKey: 'supplierId',
+          type: 'component',
+          colProps: { span: 12 },
+          formItemProps: {
+            label: '供应商',
+            rules: [{ required: true, message: '请选择供应商', trigger: 'change' }]
+          },
+          component: {
+            renderer: 'corp-supplier-picker',
+            model: {
+              prop: 'supplierId',
+              event: 'supplier-change',
+              valueFromEvent: (...args) => (args[0] as SupplierSelection | null)?.id || ''
+            },
+            props: ({ row }) => ({
+              orgCode: asPurchaseRow(row).orgCode,
+              disabled: !editable.value || asPurchaseRow(row).locked
+            }),
+            listeners: {
+              'supplier-change'({ updateRow }, selected, selectedSource) {
+                const supplier = selected as SupplierSelection | null
+                const source = selectedSource as 'favorite' | 'search'
+                updateRow({
+                  supplierName: supplier?.name || '',
+                  supplierSource: source,
+                  ...(supplier ? { taxRate: supplier.taxRate } : {})
+                })
+              }
+            }
           }
         }
-      }
-    }] }]
+      ]
+    }]
   },
   {
     key: 'quantity-price',
@@ -219,11 +278,17 @@ const columns: ColumnConfig[] = [
         },
         {
           fieldKey: 'taxPrice',
-          type: 'number',
+          type: 'component',
           colProps: { span: 14 },
           component: {
+            renderer: MoneyInput,
+            model: {
+              prop: 'amount',
+              event: 'amount-change'
+            },
             props: ({ row }) => ({
               disabled: !editable.value || asPurchaseRow(row).locked,
+              currency: 'CNY',
               min: 0,
               precision: 2
             })
@@ -247,8 +312,15 @@ const columns: ColumnConfig[] = [
           valueFromEvent: (...args) => (args[0] as UploadFile[]).map(file => file.id)
         },
         props: ({ row }) => ({
-          disabled: !editable.value || asPurchaseRow(row).locked
-        })
+          disabled: !editable.value || asPurchaseRow(row).locked,
+          limit: 5,
+          maxSizeMb: 10
+        }),
+        listeners: {
+          'upload-error'(_context, reason) {
+            console.warn((reason as Error).message)
+          }
+        }
       }
     }] }]
   },

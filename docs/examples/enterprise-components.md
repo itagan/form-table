@@ -8,12 +8,12 @@
 
 | 字段 | 组件来源 | 接入方式 |
 | --- | --- | --- |
-| 物料 | 页面手动引入 `SkuSelectorField` | 组件对象 + 自定义 model |
+| 物料 | 页面手动引入 `BusinessSkuSelector` | 组件对象 + 自定义 model |
 | 采购组织 | 公司组件库全局注册 | 字符串 renderer + 自定义 model |
 | 供应商 | 公司组件库全局注册 | 字符串 renderer + 复杂事件载荷 |
 | 数量 | Element UI | 内置 `number` 类型 |
 | 含税单价 | 页面手动引入 `MoneyInput` | 组件对象 + 自定义 model |
-| 附件 | 页面手动引入 `InternalUploadField` | 文件列表 model + 动态 props |
+| 附件 | 页面手动引入 `BusinessAttachmentUploader` | 文件列表 model + 动态 props |
 | 审批状态 | 公司全局展示组件 | `model: false` |
 | 操作 | 页面模板 | 具名 Slot |
 
@@ -34,7 +34,7 @@ Vue.use(CorpComponentLibrary)
 假设插件注册了以下组件：
 
 ```text
-corp-org-tree-select
+corp-org-selector
 corp-supplier-picker
 biz-approval-status
 ```
@@ -68,10 +68,12 @@ export interface PurchaseDetailRow extends TableRow {
 
 export interface SkuSelection {
   id: string
+  code: string
   name: string
   specification: string
   unit: string
-  defaultTaxRate: number
+  taxRate: number
+  stock: number
 }
 
 export interface SupplierSelection {
@@ -83,7 +85,8 @@ export interface SupplierSelection {
 export interface UploadFile {
   id: string
   name: string
-  url: string
+  size: number
+  status: 'success'
 }
 ```
 
@@ -94,12 +97,25 @@ export interface UploadFile {
 局部业务组件不需要注册到页面 `components`，直接将导入的组件对象传给 `renderer`：
 
 ```ts
-import SkuSelectorField from './components/SkuSelectorField.vue'
-import MoneyInput from '@/business-components/MoneyInput.vue'
-import InternalUploadField from '@/business-components/InternalUploadField.vue'
+import BusinessSkuSelector from '@/components/EnterpriseComponents/BusinessSkuSelector.vue'
+import MoneyInput from '@/components/EnterpriseComponents/MoneyInput.vue'
+import BusinessAttachmentUploader from '@/components/EnterpriseComponents/BusinessAttachmentUploader.vue'
 ```
 
 如果组件只在当前业务使用，这种方式比全局注册更清晰，也有利于构建工具按页面拆包。
+
+## 可运行的内部组件 Mock
+
+调试台提供了一组可直接运行的企业组件 Mock。它们不依赖后端接口，但保留了实际项目中常见的搜索、组织联动、非标准双向绑定、复杂事件载荷、文件限制和只读状态展示：
+
+- 物料搜索选择器（`playground/src/components/EnterpriseComponents/BusinessSkuSelector.vue`）：显示编码、规格和库存，缺货物料不可选。
+- 采购组织选择器（`playground/src/components/EnterpriseComponents/CompanyOrgSelector.vue`）：使用级联组织树，并在事件中返回组织名称、区域和成本中心。
+- 供应商选择器（`playground/src/components/EnterpriseComponents/CompanySupplierPicker.vue`）：根据采购组织过滤供应商，同时返回选择来源。
+- 金额输入框（`playground/src/components/EnterpriseComponents/MoneyInput.vue`）：使用 `amount` / `amount-change` 协议，并返回格式化元数据。
+- 业务附件上传（`playground/src/components/EnterpriseComponents/BusinessAttachmentUploader.vue`）：读取本地文件，校验数量和大小，并模拟上传后的文件 ID。
+- 审批状态展示（`playground/src/components/EnterpriseComponents/ApprovalStatusDisplay.vue`）：纯展示组件，不参与 model 写回。
+
+这些 Mock 用于演示接入协议。实际项目中可以保持 columns 配置不变，将 renderer 替换为公司组件库或业务模块中的真实组件。
 
 ## 完整 columns 工厂
 
@@ -112,9 +128,9 @@ import type {
   FormTableValue,
   TableRow
 } from '@itagan/form-table'
-import SkuSelectorField from './components/SkuSelectorField.vue'
-import MoneyInput from '@/business-components/MoneyInput.vue'
-import InternalUploadField from '@/business-components/InternalUploadField.vue'
+import BusinessSkuSelector from '@/components/EnterpriseComponents/BusinessSkuSelector.vue'
+import MoneyInput from '@/components/EnterpriseComponents/MoneyInput.vue'
+import BusinessAttachmentUploader from '@/components/EnterpriseComponents/BusinessAttachmentUploader.vue'
 import type {
   PurchaseDetailRow,
   SkuSelection,
@@ -124,8 +140,6 @@ import type {
 
 interface CreatePurchaseColumnsOptions {
   editable: boolean
-  uploadAction: string
-  uploadHeaders: Record<string, string>
 }
 
 const asPurchaseRow = (row: Readonly<TableRow>) => row as Readonly<PurchaseDetailRow>
@@ -153,7 +167,7 @@ export function createPurchaseColumns(
             },
             component: {
               // 手动引入的局部业务组件直接传组件对象。
-              renderer: SkuSelectorField,
+              renderer: BusinessSkuSelector,
               model: {
                 // 组件实际协议：selectedSkuId + select-sku。
                 prop: 'selectedSkuId',
@@ -165,7 +179,7 @@ export function createPurchaseColumns(
               props: ({ row }) => ({
                 disabled: !options.editable || asPurchaseRow(row).locked,
                 placeholder: '输入编码或名称搜索物料',
-                includeDisabled: false
+                includeOutOfStock: false
               }),
               listeners: {
                 // model 先写回 skuId，再执行同名 listener 完成字段联动。
@@ -175,7 +189,7 @@ export function createPurchaseColumns(
                     skuName: sku.name,
                     specification: sku.specification,
                     unit: sku.unit,
-                    taxRate: sku.defaultTaxRate
+                    taxRate: sku.taxRate
                   })
                 }
               }
@@ -216,12 +230,12 @@ export function createPurchaseColumns(
             },
             component: {
               // 公司组件库已经全局注册，直接使用注册名称。
-              renderer: 'corp-org-tree-select',
+              renderer: 'corp-org-selector',
               model: {
-                prop: 'selected-code',
+                prop: 'selectedCode',
                 event: 'node-select',
                 valueFromEvent: (...args: unknown[]) => {
-                  return (args[0] as { code: string }).code
+                  return (args[0] as { code: string } | null)?.code || ''
                 }
               },
               props: ({ row }) => ({
@@ -231,8 +245,12 @@ export function createPurchaseColumns(
               }),
               listeners: {
                 'node-select'({ updateRow }, selected) {
-                  const node = selected as { code: string; name: string }
-                  updateRow({ orgName: node.name })
+                  const node = selected as { code: string; name: string } | null
+                  updateRow({
+                    orgName: node?.name || '',
+                    supplierId: '',
+                    supplierName: ''
+                  })
                 }
               }
             }
@@ -249,7 +267,7 @@ export function createPurchaseColumns(
             component: {
               renderer: 'corp-supplier-picker',
               model: {
-                prop: 'supplier-id',
+                prop: 'supplierId',
                 event: 'supplier-change',
                 // 公司组件事件为 (supplier, source)，只取 supplier.id 写回。
                 valueFromEvent: (...args: unknown[]) => {
@@ -355,9 +373,9 @@ export function createPurchaseColumns(
             }]
           },
           component: {
-            renderer: InternalUploadField,
+            renderer: BusinessAttachmentUploader,
             model: {
-              prop: 'file-ids',
+              prop: 'fileIds',
               event: 'files-change',
               valueFromEvent: (...args: unknown[]) => {
                 return (args[0] as UploadFile[]).map(file => file.id)
@@ -365,9 +383,8 @@ export function createPurchaseColumns(
             },
             props: ({ row }) => ({
               disabled: !options.editable || asPurchaseRow(row).locked,
-              action: options.uploadAction,
-              headers: options.uploadHeaders,
               limit: 5,
+              maxSizeMb: 10,
               accept: '.pdf,.doc,.docx,.xls,.xlsx,.png,.jpg'
             }),
             listeners: {
@@ -504,11 +521,7 @@ const submitting = ref(false)
 
 // columns 创建一次；行级差异通过动态 props 回调读取 row。
 const columns = createPurchaseColumns({
-  editable: true,
-  uploadAction: '/api/files/upload',
-  uploadHeaders: {
-    Authorization: 'Bearer <runtime-token>'
-  }
+  editable: true
 })
 
 const handleTableDataUpdate = (nextTableData: TableRow[]) => {
