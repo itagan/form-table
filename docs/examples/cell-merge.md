@@ -1,5 +1,7 @@
 # 单元格合并业务处理示例
 
+> 可运行 Demo：[打开单元格合并调试页 ↗](http://localhost:5173/cell-merge)
+
 本示例配合 Playground 的 `/cell-merge` 页面，说明如何通过 `tableProps.spanMethod` 实现纵向分组合并和横向汇总行，以及表单数据、校验和提交阶段需要遵守的约束。
 
 可运行源码位于 `playground/src/views/CellMergeView.vue`。

@@ -1,4 +1,7 @@
 <script setup lang="ts">
+// 与 App.vue 的全局返回入口保持一致，可在不同部署环境覆盖文档站地址。
+const docsSiteUrl = import.meta.env.VITE_DOCS_SITE_URL || 'http://localhost:5174/'
+
 const examples = [
   {
     title: '基础编辑',
@@ -50,8 +53,8 @@ const examples = [
     tags: ['spanMethod', 'rowspan', 'colspan']
   },
   {
-    title: '能力文档',
-    description: '在调试应用内查看 props、事件、ref 方法和推荐配置约定。',
+    title: '调试台 API 速查',
+    description: '在 Playground 内查看 props、事件、ref 方法和推荐配置约定；完整文档请返回文档总站。',
     path: '/form-table-docs',
     type: 'info',
     tags: ['API', 'guide', 'examples']
@@ -81,8 +84,11 @@ const examples = [
           <el-button type="primary">打开基础示例</el-button>
         </router-link>
         <router-link to="/form-table-docs">
-          <el-button>查看能力文档</el-button>
+          <el-button>查看精简 API</el-button>
         </router-link>
+        <a :href="docsSiteUrl" class="docs-site-action">
+          <el-button type="success" plain icon="el-icon-document">返回文档总站</el-button>
+        </a>
       </div>
     </section>
 

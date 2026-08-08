@@ -1,5 +1,7 @@
 # 行、列与延迟提交
 
+> 可运行 Demo：[打开行列操作与延迟提交调试页 ↗](http://localhost:5173/row-column-operations)
+
 FormTable 负责渲染、字段校验路径和当前行字段更新；`tableData` 与 `columns` 始终由调用方维护。因此，行增删、列调整和需要业务确认的变更都应在页面层完成。
 
 ## 常见行操作
