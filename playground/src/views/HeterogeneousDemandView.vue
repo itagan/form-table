@@ -8,6 +8,7 @@
         <p>一个 FormTable 保持公共表头；普通字段使用动态配置，复杂场景按需求类型加载独立业务组件。</p>
       </div>
       <div class="heading-actions">
+        <el-switch v-model="readonlyMode" active-text="只读模式" />
         <el-button @click="resetRows">恢复示例数据</el-button>
         <el-button type="primary" @click="submitDemands">校验并生成提交数据</el-button>
       </div>
@@ -31,49 +32,6 @@
           <strong class="demand-type-label">{{ getDemandTypeLabel(row.type) }}</strong>
         </template>
 
-        <template #scene-schedule="{ row, value, setValue }">
-          <div v-if="requiresSchedule(row.type)" class="schedule-editor">
-            <el-date-picker
-              :value="value.start"
-              type="datetime"
-              value-format="yyyy-MM-dd HH:mm:ss"
-              :placeholder="getStartPlaceholder(row.type)"
-              @input="setValue({ ...value, start: $event })"
-            />
-            <template v-if="requiresEndTime(row.type)">
-              <span>~</span>
-              <el-date-picker
-                :value="value.end"
-                type="datetime"
-                value-format="yyyy-MM-dd HH:mm:ss"
-                :placeholder="getEndPlaceholder(row.type)"
-                @input="setValue({ ...value, end: $event })"
-              />
-            </template>
-          </div>
-          <span v-else class="empty-cell">该需求不需要时间</span>
-        </template>
-
-        <template #scene-pricing="{ row, value, setValue }">
-          <div class="pricing-editor">
-            <el-input-number
-              :value="value.quantity"
-              :min="1"
-              controls-position="right"
-              @input="setValue({ ...value, quantity: $event })"
-            />
-            <span class="unit-label">{{ value.unit }}</span>
-            <el-input-number
-              :value="value.unitPrice"
-              :min="0"
-              :precision="2"
-              controls-position="right"
-              @input="setValue({ ...value, unitPrice: $event })"
-            />
-            <span class="unit-label">元/{{ value.unit }}</span>
-          </div>
-        </template>
-
         <template #total-budget="{ row }">
           <strong class="budget">¥ {{ formatMoney(calculateDemandTotal(row)) }}</strong>
         </template>
@@ -81,9 +39,9 @@
         <template #row-actions="{ row }">
           <div class="row-actions">
             <el-tooltip content="在当前行后新增相同类型需求" placement="top">
-              <el-button type="primary" icon="el-icon-plus" circle size="mini" @click="addSameType(row)" />
+              <el-button :disabled="readonlyMode" type="primary" icon="el-icon-plus" circle size="mini" @click="addSameType(row)" />
             </el-tooltip>
-            <el-button icon="el-icon-delete" circle size="mini" @click="removeRow(row)" />
+            <el-button :disabled="readonlyMode" icon="el-icon-delete" circle size="mini" @click="removeRow(row)" />
           </div>
         </template>
       </FormTable>
@@ -105,6 +63,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue'
+import type { Component } from 'vue'
 import { Message } from 'element-ui'
 import FormTable from '@itagan/form-table'
 import type { ColumnConfig, FormTableExpose, TableRow } from '@itagan/form-table'
@@ -112,18 +71,23 @@ import VenueDemandEditor from '../components/demand-demo/VenueDemandEditor.vue'
 import HotelDemandEditor from '../components/demand-demo/HotelDemandEditor.vue'
 import MealDemandEditor from '../components/demand-demo/MealDemandEditor.vue'
 import TransportDemandEditor from '../components/demand-demo/TransportDemandEditor.vue'
+import DemandScheduleEditor from '../components/demand-demo/DemandScheduleEditor.vue'
+import DemandPricingEditor from '../components/demand-demo/DemandPricingEditor.vue'
+import UnsupportedDemandEditor from '../components/demand-demo/UnsupportedDemandEditor.vue'
 import {
   calculateDemandTotal,
   createDemandRow,
-  demandTypeLabels
+  demandTypeLabels,
+  requiresDemandEndTime,
+  requiresDemandSchedule
 } from '../components/demand-demo/types'
-import type { DemandDetail, DemandRow, DemandSchedule, DemandType } from '../components/demand-demo/types'
+import type { ComplexDemandType, DemandDetail, DemandRow, DemandSchedule, DemandType } from '../components/demand-demo/types'
 
 type ValidationCallback = (error?: Error) => void
 type SpanMethodContext = { column: { property?: string }, rowIndex: number }
 type CellSpan = { rowspan: number, colspan: number }
 
-const descriptionEditors = {
+const descriptionEditors: Record<ComplexDemandType, Component> = {
   venue: VenueDemandEditor,
   hotel: HotelDemandEditor,
   meal: MealDemandEditor,
@@ -162,9 +126,10 @@ const createInitialRows = (): DemandRow[] => [
 const tableData = ref<DemandRow[]>(createInitialRows())
 const submittedPayload = ref<unknown[] | null>(null)
 const formTableRef = ref<FormTableExpose>()
+const readonlyMode = ref(false)
 
 const asDemandRow = (row: Readonly<TableRow>) => row as Readonly<DemandRow>
-const isComplexType = (type: DemandType) => Object.prototype.hasOwnProperty.call(descriptionEditors, type)
+const isComplexType = (type: DemandType): type is ComplexDemandType => Object.prototype.hasOwnProperty.call(descriptionEditors, type)
 
 /** 连续同类型分组的首行保存跨度，其余行保存 0，避免 spanMethod 重复扫描数据。 */
 const demandTypeSpans = computed(() => {
@@ -213,8 +178,8 @@ const validateDetail = (type: DemandType, value: DemandDetail, callback: Validat
 }
 
 const validateSchedule = (type: DemandType, value: DemandSchedule, callback: ValidationCallback) => {
-  if (!requiresSchedule(type)) return callback()
-  const complete = Boolean(value?.start) && (!requiresEndTime(type) || Boolean(value?.end))
+  if (!requiresDemandSchedule(type)) return callback()
+  const complete = Boolean(value?.start) && (!requiresDemandEndTime(type) || Boolean(value?.end))
   callback(complete ? undefined : new Error(`请完善${demandTypeLabels[type]}使用时间`))
 }
 
@@ -241,10 +206,14 @@ const columns: ColumnConfig[] = [
           rules: [{ validator: (_rule: unknown, value: DemandDetail, callback: ValidationCallback) => validateDetail(asDemandRow(row).type, value, callback), trigger: 'change' }]
         }),
         component: {
-          resolveRenderer: ({ row }) => descriptionEditors[asDemandRow(row).type as keyof typeof descriptionEditors],
+          renderer: UnsupportedDemandEditor,
+          resolveRenderer: ({ row }) => {
+            const type = asDemandRow(row).type
+            return isComplexType(type) ? descriptionEditors[type] : undefined
+          },
           props: ({ row }) => {
             const type = asDemandRow(row).type
-            return type === 'flight' || type === 'train' || type === 'car' ? { mode: type } : {}
+            return { demandType: type, readonly: readonlyMode.value }
           },
           model: { prop: 'value', event: 'change' }
         }
@@ -257,7 +226,7 @@ const columns: ColumnConfig[] = [
         colProps: { span: 7 },
         formItemProps: { rules: [{ required: true, message: '请选择费用类型', trigger: 'change' }] },
         component: {
-          props: { placeholder: '费用类型' },
+          props: () => ({ placeholder: '费用类型', disabled: readonlyMode.value }),
           options: [{ label: '物料制作', value: 'material' }, { label: '服务费', value: 'service' }, { label: '其他', value: 'other' }]
         }
       },
@@ -268,7 +237,7 @@ const columns: ColumnConfig[] = [
         visible: ({ row }) => asDemandRow(row).type === 'other',
         colProps: { span: 17 },
         formItemProps: { rules: [{ required: true, message: '请输入费用描述', trigger: 'blur' }] },
-        component: { props: { placeholder: '描述（必填）' } }
+        component: { props: () => ({ placeholder: '描述（必填）', disabled: readonlyMode.value }) }
       },
       {
         key: 'guest-count',
@@ -277,7 +246,7 @@ const columns: ColumnConfig[] = [
         visible: ({ row }) => asDemandRow(row).type === 'guest',
         colProps: { span: 7 },
         formItemProps: { rules: [{ required: true, message: '请输入嘉宾数量', trigger: 'change' }] },
-        component: { props: { min: 1, controlsPosition: 'right' } }
+        component: { props: () => ({ min: 1, controlsPosition: 'right', disabled: readonlyMode.value }) }
       },
       {
         key: 'guest-remark',
@@ -285,7 +254,7 @@ const columns: ColumnConfig[] = [
         type: 'input',
         visible: ({ row }) => asDemandRow(row).type === 'guest',
         colProps: { span: 17 },
-        component: { props: { placeholder: '备注（非必填）' } }
+        component: { props: () => ({ placeholder: '备注（非必填）', disabled: readonlyMode.value }) }
       }
     ] }]
   },
@@ -296,11 +265,15 @@ const columns: ColumnConfig[] = [
     children: [{ children: [{
       key: 'schedule-field',
       fieldKey: 'schedule',
-      type: 'slot',
+      type: 'component',
       formItemProps: ({ row }) => ({
         rules: [{ validator: (_rule: unknown, value: DemandSchedule, callback: ValidationCallback) => validateSchedule(asDemandRow(row).type, value, callback), trigger: 'change' }]
       }),
-      component: { renderer: 'scene-schedule' }
+      component: {
+        renderer: DemandScheduleEditor,
+        props: ({ row }) => ({ demandType: asDemandRow(row).type, readonly: readonlyMode.value }),
+        model: { prop: 'value', event: 'change' }
+      }
     }] }]
   },
   {
@@ -310,8 +283,12 @@ const columns: ColumnConfig[] = [
     children: [{ children: [{
       key: 'pricing-field',
       fieldKey: 'pricing',
-      type: 'slot',
-      component: { renderer: 'scene-pricing' }
+      type: 'component',
+      component: {
+        renderer: DemandPricingEditor,
+        props: ({ row }) => ({ demandType: asDemandRow(row).type, readonly: readonlyMode.value }),
+        model: { prop: 'value', event: 'change' }
+      }
     }] }]
   },
   {
@@ -333,10 +310,6 @@ const columns: ColumnConfig[] = [
 ]
 
 const getDemandTypeLabel = (type: DemandType) => demandTypeLabels[type]
-const requiresSchedule = (type: DemandType) => type !== 'other' && type !== 'guest'
-const requiresEndTime = (type: DemandType) => type === 'venue' || type === 'hotel' || type === 'car'
-const getStartPlaceholder = (type: DemandType) => type === 'hotel' ? '入住时间' : type === 'meal' ? '就餐时间' : '开始/出发时间'
-const getEndPlaceholder = (type: DemandType) => type === 'hotel' ? '离店时间' : '结束时间'
 const formatMoney = (value: number) => value.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
 const replaceTableData = (rows: TableRow[]) => {
@@ -347,6 +320,7 @@ const replaceTableData = (rows: TableRow[]) => {
 const clearValidation = () => nextTick(() => formTableRef.value?.clearValidate())
 
 const addSameType = (row: DemandRow) => {
+  if (readonlyMode.value) return
   const lastGroupIndex = tableData.value.reduce((lastIndex, item, index) => (
     item.type === row.type ? index : lastIndex
   ), -1)
@@ -362,6 +336,7 @@ const addSameType = (row: DemandRow) => {
 }
 
 const removeRow = (row: DemandRow) => {
+  if (readonlyMode.value) return
   tableData.value = tableData.value.filter(item => item._rowKey !== row._rowKey)
   submittedPayload.value = null
   clearValidation()
@@ -384,7 +359,7 @@ const submitDemands = async () => {
     demandType: row.type,
     demandTypeName: demandTypeLabels[row.type],
     detail: row.detail,
-    schedule: requiresSchedule(row.type) ? row.schedule : undefined,
+    schedule: requiresDemandSchedule(row.type) ? row.schedule : undefined,
     pricing: row.pricing,
     totalBudget: calculateDemandTotal(row)
   }))
@@ -402,13 +377,10 @@ const submitDemands = async () => {
 .architecture-note { margin-bottom: 14px; padding: 12px 16px; color: #1f4f46; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; }
 .table-card, .result-card { background: #fff; border: 1px solid #e4e7ed; border-radius: 8px; box-shadow: 0 8px 24px rgba(15, 23, 42, .05); }
 .table-card { overflow: hidden; }
-.schedule-editor, .pricing-editor, .row-actions { display: flex; align-items: center; gap: 6px; }
-.schedule-editor :deep(.el-date-editor) { width: 190px; }
-.pricing-editor :deep(.el-input-number) { width: 120px; }
-.unit-label { flex-shrink: 0; color: #606266; font-size: 12px; }
+.row-actions { display: flex; align-items: center; gap: 6px; }
 .budget { color: #1f2937; font-variant-numeric: tabular-nums; }
 .demand-type-label { color: #374151; font-weight: 600; }
-.empty-cell, .empty-result { color: #909399; }
+.empty-result { color: #909399; }
 .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
 .result-card { min-width: 0; padding: 18px; }
 .result-card h2 { margin: 0 0 12px; font-size: 17px; }
