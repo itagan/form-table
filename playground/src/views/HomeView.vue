@@ -60,6 +60,13 @@ const examples = [
     tags: ['discriminated data', 'component registry', 'normalize']
   },
   {
+    title: '多日议程编排',
+    description: '简化演示日期与主题跨行合并、SortableJS 组内拖拽、行操作和分组提交。',
+    path: '/itinerary-simple',
+    type: 'primary',
+    tags: ['SortableJS', 'rowspan', 'group data']
+  },
+  {
     title: '调试台 API 速查',
     description: '在 Playground 内查看 props、事件、ref 方法和推荐配置约定；完整文档请返回文档总站。',
     path: '/form-table-docs',

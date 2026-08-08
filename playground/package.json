@@ -10,9 +10,13 @@
     "type-check": "vue-tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "element-ui": "^2.15.14",
     "@itagan/form-table": "workspace:*",
+    "element-ui": "^2.15.14",
+    "sortablejs": "^1.15.7",
     "vue": "^2.7.7",
     "vue-router": "^3.5.4"
+  },
+  "devDependencies": {
+    "@types/sortablejs": "^1.15.9"
   }
 }
