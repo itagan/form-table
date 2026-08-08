@@ -231,7 +231,7 @@
       <pre>{{ contextExample }}</pre>
 
       <h3>异步更新与 rowKey</h3>
-      <p><code>index</code> 是事件触发时快照。异步期间可能排序、插入或删除行时，应配置唯一稳定的 <code>tableProps.rowKey</code>；更新助手会在最新 tableData 中重新定位，目标行不存在时忽略更新。</p>
+      <p><code>rowKey</code> 是可选能力。普通同步输入、增删和保留对象引用的排序不需要配置；只有异步等待期间可能刷新、克隆或替换全部行对象时才建议提供。<code>index</code> 是事件触发时快照，更新助手会重新定位，目标行不存在时忽略更新。</p>
       <pre>{{ asyncUpdateExample }}</pre>
     </section>
 

@@ -29,6 +29,13 @@ const examples = [
     tags: ['JSON', 'local enhance', 'registry-free']
   },
   {
+    title: '行列操作与延迟提交',
+    description: '演示行增删复制移动、动态列，以及业务检查成功后才写入字段。',
+    path: '/row-column-operations',
+    type: 'warning',
+    tags: ['row operations', 'columns', 'delayed commit']
+  },
+  {
     title: '能力文档',
     description: '在调试应用内查看 props、事件、ref 方法和推荐配置约定。',
     path: '/form-table-docs',
