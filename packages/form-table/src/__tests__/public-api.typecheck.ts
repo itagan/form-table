@@ -3,6 +3,7 @@ import FormTable, {
   FormTable as NamedFormTable,
   FormTablePlugin,
   type ColumnConfig,
+  type FieldModelConfig,
   type FormTableExpose,
   type FormTableHeaderSlotContext,
   type FormTableProps,
@@ -35,6 +36,30 @@ const columns: ColumnConfig[] = [{
           renderer: 'actions',
           props: ({ row }) => ({ disabled: Boolean(row.locked) })
         }
+      }
+    ]
+  }]
+}]
+
+const customModel: FieldModelConfig = {
+  prop: 'selectedId',
+  event: 'select',
+  valueFromEvent: (...args) => (args[0] as { id: string }).id
+}
+
+const modelVariants: ColumnConfig[] = [{
+  label: '组件绑定协议',
+  children: [{
+    children: [
+      {
+        fieldKey: 'ownerId',
+        type: 'component',
+        component: { renderer: CustomInput, model: customModel }
+      },
+      {
+        fieldKey: 'summary',
+        type: 'component',
+        component: { renderer: CustomInput, model: false }
       }
     ]
   }]
@@ -183,6 +208,7 @@ headerContext.columnConfig.label = '新表头'
 void headerContext.column
 
 void props
+void modelVariants
 void component
 void named
 void plugin

@@ -114,7 +114,8 @@ const resolvedComponent = computed<ResolvedComponentConfig>(() => {
     },
     listeners: resolvedListeners,
     options: resolveDynamicValue(component?.options, runtimeContext.value) as FormItemOption[] || [],
-    optionProps: resolveDynamicValue(component?.optionProps, runtimeContext.value) as OptionPropsConfig | undefined
+    optionProps: resolveDynamicValue(component?.optionProps, runtimeContext.value) as OptionPropsConfig | undefined,
+    model: component?.model
   }
 })
 

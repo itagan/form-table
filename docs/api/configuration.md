@@ -167,6 +167,48 @@ slot              → component.renderer 具名 slot
 </template>
 ```
 
+### 自定义组件绑定协议
+
+`type: 'component'` 默认使用 Vue 2 原生 `v-model`。FormTable 把模型信息保留到真实组件解析阶段，因此组件自身声明的 `model.prop/model.event` 仍然有效：
+
+```ts
+const CompanySwitch = {
+  model: { prop: 'checked', event: 'toggle' },
+  props: { checked: Boolean }
+}
+```
+
+不遵循 Vue 2 `v-model` 的内部或业务组件可通过 `component.model` 显式声明协议：
+
+```ts
+{
+  fieldKey: 'ownerId',
+  type: 'component',
+  component: {
+    renderer: 'company-user-selector',
+    model: {
+      prop: 'selectedId',
+      event: 'select',
+      valueFromEvent: (...args) => args[0].id
+    },
+    listeners: {
+      select({ updateRow }, user) {
+        updateRow({ ownerName: user.name })
+      }
+    }
+  }
+}
+```
+
+| `component.model` | 行为 |
+| --- | --- |
+| 未配置 | 使用 Vue 2 原生 `v-model`，兼容组件自己的 `model` 声明 |
+| `{ prop, event }` | 将字段值绑定到指定 prop，并监听指定事件的第一个参数 |
+| `{ valueFromEvent }` | 从事件的全部原始参数中提取需要写回的字段值 |
+| `false` | 不注入任何模型 prop 或事件，适合纯展示组件 |
+
+绑定事件与 `component.listeners` 同名时，FormTable 先写回字段值，再以完整原始参数调用业务 listener。自定义协议由函数式渲染器处理，不增加额外 DOM 或 Vue 组件实例。
+
 ### 使用 Vue Render Function
 
 `component.renderer` 接收标准 Vue 组件，因此可以直接传入一个使用 Render Function 定义的本地组件，无需给 Schema 增加单独的 `render` 字段：
@@ -226,7 +268,7 @@ const columns: ColumnConfig[] = [{
 }]
 ```
 
-FormTable 会按普通自定义组件处理它：当前字段通过 `value` 传入，组件事件交给 `component.listeners`，数据更新仍使用 `setValue/updateRow`。Render Function 只是该 Vue 组件的内部实现，不是新的 FormTable 渲染模式。
+FormTable 会按普通自定义组件处理它：未配置 `component.model` 时使用组件原生 Vue 2 `v-model`，其他组件事件交给 `component.listeners`，数据更新仍可使用 `setValue/updateRow`。Render Function 只是该 Vue 组件的内部实现，不是新的 FormTable 渲染模式。
 
 ### Slot 模式
 
@@ -286,7 +328,7 @@ Slot 上下文说明：
 | `value` | 当前字段值 |
 | `setValue(value)` | 更新当前字段，支持嵌套路径，并触发 `update:tableData` 与 `field-change` |
 | `updateRow(patch)` | 合并更新当前行的多个字段 |
-| `component` | 解析后的 `renderer/props/listeners/options/optionProps` |
+| `component` | 解析后的 `renderer/props/listeners/options/optionProps/model` |
 | `columnConfig` | 当前原始 `ColumnConfig` |
 | `rowConfig` | 当前原始 `RowConfig`，与业务数据 `row` 含义不同 |
 | `itemConfig` | 当前原始 `FormItemConfig` |
