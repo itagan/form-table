@@ -15,6 +15,7 @@ export default {
     slotProps: { type: Object, required: true }
   },
   render(
+    // Vue 2 functional render 签名要求 h 位于首参；插槽函数已生成 VNode，因此无需再次使用。
     _createElement: CreateElement,
     context: RenderContext<SlotRendererProps>
   ): VNode | VNode[] | undefined {
