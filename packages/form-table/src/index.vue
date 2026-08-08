@@ -78,8 +78,23 @@ const visibleColumns = computed(() => {
   return props.columns.filter((column) => resolveVisible(column.visible, tableContext))
 })
 
+// 同一同步调用链中的多次更新必须基于上一次已发出的结果继续计算。
+// 微任务结束后重新以受控 props 为准，避免父组件未接收更新时长期保留内部状态。
+let synchronousUpdateBase: TableRow[] | null = null
+let updateBaseResetPending = false
+
+const scheduleUpdateBaseReset = () => {
+  if (updateBaseResetPending) return
+  updateBaseResetPending = true
+  Promise.resolve().then(() => {
+    synchronousUpdateBase = null
+    updateBaseResetPending = false
+  })
+}
+
 const updateRow = (rowIndex: number, patch: Partial<TableRow>) => {
-  const currentRow = props.tableData[rowIndex]
+  const sourceTableData = synchronousUpdateBase || props.tableData
+  const currentRow = sourceTableData[rowIndex]
   if (!currentRow) {
     return
   }
@@ -106,8 +121,10 @@ const updateRow = (rowIndex: number, patch: Partial<TableRow>) => {
     return
   }
 
-  const nextTableData = [...props.tableData]
+  const nextTableData = [...sourceTableData]
   nextTableData[rowIndex] = nextRow
+  synchronousUpdateBase = nextTableData
+  scheduleUpdateBaseReset()
   emit('update:tableData', nextTableData)
 
   changes.forEach((change) => {

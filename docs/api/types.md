@@ -46,9 +46,11 @@ interface SlotFormItemConfig {
 ```text
 Column visible/props     → tableData
 Row visible/props        → tableData, row, index
-Field 动态配置           → tableData, row, index, fieldKey
-component.listeners      → Field 信息 + value, setValue, updateRow
+Field 动态配置           → tableData, row, index, fieldKey, value
+component.listeners      → Field 信息 + setValue, updateRow
 字段 slot                → Listener 信息 + propPath, component
 ```
 
-`row` 和 `tableData` 在回调类型中是只读的；字段更新使用 `setValue` 或 `updateRow`。
+`row` 和 `tableData` 在回调类型中采用浅层只读约束；运行时不会冻结原对象。字段更新使用 `setValue` 或 `updateRow`。
+
+表头 slot 接收 `tableData/label/columnIndex/column`。其中 `column` 类型为 `Readonly<ColumnConfig>`；`columnIndex` 是动态显隐过滤后的可见列下标，不保证等于原始 `columns` 数组下标。

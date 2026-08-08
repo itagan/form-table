@@ -27,12 +27,39 @@ component: {
 
 如果组件执行 `$emit('xx', arg1, arg2)`，回调即收到 `fieldContext, arg1, arg2`。上下文不会包含 Column/Row 层不存在的占位字段。
 
+上下文中的 `value` 是事件回调执行时的当前字段值，不等同于组件刚刚发出的新值；新值仍按组件原始事件参数传入。
+
+```ts
+component: {
+  listeners: {
+    change({ row, index, fieldKey, value, setValue, updateRow }, nextValue) {
+      console.log('当前数据行', row)
+      console.log('数据下标与字段', index, fieldKey)
+      console.log('修改前字段值', value)
+
+      setValue(nextValue)
+      updateRow({ touched: true })
+    }
+  }
+}
+```
+
+`setValue` 与 `updateRow` 可以在同一同步回调中连续调用，后一次更新会基于前一次结果继续合并。跨异步边界后则始终以父组件最新传回的 `tableData` 为准。
+
 ```vue
 <template #actions="{ row, index, updateRow, component }">
-  <el-button v-bind="component.props" @click="updateRow({ enabled: !row.enabled })">切换</el-button>
+  <el-button
+    v-bind="component.props"
+    v-on="component.listeners"
+    @click="updateRow({ enabled: !row.enabled })"
+  >切换</el-button>
   <el-button @click="removeRow(index)">删除</el-button>
 </template>
 ```
+
+`component.listeners` 中的函数已经自动注入字段上下文。Slot 内只有显式使用 `v-on="component.listeners"`，自定义组件发出的同名事件才会进入配置 listener；FormTable 不会替 Slot 自动绑定。
+
+`row` 和 `tableData` 是原数据的只读视图约定：TypeScript 提供浅层只读限制，运行时不会冻结对象。请勿直接赋值，统一使用更新助手。
 
 ## Ref
 

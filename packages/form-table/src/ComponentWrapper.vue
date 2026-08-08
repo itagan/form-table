@@ -85,7 +85,6 @@ import {
   createRowContext,
   resolveDynamicValue
 } from './utils/dynamic'
-import { getValueByPath } from './utils/path'
 
 const props = defineProps<{
   row: TableRow
@@ -121,7 +120,7 @@ const options = computed<FormItemOption[]>(() => {
 const optionProps = computed<OptionPropsConfig | undefined>(() => {
   return resolveDynamicValue(props.config.component?.optionProps, runtimeContext.value)
 })
-const value = computed(() => getValueByPath(props.row, props.config.fieldKey))
+const value = computed(() => runtimeContext.value.value)
 const setValue = (nextValue: unknown) => updateApi?.setValue(props.rowIndex, props.config.fieldKey, nextValue)
 const updateRow = (patch: Partial<TableRow>) => updateApi?.updateRow(props.rowIndex, patch)
 const fieldContext = computed<FormTableFieldContext>(() => ({

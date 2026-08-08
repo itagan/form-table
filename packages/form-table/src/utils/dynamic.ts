@@ -5,6 +5,7 @@ import type {
   FormTableTableContext,
   TableRow
 } from '../types'
+import { getValueByPath } from './path'
 
 export function createTableContext(
   tableData: ReadonlyArray<TableRow>
@@ -30,7 +31,8 @@ export function createFieldRenderContext(
 ): FormTableFieldRenderContext {
   return {
     ...rowContext,
-    fieldKey
+    fieldKey,
+    value: getValueByPath(rowContext.row, fieldKey)
   }
 }
 
