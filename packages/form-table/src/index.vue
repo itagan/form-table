@@ -84,6 +84,7 @@ const visibleColumns = computed(() => {
 // 同一同步调用链中的多次更新必须基于上一次已发出的结果继续计算。
 // 微任务结束后重新以受控 props 为准，避免父组件未接收更新时长期保留内部状态。
 let synchronousUpdateBase: TableRow[] | null = null
+const synchronousRowIndexes = new Map<TableRow, number>()
 let updateBaseResetPending = false
 
 const scheduleUpdateBaseReset = () => {
@@ -91,6 +92,7 @@ const scheduleUpdateBaseReset = () => {
   updateBaseResetPending = true
   Promise.resolve().then(() => {
     synchronousUpdateBase = null
+    synchronousRowIndexes.clear()
     updateBaseResetPending = false
   })
 }
@@ -104,27 +106,29 @@ const getRowIdentity = (row: TableRow) => {
 
 const resolveUpdateRowIndex = (
   sourceTableData: TableRow[],
-  targetRow: TableRow,
-  fallbackIndex: number
+  targetRow: TableRow
 ) => {
   const rowKey = props.tableProps?.rowKey
   if (typeof rowKey === 'function' || (typeof rowKey === 'string' && rowKey)) {
     const identity = getRowIdentity(targetRow)
     if (identity === undefined || identity === null) return -1
-    return sourceTableData.findIndex(row => Object.is(getRowIdentity(row), identity))
+    let matchedIndex = -1
+    for (let index = 0; index < sourceTableData.length; index += 1) {
+      if (!Object.is(getRowIdentity(sourceTableData[index]), identity)) continue
+      if (matchedIndex >= 0) return -1
+      matchedIndex = index
+    }
+    return matchedIndex
   }
 
   const referenceIndex = sourceTableData.indexOf(targetRow)
   if (referenceIndex >= 0) return referenceIndex
-
-  // 同一同步更新链中首个更新已生成了新行对象，此时沿用其已确认的下标。
-  if (synchronousUpdateBase && sourceTableData[fallbackIndex]) return fallbackIndex
-  return -1
+  return synchronousRowIndexes.get(targetRow) ?? -1
 }
 
-const updateRow = (targetRow: TableRow, fallbackIndex: number, patch: Partial<TableRow>) => {
+const updateRow = (targetRow: TableRow, _fallbackIndex: number, patch: Partial<TableRow>) => {
   const sourceTableData = synchronousUpdateBase || props.tableData
-  const rowIndex = resolveUpdateRowIndex(sourceTableData, targetRow, fallbackIndex)
+  const rowIndex = resolveUpdateRowIndex(sourceTableData, targetRow)
   if (rowIndex < 0) return
   const currentRow = sourceTableData[rowIndex]
   if (!currentRow) {
@@ -156,6 +160,9 @@ const updateRow = (targetRow: TableRow, fallbackIndex: number, patch: Partial<Ta
   const nextTableData = [...sourceTableData]
   nextTableData[rowIndex] = nextRow
   synchronousUpdateBase = nextTableData
+  synchronousRowIndexes.set(targetRow, rowIndex)
+  synchronousRowIndexes.set(currentRow, rowIndex)
+  synchronousRowIndexes.set(nextRow, rowIndex)
   scheduleUpdateBaseReset()
   emit('update:tableData', nextTableData)
 

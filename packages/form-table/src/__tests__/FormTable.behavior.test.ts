@@ -355,6 +355,87 @@ describe('FormTable core behavior', () => {
     wrapper.destroy()
   })
 
+  it('does not use a stale row index for an unrelated context in the same update chain', async () => {
+    const contexts: any[] = []
+    const CaptureField = {
+      props: ['value'],
+      render(this: any, h: any) {
+        return h('button', {
+          class: 'capture-unkeyed-row',
+          attrs: { type: 'button' },
+          on: { click: () => this.$emit('capture') }
+        }, this.value)
+      }
+    }
+    const wrapper = mountFormTable({
+      tableData: [{ name: 'Old row' }],
+      columns: [{
+        label: '姓名',
+        children: [{ children: [{
+          fieldKey: 'name',
+          type: 'component',
+          component: {
+            renderer: CaptureField,
+            listeners: { capture: context => contexts.push(context) }
+          }
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+    await wrapper.find('.capture-unkeyed-row').trigger('click')
+
+    await wrapper.setProps({ tableData: [{ name: 'New row' }] })
+    await wrapper.vm.$nextTick()
+    await wrapper.find('.capture-unkeyed-row').trigger('click')
+
+    contexts[1].setValue('Updated row')
+    contexts[0].updateRow({ name: 'Wrong row' })
+
+    expect(wrapper.emitted('update:tableData')).toEqual([[[{ name: 'Updated row' }]]])
+    expect(wrapper.emitted('field-change')).toHaveLength(1)
+    wrapper.destroy()
+  })
+
+  it('ignores updates when a configured rowKey is duplicated', async () => {
+    let savedContext: any
+    const CaptureField = {
+      props: ['value'],
+      render(this: any, h: any) {
+        return h('button', {
+          class: 'capture-duplicate-key',
+          attrs: { type: 'button' },
+          on: { click: () => this.$emit('capture') }
+        }, this.value)
+      }
+    }
+    const wrapper = mountFormTable({
+      tableData: [
+        { id: 1, name: 'First' },
+        { id: 1, name: 'Second' }
+      ],
+      tableProps: { rowKey: 'id' },
+      columns: [{
+        label: '姓名',
+        children: [{ children: [{
+          fieldKey: 'name',
+          type: 'component',
+          component: {
+            renderer: CaptureField,
+            listeners: { capture: context => { savedContext = context } }
+          }
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+    await wrapper.findAll('.capture-duplicate-key').at(0).trigger('click')
+
+    savedContext.setValue('Wrong row')
+
+    expect(wrapper.emitted('update:tableData')).toBeUndefined()
+    expect(wrapper.emitted('field-change')).toBeUndefined()
+    wrapper.destroy()
+  })
+
   it('updates the original row by rowKey after rows are replaced and reordered', async () => {
     let savedContext: any
     const captureContext = vi.fn((context) => {
