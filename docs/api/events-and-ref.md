@@ -102,18 +102,21 @@ formTableRef.value?.getTableRef()
 
 `validate()` 使用 Element UI 完整规则并统一返回 `Promise<boolean>`；校验失败时返回 `false`，不会要求调用方捕获 rejected Promise。
 
-`resetFields()` 按当前已挂载 FormItem 记录的初始值生成新的 `tableData`，清除校验状态并触发一次 `update:tableData`。它不会直接修改传入行对象，也不会逐字段触发 `field-change`。动态新增行会保留并恢复到该行字段挂载时的值；已经删除或当前未渲染的字段不会被重新创建。
+`resetFields()` 保持 Element UI 原生语义，直接调用 `el-form.resetFields()`。由于 Form model 引用了传入的 `tableData`，原生重置会直接修改对应字段，不会触发 `update:tableData` 或 `field-change`。
 
-```vue
-<FormTable
-  ref="formTableRef"
-  :table-data="tableData"
-  :columns="columns"
-  @update:tableData="tableData = $event"
-/>
+受控场景推荐由调用方明确保存和恢复业务初始数据，再清除校验状态：
+
+```ts
+const initialTableData = cloneDeep(tableData.value)
+
+const resetTable = async () => {
+  tableData.value = cloneDeep(initialTableData)
+  await nextTick()
+  formTableRef.value?.clearValidate()
+}
 ```
 
-受控重置依赖调用方接收 `update:tableData`。不要改用 `getFormRef().resetFields()`：那是 Element UI 原生方法，会直接修改 Form model；单字段校验、滚动等未封装能力仍可通过原生 Form Ref 使用：
+这样可以由新增、编辑等业务场景自行决定是否删除新增行、恢复已删除行或只重置部分字段。单字段校验、滚动等未封装能力仍可通过原生 Form Ref 使用：
 
 ```ts
 formTableRef.value

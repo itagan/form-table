@@ -59,7 +59,7 @@ Slot 内容直接渲染，不附加内部 `div/span` 包装；需要根节点样
 
 Table 原生事件直接透传。通过 ref 可调用 `validate()`、`resetFields()`、`clearValidate()`、`getFormRef()` 和 `getTableRef()`。
 
-字段规则直接配置在 `formItemProps.rules`。`resetFields()` 会按已挂载字段的初始值发出新的 `tableData`，不会修改传入行对象；调用方需要接收 `update:tableData`。单字段校验等底层能力可通过 `getFormRef()` 使用。
+字段规则直接配置在 `formItemProps.rules`。`resetFields()` 保持 Element UI 原生语义；受控场景由调用方恢复 `tableData` 后调用 `clearValidate()`。单字段校验等底层能力可通过 `getFormRef()` 使用。
 
 表头必填标记等展示使用 `headerSlot` 明确渲染；字段是否必填只由 `formItemProps.rules` 决定。
 

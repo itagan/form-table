@@ -938,6 +938,9 @@ describe('FormTable core behavior', () => {
     const expose = wrapper.vm as unknown as FormTableExpose
     expect(expose.getFormRef()).toBeTruthy()
     expect(expose.getTableRef()).toBeTruthy()
+    const resetFields = vi.spyOn(expose.getFormRef() as any, 'resetFields')
+    expose.resetFields()
+    expect(resetFields).toHaveBeenCalledTimes(1)
     expose.clearValidate()
     wrapper.destroy()
   })
@@ -973,35 +976,6 @@ describe('FormTable core behavior', () => {
     await wrapper.vm.$nextTick()
     expect(await expose.validate()).toBe(true)
     expect(asyncValidator).toHaveBeenCalled()
-    wrapper.destroy()
-  })
-
-  it('resets current fields immutably and emits controlled table data', async () => {
-    const original = [{ name: 'Alice', profile: { city: '杭州' } }]
-    const current = [{ name: 'Bob', profile: { city: '宁波' } }]
-    const wrapper = mountFormTable({
-      tableData: original,
-      columns: [{
-        label: '信息',
-        children: [{ children: [
-          { fieldKey: 'name', type: 'input' },
-          { fieldKey: 'profile.city', type: 'input' }
-        ] }]
-      }]
-    })
-    await wrapper.vm.$nextTick()
-    await wrapper.setProps({ tableData: current })
-    await wrapper.vm.$nextTick()
-
-    const expose = wrapper.vm as unknown as FormTableExpose
-    expose.resetFields()
-
-    expect(original).toEqual([{ name: 'Alice', profile: { city: '杭州' } }])
-    expect(current).toEqual([{ name: 'Bob', profile: { city: '宁波' } }])
-    expect(wrapper.emitted('update:tableData')?.at(-1)?.[0]).toEqual([
-      { name: 'Alice', profile: { city: '杭州' } }
-    ])
-    expect(wrapper.emitted('field-change')).toBeUndefined()
     wrapper.destroy()
   })
 
