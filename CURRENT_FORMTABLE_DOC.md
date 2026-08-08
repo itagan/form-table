@@ -21,6 +21,7 @@ FormTable
 - `type` 是唯一渲染策略：内置别名、`component` 动态组件或 `slot` 自定义模板。
 - `component.renderer` 在 component 模式下是 Vue 组件，在 slot 模式下是具名 slot 名称。
 - `component.props/listeners/options/optionProps` 是三种渲染模式共用的配置来源。
+- `component.model` 可声明自定义组件的 `prop/event/valueFromEvent`；未配置时保留 Vue 2 原生 `v-model`，`false` 表示不注入模型绑定。
 - 远程 JSON 只负责可序列化结构，组件、事件和 slot 在业务页面按 `fieldKey` 本地增强。
 - `type: 'slot'` 绕过组件渲染器，但保留 `el-col` 和 `el-form-item`；解析后的 component 配置通过同名上下文返回模板。
 - 表头必填标记等自定义展示由 `headerSlot` 显式渲染，字段校验只由 `formItemProps.rules` 决定。

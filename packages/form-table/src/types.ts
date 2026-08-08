@@ -69,6 +69,16 @@ export interface OptionPropsConfig {
   key?: string
 }
 
+/** 自定义字段组件的受控值协议；未配置时使用组件原生 Vue 2 v-model。 */
+export interface FieldModelConfig {
+  /** 接收当前字段值的组件 prop，默认 value。 */
+  prop?: string
+  /** 通知字段值变化的组件事件，默认 input。 */
+  event?: string
+  /** 从组件事件参数中提取需要写回表格的字段值。 */
+  valueFromEvent?: (...args: unknown[]) => FormTableValue
+}
+
 /**
  * 字段组件配置。
  *
@@ -86,6 +96,8 @@ export interface FieldComponentConfig {
   options?: DynamicValue<FormItemOption[], FormTableFieldRenderContext>
   /** 自定义选项字段映射。 */
   optionProps?: DynamicValue<OptionPropsConfig, FormTableFieldRenderContext>
+  /** 自定义受控值协议；false 表示不向组件注入任何双向绑定。 */
+  model?: FieldModelConfig | false
 }
 
 export type BuiltinFormItemType =
@@ -208,6 +220,7 @@ export interface ResolvedComponentConfig {
   listeners: Record<string, (...args: unknown[]) => void>
   options: FormItemOption[]
   optionProps?: OptionPropsConfig
+  model?: FieldModelConfig | false
 }
 
 /** 字段插槽可使用的完整上下文。 */

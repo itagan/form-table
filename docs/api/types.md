@@ -4,7 +4,7 @@
 
 - `ColumnConfig`、`RowConfig`、`FormItemConfig`
 - `BuiltinFormItemConfig`、`ComponentFormItemConfig`、`SlotFormItemConfig`
-- `FieldComponentConfig`、`BuiltinFormItemType`、`FormItemType`
+- `FieldComponentConfig`、`FieldModelConfig`、`BuiltinFormItemType`、`FormItemType`
 - `FormItemOption`、`OptionPropsConfig`、`ResolvedComponentConfig`
 - `TableRow`、`FormTableRecord`、`FormTableProps`
 - `FormTableTableContext`、`FormTableColumnContext`、`FormTableRowContext`、`FormTableFieldRenderContext`
@@ -53,7 +53,19 @@ component.listeners      → Field 信息 + setValue, updateRow
 字段 slot                → Listener 信息 + propPath, component
 ```
 
-`FormTableSlotContext.itemConfig.component` 保留调用方传入的原始配置；`FormTableSlotContext.component` 的类型是 `ResolvedComponentConfig`，包含针对当前数据行解析并归一化后的 `props/listeners/options/optionProps`，用于直接绑定 Slot 内组件。
+`FormTableSlotContext.itemConfig.component` 保留调用方传入的原始配置；`FormTableSlotContext.component` 的类型是 `ResolvedComponentConfig`，包含针对当前数据行解析并归一化后的 `props/listeners/options/optionProps/model`，用于直接绑定 Slot 内组件。
+
+自定义组件绑定协议类型：
+
+```ts
+interface FieldModelConfig {
+  prop?: string
+  event?: string
+  valueFromEvent?: (...args: unknown[]) => FormTableValue
+}
+```
+
+`FieldComponentConfig.model` 未配置时保留 Vue 2 原生 `v-model`；配置 `FieldModelConfig` 时使用指定 prop/event；配置 `false` 时不注入模型绑定。
 
 `row/tableData` 与 `columnConfig/rowConfig/itemConfig` 在回调类型中采用浅层只读约束；运行时不会冻结原对象。字段更新使用 `setValue` 或 `updateRow`，配置调整由调用方替换 `columns`。
 

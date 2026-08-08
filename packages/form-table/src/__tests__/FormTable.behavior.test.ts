@@ -328,6 +328,160 @@ describe('FormTable core behavior', () => {
     wrapper.destroy()
   })
 
+  it('preserves a component declared Vue 2 model when model config is omitted', async () => {
+    const DeclaredModelSwitch = {
+      model: { prop: 'checked', event: 'toggle' },
+      props: ['checked'],
+      render(this: any, h: any) {
+        return h('button', {
+          class: 'declared-model-switch',
+          attrs: { type: 'button' },
+          on: { click: () => this.$emit('toggle', !this.checked) }
+        }, String(this.checked))
+      }
+    }
+    const wrapper = mountFormTable({
+      tableData: [{ enabled: true }],
+      columns: [{
+        label: '启用',
+        children: [{ children: [{
+          fieldKey: 'enabled',
+          type: 'component',
+          component: { renderer: DeclaredModelSwitch }
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.declared-model-switch').text()).toBe('true')
+    await wrapper.find('.declared-model-switch').trigger('click')
+    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{ enabled: false }])
+    wrapper.destroy()
+  })
+
+  it('supports a custom model prop, event, value extractor, and same-event listener', async () => {
+    const selectionListener = vi.fn()
+    const UserSelector = {
+      props: ['selectedId'],
+      render(this: any, h: any) {
+        return h('button', {
+          class: 'custom-model-selector',
+          attrs: { type: 'button', 'data-selected-id': this.selectedId },
+          on: {
+            click: () => this.$emit('select', { id: 'user-2', name: 'Bob' }, 'manual')
+          }
+        }, this.selectedId)
+      }
+    }
+    const wrapper = mountFormTable({
+      tableData: [{ ownerId: 'user-1' }],
+      columns: [{
+        label: '负责人',
+        children: [{ children: [{
+          fieldKey: 'ownerId',
+          type: 'component',
+          component: {
+            renderer: UserSelector,
+            model: {
+              prop: 'selectedId',
+              event: 'select',
+              valueFromEvent: (...args) => (args[0] as { id: string }).id
+            },
+            listeners: { select: selectionListener }
+          }
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.custom-model-selector').attributes('data-selected-id')).toBe('user-1')
+    await wrapper.find('.custom-model-selector').trigger('click')
+
+    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{ ownerId: 'user-2' }])
+    expect(selectionListener).toHaveBeenCalledTimes(1)
+    expect(selectionListener.mock.calls[0][0]).toMatchObject({
+      fieldKey: 'ownerId',
+      value: 'user-1'
+    })
+    expect(selectionListener.mock.calls[0].slice(1)).toEqual([
+      { id: 'user-2', name: 'Bob' },
+      'manual'
+    ])
+    wrapper.destroy()
+  })
+
+  it('does not inject model props or listeners when model is false', async () => {
+    const DisplayOnlyField = {
+      inheritAttrs: false,
+      props: ['status'],
+      render(this: any, h: any) {
+        return h('span', {
+          class: 'display-only-field',
+          attrs: {
+            'data-status': this.status,
+            'data-has-value': String(Object.prototype.hasOwnProperty.call(this.$attrs, 'value')),
+            'data-has-input': String(Boolean(this.$listeners.input))
+          }
+        }, this.status)
+      }
+    }
+    const wrapper = mountFormTable({
+      tableData: [{ status: 'approved' }],
+      columns: [{
+        label: '状态',
+        children: [{ children: [{
+          fieldKey: 'status',
+          type: 'component',
+          component: {
+            renderer: DisplayOnlyField,
+            model: false,
+            props: ({ value }) => ({ status: value })
+          }
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    const field = wrapper.find('.display-only-field')
+    expect(field.attributes('data-status')).toBe('approved')
+    expect(field.attributes('data-has-value')).toBe('false')
+    expect(field.attributes('data-has-input')).toBe('false')
+    expect(wrapper.emitted('update:tableData')).toBeUndefined()
+    wrapper.destroy()
+  })
+
+  it('keeps radio and checkbox option children through the functional renderer', async () => {
+    const options = [
+      { label: '选项 A', value: 'a' },
+      { label: '选项 B', value: 'b' }
+    ]
+    const wrapper = mountFormTable({
+      tableData: [{ choice: 'a', checked: ['b'] }],
+      columns: [{
+        label: '选项字段',
+        children: [{ children: [
+          {
+            fieldKey: 'choice',
+            type: 'radio',
+            component: { options }
+          },
+          {
+            fieldKey: 'checked',
+            type: 'checkbox',
+            component: { options }
+          }
+        ] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.findAll('.el-radio')).toHaveLength(2)
+    expect(wrapper.findAll('.el-checkbox')).toHaveLength(2)
+    expect(wrapper.text()).toContain('选项 A')
+    expect(wrapper.text()).toContain('选项 B')
+    wrapper.destroy()
+  })
+
   it('keeps keyed field instances stable when items are reordered', async () => {
     let nextInstanceId = 0
     const StatefulField = {
