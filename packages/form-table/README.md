@@ -11,6 +11,7 @@ const columns = [{
   children: [{
     props: { gutter: 8 },
     children: [{
+      key: 'primary-name',
       fieldKey: 'name',
       type: 'input',
       colProps: { span: 12 },
@@ -24,6 +25,8 @@ const columns = [{
   }]
 }]
 ```
+
+Item 的 `key` 是可选渲染身份，`fieldKey` 是必填数据路径。动态增删、排序或重复使用同一 `fieldKey` 时建议提供稳定 `key`。
 
 字段通过 `type` 明确选择渲染模式：
 

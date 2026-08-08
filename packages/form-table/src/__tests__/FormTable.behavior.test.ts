@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 import FormTable from '../index.vue'
 import type {
   ColumnConfig,
+  FormItemConfig,
   FormTableFieldRenderContext,
   FormTableExpose,
   FormTableRowContext,
@@ -205,6 +206,40 @@ describe('FormTable core behavior', () => {
     ])
     expect(listener.mock.calls[0].slice(1)).toEqual(['saved', { source: 'button' }])
     expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{ status: 'disabled' }])
+    wrapper.destroy()
+  })
+
+  it('keeps keyed field instances stable when items are reordered', async () => {
+    let nextInstanceId = 0
+    const StatefulField = {
+      props: ['value', 'marker'],
+      data() {
+        return { instanceId: ++nextInstanceId }
+      },
+      render(this: any, h: any) {
+        return h('span', { class: 'stateful-field' }, `${this.marker}:${this.instanceId}`)
+      }
+    }
+    const createItem = (key: string, marker: string) => ({
+      key,
+      fieldKey: 'name',
+      type: 'component' as const,
+      component: { renderer: StatefulField, props: { marker } }
+    })
+    const first = createItem('first-name', 'A')
+    const second = createItem('second-name', 'B')
+    const createColumns = (children: FormItemConfig[]): ColumnConfig[] => [{
+      label: '稳定字段身份',
+      children: [{ children }]
+    }]
+    const wrapper = mountFormTable({ columns: createColumns([first, second]) })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.findAll('.stateful-field').wrappers.map(node => node.text())).toEqual(['A:1', 'B:2'])
+    await wrapper.setProps({ columns: createColumns([second, first]) })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.findAll('.stateful-field').wrappers.map(node => node.text())).toEqual(['B:2', 'A:1'])
     wrapper.destroy()
   })
 

@@ -23,6 +23,8 @@ type FormItemConfig =
   | SlotFormItemConfig
 ```
 
+三种 Item 都支持可选 `key` 作为稳定渲染身份，并要求 `fieldKey` 指向行数据路径。`key` 不参与取值、更新或表单校验路径计算。
+
 `type` 明确决定模式，`component.renderer` 的类型随模式收窄：
 
 ```ts

@@ -83,6 +83,8 @@ export type BuiltinFormItemType =
 export type FormItemType = BuiltinFormItemType | 'component' | 'slot'
 
 interface BaseFormItemConfig {
+  /** 字段渲染身份；动态增删、排序或重复 fieldKey 时建议提供。 */
+  key?: string
   /** 行数据字段路径，例如 `name`、`profile.city`。 */
   fieldKey: string
   visible?: DynamicValue<boolean, FormTableFieldRenderContext>

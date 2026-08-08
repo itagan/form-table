@@ -2,7 +2,7 @@
   <el-row v-if="isVisible" v-bind="rowProps">
     <el-col
       v-for="(item, itemIndex) in visibleItems"
-      :key="item.config.fieldKey || itemIndex"
+      :key="item.config.key || item.config.fieldKey || itemIndex"
       v-bind="item.colProps"
     >
       <FormTableItem

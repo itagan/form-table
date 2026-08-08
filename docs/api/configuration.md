@@ -19,6 +19,7 @@
   children: [{
     props: { gutter: 8 },         // el-row
     children: [{
+      key: 'primary-name',        // 可选，稳定渲染身份
       fieldKey: 'name',
       type: 'input',
       colProps: { span: 12 },     // el-col
@@ -31,7 +32,8 @@
 
 - Column 的 `label` 是表头文本，`props` 直接传给 `el-table-column`。
 - Row 的 `props` 直接传给 `el-row`。
-- Item 的 `fieldKey` 是行数据路径；`colProps` 与 `formItemProps` 分别传给 `el-col` 和 `el-form-item`。
+- Item 的 `key` 是可选渲染身份，`fieldKey` 是必填的数据路径；`colProps` 与 `formItemProps` 分别传给 `el-col` 和 `el-form-item`。
+- 动态增删、排序、切换渲染器或重复使用同一 `fieldKey` 时建议提供稳定的 Item `key`；否则默认使用 `fieldKey`。
 
 ## 渲染模式
 

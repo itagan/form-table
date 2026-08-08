@@ -116,11 +116,16 @@
 
           <tbody class="layer-group">
             <tr>
-              <th rowspan="6" scope="rowgroup" class="layer-cell">Item</th>
+              <th rowspan="7" scope="rowgroup" class="layer-cell">Item</th>
+              <td><code>key</code></td>
+              <td>渲染标识</td>
+              <td>可选；动态增删、排序或重复 fieldKey 时建议提供。</td>
+              <td rowspan="7" class="context-cell"><code>tableData</code><br><code>row</code><br><code>index</code><br><code>fieldKey</code><br><code>value</code></td>
+            </tr>
+            <tr>
               <td><code>fieldKey</code></td>
               <td>行数据字段路径</td>
               <td>支持 <code>name</code>、<code>profile.city</code>、<code>items[0].name</code>。</td>
-              <td rowspan="6" class="context-cell"><code>tableData</code><br><code>row</code><br><code>index</code><br><code>fieldKey</code><br><code>value</code></td>
             </tr>
             <tr>
               <td><code>visible</code></td>
@@ -213,6 +218,7 @@ const propsExample = `{
   children: [{
     props: { gutter: 8 },      // el-row
     children: [{
+      key: 'primary-name',       // 稳定渲染身份
       fieldKey: 'name',
       type: 'input',
       colProps: { span: 12 },  // el-col

@@ -92,9 +92,16 @@ const renamedItem: ColumnConfig = {
   label: '字段路径',
   children: [{
     children: [
-      // @ts-expect-error FormItemConfig uses fieldKey; legacy key is not accepted.
+      // @ts-expect-error key is only the render identity; fieldKey remains required.
       { key: 'name', type: 'input' }
     ]
+  }]
+}
+
+const keyedItem: ColumnConfig = {
+  label: '稳定字段身份',
+  children: [{
+    children: [{ key: 'primary-name', fieldKey: 'name', type: 'input' }]
   }]
 }
 
@@ -172,6 +179,7 @@ void invalid
 void invalidModes
 void renamedColumn
 void renamedItem
+void keyedItem
 void legacySlotString
 void legacyComponentIs
 void contextBoundaries
