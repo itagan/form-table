@@ -4,116 +4,105 @@ import FormTable, {
   FormTablePlugin,
   type ColumnConfig,
   type FormTableExpose,
-  type FormTableFieldChangePayload,
   type FormTableProps,
   type TableRow
 } from '../index'
 
-const defaultComponent: Component = FormTable
-const namedComponent: Component = NamedFormTable
-const plugin: PluginObject<undefined> = FormTablePlugin
-
-const rows: TableRow[] = [
-  {
-    name: 'Alice',
-    age: 18
-  }
-]
-
-const InlineInput: Component = {
-  name: 'InlineInput'
-}
-
-const columns: ColumnConfig[] = [
-  {
-    name: '基本信息',
-    fieldRow: {
-      gutter: 8
-    },
-    fields: [
+const CustomInput: Component = { name: 'CustomInput' }
+const rows: TableRow[] = [{ name: 'Alice', profile: { city: '杭州' } }]
+const columns: ColumnConfig[] = [{
+  name: '基本信息',
+  children: [{
+    props: { gutter: 8 },
+    children: [
       {
         key: 'name',
         type: 'input',
-        label: '姓名',
-        placeholder: '请输入姓名',
-        clearable: true,
-        required: true,
-        requiredMessage: '请输入姓名'
+        colProps: { span: 8 },
+        formItemProps: { label: '姓名', rules: [{ required: true }] },
+        component: { props: { clearable: true } }
       },
       {
-        key: 'age',
-        type: 'number',
-        label: '年龄',
-        disabled: false,
-        behavior: {
-          defaultValue: 18
-        }
+        key: 'profile.city',
+        component: { is: CustomInput }
       },
       {
-        key: 'inline',
-        type: 'custom',
-        label: '内联组件',
-        component: {
-          name: InlineInput
-        }
+        key: 'actions',
+        slot: 'actions'
       }
     ]
-  }
-]
+  }]
+}]
 
 const props: FormTableProps = {
   tableData: rows,
   columns,
-  rules: {
-    name: [
-      {
-        required: true,
-        message: '请输入姓名',
-        trigger: 'blur'
-      }
-    ]
-  }
+  formProps: { size: 'small' },
+  tableProps: { border: true }
+}
+const component: Component = FormTable
+const named: Component = NamedFormTable
+const plugin: PluginObject<undefined> = FormTablePlugin
+
+async function useExpose(expose: FormTableExpose) {
+  await expose.validate()
+  expose.clearValidate()
+  return expose.getTableRef()
 }
 
-const handleFieldChange = (payload: FormTableFieldChangePayload) => {
-  payload.row[payload.fieldKey] = payload.value
-}
+const invalid: ColumnConfig[] = [{
+  name: '错误配置',
+  children: [{
+    children: [{
+      key: 'bad',
+      // @ts-expect-error unknown type aliases are rejected.
+      type: 'unknown'
+    }]
+  }]
+}]
 
-const useExpose = async (expose: FormTableExpose) => {
-  const valid = await expose.validate()
-  const firstRow = expose.getRow(0)
-
-  expose.updateRow(0, {
-    name: 'Bob'
-  })
-
-  return {
-    valid,
-    firstRow
-  }
-}
-
-const invalidColumns: ColumnConfig[] = [
-  {
-    name: '错误配置',
-    children: [
-      {
-        children: [
-          {
-            key: 'bad',
-            // @ts-expect-error public column config only accepts known form item types.
-            type: 'unknown'
+const contextBoundaries: ColumnConfig[] = [{
+  name: '上下文边界',
+  visible: (tableContext) => {
+    void tableContext.tableData
+    // @ts-expect-error column callbacks do not have a current row.
+    void tableContext.row
+    return true
+  },
+  children: [{
+    visible: (rowContext) => {
+      void rowContext.row
+      void rowContext.index
+      // @ts-expect-error row callbacks do not have a current field.
+      void rowContext.fieldKey
+      return true
+    },
+    children: [{
+      key: 'name',
+      type: 'input',
+      visible: (fieldContext) => {
+        void fieldContext.row
+        void fieldContext.index
+        void fieldContext.fieldKey
+        return true
+      },
+      component: {
+        listeners: {
+          change(fieldContext) {
+            // @ts-expect-error callback rows are read-only; use updateRow instead.
+            fieldContext.row.name = 'Bob'
+            fieldContext.updateRow({ name: 'Bob' })
           }
-        ]
+        }
       }
-    ]
-  }
-]
+    }]
+  }]
+}]
 
-void defaultComponent
-void namedComponent
-void plugin
 void props
-void handleFieldChange
+void component
+void named
+void plugin
 void useExpose
-void invalidColumns
+void invalid
+void contextBoundaries

@@ -62,10 +62,10 @@ import type { ColumnConfig, TableRow } from '@itagan/form-table'
 
 | 路由 | 用途 |
 | ------ | ------ |
-| `/form-table` | 基础编辑场景，验证最小 columns、rules 和字段同步。 |
-| `/form-table-advanced` | 综合示例，覆盖插槽、自定义组件、行操作、联动和事件归档。 |
-| `/dynamic-slot-test` | 动态插槽专项复现页，适合验证删除、显隐和 slot 上下文。 |
-| `/debug` | 自定义组件诊断台，对比组件直连和 FormTable 注册后的 v-model / change / update:tableData 行为。 |
+| `/form-table` | 基础编辑场景，验证 children、type、字段校验和同步。 |
+| `/form-table-advanced` | 综合示例，覆盖多行栅格、自定义组件、动态 options、嵌套路径和 slot。 |
+| `/dynamic-slot-test` | 动态显隐与 slot 上下文专项页面。 |
+| `/debug` | 自定义组件对象直传、事件和原生 Ref 调试。 |
 | `/form-table-docs` | playground 内置能力文档页，快速查 props、事件、ref 和配置约定。 |
 
 `playground` 通过 workspace alias 直接引用 `packages/form-table/src/index.ts`，开发时无需先构建组件包。
@@ -74,8 +74,8 @@ import type { ColumnConfig, TableRow } from '@itagan/form-table'
 
 `pnpm test` 会运行组件包的 Vitest 测试，当前覆盖：
 
-- 纯工具逻辑：路径读写、规则匹配、schema 归一化、行操作、字段联动和校验路径。
-- 组件行为：基础 input 编辑、字段 slot 的 `setValue`、自定义组件 `v-model` 注入，以及对应的 `update:tableData` / `field-change` 事件。
+- 纯工具逻辑：嵌套字段路径的不可变读写。
+- 组件行为：type、component、slot、动态配置、原生事件透传和 `update:tableData` / `field-change`。
 
 ## 文档
 

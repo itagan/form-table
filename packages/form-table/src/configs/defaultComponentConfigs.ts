@@ -1,103 +1,6 @@
-/**
- * 默认组件配置 & 类型映射
- *
- * - defaultComponentConfigs: 各 type 的默认属性（如日期格式、数字步长等）
- * - componentTypeMap: type → Element 组件名的映射
- */
-import type { FormItemType, FormTableValue } from '../types'
+import type { ComponentProps, FormItemType } from '../types'
 
-export interface DefaultComponentConfig {
-  [key: string]: FormTableValue
-}
-
-export const defaultComponentConfigs: Partial<Record<FormItemType, DefaultComponentConfig>> = {
-  // 日期相关组件需要设置默认格式
-  date: {
-    type: 'date',
-    format: 'YYYY-MM-DD',
-    valueFormat: 'YYYY-MM-DD'
-  },
-  datetime: {
-    type: 'datetime',
-    format: 'YYYY-MM-DD HH:mm:ss',
-    valueFormat: 'YYYY-MM-DD HH:mm:ss'
-  },
-  time: {
-    format: 'HH:mm:ss',
-    valueFormat: 'HH:mm:ss'
-  },
-  
-  // 数字输入框默认配置
-  number: {
-    min: 0,
-    step: 1
-  },
-  
-  // 评分组件默认配置
-  rate: {
-    max: 5,
-    showScore: true
-  },
-  
-  // 滑块组件默认配置
-  slider: {
-    min: 0,
-    max: 100,
-    step: 1
-  },
-  
-  // 颜色选择器默认配置
-  color: {
-    showAlpha: true
-  },
-  
-  // 上传组件默认配置
-  upload: {
-    action: '#',
-    'auto-upload': false,
-    'list-type': 'text'
-  },
-  
-  // 级联选择器默认配置
-  cascader: {
-    props: {
-      expandTrigger: 'hover'
-    }
-  },
-  
-  // 树形选择器默认配置
-  'tree-select': {
-    props: {
-      children: 'children',
-      label: 'label',
-      value: 'value'
-    }
-  },
-  
-  // 自动完成组件默认配置
-  autocomplete: {
-    triggerOnFocus: true
-  },
-  
-  // 标签输入组件默认配置
-  'tag-input': {
-    multiple: true,
-    filterable: true,
-    allowCreate: true,
-    'default-first-option': true
-  },
-  
-  // 多行文本默认配置
-  textarea: {
-    type: 'textarea',
-    rows: 3
-  }
-}
-
-/**
- * 组件类型映射表
- * 将配置中的type映射到实际的Element UI组件
- */
+/** 仅负责 type 到组件的映射，不覆盖 Element UI 的交互默认值。 */
 export const componentTypeMap: Record<FormItemType, string> = {
   input: 'el-input',
   select: 'el-select',
@@ -110,8 +13,6 @@ export const componentTypeMap: Record<FormItemType, string> = {
   radio: 'el-radio-group',
   checkbox: 'el-checkbox-group',
   text: 'span',
-  slot: 'div',
-  custom: 'div',
   rate: 'el-rate',
   slider: 'el-slider',
   color: 'el-color-picker',
@@ -122,20 +23,22 @@ export const componentTypeMap: Record<FormItemType, string> = {
   'tag-input': 'el-select'
 }
 
-/**
- * 获取组件默认配置
- * @param type 组件类型
- * @returns 默认配置对象
- */
-export function getDefaultConfig(type: FormItemType): DefaultComponentConfig {
-  return defaultComponentConfigs[type] || {}
+/** 只补充 type 别名本身必需的属性。 */
+export const typeRequiredProps: Partial<Record<FormItemType, ComponentProps>> = {
+  textarea: { type: 'textarea' },
+  date: { type: 'date' },
+  datetime: { type: 'datetime' },
+  'tag-input': {
+    multiple: true,
+    filterable: true,
+    allowCreate: true
+  }
 }
 
-/**
- * 获取组件类型
- * @param type 配置中的类型
- * @returns Element UI组件名称
- */
-export function getComponentType(type: FormItemType): string {
-  return componentTypeMap[type] || 'el-input'
+export function getComponentType(type: FormItemType) {
+  return componentTypeMap[type]
+}
+
+export function getRequiredProps(type: FormItemType) {
+  return typeRequiredProps[type] || {}
 }

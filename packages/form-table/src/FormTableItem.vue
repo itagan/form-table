@@ -1,265 +1,85 @@
 <template>
-  <el-form-item 
-    :prop="propPath" 
-    :rules="effectiveRules"
-    :label="label"
-    :label-width="normalizedLabelWidth"
-    v-bind="attrs"
-  >
-    <!-- 插槽组件: 从 FormTable 顶层注入的 $slots 中取具名插槽 -->
+  <el-form-item v-bind="resolvedFormItemProps">
     <SlotRenderer
-      v-if="config.type === 'slot' && slotName && slotFn"
+      v-if="config.slot && slotFn"
       :slot-fn="slotFn"
-      :slot-props="slotProps"
+      :slot-props="slotContext"
     />
-
-    <span v-else-if="config.type === 'slot'" class="form-table-slot-fallback" />
-    
-    <!-- 带Tooltip的组件 -->
-    <el-tooltip 
-      v-else-if="isTooltipEnabled"
-      effect="dark" 
-      :disabled="!hasContent" 
-      :content="tooltipContent" 
-      placement="top-start" 
-      v-bind="resolvedTooltipProps"
-    >
-      <ComponentWrapper v-bind="wrapperProps" />
-    </el-tooltip>
-    
-    <!-- 普通组件 -->
-    <ComponentWrapper v-else v-bind="wrapperProps" />
+    <span v-else-if="config.slot" />
+    <ComponentWrapper
+      v-else
+      :row="row"
+      :row-index="rowIndex"
+      :config="config"
+    />
   </el-form-item>
 </template>
 
 <script lang="ts" setup>
-/**
- * FormTableItem - 表单项渲染
- *
- * 负责渲染单个表单字段，包含三种模式:
- * 1. slot: 通过 slotName 具名插槽自定义渲染
- * 2. 带 Tooltip: display.tooltip=true 时，内容超出用 el-tooltip 展示
- * 3. 普通组件: 由 ComponentWrapper 根据 type 动态渲染
- */
-import { computed, defineComponent, h, inject, type ComputedRef, type PropType, useAttrs } from 'vue'
+import { computed, defineComponent, h, inject, type ComputedRef, type PropType } from 'vue'
 import ComponentWrapper from './ComponentWrapper.vue'
 import type {
-  FormTableActions,
   FormItemConfig,
-  FormTableBaseContext,
-  FormTableRecord,
+  FormTableTableContext,
   FormTableSlotContext,
   FormTableSlotFn,
   FormTableSlots,
-  FormTableValue,
-  ValidationRule
+  FormTableUpdateApi,
+  TableRow
 } from './types'
 import {
-  FORM_TABLE_ACTIONS_KEY,
   FORM_TABLE_CONTEXT_KEY,
-  FORM_TABLE_DISPATCH_KEY,
-  FORM_TABLE_RULES_KEY,
   FORM_TABLE_SLOTS_KEY,
-  type ComponentBind,
-  type DispatchFn
+  FORM_TABLE_UPDATE_KEY
 } from './types'
-import { createRuntimeContext } from './utils/dynamic'
-import { createFallbackFormTableActions } from './utils/actions'
 import {
-  createFieldValueSetter,
-  createRowPatchUpdater
-} from './utils/componentProtocol'
-import {
-  getFormItemEmptyText,
-  getFormItemFormatter,
-  getFormItemSlotName,
-  isFormItemTooltipEnabled,
-  resolveFormItemBind,
-  resolveFormItemOptions,
-  resolveFormItemOptionProps,
-  resolveFormItemTooltipProps
-} from './utils/fieldConfig'
-import {
-  createComponentWrapperProps,
-  createFormTableSlotContext,
-  hasFormItemTooltipContent,
-  mergeFormItemRules,
-  normalizeFormItemLabelWidth,
-  resolveFormItemTooltipContent
-} from './utils/formItemRender'
+  createFieldRenderContext,
+  createRowContext,
+  resolveDynamicValue
+} from './utils/dynamic'
 import { getValueByPath } from './utils/path'
 
-// 渲染顶层插槽的包装组件，用 div 包裹以兼容 Vue 2 单根节点要求
 const SlotRenderer = defineComponent({
   props: {
-    slotFn: {
-      type: Function as PropType<FormTableSlotFn>,
-      required: true
-    },
-    slotProps: {
-      type: Object as PropType<FormTableSlotContext>,
-      required: true
-    }
+    slotFn: { type: Function as PropType<FormTableSlotFn>, required: true },
+    slotProps: { type: Object as PropType<FormTableSlotContext>, required: true }
   },
   setup(props) {
-    return () => h('div', props.slotFn(props.slotProps))
+    return () => h('div', { class: 'form-table-slot' }, props.slotFn(props.slotProps))
   }
 })
 
-const props = withDefaults(defineProps<{
-  propPath: string
-  rules?: ValidationRule[]
-  label?: string
-  labelWidth?: string
-  row: FormTableRecord
-  index: number
+const props = defineProps<{
+  row: TableRow
+  rowIndex: number
   config: FormItemConfig
-}>(), {
-  label: ''
-})
+}>()
 
-const attrs = useAttrs()
-const formTableActions = inject<FormTableActions>(FORM_TABLE_ACTIONS_KEY, createFallbackFormTableActions())
-const formTableContext = inject<ComputedRef<FormTableBaseContext>>(
+const formTableContext = inject<ComputedRef<FormTableTableContext>>(
   FORM_TABLE_CONTEXT_KEY,
-  computed(() => ({ formData: {}, tableData: [] }))
+  computed(() => ({ tableData: [] }))
 )
-const dispatch = inject<DispatchFn>(FORM_TABLE_DISPATCH_KEY)
-const formRules = inject<ComputedRef<Record<string, ValidationRule[]>>>(FORM_TABLE_RULES_KEY, computed(() => ({})))
+const updateApi = inject<FormTableUpdateApi>(FORM_TABLE_UPDATE_KEY)
 const parentSlots = inject<FormTableSlots>(FORM_TABLE_SLOTS_KEY, {})
-
-// 从顶层 FormTable 注入的 slots 中取出对应具名插槽函数
-const slotName = computed(() => getFormItemSlotName(props.config))
-const slotFn = computed(() => {
-  return slotName.value ? parentSlots[slotName.value] || null : null
-})
-
-/**
- * 更新当前字段值。
- *
- * 插槽和内置组件都通过 dispatch 进入 FormTable 主组件，确保字段联动、
- * field-change 事件和 update:tableData 的行为一致。
- */
-const setValue = createFieldValueSetter({
-  getRow: () => props.row,
-  getRowIndex: () => props.index,
-  getFieldKey: () => props.config.key,
-  dispatch,
-  fallback: (row, fieldKey, value) => {
-    row[fieldKey] = value
-  }
-})
-
-/**
- * 批量更新当前行。
- *
- * slot 自定义内容可以通过它提交多个字段的 patch，而不需要直接修改 row。
- */
-const updateRow = createRowPatchUpdater({
-  getRow: () => props.row,
-  getRowIndex: () => props.index,
-  dispatch
-})
-
-const runtimeContext = computed(() => createRuntimeContext(formTableContext.value, {
-  row: props.row,
-  index: props.index,
-  fieldKey: props.config.key
+const propPath = computed(() => `tableData.${props.rowIndex}.${props.config.key}`)
+const runtimeContext = computed(() => createFieldRenderContext(
+  createRowContext(formTableContext.value, props.row, props.rowIndex),
+  props.config.key
+))
+const resolvedFormItemProps = computed(() => ({
+  ...(resolveDynamicValue(props.config.formItemProps, runtimeContext.value) || {}),
+  prop: propPath.value
 }))
-
-const resolvedTooltipProps = computed<ComponentBind>(() => {
-  return resolveFormItemTooltipProps(props.config, runtimeContext.value)
-})
-
-const resolvedBind = computed<ComponentBind>(() => {
-  return resolveFormItemBind(props.config, runtimeContext.value)
-})
-
-const resolvedOptions = computed(() => {
-  return resolveFormItemOptions(props.config, runtimeContext.value)
-})
-
-const resolvedOptionProps = computed(() => {
-  return resolveFormItemOptionProps(props.config, runtimeContext.value)
-})
-
-/**
- * Element UI 的 label-width="auto" 会在 LabelWrap 中注册动态宽度。
- * 表格行删除会批量销毁 form-item，auto 宽度注销时可能因宽度数组已变化而抛错。
- * FormTable 单元格默认不参与表单级自动标签宽度计算；需要标签宽度时请传固定值。
- */
-const normalizedLabelWidth = computed(() => {
-  return normalizeFormItemLabelWidth(props.labelWidth)
-})
-
-/**
- * 传给 slot 的上下文。
- *
- * 除基础行信息外，也暴露行操作和校验快捷方法，让操作列可以保持声明式配置。
- */
-const slotProps = computed<FormTableSlotContext>(() => {
-  return createFormTableSlotContext({
-    row: props.row,
-    rowIndex: props.index,
-    config: props.config,
-    propPath: props.propPath,
-    formTableContext: formTableContext.value,
-    actions: formTableActions,
-    setValue,
-    updateRow
-  })
-})
-
-/**
- * 合并全局 rules 和字段自身 rules。
- *
- * 全局 rules 支持通配路径，字段 rules 适合写局部、一次性的补充规则。
- */
-const effectiveRules = computed(() => {
-  return mergeFormItemRules({
-    formRules: formRules.value,
-    propPath: props.propPath,
-    localRules: props.rules
-  })
-})
-
-/**
- * 传给 ComponentWrapper 的渲染参数。
- *
- * 这里只传组件渲染需要的字段，避免把 layout/display/behavior 等结构配置
- * 继续下传到底层 Element UI 组件。
- */
-const wrapperProps = computed(() => {
-  return createComponentWrapperProps({
-    config: props.config,
-    row: props.row,
-    rowIndex: props.index,
-    bind: resolvedBind.value,
-    options: resolvedOptions.value,
-    optionProps: resolvedOptionProps.value
-  })
-})
-
-const isTooltipEnabled = computed(() => isFormItemTooltipEnabled(props.config))
-
-/**
- * tooltip 在空值时不展示，避免出现空浮层。
- */
-const hasContent = computed(() => {
-  return hasFormItemTooltipContent(getValueByPath(props.row, props.config.key))
-})
-
-/**
- * tooltip 展示内容复用 text 类型的展示解析逻辑。
- */
-const tooltipContent = computed(() => {
-  return resolveFormItemTooltipContent({
-    value: getValueByPath(props.row, props.config.key),
-    options: resolvedOptions.value,
-    optionProps: resolvedOptionProps.value,
-    formatter: getFormItemFormatter(props.config),
-    emptyText: getFormItemEmptyText(props.config),
-    context: runtimeContext.value
-  })
-})
+const slotFn = computed(() => props.config.slot
+  ? parentSlots[props.config.slot] || null
+  : null)
+const setValue = (value: unknown) => updateApi?.setValue(props.rowIndex, props.config.key, value)
+const updateRow = (patch: Partial<TableRow>) => updateApi?.updateRow(props.rowIndex, patch)
+const slotContext = computed<FormTableSlotContext>(() => ({
+  ...runtimeContext.value,
+  propPath: propPath.value,
+  value: getValueByPath(props.row, props.config.key),
+  setValue,
+  updateRow
+}))
 </script>

@@ -2,284 +2,156 @@
   <div class="form-table-container">
     <el-form
       ref="formRef"
+      v-bind="props.formProps"
       :model="formModel"
-      :rules="props.rules"
-      v-bind="formAttrs"
     >
       <el-table
         ref="tableRef"
+        v-bind="props.tableProps"
+        v-on="$listeners"
         :data="props.tableData"
-        v-bind="tableAttrs"
         v-loading="props.loading"
-        @select="handleTableSelect"
-        @select-all="handleTableSelectAll"
-        @selection-change="handleTableSelectionChange"
-        @cell-mouse-enter="handleTableCellMouseEnter"
-        @cell-mouse-leave="handleTableCellMouseLeave"
-        @cell-click="handleTableCellClick"
-        @cell-dblclick="handleTableCellDblclick"
-        @row-click="handleTableRowClick"
-        @row-contextmenu="handleTableRowContextmenu"
-        @row-dblclick="handleTableRowDblclick"
-        @header-click="handleTableHeaderClick"
-        @header-contextmenu="handleTableHeaderContextmenu"
-        @sort-change="handleTableSortChange"
-        @filter-change="handleTableFilterChange"
-        @current-change="handleTableCurrentChange"
-        @header-dragend="handleTableHeaderDragend"
-        @expand-change="handleTableExpandChange"
       >
         <FormTableColumn
           v-for="(column, columnIndex) in visibleColumns"
-          :key="getColumnKey(column, columnIndex)"
+          :key="column.key || column.name || columnIndex"
           :column="column"
           :column-index="columnIndex"
-        >
-          <slot />
-        </FormTableColumn>
+        />
       </el-table>
     </el-form>
   </div>
 </template>
 
 <script lang="ts" setup>
-/**
- * FormTable 主组件 - 表格内嵌表单
- *
- * 数据流: tableData(props) → el-table 渲染 → dispatch('update:row') → commitRowChange → emit
- * 层级结构: FormTable > FormTableColumn > FormTableRow > FormTableItem > ComponentWrapper
- *
- * 入口组件只负责模板组装、provide 和 ref API 汇总；模型、schema、事件、行操作和校验
- * 分别收口到 composables 中，保持外部 API 不变。
- */
-import { computed, provide, ref, useAttrs, useSlots } from 'vue'
+import { computed, provide, ref, useSlots } from 'vue'
 import FormTableColumn from './FormTableColumn.vue'
-import { useFormTableEvents } from './composables/useFormTableEvents'
-import { useFormTableExpose } from './composables/useFormTableExpose'
-import { useFormTableModel } from './composables/useFormTableModel'
-import { useFormTableRows } from './composables/useFormTableRows'
-import { useFormTableSchema } from './composables/useFormTableSchema'
-import { useFormTableTableEvents } from './composables/useFormTableTableEvents'
-import { useFormTableValidation } from './composables/useFormTableValidation'
-import { extractFormAttrs, extractTableAttrs } from './utils/attrs'
 import type {
   ColumnConfig,
-  CustomComponentConfig,
-  FormTableEmitFn,
+  ComponentProps,
   FormTableElementFormRef,
   FormTableElementTableRef,
-  FormTableEventPayload,
   FormTableFieldChangePayload,
-  FormTableRecord,
   FormTableSlots,
+  FormTableUpdateApi,
   FormTableValue,
-  FormTableValidationErrors,
-  ValidationRule,
   TableRow
 } from './types'
 import {
-  FORM_TABLE_ACTIONS_KEY,
-  FORM_TABLE_CUSTOM_COMPONENTS_KEY,
   FORM_TABLE_CONTEXT_KEY,
-  FORM_TABLE_DISPATCH_KEY,
-  FORM_TABLE_RULES_KEY,
-  FORM_TABLE_SLOTS_KEY
+  FORM_TABLE_SLOTS_KEY,
+  FORM_TABLE_UPDATE_KEY
 } from './types'
-
-const attrs = useAttrs()
-const slots = useSlots()
+import { createTableContext, resolveVisible } from './utils/dynamic'
+import { getValueByPath, setValueByPath } from './utils/path'
 
 const props = withDefaults(defineProps<{
   tableData: TableRow[]
   columns: ColumnConfig[]
-  rules?: Record<string, ValidationRule[]>
-  formData?: FormTableRecord
-  customComponents?: CustomComponentConfig[]
+  formProps?: ComponentProps
+  tableProps?: ComponentProps
   loading?: boolean
 }>(), {
   tableData: () => [],
   columns: () => [],
-  rules: () => ({}),
-  formData: () => ({}),
-  customComponents: () => [],
+  formProps: () => ({}),
+  tableProps: () => ({}),
   loading: false
 })
 
-// Vue 2.7 的 SFC 编译器要求 defineEmits 使用本地 call signatures；
-// 内部 composables 仍通过 FormTableEmitFn 复用 types.ts 中的事件参数映射。
 const emit = defineEmits<{
-  (e: 'update:tableData', data: TableRow[]): void
-  (e: 'update:formData', data: FormTableRecord): void
-  (e: 'field-change', payload: FormTableFieldChangePayload): void
-  (e: 'row-add', row: TableRow, index: number): void
-  (e: 'row-copy', row: TableRow, index: number): void
-  (e: 'row-update', row: TableRow, index: number): void
-  (e: 'row-move', row: TableRow, fromIndex: number, toIndex: number): void
-  (e: 'row-remove', row: TableRow, index: number): void
-  (e: 'validate', valid: boolean, errors: FormTableValidationErrors): void
-  (e: 'select', selection: TableRow[], row: TableRow): void
-  (e: 'select-all', selection: TableRow[]): void
-  (e: 'selection-change', selection: TableRow[]): void
-  (e: 'cell-mouse-enter', row: TableRow, column: FormTableValue, cell: HTMLElement, event: Event): void
-  (e: 'cell-mouse-leave', row: TableRow, column: FormTableValue, cell: HTMLElement, event: Event): void
-  (e: 'cell-click', row: TableRow, column: FormTableValue, cell: HTMLElement, event: Event): void
-  (e: 'cell-dblclick', row: TableRow, column: FormTableValue, cell: HTMLElement, event: Event): void
-  (e: 'row-click', row: TableRow, column: FormTableValue, event: Event): void
-  (e: 'row-contextmenu', row: TableRow, column: FormTableValue, event: Event): void
-  (e: 'row-dblclick', row: TableRow, column: FormTableValue, event: Event): void
-  (e: 'header-click', column: FormTableValue, event: Event): void
-  (e: 'header-contextmenu', column: FormTableValue, event: Event): void
-  (e: 'sort-change', payload: FormTableValue): void
-  (e: 'filter-change', filters: FormTableValue): void
-  (e: 'current-change', currentRow: TableRow | null, oldCurrentRow: TableRow | null): void
-  (e: 'header-dragend', newWidth: number, oldWidth: number, column: FormTableValue, event: Event): void
-  (e: 'expand-change', row: TableRow, expandedRows: TableRow[]): void
-  (e: 'event', payload: FormTableEventPayload): void
+  (event: 'update:tableData', data: TableRow[]): void
+  (event: 'field-change', payload: FormTableFieldChangePayload): void
 }>()
 
 const formRef = ref<FormTableElementFormRef | null>(null)
 const tableRef = ref<FormTableElementTableRef | null>(null)
-const formAttrs = computed(() => extractFormAttrs(attrs))
-const tableAttrs = computed(() => extractTableAttrs(attrs))
+const slots = useSlots()
 
-const {
-  handleTableSelect,
-  handleTableSelectAll,
-  handleTableSelectionChange,
-  handleTableCellMouseEnter,
-  handleTableCellMouseLeave,
-  handleTableCellClick,
-  handleTableCellDblclick,
-  handleTableRowClick,
-  handleTableRowContextmenu,
-  handleTableRowDblclick,
-  handleTableHeaderClick,
-  handleTableHeaderContextmenu,
-  handleTableSortChange,
-  handleTableFilterChange,
-  handleTableCurrentChange,
-  handleTableHeaderDragend,
-  handleTableExpandChange
-} = useFormTableTableEvents(emit as FormTableEmitFn)
-
-const {
-  formModel,
-  formTableContext,
-  createTableBaseContext,
-  emitTableDataChange,
-  customComponentsMap
-} = useFormTableModel({
-  props,
-  emitTableData: (tableData) => emit('update:tableData', tableData),
-  emitFormData: (formData) => emit('update:formData', formData)
-})
-
-const {
-  visibleColumns,
-  getColumnKey,
-  getFieldConfigByKey,
-  getConfiguredFieldKeys,
-  getAllRowFieldProps,
-  getVisibleRowFieldProps
-} = useFormTableSchema({
-  props,
-  formTableContext,
-  createTableBaseContext
-})
-
-const {
-  dispatch,
-  emitBusinessEvent,
-  setInternalEventHandlers
-} = useFormTableEvents(emit as FormTableEmitFn)
-
-const {
-  scheduleHiddenFieldValidationCleanup,
-  validateFieldProps
-} = useFormTableValidation({
-  props,
-  formRef,
-  getAllRowFieldProps,
-  getVisibleRowFieldProps
-})
-
-const {
-  commitRowChange,
-  insertRow,
-  updateRow,
-  copyRow,
-  removeRow,
-  moveRow,
-  formTableActions
-} = useFormTableRows({
-  props,
-  formRef,
-  formTableContext,
-  visibleColumns,
-  getFieldConfigByKey,
-  getConfiguredFieldKeys,
-  getAllRowFieldProps,
-  getVisibleRowFieldProps,
-  validateFieldProps,
-  emitTableDataChange,
-  scheduleHiddenFieldValidationCleanup,
-  emitBusinessEvent
-})
-
-setInternalEventHandlers({
-  updateRowField: (rowIndex, fieldKey, value) => {
-    commitRowChange(rowIndex, {
-      [fieldKey]: value
-    })
-  },
-  updateRowData: (rowIndex, patch) => {
-    commitRowChange(rowIndex, patch)
-  }
-})
-
-provide(FORM_TABLE_CUSTOM_COMPONENTS_KEY, customComponentsMap)
-provide(FORM_TABLE_CONTEXT_KEY, formTableContext)
-provide(FORM_TABLE_ACTIONS_KEY, formTableActions)
-provide(FORM_TABLE_SLOTS_KEY, slots as FormTableSlots)
-provide(FORM_TABLE_RULES_KEY, computed(() => props.rules))
-provide(FORM_TABLE_DISPATCH_KEY, dispatch)
-
-// 暴露给业务侧 ref 调用的方法，保持和 Element UI Form 常用 API 风格接近。
-defineExpose(useFormTableExpose({
-  props,
-  formRef,
-  tableRef,
-  formModel,
-  formTableActions,
-  validateFieldProps,
-  emitTableDataChange,
-  emitBusinessEvent,
-  insertRow,
-  copyRow,
-  updateRow,
-  moveRow,
-  removeRow
+const formModel = computed(() => ({ tableData: props.tableData }))
+const formTableContext = computed(() => ({
+  tableData: props.tableData
 }))
+
+const visibleColumns = computed(() => {
+  const tableContext = createTableContext(props.tableData)
+  return props.columns.filter((column) => resolveVisible(column.visible, tableContext))
+})
+
+const updateRow = (rowIndex: number, patch: Partial<TableRow>) => {
+  const currentRow = props.tableData[rowIndex]
+  if (!currentRow) {
+    return
+  }
+
+  let nextRow = currentRow
+  const changes: Array<{
+    fieldKey: string
+    value: FormTableValue
+    previousValue: FormTableValue
+  }> = []
+
+  Object.keys(patch).forEach((fieldKey) => {
+    const value = patch[fieldKey]
+    const previousValue = getValueByPath(nextRow, fieldKey)
+    if (Object.is(previousValue, value)) {
+      return
+    }
+
+    nextRow = setValueByPath(nextRow, fieldKey, value)
+    changes.push({ fieldKey, value, previousValue })
+  })
+
+  if (changes.length === 0) {
+    return
+  }
+
+  const nextTableData = [...props.tableData]
+  nextTableData[rowIndex] = nextRow
+  emit('update:tableData', nextTableData)
+
+  changes.forEach((change) => {
+    emit('field-change', {
+      row: nextRow,
+      index: rowIndex,
+      ...change
+    })
+  })
+}
+
+const updateApi: FormTableUpdateApi = {
+  setValue: (rowIndex, fieldKey, value) => updateRow(rowIndex, { [fieldKey]: value }),
+  updateRow
+}
+
+provide(FORM_TABLE_CONTEXT_KEY, formTableContext)
+provide(FORM_TABLE_UPDATE_KEY, updateApi)
+provide(FORM_TABLE_SLOTS_KEY, slots as FormTableSlots)
+
+const validate = async (callback?: (valid: boolean, fields?: FormTableValue) => void) => {
+  try {
+    const valid = Boolean(await formRef.value?.validate?.())
+    callback?.(valid)
+    return valid
+  } catch (fields) {
+    callback?.(false, fields)
+    return false
+  }
+}
+
+defineExpose({
+  validate,
+  resetFields: () => formRef.value?.resetFields?.(),
+  clearValidate: (fieldProps?: string | string[]) => formRef.value?.clearValidate?.(fieldProps),
+  getFormRef: () => formRef.value,
+  getTableRef: () => tableRef.value
+})
 </script>
 
 <style lang="less" scoped>
 .form-table-container {
-  :deep(.el-table) {
-    .el-table__body-wrapper {
-      .el-table__row {
-        .el-table__cell {
-          padding: 8px 0;
-
-          .el-form-item {
-            margin-bottom: 0;
-
-            .el-form-item__content {
-              line-height: 1;
-            }
-          }
-        }
-      }
-    }
+  :deep(.el-table__cell .el-form-item) {
+    margin-bottom: 0;
   }
 }
 </style>

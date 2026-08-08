@@ -1,193 +1,115 @@
 <template>
-  <div class="form-table-demo">
-    <h1>FormTable 组件演示</h1>
-    
-    <div class="demo-section">
-      <h2>基础用法</h2>
+  <main class="demo-page">
+    <header>
+      <router-link to="/">← 返回</router-link>
+      <h1>基础表格表单</h1>
+      <p>统一使用 children 布局，字段通过 type 映射 Element UI 组件。</p>
+    </header>
+
+    <section class="demo-card">
       <FormTable
         ref="formTableRef"
         :table-data="tableData"
         :columns="columns"
-        :rules="rules"
-        :form-data="formData"
-        @update:tableData="handleTableDataUpdate"
-        @update:formData="handleFormDataUpdate"
+        :form-props="{ size: 'small' }"
+        :table-props="{ border: true, stripe: true }"
+        @update:tableData="tableData = $event"
       />
-      
-      <div class="actions">
-        <el-button type="primary" @click="handleSubmit">提交表单</el-button>
-        <el-button @click="handleReset">重置表单</el-button>
-        <el-button @click="handleAddRow">添加行</el-button>
-        <el-button @click="handleRemoveRow">删除行</el-button>
-      </div>
-    </div>
 
-    <div class="demo-section">
+      <div class="actions">
+        <el-button type="primary" @click="submit">校验</el-button>
+        <el-button @click="addRow">添加行</el-button>
+        <el-button :disabled="!tableData.length" @click="removeRow">删除末行</el-button>
+      </div>
+    </section>
+
+    <section class="demo-card">
+      <h2>组件配置</h2>
+      <pre>{{ columnsCode }}</pre>
+    </section>
+
+    <section class="demo-card">
       <h2>当前数据</h2>
       <pre>{{ JSON.stringify(tableData, null, 2) }}</pre>
-    </div>
-  </div>
+    </section>
+  </main>
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive } from 'vue'
+import { ref } from 'vue'
 import { Message } from 'element-ui'
 import FormTable from '@itagan/form-table'
-import type {
-  ColumnConfig,
-  FormTableExpose,
-  FormTableRecord,
-  TableRow
-} from '@itagan/form-table'
+import type { ColumnConfig, FormTableExpose, TableRow } from '@itagan/form-table'
+import { formatFormTableConfig } from '../utils/formatFormTableConfig'
 
 const tableData = ref<TableRow[]>([
-  { name: '小米', age: 16, sex: '男', school: '县一小' },
-  { name: '小2米', age: 32, sex: '男', school: '' }
+  { name: '小米', age: 16, school: 'county-primary' },
+  { name: '小明', age: 18, school: 'city-middle' }
 ])
 
-const formData = reactive({
-  tableData: tableData.value
-})
-
-const rules = ref({
-  'tableData.*.name': [{ required: true, message: '请输入姓名', trigger: 'blur' }],
-  'tableData.*.age': [
-    { required: true, message: '请输入年龄', trigger: 'blur' },
-    { type: 'number', min: 1, max: 120, message: '年龄必须在1-120之间', trigger: 'blur' }
-  ],
-  'tableData.*.sex': [{ required: true, message: '请选择性别', trigger: 'change' }],
-  'tableData.*.school': [{ required: true, message: '请选择学校', trigger: 'change' }]
-})
-
-const columns = ref<ColumnConfig[]>([
+const required = (message: string, trigger = 'blur') => [{ required: true, message, trigger }]
+const columns: ColumnConfig[] = [
   {
     name: '姓名和年龄',
-    props: { width: '300px' },
-    fieldRow: { gutter: 10 },
-    fields: [
-      {
-        key: 'name',
-        type: 'input',
-        placeholder: '请输入姓名',
-        required: true,
-        layout: { span: 12 }
-      },
-      {
-        key: 'age',
-        type: 'number',
-        placeholder: '请输入年龄',
-        required: true,
-        layout: { span: 12 }
-      }
-    ]
-  },
-  {
-    name: '性别',
-    props: { width: '150px' },
-    fields: [
-      {
-        key: 'sex',
-        type: 'input',
-        placeholder: '请输入性别',
-        required: true
-      }
-    ]
+    props: { minWidth: 320 },
+    children: [{
+      props: { gutter: 10 },
+      children: [
+        {
+          key: 'name',
+          type: 'input',
+          colProps: { span: 12 },
+          formItemProps: { rules: required('请输入姓名') },
+          component: { props: { placeholder: '请输入姓名', clearable: true } }
+        },
+        {
+          key: 'age',
+          type: 'number',
+          colProps: { span: 12 },
+          formItemProps: { rules: required('请输入年龄', 'change') },
+          component: { props: { min: 0, max: 150 } }
+        }
+      ]
+    }]
   },
   {
     name: '学校',
-    props: { width: '200px' },
-    fields: [
-      {
+    props: { minWidth: 200 },
+    children: [{
+      children: [{
         key: 'school',
         type: 'select',
-        placeholder: '请选择学校',
-        required: true,
-        options: [
-          { label: '县一小', value: '县一小' },
-          { label: '县二中', value: '县二中' },
-          { label: '市一中', value: '市一中' }
-        ]
-      }
-    ]
+        formItemProps: { rules: required('请选择学校', 'change') },
+        component: {
+          props: { placeholder: '请选择学校', clearable: true },
+          options: [
+            { label: '县一小', value: 'county-primary' },
+            { label: '市一中', value: 'city-middle' }
+          ]
+        }
+      }]
+    }]
   }
-])
+]
+const columnsCode = formatFormTableConfig(columns)
 
 const formTableRef = ref<FormTableExpose>()
-
-const handleTableDataUpdate = (newData: TableRow[]) => {
-  tableData.value = newData
-}
-
-const handleFormDataUpdate = (newData: FormTableRecord) => {
-  Object.assign(formData, newData)
-}
-
-const handleSubmit = async () => {
+const submit = async () => {
   const valid = await formTableRef.value?.validate()
-  if (valid) {
-    Message.success('表单验证通过')
-    return
-  }
-
-  Message.error('表单验证失败，请检查输入')
+  Message[valid ? 'success' : 'error'](valid ? '校验通过' : '请完善表格内容')
 }
-
-const handleReset = () => {
-  formTableRef.value?.resetFields()
+const addRow = () => {
+  tableData.value = [...tableData.value, { name: '', age: 0, school: '' }]
 }
-
-const handleAddRow = () => {
-  formTableRef.value?.addRow({ name: '', age: 0, sex: '', school: '' })
-}
-
-const handleRemoveRow = () => {
-  if (tableData.value.length > 1) {
-    formTableRef.value?.removeRow(tableData.value.length - 1)
-  }
+const removeRow = () => {
+  tableData.value = tableData.value.slice(0, -1)
+  formTableRef.value?.clearValidate()
 }
 </script>
 
-<style lang="less" scoped>
-.form-table-demo {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-
-  h1 {
-    color: #303133;
-    margin-bottom: 30px;
-    text-align: center;
-  }
-
-  .demo-section {
-    margin-bottom: 40px;
-    padding: 20px;
-    border: 1px solid #ebeef5;
-    border-radius: 4px;
-    background: #fff;
-
-    h2 {
-      color: #606266;
-      margin-bottom: 20px;
-    }
-
-    .actions {
-      margin-top: 20px;
-      padding-top: 20px;
-      border-top: 1px solid #ebeef5;
-
-      .el-button {
-        margin-right: 10px;
-      }
-    }
-
-    pre {
-      background: #f5f7fa;
-      padding: 15px;
-      border-radius: 4px;
-      font-size: 12px;
-      overflow-x: auto;
-    }
-  }
-}
+<style scoped>
+.demo-page { max-width: 1100px; margin: 0 auto; padding: 32px; }
+.demo-card { margin-top: 20px; padding: 24px; background: #fff; border-radius: 12px; }
+.actions { display: flex; gap: 10px; margin-top: 20px; }
+pre { padding: 16px; overflow: auto; background: #f6f8fa; border-radius: 8px; }
 </style>

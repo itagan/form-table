@@ -1,278 +1,144 @@
-import { describe, expect, it, vi } from 'vitest'
-import { mount, createLocalVue } from '@vue/test-utils'
+import { createLocalVue, mount } from '@vue/test-utils'
 import ElementUI from 'element-ui'
+import { describe, expect, it, vi } from 'vitest'
 import FormTable from '../index.vue'
 import type {
   ColumnConfig,
-  CustomComponentConfig,
+  FormTableFieldRenderContext,
   FormTableExpose,
-  FormTableRecord,
-  TableRow,
-  ValidationRule
+  FormTableRowContext,
+  FormTableTableContext,
+  TableRow
 } from '../types.public'
 
 const localVue = createLocalVue()
 localVue.use(ElementUI)
 
-function createColumns(): ColumnConfig[] {
-  return [
-    {
-      name: '姓名',
-      children: [
-        {
-          children: [
-            {
-              key: 'name',
-              type: 'input',
-              component: {
-                bind: {
-                  placeholder: '请输入姓名'
-                }
-              }
+const inputColumns: ColumnConfig[] = [
+  {
+    name: '姓名',
+    children: [
+      {
+        children: [
+          {
+            key: 'name',
+            type: 'input',
+            component: {
+              props: { placeholder: '请输入姓名' }
             }
-          ]
-        }
-      ]
-    }
-  ]
-}
+          }
+        ]
+      }
+    ]
+  }
+]
 
-interface MountFormTableOptions {
+function mountFormTable(options: {
   tableData?: TableRow[]
   columns?: ColumnConfig[]
-  rules?: Record<string, ValidationRule[]>
-  formData?: FormTableRecord
-  customComponents?: CustomComponentConfig[]
   scopedSlots?: Record<string, any>
-}
-
-function mountFormTable(options: MountFormTableOptions = {}) {
+  listeners?: Record<string, (...args: any[]) => void>
+} = {}) {
   return mount(FormTable as any, {
     localVue,
     propsData: {
       tableData: options.tableData || [{ name: 'Alice' }],
-      columns: options.columns || createColumns(),
-      rules: options.rules || {},
-      formData: options.formData || {},
-      customComponents: options.customComponents || []
+      columns: options.columns || inputColumns,
+      formProps: { size: 'small' },
+      tableProps: { border: true }
     },
     scopedSlots: options.scopedSlots,
+    listeners: options.listeners,
     attachTo: document.body
   })
 }
 
-describe('FormTable behavior', () => {
-  it('renders configured columns and row values', async () => {
-    const wrapper = mountFormTable()
+describe('FormTable core behavior', () => {
+  it('renders a type field and emits immutable field updates', async () => {
+    const original = [{ name: 'Alice' }]
+    const wrapper = mountFormTable({ tableData: original })
     await wrapper.vm.$nextTick()
 
     expect(wrapper.text()).toContain('姓名')
     expect((wrapper.find('input').element as HTMLInputElement).value).toBe('Alice')
+    await wrapper.find('input').setValue('Bob')
 
-    wrapper.destroy()
-  })
-
-  it('emits table data and field-change events when an input changes', async () => {
-    const wrapper = mountFormTable()
-    await wrapper.vm.$nextTick()
-    const input = wrapper.find('input')
-
-    await input.setValue('Bob')
-
-    const tableDataEvents = wrapper.emitted('update:tableData')
-    const fieldChangeEvents = wrapper.emitted('field-change')
-
-    expect(tableDataEvents).toBeTruthy()
-    expect(tableDataEvents?.[0]?.[0]).toEqual([{ name: 'Bob' }])
-    expect(fieldChangeEvents?.[0]?.[0]).toEqual({
+    expect(original).toEqual([{ name: 'Alice' }])
+    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{ name: 'Bob' }])
+    expect(wrapper.emitted('field-change')?.[0]?.[0]).toEqual({
       row: { name: 'Bob' },
       index: 0,
       fieldKey: 'name',
       value: 'Bob',
       previousValue: 'Alice'
     })
-
     wrapper.destroy()
   })
 
-  it('updates row data through a field slot setValue helper', async () => {
+  it('keeps nested field paths working', async () => {
     const wrapper = mountFormTable({
-      tableData: [{ school: '第一中学' }],
-      columns: [
-        {
-          name: '学校',
-          children: [
-            {
-              children: [
-                {
-                  key: 'school',
-                  type: 'slot',
-                  component: {
-                    slotName: 'school-field'
-                  }
-                }
-              ]
-            }
-          ]
-        }
-      ],
+      tableData: [{ profile: { city: '杭州' } }],
+      columns: [{
+        name: '城市',
+        children: [{ children: [{ key: 'profile.city', type: 'input' }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+    await wrapper.find('input').setValue('宁波')
+
+    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([
+      { profile: { city: '宁波' } }
+    ])
+    wrapper.destroy()
+  })
+
+  it('renders a named slot and exposes focused update helpers', async () => {
+    const wrapper = mountFormTable({
+      tableData: [{ school: '一中' }],
+      columns: [{
+        name: '学校',
+        children: [{ children: [{ key: 'school', slot: 'school' }] }]
+      }],
       scopedSlots: {
-        'school-field': '<button type="button" class="slot-setter" @click="props.setValue(\'第二中学\')">{{ props.value }}</button>'
+        school: '<button type="button" class="slot-setter" @click="props.setValue(\'二中\')">{{ props.value }}</button>'
       }
     })
     await wrapper.vm.$nextTick()
-
-    expect(wrapper.find('.slot-setter').text()).toBe('第一中学')
-
+    expect(wrapper.find('.slot-setter').text()).toBe('一中')
     await wrapper.find('.slot-setter').trigger('click')
-
-    const tableDataEvents = wrapper.emitted('update:tableData')
-    const fieldChangeEvents = wrapper.emitted('field-change')
-
-    expect(tableDataEvents?.[0]?.[0]).toEqual([{ school: '第二中学' }])
-    expect(fieldChangeEvents?.[0]?.[0]).toEqual({
-      row: { school: '第二中学' },
-      index: 0,
-      fieldKey: 'school',
-      value: '第二中学',
-      previousValue: '第一中学'
-    })
-
+    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{ school: '二中' }])
     wrapper.destroy()
   })
 
-  it('updates row data from a registered custom component v-model', async () => {
+  it('renders a directly supplied component and wraps its listeners', async () => {
+    const listener = vi.fn((context) => context.setValue('disabled'))
     const StatusInput = {
-      name: 'StatusInput',
-      props: {
-        value: {
-          type: String,
-          default: ''
-        }
-      },
-      render(this: any, h: any): any {
-        return h(
-          'button',
-          {
-            class: 'status-input',
-            attrs: { type: 'button' },
-            on: {
-              click: () => this.$emit('input', 'disabled')
-            }
-          },
-          this.value
-        )
+      props: ['value'],
+      render(this: any, h: any) {
+        return h('button', {
+          class: 'status-input',
+          attrs: { type: 'button' },
+          on: { click: () => this.$emit('commit') }
+        }, this.value)
       }
     }
-
     const wrapper = mountFormTable({
       tableData: [{ status: 'enabled' }],
-      columns: [
-        {
-          name: '状态',
-          children: [
-            {
-              children: [
-                {
-                  key: 'status',
-                  type: 'custom',
-                  component: {
-                    name: 'StatusInput'
-                  }
-                }
-              ]
+      columns: [{
+        name: '状态',
+        children: [{
+          children: [{
+            key: 'status',
+            component: {
+              is: StatusInput,
+              listeners: { commit: listener }
             }
-          ]
-        }
-      ],
-      customComponents: [
-        {
-          name: 'StatusInput',
-          component: StatusInput
-        }
-      ]
+          }]
+        }]
+      }]
     })
     await wrapper.vm.$nextTick()
-
-    expect(wrapper.find('.status-input').text()).toBe('enabled')
-
     await wrapper.find('.status-input').trigger('click')
-
-    const tableDataEvents = wrapper.emitted('update:tableData')
-    const fieldChangeEvents = wrapper.emitted('field-change')
-
-    expect(tableDataEvents?.[0]?.[0]).toEqual([{ status: 'disabled' }])
-    expect(fieldChangeEvents?.[0]?.[0]).toEqual({
-      row: { status: 'disabled' },
-      index: 0,
-      fieldKey: 'status',
-      value: 'disabled',
-      previousValue: 'enabled'
-    })
-
-    wrapper.destroy()
-  })
-
-  it('passes field context and original event args to custom component listeners', async () => {
-    const ListenerInput = {
-      name: 'ListenerInput',
-      props: {
-        value: {
-          type: String,
-          default: ''
-        }
-      },
-      render(this: any, h: any): any {
-        return h(
-          'button',
-          {
-            class: 'listener-input',
-            attrs: { type: 'button' },
-            on: {
-              click: () => this.$emit('commit', 'listener-updated', { source: 'button' })
-            }
-          },
-          this.value
-        )
-      }
-    }
-    const listener = vi.fn((context, value, meta) => {
-      context.setValue('listener-updated')
-    })
-
-    const wrapper = mountFormTable({
-      tableData: [{ status: 'enabled' }],
-      columns: [
-        {
-          name: '状态',
-          children: [
-            {
-              children: [
-                {
-                  key: 'status',
-                  type: 'custom',
-                  component: {
-                    name: 'ListenerInput',
-                    listeners: {
-                      commit: listener
-                    }
-                  }
-                }
-              ]
-            }
-          ]
-        }
-      ],
-      customComponents: [
-        {
-          name: 'ListenerInput',
-          component: ListenerInput
-        }
-      ]
-    })
-    await wrapper.vm.$nextTick()
-
-    await wrapper.find('.listener-input').trigger('click')
 
     expect(listener).toHaveBeenCalledTimes(1)
     expect(listener.mock.calls[0][0]).toMatchObject({
@@ -281,440 +147,90 @@ describe('FormTable behavior', () => {
       fieldKey: 'status',
       value: 'enabled'
     })
-    expect(listener.mock.calls[0][1]).toBe('listener-updated')
-    expect(listener.mock.calls[0][2]).toEqual({ source: 'button' })
-    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([
-      { status: 'listener-updated' }
+    expect(Object.keys(listener.mock.calls[0][0]).sort()).toEqual([
+      'fieldKey',
+      'index',
+      'row',
+      'setValue',
+      'tableData',
+      'updateRow',
+      'value'
     ])
-    expect(wrapper.emitted('field-change')?.[0]?.[0]).toMatchObject({
-      fieldKey: 'status',
-      value: 'listener-updated',
-      previousValue: 'enabled'
-    })
-
+    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{ status: 'disabled' }])
     wrapper.destroy()
   })
 
-  it('exposes row mutation methods and emits row operation events', async () => {
-    const wrapper = mountFormTable({
-      tableData: [
-        { name: 'Alice' },
-        { name: 'Bob' }
-      ]
-    })
-    await wrapper.vm.$nextTick()
-    const formTable = wrapper.vm as unknown as FormTableExpose
-
-    formTable.addRow({ name: 'Carol' })
-    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([
-      { name: 'Alice' },
-      { name: 'Bob' },
-      { name: 'Carol' }
-    ])
-    expect(wrapper.emitted('row-add')?.[0]).toEqual([{ name: 'Carol' }, 2])
-
-    await wrapper.setProps({
-      tableData: wrapper.emitted('update:tableData')?.[0]?.[0]
-    })
-
-    formTable.copyRow(0, { name: 'Alice Copy' })
-    expect(wrapper.emitted('update:tableData')?.[1]?.[0]).toEqual([
-      { name: 'Alice' },
-      { name: 'Alice Copy' },
-      { name: 'Bob' },
-      { name: 'Carol' }
-    ])
-    expect(wrapper.emitted('row-copy')?.[0]).toEqual([{ name: 'Alice Copy' }, 1])
-
-    await wrapper.setProps({
-      tableData: wrapper.emitted('update:tableData')?.[1]?.[0]
-    })
-
-    formTable.moveRow(3, 1)
-    expect(wrapper.emitted('update:tableData')?.[2]?.[0]).toEqual([
-      { name: 'Alice' },
-      { name: 'Carol' },
-      { name: 'Alice Copy' },
-      { name: 'Bob' }
-    ])
-    expect(wrapper.emitted('row-move')?.[0]).toEqual([{ name: 'Carol' }, 3, 1])
-
-    await wrapper.setProps({
-      tableData: wrapper.emitted('update:tableData')?.[2]?.[0]
-    })
-
-    formTable.removeRow(2)
-    expect(wrapper.emitted('update:tableData')?.[3]?.[0]).toEqual([
-      { name: 'Alice' },
-      { name: 'Carol' },
-      { name: 'Bob' }
-    ])
-    expect(wrapper.emitted('row-remove')?.[0]).toEqual([{ name: 'Alice Copy' }, 2])
-
-    wrapper.destroy()
-  })
-
-  it('exposes form data helpers and keeps tableData synchronized', async () => {
-    const wrapper = mountFormTable({
-      tableData: [{ name: 'Alice' }],
-      formData: {
-        owner: 'tester'
-      }
-    })
-    await wrapper.vm.$nextTick()
-    const formTable = wrapper.vm as unknown as FormTableExpose
-
-    expect(formTable.getFormData()).toEqual({
-      owner: 'tester',
-      tableData: [{ name: 'Alice' }]
-    })
-
-    formTable.setFormData({
-      owner: 'next',
-      tableData: [{ name: 'Bob' }]
-    })
-
-    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{ name: 'Bob' }])
-    expect(wrapper.emitted('update:formData')?.[1]?.[0]).toEqual({
-      owner: 'next',
-      tableData: [{ name: 'Bob' }]
-    })
-
-    wrapper.destroy()
-  })
-
-  it('validates visible row fields through the exposed validateRow method', async () => {
-    const wrapper = mountFormTable({
-      tableData: [{ name: '' }],
-      rules: {
-        'tableData.*.name': [
+  it('resolves dynamic visibility and options from row context', async () => {
+    const columnVisible = vi.fn((_context: FormTableTableContext) => true)
+    const rowProps = vi.fn((_context: FormTableRowContext) => ({ gutter: 8 }))
+    const fieldVisible = vi.fn(({ row }: FormTableFieldRenderContext) => row.province === 'zhejiang')
+    const fieldOptions = vi.fn(({ row }: FormTableFieldRenderContext) => row.province === 'zhejiang'
+      ? [{ label: '杭州', value: 'hangzhou' }]
+      : [])
+    const columns: ColumnConfig[] = [{
+      name: '地区',
+      visible: columnVisible,
+      children: [{
+        props: rowProps,
+        children: [
           {
-            required: true,
-            message: '请输入姓名',
-            trigger: 'blur'
-          }
-        ]
-      }
-    })
-    await wrapper.vm.$nextTick()
-    const formTable = wrapper.vm as unknown as FormTableExpose
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-
-    await expect(formTable.validateRow(0)).resolves.toBe(false)
-
-    await wrapper.setProps({
-      tableData: [{ name: 'Alice' }]
-    })
-    await wrapper.vm.$nextTick()
-
-    await expect(formTable.validateRow(0)).resolves.toBe(true)
-
-    warnSpy.mockRestore()
-    wrapper.destroy()
-  })
-
-  it('renders required column headers with the default required mark', async () => {
-    const wrapper = mountFormTable({
-      columns: [
-        {
-          name: '姓名',
-          required: true,
-          children: [
-            {
-              children: [
-                {
-                  key: 'name',
-                  type: 'input'
-                }
-              ]
+            key: 'province',
+            type: 'select',
+            colProps: { span: 12 },
+            component: {
+              options: [{ label: '浙江', value: 'zhejiang' }]
             }
-          ]
-        }
-      ]
-    })
-    await wrapper.vm.$nextTick()
-
-    const header = wrapper.find('.form-table-column-header')
-
-    expect(header.exists()).toBe(true)
-    expect(header.find('.form-table-column-header__required').text()).toBe('*')
-    expect(header.text()).toContain('姓名')
-
-    wrapper.destroy()
-  })
-
-  it('renders column header slots with header context', async () => {
-    const wrapper = mountFormTable({
-      columns: [
-        {
-          name: '姓名',
-          required: true,
-          headerSlot: 'name-header',
-          children: [
-            {
-              children: [
-                {
-                  key: 'name',
-                  type: 'input'
-                }
-              ]
-            }
-          ]
-        }
-      ],
-      scopedSlots: {
-        'name-header': '<strong class="custom-header">{{ props.label }}-{{ props.required }}-{{ props.columnIndex }}</strong>'
-      }
-    })
-    await wrapper.vm.$nextTick()
-
-    expect(wrapper.find('.custom-header').text()).toBe('姓名-true-0')
-
-    wrapper.destroy()
-  })
-
-  it('uses native rendering for index columns and skips configured form children', async () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-    const wrapper = mountFormTable({
-      tableData: [{ name: 'Alice' }],
-      columns: [
-        {
-          name: '序号',
-          props: {
-            type: 'index',
-            width: '70px'
           },
-          children: [
-            {
-              children: [
-                {
-                  key: 'shouldNotRender',
-                  type: 'input',
-                  component: {
-                    bind: {
-                      placeholder: '不应渲染'
-                    }
-                  }
-                }
-              ]
-            }
-          ]
-        },
-        ...createColumns()
-      ]
-    })
-    await wrapper.vm.$nextTick()
-
-    expect(wrapper.findAll('input').length).toBe(1)
-    expect(wrapper.text()).not.toContain('不应渲染')
-    expect(wrapper.text()).toContain('1')
-
-    warnSpy.mockRestore()
-    wrapper.destroy()
-  })
-
-  it('excludes hidden fields from row validation when visibility changes', async () => {
-    const wrapper = mountFormTable({
-      tableData: [{ name: 'Alice', remark: '' }],
-      formData: {
-        showRemark: true
-      },
-      rules: {
-        'tableData.*.remark': [
           {
-            required: true,
-            message: '请输入备注',
-            trigger: 'blur'
+            key: 'city',
+            type: 'select',
+            visible: fieldVisible,
+            colProps: { span: 12 },
+            component: {
+              options: fieldOptions
+            }
           }
         ]
-      },
-      columns: [
-        {
-          name: '信息',
-          children: [
-            {
-              children: [
-                {
-                  key: 'name',
-                  type: 'input'
-                },
-                {
-                  key: 'remark',
-                  type: 'input',
-                  behavior: {
-                    visible: ({ formData }) => formData.showRemark === true
-                  }
-                }
-              ]
-            }
-          ]
-        }
-      ]
+      }]
+    }]
+    const wrapper = mountFormTable({
+      tableData: [{ province: 'zhejiang', city: 'hangzhou' }],
+      columns
     })
     await wrapper.vm.$nextTick()
-    const formTable = wrapper.vm as unknown as FormTableExpose
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-
-    expect(wrapper.findAll('input').length).toBe(2)
-    await expect(formTable.validateRow(0)).resolves.toBe(false)
-
-    await wrapper.setProps({
-      formData: {
-        showRemark: false
-      }
-    })
-    await wrapper.vm.$nextTick()
-
-    expect(wrapper.findAll('input').length).toBe(1)
-    await expect(formTable.validateRow(0)).resolves.toBe(true)
-
-    warnSpy.mockRestore()
+    expect(wrapper.findAll('.el-select')).toHaveLength(2)
+    expect(Object.keys(columnVisible.mock.calls[0][0]).sort()).toEqual(['tableData'])
+    expect(Object.keys(rowProps.mock.calls[0][0]).sort()).toEqual([
+      'index',
+      'row',
+      'tableData'
+    ])
+    expect(Object.keys(fieldVisible.mock.calls[0][0]).sort()).toEqual([
+      'fieldKey',
+      'index',
+      'row',
+      'tableData'
+    ])
+    expect(Object.keys(fieldOptions.mock.calls[0][0]).sort()).toEqual([
+      'fieldKey',
+      'index',
+      'row',
+      'tableData'
+    ])
     wrapper.destroy()
   })
 
-  it('validates remaining rows with recalculated paths after removing a row', async () => {
-    const wrapper = mountFormTable({
-      tableData: [
-        { name: 'Alice' },
-        { name: '' }
-      ],
-      rules: {
-        'tableData.*.name': [
-          {
-            required: true,
-            message: '请输入姓名',
-            trigger: 'blur'
-          }
-        ]
-      }
-    })
+  it('forwards native table events and exposes native refs', async () => {
+    const rowClick = vi.fn()
+    const wrapper = mountFormTable({ listeners: { 'row-click': rowClick } })
     await wrapper.vm.$nextTick()
-    const formTable = wrapper.vm as unknown as FormTableExpose
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    ;(wrapper.findComponent({ name: 'ElTable' }).vm as any).$emit('row-click', { name: 'Alice' })
+    expect(rowClick).toHaveBeenCalledWith({ name: 'Alice' })
 
-    formTable.removeRow(0)
-    const nextTableData = wrapper.emitted('update:tableData')?.[0]?.[0] as TableRow[]
-
-    expect(nextTableData).toEqual([{ name: '' }])
-
-    await wrapper.setProps({
-      tableData: nextTableData
-    })
-    await wrapper.vm.$nextTick()
-
-    await expect(formTable.validateRow(0)).resolves.toBe(false)
-
-    await wrapper.setProps({
-      tableData: [{ name: 'Bob' }]
-    })
-    await wrapper.vm.$nextTick()
-
-    await expect(formTable.validateRow(0)).resolves.toBe(true)
-
-    warnSpy.mockRestore()
-    wrapper.destroy()
-  })
-
-  it('applies field linkage patches when an input changes', async () => {
-    const wrapper = mountFormTable({
-      tableData: [{ name: 'Alice', slug: '' }],
-      columns: [
-        {
-          name: '信息',
-          children: [
-            {
-              children: [
-                {
-                  key: 'name',
-                  type: 'input',
-                  behavior: {
-                    onValueChange: ({ value }) => ({
-                      slug: String(value).toLowerCase()
-                    })
-                  }
-                },
-                {
-                  key: 'slug',
-                  type: 'input'
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    })
-    await wrapper.vm.$nextTick()
-
-    await wrapper.find('input').setValue('Bob')
-
-    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([
-      { name: 'Bob', slug: 'bob' }
-    ])
-    expect(wrapper.emitted('field-change')?.[0]?.[0]).toMatchObject({
-      fieldKey: 'name',
-      value: 'Bob',
-      previousValue: 'Alice'
-    })
-    expect(wrapper.emitted('field-change')?.[1]?.[0]).toMatchObject({
-      fieldKey: 'slug',
-      value: 'bob',
-      previousValue: ''
-    })
-
-    wrapper.destroy()
-  })
-
-  it('applies field linkage when rows are added or copied', async () => {
-    const wrapper = mountFormTable({
-      tableData: [{ name: 'Alice', slug: 'alice' }],
-      columns: [
-        {
-          name: '信息',
-          children: [
-            {
-              children: [
-                {
-                  key: 'name',
-                  type: 'input',
-                  behavior: {
-                    defaultValue: 'Draft',
-                    onValueChange: ({ value }) => ({
-                      slug: String(value).toLowerCase()
-                    })
-                  }
-                },
-                {
-                  key: 'slug',
-                  type: 'input'
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    })
-    await wrapper.vm.$nextTick()
-    const formTable = wrapper.vm as unknown as FormTableExpose
-
-    formTable.addRow()
-    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([
-      { name: 'Alice', slug: 'alice' },
-      { name: 'Draft', slug: 'draft' }
-    ])
-    expect(wrapper.emitted('row-add')?.[0]).toEqual([{ name: 'Draft', slug: 'draft' }, 1])
-
-    await wrapper.setProps({
-      tableData: wrapper.emitted('update:tableData')?.[0]?.[0]
-    })
-
-    formTable.copyRow(0, { name: 'Copied' })
-    expect(wrapper.emitted('update:tableData')?.[1]?.[0]).toEqual([
-      { name: 'Alice', slug: 'alice' },
-      { name: 'Copied', slug: 'copied' },
-      { name: 'Draft', slug: 'draft' }
-    ])
-    expect(wrapper.emitted('row-copy')?.[0]).toEqual([{ name: 'Copied', slug: 'copied' }, 1])
-
+    const expose = wrapper.vm as unknown as FormTableExpose
+    expect(expose.getFormRef()).toBeTruthy()
+    expect(expose.getTableRef()).toBeTruthy()
+    expose.clearValidate()
     wrapper.destroy()
   })
 })
