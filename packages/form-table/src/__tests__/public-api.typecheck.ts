@@ -61,9 +61,48 @@ const invalid: ColumnConfig[] = [{
   }]
 }]
 
+const contextBoundaries: ColumnConfig[] = [{
+  name: '上下文边界',
+  visible: (tableContext) => {
+    void tableContext.tableData
+    // @ts-expect-error column callbacks do not have a current row.
+    void tableContext.row
+    return true
+  },
+  children: [{
+    visible: (rowContext) => {
+      void rowContext.row
+      void rowContext.index
+      // @ts-expect-error row callbacks do not have a current field.
+      void rowContext.fieldKey
+      return true
+    },
+    children: [{
+      key: 'name',
+      type: 'input',
+      visible: (fieldContext) => {
+        void fieldContext.row
+        void fieldContext.index
+        void fieldContext.fieldKey
+        return true
+      },
+      component: {
+        listeners: {
+          change(fieldContext) {
+            // @ts-expect-error callback rows are read-only; use updateRow instead.
+            fieldContext.row.name = 'Bob'
+            fieldContext.updateRow({ name: 'Bob' })
+          }
+        }
+      }
+    }]
+  }]
+}]
+
 void props
 void component
 void named
 void plugin
 void useExpose
 void invalid
+void contextBoundaries

@@ -42,7 +42,7 @@ import {
   FORM_TABLE_SLOTS_KEY,
   FORM_TABLE_UPDATE_KEY
 } from './types'
-import { createRuntimeContext, resolveVisible } from './utils/dynamic'
+import { createTableContext, resolveVisible } from './utils/dynamic'
 import { getValueByPath, setValueByPath } from './utils/path'
 
 const props = withDefaults(defineProps<{
@@ -74,8 +74,8 @@ const formTableContext = computed(() => ({
 }))
 
 const visibleColumns = computed(() => {
-  const runtimeContext = createRuntimeContext(formTableContext.value)
-  return props.columns.filter((column) => resolveVisible(column.visible, runtimeContext))
+  const tableContext = createTableContext(props.tableData)
+  return props.columns.filter((column) => resolveVisible(column.visible, tableContext))
 })
 
 const updateRow = (rowIndex: number, patch: Partial<TableRow>) => {

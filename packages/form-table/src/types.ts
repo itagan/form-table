@@ -6,23 +6,26 @@ export type ComponentProps = Record<string, FormTableValue>
 
 export interface TableRow extends FormTableRecord {}
 
-export interface FormTableState {
-  tableData: TableRow[]
+export interface FormTableTableContext {
+  tableData: ReadonlyArray<TableRow>
 }
 
-export interface FormTableRuntimeContext extends FormTableState {
-  row: TableRow
+export interface FormTableRowContext extends FormTableTableContext {
+  row: Readonly<TableRow>
   index: number
-  fieldKey?: string
 }
 
-export interface FormTableFieldContext extends FormTableRuntimeContext {
+export interface FormTableFieldRenderContext extends FormTableRowContext {
+  fieldKey: string
+}
+
+export interface FormTableFieldContext extends FormTableFieldRenderContext {
   value: FormTableValue
   setValue: (value: FormTableValue) => void
   updateRow: (patch: Partial<TableRow>) => void
 }
 
-export type DynamicValue<T> = T | ((context: FormTableRuntimeContext) => T)
+export type DynamicValue<T, Context> = T | ((context: Context) => T)
 export type FormTableFieldListener = (
   context: FormTableFieldContext,
   ...args: unknown[]
@@ -50,10 +53,10 @@ export interface OptionPropsConfig {
  */
 export interface FieldComponentConfig {
   is?: string | Component
-  props?: DynamicValue<ComponentProps>
+  props?: DynamicValue<ComponentProps, FormTableFieldRenderContext>
   listeners?: Record<string, FormTableFieldListener>
-  options?: DynamicValue<FormItemOption[]>
-  optionProps?: DynamicValue<OptionPropsConfig>
+  options?: DynamicValue<FormItemOption[], FormTableFieldRenderContext>
+  optionProps?: DynamicValue<OptionPropsConfig, FormTableFieldRenderContext>
 }
 
 export type FormItemType =
@@ -79,9 +82,9 @@ export type FormItemType =
 
 interface BaseFormItemConfig {
   key: string
-  visible?: DynamicValue<boolean>
-  colProps?: DynamicValue<ComponentProps>
-  formItemProps?: DynamicValue<ComponentProps>
+  visible?: DynamicValue<boolean, FormTableFieldRenderContext>
+  colProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext>
+  formItemProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext>
 }
 
 export interface TypeFormItemConfig extends BaseFormItemConfig {
@@ -111,8 +114,8 @@ export type FormItemConfig =
 
 export interface RowConfig {
   key?: string
-  visible?: DynamicValue<boolean>
-  props?: DynamicValue<ComponentProps>
+  visible?: DynamicValue<boolean, FormTableRowContext>
+  props?: DynamicValue<ComponentProps, FormTableRowContext>
   children: FormItemConfig[]
 }
 
@@ -120,8 +123,8 @@ export interface ColumnConfig {
   key?: string
   name: string
   headerSlot?: string
-  visible?: DynamicValue<boolean>
-  props?: DynamicValue<ComponentProps>
+  visible?: DynamicValue<boolean, FormTableTableContext>
+  props?: DynamicValue<ComponentProps, FormTableTableContext>
   children: RowConfig[]
 }
 
@@ -145,7 +148,7 @@ export interface FormTableSlotContext extends FormTableFieldContext {
   propPath: string
 }
 
-export interface FormTableHeaderSlotContext extends FormTableState {
+export interface FormTableHeaderSlotContext extends FormTableTableContext {
   column: ColumnConfig
   columnIndex: number
   label: string

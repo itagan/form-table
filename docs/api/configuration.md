@@ -51,6 +51,8 @@ component: {
 
 字段 `visible` 同样支持运行时函数。字段联动不在配置中执行，请监听 `field-change` 后更新业务数据。
 
+动态函数只接收当前层级有意义的信息：Column 只有 `tableData`，Row 增加 `row/index`，Field 再增加 `fieldKey`。组件 listener 另外获得 `value/setValue/updateRow`。不会用空 row、`index = -1` 等占位值补齐上下文。
+
 列级不提供 `required` 快捷字段。表头标记使用 `headerSlot` 渲染，实际校验配置在字段的 `formItemProps.rules` 中：
 
 ```vue

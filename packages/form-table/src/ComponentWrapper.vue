@@ -66,7 +66,7 @@ import { getComponentType, getRequiredProps } from './configs/defaultComponentCo
 import type {
   FormItemConfig,
   FormItemOption,
-  FormTableState,
+  FormTableTableContext,
   FormTableFieldContext,
   FormTableUpdateApi,
   OptionPropsConfig,
@@ -79,7 +79,11 @@ import {
   getOptionLabel,
   getOptionValue
 } from './utils/display'
-import { createRuntimeContext, resolveDynamicValue } from './utils/dynamic'
+import {
+  createFieldRenderContext,
+  createRowContext,
+  resolveDynamicValue
+} from './utils/dynamic'
 import { getValueByPath } from './utils/path'
 
 const props = defineProps<{
@@ -88,16 +92,15 @@ const props = defineProps<{
   config: FormItemConfig
 }>()
 
-const formTableContext = inject<ComputedRef<FormTableState>>(
+const formTableContext = inject<ComputedRef<FormTableTableContext>>(
   FORM_TABLE_CONTEXT_KEY,
   computed(() => ({ tableData: [] }))
 )
 const updateApi = inject<FormTableUpdateApi>(FORM_TABLE_UPDATE_KEY)
-const runtimeContext = computed(() => createRuntimeContext(formTableContext.value, {
-  row: props.row,
-  index: props.rowIndex,
-  fieldKey: props.config.key
-}))
+const runtimeContext = computed(() => createFieldRenderContext(
+  createRowContext(formTableContext.value, props.row, props.rowIndex),
+  props.config.key
+))
 const resolvedComponent = computed(() => {
   return props.config.component?.is || (props.config.type ? getComponentType(props.config.type) : 'span')
 })

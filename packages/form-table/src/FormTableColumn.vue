@@ -35,13 +35,13 @@ import { computed, defineComponent, h, inject, type ComputedRef, type PropType }
 import FormTableRow from './FormTableRow.vue'
 import type {
   ColumnConfig,
-  FormTableState,
+  FormTableTableContext,
   FormTableHeaderSlotContext,
   FormTableSlotFn,
   FormTableSlots
 } from './types'
 import { FORM_TABLE_CONTEXT_KEY, FORM_TABLE_SLOTS_KEY } from './types'
-import { createRuntimeContext, resolveDynamicValue } from './utils/dynamic'
+import { resolveDynamicValue } from './utils/dynamic'
 
 const SlotRenderer = defineComponent({
   props: {
@@ -58,13 +58,12 @@ const props = defineProps<{
   columnIndex: number
 }>()
 
-const formTableContext = inject<ComputedRef<FormTableState>>(
+const formTableContext = inject<ComputedRef<FormTableTableContext>>(
   FORM_TABLE_CONTEXT_KEY,
   computed(() => ({ tableData: [] }))
 )
 const parentSlots = inject<FormTableSlots>(FORM_TABLE_SLOTS_KEY, {})
-const runtimeContext = computed(() => createRuntimeContext(formTableContext.value))
-const columnProps = computed(() => resolveDynamicValue(props.column.props, runtimeContext.value) || {})
+const columnProps = computed(() => resolveDynamicValue(props.column.props, formTableContext.value) || {})
 const isNativeColumn = computed(() => ['index', 'selection', 'expand'].includes(columnProps.value.type))
 const headerSlotFn = computed(() => props.column.headerSlot
   ? parentSlots[props.column.headerSlot] || null

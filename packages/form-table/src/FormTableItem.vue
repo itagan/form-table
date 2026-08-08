@@ -20,7 +20,7 @@ import { computed, defineComponent, h, inject, type ComputedRef, type PropType }
 import ComponentWrapper from './ComponentWrapper.vue'
 import type {
   FormItemConfig,
-  FormTableState,
+  FormTableTableContext,
   FormTableSlotContext,
   FormTableSlotFn,
   FormTableSlots,
@@ -32,7 +32,11 @@ import {
   FORM_TABLE_SLOTS_KEY,
   FORM_TABLE_UPDATE_KEY
 } from './types'
-import { createRuntimeContext, resolveDynamicValue } from './utils/dynamic'
+import {
+  createFieldRenderContext,
+  createRowContext,
+  resolveDynamicValue
+} from './utils/dynamic'
 import { getValueByPath } from './utils/path'
 
 const SlotRenderer = defineComponent({
@@ -51,18 +55,17 @@ const props = defineProps<{
   config: FormItemConfig
 }>()
 
-const formTableContext = inject<ComputedRef<FormTableState>>(
+const formTableContext = inject<ComputedRef<FormTableTableContext>>(
   FORM_TABLE_CONTEXT_KEY,
   computed(() => ({ tableData: [] }))
 )
 const updateApi = inject<FormTableUpdateApi>(FORM_TABLE_UPDATE_KEY)
 const parentSlots = inject<FormTableSlots>(FORM_TABLE_SLOTS_KEY, {})
 const propPath = computed(() => `tableData.${props.rowIndex}.${props.config.key}`)
-const runtimeContext = computed(() => createRuntimeContext(formTableContext.value, {
-  row: props.row,
-  index: props.rowIndex,
-  fieldKey: props.config.key
-}))
+const runtimeContext = computed(() => createFieldRenderContext(
+  createRowContext(formTableContext.value, props.row, props.rowIndex),
+  props.config.key
+))
 const resolvedFormItemProps = computed(() => ({
   ...(resolveDynamicValue(props.config.formItemProps, runtimeContext.value) || {}),
   prop: propPath.value

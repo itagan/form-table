@@ -1,33 +1,51 @@
 import type {
   DynamicValue,
-  FormTableState,
-  FormTableRuntimeContext
+  FormTableFieldRenderContext,
+  FormTableRowContext,
+  FormTableTableContext,
+  TableRow
 } from '../types'
 
-export function createRuntimeContext(
-  baseContext: FormTableState,
-  overrides: Partial<FormTableRuntimeContext> = {}
-): FormTableRuntimeContext {
+export function createTableContext(
+  tableData: ReadonlyArray<TableRow>
+): FormTableTableContext {
+  return { tableData }
+}
+
+export function createRowContext(
+  tableContext: FormTableTableContext,
+  row: Readonly<TableRow>,
+  index: number
+): FormTableRowContext {
   return {
-    tableData: baseContext.tableData,
-    row: overrides.row || {},
-    index: overrides.index ?? -1,
-    fieldKey: overrides.fieldKey
+    ...tableContext,
+    row,
+    index
   }
 }
 
-export function resolveDynamicValue<T>(
-  value: DynamicValue<T> | undefined,
-  context: FormTableRuntimeContext
+export function createFieldRenderContext(
+  rowContext: FormTableRowContext,
+  fieldKey: string
+): FormTableFieldRenderContext {
+  return {
+    ...rowContext,
+    fieldKey
+  }
+}
+
+export function resolveDynamicValue<T, Context>(
+  value: DynamicValue<T, Context> | undefined,
+  context: Context
 ): T | undefined {
   return typeof value === 'function'
-    ? (value as (context: FormTableRuntimeContext) => T)(context)
+    ? (value as (context: Context) => T)(context)
     : value
 }
 
-export function resolveVisible(
-  value: DynamicValue<boolean> | undefined,
-  context: FormTableRuntimeContext
+export function resolveVisible<Context>(
+  value: DynamicValue<boolean, Context> | undefined,
+  context: Context
 ) {
   return resolveDynamicValue(value, context) !== false
 }

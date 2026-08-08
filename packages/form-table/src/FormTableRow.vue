@@ -17,9 +17,14 @@
 <script lang="ts" setup>
 import { computed, inject, type ComputedRef } from 'vue'
 import FormTableItem from './FormTableItem.vue'
-import type { FormItemConfig, FormTableState, RowConfig, TableRow } from './types'
+import type { FormItemConfig, FormTableTableContext, RowConfig, TableRow } from './types'
 import { FORM_TABLE_CONTEXT_KEY } from './types'
-import { createRuntimeContext, resolveDynamicValue, resolveVisible } from './utils/dynamic'
+import {
+  createFieldRenderContext,
+  createRowContext,
+  resolveDynamicValue,
+  resolveVisible
+} from './utils/dynamic'
 
 const props = defineProps<{
   row: TableRow
@@ -27,25 +32,22 @@ const props = defineProps<{
   rowConfig: RowConfig
 }>()
 
-const formTableContext = inject<ComputedRef<FormTableState>>(
+const formTableContext = inject<ComputedRef<FormTableTableContext>>(
   FORM_TABLE_CONTEXT_KEY,
   computed(() => ({ tableData: [] }))
 )
-const rowContext = computed(() => createRuntimeContext(formTableContext.value, {
-  row: props.row,
-  index: props.rowIndex
-}))
+const rowContext = computed(() => createRowContext(
+  formTableContext.value,
+  props.row,
+  props.rowIndex
+))
 const isVisible = computed(() => resolveVisible(props.rowConfig.visible, rowContext.value))
 const rowProps = computed(() => resolveDynamicValue(props.rowConfig.props, rowContext.value) || {})
 const visibleItems = computed(() => props.rowConfig.children.reduce<Array<{
   config: FormItemConfig
   colProps: Record<string, unknown>
 }>>((items, config) => {
-  const itemContext = createRuntimeContext(formTableContext.value, {
-    row: props.row,
-    index: props.rowIndex,
-    fieldKey: config.key
-  })
+  const itemContext = createFieldRenderContext(rowContext.value, config.key)
 
   if (resolveVisible(config.visible, itemContext)) {
     items.push({

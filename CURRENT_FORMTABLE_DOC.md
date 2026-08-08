@@ -23,7 +23,8 @@ FormTable
 - `slot` 绕过组件渲染器，但保留 `el-col` 和 `el-form-item`。
 - 表头必填标记等自定义展示由 `headerSlot` 显式渲染，字段校验只由 `formItemProps.rules` 决定。
 - `colProps`、`formItemProps`、`component.props` 分别透传到对应 Element UI 层。
-- 动态 `visible`、props 和 options 接收 `{ row, index, fieldKey, tableData }`，页面依赖直接通过闭包读取。
+- 动态上下文按层级提供：Column 只有 `tableData`，Row 增加 `row/index`，Field 再增加 `fieldKey`；不会回传空 row 或 `index = -1` 等占位值。
+- 组件 listener 在 Field 上下文后继续接收组件原始事件参数；字段 slot 再增加 `propPath`。
 - 字段 key 支持 `profile.city` 和 `items[0].name` 路径。
 
 ## 数据边界

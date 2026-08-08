@@ -53,3 +53,5 @@ const columns = [{
 Table 原生事件直接透传。通过 ref 可调用 `validate()`、`resetFields()`、`clearValidate()`、`getFormRef()` 和 `getTableRef()`。
 
 表头必填标记等展示使用 `headerSlot` 明确渲染；字段是否必填只由 `formItemProps.rules` 决定。
+
+动态配置只获得当前层级有意义的上下文：Column 为 `tableData`，Row 增加 `row/index`，Field 增加 `fieldKey`。组件 listener 额外获得 `value/setValue/updateRow`，不再回传占位字段。

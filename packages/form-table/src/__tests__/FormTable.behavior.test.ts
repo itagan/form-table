@@ -2,7 +2,14 @@ import { createLocalVue, mount } from '@vue/test-utils'
 import ElementUI from 'element-ui'
 import { describe, expect, it, vi } from 'vitest'
 import FormTable from '../index.vue'
-import type { ColumnConfig, FormTableExpose, TableRow } from '../types.public'
+import type {
+  ColumnConfig,
+  FormTableFieldRenderContext,
+  FormTableExpose,
+  FormTableRowContext,
+  FormTableTableContext,
+  TableRow
+} from '../types.public'
 
 const localVue = createLocalVue()
 localVue.use(ElementUI)
@@ -140,15 +147,31 @@ describe('FormTable core behavior', () => {
       fieldKey: 'status',
       value: 'enabled'
     })
+    expect(Object.keys(listener.mock.calls[0][0]).sort()).toEqual([
+      'fieldKey',
+      'index',
+      'row',
+      'setValue',
+      'tableData',
+      'updateRow',
+      'value'
+    ])
     expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{ status: 'disabled' }])
     wrapper.destroy()
   })
 
   it('resolves dynamic visibility and options from row context', async () => {
+    const columnVisible = vi.fn((_context: FormTableTableContext) => true)
+    const rowProps = vi.fn((_context: FormTableRowContext) => ({ gutter: 8 }))
+    const fieldVisible = vi.fn(({ row }: FormTableFieldRenderContext) => row.province === 'zhejiang')
+    const fieldOptions = vi.fn(({ row }: FormTableFieldRenderContext) => row.province === 'zhejiang'
+      ? [{ label: '杭州', value: 'hangzhou' }]
+      : [])
     const columns: ColumnConfig[] = [{
       name: '地区',
+      visible: columnVisible,
       children: [{
-        props: { gutter: 8 },
+        props: rowProps,
         children: [
           {
             key: 'province',
@@ -161,12 +184,10 @@ describe('FormTable core behavior', () => {
           {
             key: 'city',
             type: 'select',
-            visible: ({ row }) => row.province === 'zhejiang',
+            visible: fieldVisible,
             colProps: { span: 12 },
             component: {
-              options: ({ row }) => row.province === 'zhejiang'
-                ? [{ label: '杭州', value: 'hangzhou' }]
-                : []
+              options: fieldOptions
             }
           }
         ]
@@ -178,6 +199,24 @@ describe('FormTable core behavior', () => {
     })
     await wrapper.vm.$nextTick()
     expect(wrapper.findAll('.el-select')).toHaveLength(2)
+    expect(Object.keys(columnVisible.mock.calls[0][0]).sort()).toEqual(['tableData'])
+    expect(Object.keys(rowProps.mock.calls[0][0]).sort()).toEqual([
+      'index',
+      'row',
+      'tableData'
+    ])
+    expect(Object.keys(fieldVisible.mock.calls[0][0]).sort()).toEqual([
+      'fieldKey',
+      'index',
+      'row',
+      'tableData'
+    ])
+    expect(Object.keys(fieldOptions.mock.calls[0][0]).sort()).toEqual([
+      'fieldKey',
+      'index',
+      'row',
+      'tableData'
+    ])
     wrapper.destroy()
   })
 
