@@ -1,6 +1,6 @@
 # 企业内部复杂组件接入示例
 
-本示例以“采购申请明细”为业务场景，展示一个页面同时使用 Element UI 内置字段、公司全局组件、页面手动引入组件、非标准双向绑定组件、纯展示组件和操作 Slot 的完整组织方式。
+本示例以“采购申请明细”为业务场景，展示一个页面同时使用 Element UI 内置字段、公司全局组件、页面手动引入组件、非标准双向绑定组件、手动同步组件、纯展示组件和操作 Slot 的完整组织方式。
 
 ## 场景与组件来源
 
@@ -8,7 +8,7 @@
 
 | 字段 | 组件来源 | 接入方式 |
 | --- | --- | --- |
-| 物料 | 页面手动引入 `BusinessSkuSelector` | 组件对象 + 自定义 model |
+| 物料 | 页面手动引入 `BusinessSkuSelector` | `model: false` + props + listeners 手动同步 |
 | 采购组织 | 公司组件库全局注册 | 字符串 renderer + 自定义 model |
 | 供应商 | 公司组件库全局注册 | 字符串 renderer + 复杂事件载荷 |
 | 数量 | Element UI | 内置 `number` 类型 |
@@ -123,11 +123,7 @@ import BusinessAttachmentUploader from '@/components/EnterpriseComponents/Busine
 
 ```ts
 // src/views/PurchaseRequest/createPurchaseColumns.ts
-import type {
-  ColumnConfig,
-  FormTableValue,
-  TableRow
-} from '@itagan/form-table'
+import type { ColumnConfig, TableRow } from '@itagan/form-table'
 import BusinessSkuSelector from '@/components/EnterpriseComponents/BusinessSkuSelector.vue'
 import MoneyInput from '@/components/EnterpriseComponents/MoneyInput.vue'
 import BusinessAttachmentUploader from '@/components/EnterpriseComponents/BusinessAttachmentUploader.vue'
@@ -168,24 +164,21 @@ export function createPurchaseColumns(
             component: {
               // 手动引入的局部业务组件直接传组件对象。
               renderer: BusinessSkuSelector,
-              model: {
-                // 组件实际协议：selectedSkuId + select-sku。
-                prop: 'selectedSkuId',
-                event: 'select-sku',
-                valueFromEvent: (...args: unknown[]): FormTableValue => {
-                  return (args[0] as SkuSelection).id
-                }
-              },
-              props: ({ row }) => ({
+              // 不使用 FormTable 自动 model，改由下面的 props/listeners 手动同步。
+              model: false,
+              props: ({ value, row }) => ({
+                // 当前字段值单向传入内部组件，保证接口回填、复制和重置后仍能同步显示。
+                selectedSkuId: value,
                 disabled: !options.editable || asPurchaseRow(row).locked,
                 placeholder: '输入编码或名称搜索物料',
                 includeOutOfStock: false
               }),
               listeners: {
-                // model 先写回 skuId，再执行同名 listener 完成字段联动。
+                // 监听业务事件，一次写回主字段和所有关联字段。
                 'select-sku'({ updateRow }, selected) {
                   const sku = selected as SkuSelection
                   updateRow({
+                    skuId: sku.id,
                     skuName: sku.name,
                     specification: sku.specification,
                     unit: sku.unit,
@@ -410,7 +403,7 @@ export function createPurchaseColumns(
           type: 'component',
           component: {
             renderer: 'biz-approval-status',
-            // 展示组件不接收 value/input，由 props 显式传入业务属性。
+            // 完全关闭双向绑定；只通过 props 向展示组件传入状态。
             model: false,
             props: ({ value }) => ({
               status: value,
@@ -623,6 +616,48 @@ component: {
 }
 ```
 
+`model: false` 不会自动注入值属性，也不会注册值更新事件。上面的审批状态只是单向展示；如果是命令按钮，连 `value` 都不需要传入：
+
+```ts
+component: {
+  renderer: 'biz-risk-check-button',
+  model: false,
+  props: ({ row }) => ({ orderId: row.id }),
+  listeners: {
+    complete(_context, result) {
+      console.log('风控检查结果', result)
+    }
+  }
+}
+```
+
+### 使用 props 和 listeners 手动同步
+
+不希望使用自动 model 时，可以显式关闭它，再将当前值传给组件并在事件中手动更新行数据：
+
+```ts
+component: {
+  renderer: BusinessSkuSelector,
+  model: false,
+  props: ({ value }) => ({
+    selectedSkuId: value
+  }),
+  listeners: {
+    'select-sku'({ updateRow }, selected) {
+      const sku = selected as SkuSelection
+      updateRow({
+        skuId: sku.id,
+        skuName: sku.name,
+        specification: sku.specification,
+        unit: sku.unit
+      })
+    }
+  }
+}
+```
+
+这种写法的值来源仍然是 `tableData`，所以接口回填、复制行和重置数据都能反映到内部组件。若组件完全维护自己的显示值，也可以不传 `selectedSkuId`，但它不会自动响应外部数据变化。
+
 ### 多页面复用的异常协议
 
 如果同一个内部组件需要在许多页面重复编写值转换、默认 props 和事件联动，应创建 Adapter 组件统一协议，而不是在每份 columns 中复制代码：
@@ -660,6 +695,7 @@ Adapter 负责技术协议归一化，columns listener 负责当前采购页面�
 - 全局组件使用字符串 renderer；局部组件直接传组件对象，避免为了 FormTable 扩大全局注册范围。
 - `component.model` 只描述稳定的技术协议，业务字段联动放在 `component.listeners`。
 - 复杂事件使用 `valueFromEvent` 只提取当前字段值，其余事件参数仍会完整传给同名 listener。
+- 需要手动适配时使用 `model: false + props + listeners`，并优先用一次 `updateRow()` 完成主字段和关联字段更新。
 - 展示组件使用 `model: false`，避免无意义的 value/input 注入。
 - 行增删后调用 `clearValidate()`；提交前统一调用 `validate()`。
 - 服务端 Schema 只保存可序列化布局和允许的组件标识，组件对象、函数与事件处理在可信的业务代码中补充。

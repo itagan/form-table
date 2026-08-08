@@ -45,8 +45,12 @@
           <p><code>BusinessSkuSelector</code>、<code>MoneyInput</code>、<code>BusinessAttachmentUploader</code></p>
         </article>
         <article>
-          <h2>绑定协议</h2>
-          <p><code>select-sku</code>、<code>node-select</code>、<code>supplier-change</code>、<code>amount-change</code>、<code>files-change</code></p>
+          <h2>手动双向绑定</h2>
+          <p>物料组件通过 <code>props</code> 接收当前值，再由 <code>listeners</code> 一次写回物料及其关联字段。</p>
+        </article>
+        <article>
+          <h2>完全关闭双向绑定</h2>
+          <p>审批状态设置 <code>model: false</code>，只接收展示属性，不向表格回写任何值。</p>
         </article>
       </div>
 
@@ -145,23 +149,23 @@ const columns: ColumnConfig[] = [
           type: 'component',
           colProps: { span: 14 },
           formItemProps: {
-            label: '物料选择',
+            label: '物料选择（props + listeners）',
             rules: [{ required: true, message: '请选择物料', trigger: 'change' }]
           },
           component: {
             renderer: BusinessSkuSelector,
-            model: {
-              prop: 'selectedSkuId',
-              event: 'select-sku',
-              valueFromEvent: (...args) => (args[0] as SkuSelection).id
-            },
-            props: ({ row }) => ({
+            // 关闭自动 model，由 props 传值、listeners 处理事件并写回当前行。
+            model: false,
+            props: ({ value, row }) => ({
+              selectedSkuId: value,
               disabled: !editable.value || asPurchaseRow(row).locked
             }),
             listeners: {
               'select-sku'({ updateRow }, selected) {
                 const sku = selected as SkuSelection
+                // 单次 patch 同步当前字段及关联字段，避免拆成多次行更新。
                 updateRow({
+                  skuId: sku.id,
                   skuName: sku.name,
                   specification: sku.specification,
                   unit: sku.unit,
@@ -333,6 +337,7 @@ const columns: ColumnConfig[] = [
       type: 'component',
       component: {
         renderer: 'biz-approval-status',
+        // 纯展示组件只接收 status，不注入或监听任何 model 协议。
         model: false,
         props: ({ value }) => ({ status: value })
       }
@@ -419,7 +424,7 @@ const validate = async () => {
 
 .explanation-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin-top: 20px;
 }
