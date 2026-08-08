@@ -3,8 +3,7 @@
   "include": [
     "src/public-types.ts",
     "src/types.public.ts",
-    "src/types.ts",
-    "src/configs/**/*.ts"
+    "src/types.ts"
   ],
   "compilerOptions": {
     "noEmit": false,

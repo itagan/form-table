@@ -2,24 +2,24 @@
 const examples = [
   {
     title: '基础编辑',
-    description: '最小配置的表格内表单，覆盖字段编辑、表单数据同步和基础校验。',
+    description: '统一 children 布局的基础编辑、字段组件和 Element UI 校验。',
     path: '/form-table',
     type: 'primary',
-    tags: ['tableData', 'columns', 'rules']
+    tags: ['children', 'type', 'formItemProps']
   },
   {
     title: '高级示例',
-    description: '集中演示插槽、自定义组件、行操作、字段联动和事件归档。',
+    description: '集中演示多行栅格、直接组件、动态 options、嵌套路径和 slot。',
     path: '/form-table-advanced',
     type: 'success',
-    tags: ['slot', 'customComponents', 'row actions']
+    tags: ['slot', 'component.is', 'dynamic']
   },
   {
     title: '动态插槽',
-    description: '验证动态显隐、字段上下文和插槽快捷操作的组合行为。',
+    description: '验证动态显隐、字段上下文和 slot 更新助手。',
     path: '/dynamic-slot-test',
     type: 'warning',
-    tags: ['visible', 'slot props', 'linkage']
+    tags: ['visible', 'slot props', 'setValue']
   },
   {
     title: '能力文档',
@@ -30,10 +30,10 @@ const examples = [
   },
   {
     title: '组件调试',
-    description: '用于快速复现自定义组件注册、渲染和字段更新问题。',
+    description: '用于验证自定义组件对象直传、事件和原生 Ref。',
     path: '/debug',
     type: 'danger',
-    tags: ['debug', 'custom field', 'diagnostics']
+    tags: ['debug', 'component.is', 'native ref']
   }
 ]
 </script>
@@ -45,7 +45,7 @@ const examples = [
         <p class="eyebrow">FormTable Playground</p>
         <h1>表格内表单组件调试台</h1>
         <p class="hero-copy">
-          这里专门用于验证 npm 包源码在真实业务场景中的行为，覆盖基础配置、高级扩展、动态插槽和问题复现。
+          这里验证精简后的 FormTable：布局归布局，组件归组件，业务数据操作由调用方维护。
         </p>
       </div>
       <div class="hero-actions">
