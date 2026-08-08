@@ -11,24 +11,29 @@ import FormTable, {
 const CustomInput: Component = { name: 'CustomInput' }
 const rows: TableRow[] = [{ name: 'Alice', profile: { city: '杭州' } }]
 const columns: ColumnConfig[] = [{
-  name: '基本信息',
+  label: '基本信息',
   children: [{
     props: { gutter: 8 },
     children: [
       {
-        key: 'name',
+        fieldKey: 'name',
         type: 'input',
         colProps: { span: 8 },
         formItemProps: { label: '姓名', rules: [{ required: true }] },
         component: { props: { clearable: true } }
       },
       {
-        key: 'profile.city',
-        component: { is: CustomInput }
+        fieldKey: 'profile.city',
+        type: 'component',
+        component: { renderer: CustomInput }
       },
       {
-        key: 'actions',
-        slot: 'actions'
+        fieldKey: 'actions',
+        type: 'slot',
+        component: {
+          renderer: 'actions',
+          props: ({ row }) => ({ disabled: Boolean(row.locked) })
+        }
       }
     ]
   }]
@@ -51,18 +56,69 @@ async function useExpose(expose: FormTableExpose) {
 }
 
 const invalid: ColumnConfig[] = [{
-  name: '错误配置',
+  label: '错误配置',
   children: [{
     children: [{
-      key: 'bad',
+      fieldKey: 'bad',
       // @ts-expect-error unknown type aliases are rejected.
       type: 'unknown'
     }]
   }]
 }]
 
+const invalidModes: ColumnConfig[] = [{
+  label: '渲染模式约束',
+  children: [{
+    children: [
+      // @ts-expect-error builtin modes resolve their own renderer.
+      { fieldKey: 'name', type: 'input', component: { renderer: CustomInput } },
+      // @ts-expect-error component mode requires component.renderer.
+      { fieldKey: 'custom', type: 'component', component: { props: {} } },
+      // @ts-expect-error slot renderer must be a string name.
+      { fieldKey: 'actions', type: 'slot', component: { renderer: CustomInput } }
+    ]
+  }]
+}]
+
+const renamedColumn: ColumnConfig = {
+  label: '新字段名',
+  // @ts-expect-error ColumnConfig uses label; legacy name is not accepted.
+  name: '旧字段名',
+  children: []
+}
+
+const renamedItem: ColumnConfig = {
+  label: '字段路径',
+  children: [{
+    children: [
+      // @ts-expect-error FormItemConfig uses fieldKey; legacy key is not accepted.
+      { key: 'name', type: 'input' }
+    ]
+  }]
+}
+
+const legacySlotString: ColumnConfig = {
+  label: '旧 slot 写法',
+  children: [{
+    children: [
+      // @ts-expect-error standalone slot field was replaced by type: 'slot' + component.renderer.
+      { fieldKey: 'actions', slot: 'actions' }
+    ]
+  }]
+}
+
+const legacyComponentIs: ColumnConfig = {
+  label: '旧组件写法',
+  children: [{
+    children: [
+      // @ts-expect-error component mode requires type: 'component' + component.renderer.
+      { fieldKey: 'custom', component: { is: CustomInput } }
+    ]
+  }]
+}
+
 const contextBoundaries: ColumnConfig[] = [{
-  name: '上下文边界',
+  label: '上下文边界',
   visible: (tableContext) => {
     void tableContext.tableData
     // @ts-expect-error column callbacks do not have a current row.
@@ -78,7 +134,7 @@ const contextBoundaries: ColumnConfig[] = [{
       return true
     },
     children: [{
-      key: 'name',
+      fieldKey: 'name',
       type: 'input',
       visible: (fieldContext) => {
         void fieldContext.row
@@ -105,4 +161,9 @@ void named
 void plugin
 void useExpose
 void invalid
+void invalidModes
+void renamedColumn
+void renamedItem
+void legacySlotString
+void legacyComponentIs
 void contextBoundaries

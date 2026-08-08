@@ -3,7 +3,7 @@ import type { ColumnConfig } from '@itagan/form-table'
 /** 将演示页正在使用的配置转换成可读代码，避免维护第二份静态示例。 */
 export function formatFormTableConfig(columns: ColumnConfig[]) {
   return JSON.stringify(columns, (key, value) => {
-    if (key === 'is' && value) {
+    if (key === 'renderer' && value && typeof value !== 'string') {
       return `[Component ${value.name || value.options?.name || 'Anonymous'}]`
     }
 

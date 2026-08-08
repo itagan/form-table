@@ -16,12 +16,12 @@ localVue.use(ElementUI)
 
 const inputColumns: ColumnConfig[] = [
   {
-    name: '姓名',
+    label: '姓名',
     children: [
       {
         children: [
           {
-            key: 'name',
+            fieldKey: 'name',
             type: 'input',
             component: {
               props: { placeholder: '请输入姓名' }
@@ -79,8 +79,8 @@ describe('FormTable core behavior', () => {
     const wrapper = mountFormTable({
       tableData: [{ profile: { city: '杭州' } }],
       columns: [{
-        name: '城市',
-        children: [{ children: [{ key: 'profile.city', type: 'input' }] }]
+        label: '城市',
+        children: [{ children: [{ fieldKey: 'profile.city', type: 'input' }] }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -93,20 +93,65 @@ describe('FormTable core behavior', () => {
   })
 
   it('renders a named slot and exposes focused update helpers', async () => {
+    const componentPropsResolver = vi.fn(({ row }: FormTableFieldRenderContext) => ({
+      suffix: row.school === '一中' ? '（当前）' : ''
+    }))
+    const slotListener = vi.fn()
     const wrapper = mountFormTable({
       tableData: [{ school: '一中' }],
       columns: [{
-        name: '学校',
-        children: [{ children: [{ key: 'school', slot: 'school' }] }]
+        label: '学校',
+        children: [{ children: [{
+          fieldKey: 'school',
+          type: 'slot',
+          component: {
+            renderer: 'school',
+            props: componentPropsResolver,
+            options: [{ label: '校区配置', value: 'campus' }],
+            listeners: { commit: slotListener }
+          }
+        }] }]
       }],
       scopedSlots: {
-        school: '<button type="button" class="slot-setter" @click="props.setValue(\'二中\')">{{ props.value }}</button>'
+        school: `<button
+          type="button"
+          class="slot-setter"
+          @click="props.setValue('二中'); props.component.listeners.commit('saved')"
+        >{{ props.value }}{{ props.component.props.suffix }}{{ props.component.options[0].label }}</button>`
       }
     })
     await wrapper.vm.$nextTick()
-    expect(wrapper.find('.slot-setter').text()).toBe('一中')
+    expect(wrapper.find('.slot-setter').text()).toBe('一中（当前）校区配置')
+    expect(componentPropsResolver).toHaveBeenCalledTimes(1)
+    expect(Object.keys(componentPropsResolver.mock.calls[0][0]).sort()).toEqual([
+      'fieldKey',
+      'index',
+      'row',
+      'tableData'
+    ])
     await wrapper.find('.slot-setter').trigger('click')
+    expect(slotListener).toHaveBeenCalledTimes(1)
+    expect(slotListener.mock.calls[0][0]).toMatchObject({
+      row: { school: '一中' },
+      fieldKey: 'school',
+      value: '一中'
+    })
+    expect(slotListener.mock.calls[0][1]).toBe('saved')
     expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{ school: '二中' }])
+    wrapper.destroy()
+  })
+
+  it('renders the field value when an untyped config has no renderer', async () => {
+    const wrapper = mountFormTable({
+      tableData: [{ summary: '只读内容' }],
+      columns: [{
+        label: '默认展示',
+        children: [{ children: [{ fieldKey: 'summary' } as any] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.text()).toContain('只读内容')
     wrapper.destroy()
   })
 
@@ -118,19 +163,20 @@ describe('FormTable core behavior', () => {
         return h('button', {
           class: 'status-input',
           attrs: { type: 'button' },
-          on: { click: () => this.$emit('commit') }
+          on: { click: () => this.$emit('commit', 'saved', { source: 'button' }) }
         }, this.value)
       }
     }
     const wrapper = mountFormTable({
       tableData: [{ status: 'enabled' }],
       columns: [{
-        name: '状态',
+        label: '状态',
         children: [{
           children: [{
-            key: 'status',
+            fieldKey: 'status',
+            type: 'component',
             component: {
-              is: StatusInput,
+              renderer: StatusInput,
               listeners: { commit: listener }
             }
           }]
@@ -156,7 +202,57 @@ describe('FormTable core behavior', () => {
       'updateRow',
       'value'
     ])
+    expect(listener.mock.calls[0].slice(1)).toEqual(['saved', { source: 'button' }])
     expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{ status: 'disabled' }])
+    wrapper.destroy()
+  })
+
+  it('applies updateRow patches immutably and emits one change per field', async () => {
+    const original = [{ name: 'Alice', profile: { city: '杭州' } }]
+    const wrapper = mountFormTable({
+      tableData: original,
+      columns: [{
+        label: '批量更新',
+        children: [{ children: [{
+          fieldKey: 'name',
+          type: 'slot',
+          component: { renderer: 'batch-update' }
+        }] }]
+      }],
+      scopedSlots: {
+        'batch-update': `
+          <button
+            type="button"
+            class="batch-update"
+            @click="props.updateRow({ name: 'Bob', 'profile.city': '宁波' })"
+          >更新</button>
+        `
+      }
+    })
+    await wrapper.vm.$nextTick()
+    await wrapper.find('.batch-update').trigger('click')
+
+    expect(original).toEqual([{ name: 'Alice', profile: { city: '杭州' } }])
+    expect(wrapper.emitted('update:tableData')).toHaveLength(1)
+    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([
+      { name: 'Bob', profile: { city: '宁波' } }
+    ])
+    expect(wrapper.emitted('field-change')?.map(([payload]) => payload)).toEqual([
+      {
+        row: { name: 'Bob', profile: { city: '宁波' } },
+        index: 0,
+        fieldKey: 'name',
+        value: 'Bob',
+        previousValue: 'Alice'
+      },
+      {
+        row: { name: 'Bob', profile: { city: '宁波' } },
+        index: 0,
+        fieldKey: 'profile.city',
+        value: '宁波',
+        previousValue: '杭州'
+      }
+    ])
     wrapper.destroy()
   })
 
@@ -168,13 +264,13 @@ describe('FormTable core behavior', () => {
       ? [{ label: '杭州', value: 'hangzhou' }]
       : [])
     const columns: ColumnConfig[] = [{
-      name: '地区',
+      label: '地区',
       visible: columnVisible,
       children: [{
         props: rowProps,
         children: [
           {
-            key: 'province',
+            fieldKey: 'province',
             type: 'select',
             colProps: { span: 12 },
             component: {
@@ -182,7 +278,7 @@ describe('FormTable core behavior', () => {
             }
           },
           {
-            key: 'city',
+            fieldKey: 'city',
             type: 'select',
             visible: fieldVisible,
             colProps: { span: 12 },

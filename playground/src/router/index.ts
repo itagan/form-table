@@ -29,6 +29,11 @@ const router = new VueRouter({
       component: () => import('../views/FormTableDocsView.vue')
     },
     {
+      path: '/remote-schema',
+      name: 'remote-schema',
+      component: () => import('../views/RemoteSchemaView.vue')
+    },
+    {
       path: '/dynamic-slot-test',
       name: 'dynamic-slot-test',
       component: () => import('../views/DynamicSlotTestView.vue')

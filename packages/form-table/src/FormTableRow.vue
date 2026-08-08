@@ -2,7 +2,7 @@
   <el-row v-if="isVisible" v-bind="rowProps">
     <el-col
       v-for="(item, itemIndex) in visibleItems"
-      :key="item.config.key || itemIndex"
+      :key="item.config.fieldKey || itemIndex"
       v-bind="item.colProps"
     >
       <FormTableItem
@@ -47,7 +47,7 @@ const visibleItems = computed(() => props.rowConfig.children.reduce<Array<{
   config: FormItemConfig
   colProps: Record<string, unknown>
 }>>((items, config) => {
-  const itemContext = createFieldRenderContext(rowContext.value, config.key)
+  const itemContext = createFieldRenderContext(rowContext.value, config.fieldKey)
 
   if (resolveVisible(config.visible, itemContext)) {
     items.push({

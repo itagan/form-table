@@ -14,7 +14,7 @@
       >
         <FormTableColumn
           v-for="(column, columnIndex) in visibleColumns"
-          :key="column.key || column.name || columnIndex"
+          :key="column.key || column.label || columnIndex"
           :column="column"
           :column-index="columnIndex"
         />

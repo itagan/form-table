@@ -21,10 +21,10 @@ import type { ColumnConfig } from '@itagan/form-table'
 
 const tableData = ref([{ name: '张三' }])
 const columns: ColumnConfig[] = [{
-  name: '姓名',
+  label: '姓名',
   children: [{
     children: [{
-      key: 'name',
+      fieldKey: 'name',
       type: 'input',
       formItemProps: {
         rules: [{ required: true, message: '请输入姓名' }]

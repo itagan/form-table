@@ -64,6 +64,7 @@
 import { computed, inject, type ComputedRef } from 'vue'
 import { getComponentType, getRequiredProps } from './configs/defaultComponentConfigs'
 import type {
+  BuiltinFormItemType,
   FormItemConfig,
   FormItemOption,
   FormTableTableContext,
@@ -99,13 +100,19 @@ const formTableContext = inject<ComputedRef<FormTableTableContext>>(
 const updateApi = inject<FormTableUpdateApi>(FORM_TABLE_UPDATE_KEY)
 const runtimeContext = computed(() => createFieldRenderContext(
   createRowContext(formTableContext.value, props.row, props.rowIndex),
-  props.config.key
+  props.config.fieldKey
 ))
+const builtinType = computed<BuiltinFormItemType | null>(() => {
+  return props.config.type === 'component' || props.config.type === 'slot'
+    ? null
+    : props.config.type
+})
 const resolvedComponent = computed(() => {
-  return props.config.component?.is || (props.config.type ? getComponentType(props.config.type) : 'span')
+  if (props.config.type === 'component') return props.config.component.renderer
+  return builtinType.value ? getComponentType(builtinType.value) : 'span'
 })
 const componentProps = computed(() => ({
-  ...(props.config.type ? getRequiredProps(props.config.type) : {}),
+  ...(builtinType.value ? getRequiredProps(builtinType.value) : {}),
   ...(resolveDynamicValue(props.config.component?.props, runtimeContext.value) || {})
 }))
 const options = computed<FormItemOption[]>(() => {
@@ -114,8 +121,8 @@ const options = computed<FormItemOption[]>(() => {
 const optionProps = computed<OptionPropsConfig | undefined>(() => {
   return resolveDynamicValue(props.config.component?.optionProps, runtimeContext.value)
 })
-const value = computed(() => getValueByPath(props.row, props.config.key))
-const setValue = (nextValue: unknown) => updateApi?.setValue(props.rowIndex, props.config.key, nextValue)
+const value = computed(() => getValueByPath(props.row, props.config.fieldKey))
+const setValue = (nextValue: unknown) => updateApi?.setValue(props.rowIndex, props.config.fieldKey, nextValue)
 const updateRow = (patch: Partial<TableRow>) => updateApi?.updateRow(props.rowIndex, patch)
 const fieldContext = computed<FormTableFieldContext>(() => ({
   ...runtimeContext.value,

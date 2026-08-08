@@ -1,7 +1,7 @@
-import type { ComponentProps, FormItemType } from '../types'
+import type { BuiltinFormItemType, ComponentProps } from '../types'
 
 /** 仅负责 type 到组件的映射，不覆盖 Element UI 的交互默认值。 */
-export const componentTypeMap: Record<FormItemType, string> = {
+export const componentTypeMap: Record<BuiltinFormItemType, string> = {
   input: 'el-input',
   select: 'el-select',
   date: 'el-date-picker',
@@ -24,7 +24,7 @@ export const componentTypeMap: Record<FormItemType, string> = {
 }
 
 /** 只补充 type 别名本身必需的属性。 */
-export const typeRequiredProps: Partial<Record<FormItemType, ComponentProps>> = {
+export const typeRequiredProps: Partial<Record<BuiltinFormItemType, ComponentProps>> = {
   textarea: { type: 'textarea' },
   date: { type: 'date' },
   datetime: { type: 'datetime' },
@@ -35,10 +35,10 @@ export const typeRequiredProps: Partial<Record<FormItemType, ComponentProps>> = 
   }
 }
 
-export function getComponentType(type: FormItemType) {
+export function getComponentType(type: BuiltinFormItemType) {
   return componentTypeMap[type]
 }
 
-export function getRequiredProps(type: FormItemType) {
+export function getRequiredProps(type: BuiltinFormItemType) {
   return typeRequiredProps[type] || {}
 }

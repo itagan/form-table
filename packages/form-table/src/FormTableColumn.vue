@@ -1,13 +1,13 @@
 <template>
   <el-table-column
     v-if="isNativeColumn"
-    :label="column.name"
+    :label="column.label"
     v-bind="columnProps"
   />
 
   <el-table-column
     v-else
-    :label="column.name"
+    :label="column.label"
     v-bind="columnProps"
   >
     <template v-if="shouldRenderHeader" v-slot:header>
@@ -74,7 +74,7 @@ const shouldRenderHeader = computed(() => {
 const headerSlotProps = computed<FormTableHeaderSlotContext>(() => ({
   column: props.column,
   columnIndex: props.columnIndex,
-  label: props.column.name,
+  label: props.column.label,
   tableData: formTableContext.value.tableData
 }))
 </script>

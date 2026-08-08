@@ -11,22 +11,20 @@
         :table-props="{ border: true }"
         @update:tableData="tableData = $event"
       >
-        <template #score="{ value, setValue }">
-          <el-rate :value="value" @input="setValue" />
+        <template #score="{ value, setValue, component }">
+          <el-rate v-bind="component.props" :value="value" @input="setValue" />
         </template>
 
-        <template #detail="{ row, updateRow }">
+        <template #detail="{ row, updateRow, component }">
           <el-input
+            v-bind="component.props"
             :value="row.detail"
-            type="textarea"
-            :rows="2"
-            placeholder="仅在开启详情时显示"
             @input="updateRow({ detail: $event })"
           />
         </template>
 
-        <template #actions="{ index }">
-          <el-button type="text" @click="removeRow(index)">删除</el-button>
+        <template #actions="{ index, component }">
+          <el-button type="text" @click="removeRow(index)">{{ component.props.label }}</el-button>
         </template>
       </FormTable>
 
@@ -52,15 +50,15 @@ const tableData = ref<TableRow[]>([
 ])
 const columns: ColumnConfig[] = [
   {
-    name: '内容',
+    label: '内容',
     props: { minWidth: 420 },
     children: [
       {
         props: { gutter: 10 },
         children: [
-          { key: 'title', type: 'input', colProps: { span: 16 } },
+          { fieldKey: 'title', type: 'input', colProps: { span: 16 } },
           {
-            key: 'showDetail',
+            fieldKey: 'showDetail',
             type: 'switch',
             colProps: { span: 8 },
             formItemProps: { label: '详情', labelWidth: '48px' }
@@ -69,22 +67,39 @@ const columns: ColumnConfig[] = [
       },
       {
         children: [{
-          key: 'detail',
-          slot: 'detail',
+          fieldKey: 'detail',
+          type: 'slot',
+          component: {
+            renderer: 'detail',
+            props: ({ row }) => ({
+              type: 'textarea',
+              rows: 2,
+              disabled: row.locked === true,
+              placeholder: '仅在开启详情时显示'
+            })
+          },
           visible: ({ row }) => row.showDetail === true
         }]
       }
     ]
   },
   {
-    name: '评分',
+    label: '评分',
     props: { width: 180 },
-    children: [{ children: [{ key: 'score', slot: 'score' }] }]
+    children: [{ children: [{
+      fieldKey: 'score',
+      type: 'slot',
+      component: { renderer: 'score', props: { showScore: true } }
+    }] }]
   },
   {
-    name: '操作',
+    label: '操作',
     props: { width: 90, align: 'center' },
-    children: [{ children: [{ key: '__actions', slot: 'actions' }] }]
+    children: [{ children: [{
+      fieldKey: '__actions',
+      type: 'slot',
+      component: { renderer: 'actions', props: { label: '删除' } }
+    }] }]
   }
 ]
 const columnsCode = formatFormTableConfig(columns)

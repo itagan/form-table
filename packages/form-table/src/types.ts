@@ -48,18 +48,18 @@ export interface OptionPropsConfig {
 /**
  * 字段组件配置。
  *
- * `is` 直接接收自定义组件；未提供时由字段 `type` 映射 Element UI 组件。
+ * `renderer` 在 component 模式下接收组件，在 slot 模式下接收具名 slot 名称。
  * 其余配置只描述实际字段组件，不承载布局、校验或业务行为。
  */
 export interface FieldComponentConfig {
-  is?: string | Component
+  renderer?: string | Component
   props?: DynamicValue<ComponentProps, FormTableFieldRenderContext>
   listeners?: Record<string, FormTableFieldListener>
   options?: DynamicValue<FormItemOption[], FormTableFieldRenderContext>
   optionProps?: DynamicValue<OptionPropsConfig, FormTableFieldRenderContext>
 }
 
-export type FormItemType =
+export type BuiltinFormItemType =
   | 'input'
   | 'select'
   | 'date'
@@ -80,50 +80,59 @@ export type FormItemType =
   | 'autocomplete'
   | 'tag-input'
 
+export type FormItemType = BuiltinFormItemType | 'component' | 'slot'
+
 interface BaseFormItemConfig {
-  key: string
+  /** 行数据字段路径，例如 `name`、`profile.city`。 */
+  fieldKey: string
   visible?: DynamicValue<boolean, FormTableFieldRenderContext>
+  /** 直接传给 el-col。 */
   colProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext>
+  /** 直接传给 el-form-item。 */
   formItemProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext>
 }
 
-export interface TypeFormItemConfig extends BaseFormItemConfig {
-  type: FormItemType
-  slot?: never
-  component?: FieldComponentConfig
+export interface BuiltinFormItemConfig extends BaseFormItemConfig {
+  type: BuiltinFormItemType
+  component?: FieldComponentConfig & {
+    renderer?: never
+  }
 }
 
-export interface CustomComponentFormItemConfig extends BaseFormItemConfig {
-  type?: never
-  slot?: never
+export interface ComponentFormItemConfig extends BaseFormItemConfig {
+  type: 'component'
   component: FieldComponentConfig & {
-    is: string | Component
+    renderer: string | Component
   }
 }
 
 export interface SlotFormItemConfig extends BaseFormItemConfig {
-  type?: never
-  slot: string
-  component?: never
+  type: 'slot'
+  component: FieldComponentConfig & {
+    renderer: string
+  }
 }
 
 export type FormItemConfig =
-  | TypeFormItemConfig
-  | CustomComponentFormItemConfig
+  | BuiltinFormItemConfig
+  | ComponentFormItemConfig
   | SlotFormItemConfig
 
 export interface RowConfig {
   key?: string
   visible?: DynamicValue<boolean, FormTableRowContext>
+  /** 直接传给 el-row。 */
   props?: DynamicValue<ComponentProps, FormTableRowContext>
   children: FormItemConfig[]
 }
 
 export interface ColumnConfig {
   key?: string
-  name: string
+  /** el-table-column 的表头文本。 */
+  label: string
   headerSlot?: string
   visible?: DynamicValue<boolean, FormTableTableContext>
+  /** 直接传给 el-table-column。 */
   props?: DynamicValue<ComponentProps, FormTableTableContext>
   children: RowConfig[]
 }
@@ -144,8 +153,17 @@ export interface FormTableFieldChangePayload {
   previousValue: FormTableValue
 }
 
+export interface ResolvedComponentConfig {
+  renderer?: string | Component
+  props: ComponentProps
+  listeners: Record<string, (...args: unknown[]) => void>
+  options: FormItemOption[]
+  optionProps?: OptionPropsConfig
+}
+
 export interface FormTableSlotContext extends FormTableFieldContext {
   propPath: string
+  component: ResolvedComponentConfig
 }
 
 export interface FormTableHeaderSlotContext extends FormTableTableContext {

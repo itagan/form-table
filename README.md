@@ -64,6 +64,7 @@ import type { ColumnConfig, TableRow } from '@itagan/form-table'
 | ------ | ------ |
 | `/form-table` | 基础编辑场景，验证 children、type、字段校验和同步。 |
 | `/form-table-advanced` | 综合示例，覆盖多行栅格、自定义组件、动态 options、嵌套路径和 slot。 |
+| `/remote-schema` | 远程纯 JSON 配置与页面本地组件、事件增强。 |
 | `/dynamic-slot-test` | 动态显隐与 slot 上下文专项页面。 |
 | `/debug` | 自定义组件对象直传、事件和原生 Ref 调试。 |
 | `/form-table-docs` | playground 内置能力文档页，快速查 props、事件、ref 和配置约定。 |
@@ -75,7 +76,7 @@ import type { ColumnConfig, TableRow } from '@itagan/form-table'
 `pnpm test` 会运行组件包的 Vitest 测试，当前覆盖：
 
 - 纯工具逻辑：嵌套字段路径的不可变读写。
-- 组件行为：type、component、slot、动态配置、原生事件透传和 `update:tableData` / `field-change`。
+- 组件行为：渲染模式优先级、type、component、slot、动态配置、原生事件参数透传和不可变更新协议。
 
 ## 文档
 

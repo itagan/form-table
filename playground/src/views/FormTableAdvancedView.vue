@@ -25,18 +25,18 @@
           </el-tooltip>
         </template>
 
-        <template #status="{ value }">
-          <el-tag :type="value === 'enabled' ? 'success' : 'info'">
+        <template #status="{ value, component }">
+          <el-tag v-bind="component.props">
             {{ value === 'enabled' ? '启用' : '停用' }}
           </el-tag>
         </template>
 
-        <template #actions="{ row, index, updateRow }">
-          <el-button type="text" @click="updateRow({ status: row.status === 'enabled' ? 'disabled' : 'enabled' })">
+        <template #actions="{ row, index, updateRow, component }">
+          <el-button v-bind="component.props" @click="updateRow({ status: row.status === 'enabled' ? 'disabled' : 'enabled' })">
             切换状态
           </el-button>
-          <el-button type="text" @click="copyRow(row, index)">复制</el-button>
-          <el-button type="text" class="danger" @click="removeRow(index)">删除</el-button>
+          <el-button v-bind="component.props" @click="copyRow(row, index)">复制</el-button>
+          <el-button v-bind="component.props" class="danger" @click="removeRow(index)">删除</el-button>
         </template>
       </FormTable>
 
@@ -83,10 +83,10 @@ const selection = ref<TableRow[]>([])
 const formTableRef = ref<FormTableExpose>()
 
 const columns: ColumnConfig[] = [
-  { name: '', props: { type: 'selection', width: 48 }, children: [] },
-  { name: '序号', props: { type: 'index', width: 64, align: 'center' }, children: [] },
+  { label: '', props: { type: 'selection', width: 48 }, children: [] },
+  { label: '序号', props: { type: 'index', width: 64, align: 'center' }, children: [] },
   {
-    name: '联系人信息',
+    label: '联系人信息',
     headerSlot: 'contact-header',
     props: { minWidth: 600 },
     children: [
@@ -94,18 +94,19 @@ const columns: ColumnConfig[] = [
         props: { gutter: 10 },
         children: [
           {
-            key: 'name',
+            fieldKey: 'name',
             type: 'input',
             colProps: { span: 8 },
             formItemProps: { label: '姓名', labelWidth: '52px', rules: [{ required: true, message: '请输入姓名' }] },
             component: { props: { clearable: true } }
           },
           {
-            key: 'phone',
+            fieldKey: 'phone',
+            type: 'component',
             colProps: { span: 16 },
             formItemProps: { label: '手机', labelWidth: '52px' },
             component: {
-              is: PhoneInput,
+              renderer: PhoneInput,
               props: { size: 'small', clearable: true },
               listeners: { change: ({ value }) => console.log('phone changed', value) }
             }
@@ -116,7 +117,7 @@ const columns: ColumnConfig[] = [
         props: { gutter: 10 },
         children: [
           {
-            key: 'province',
+            fieldKey: 'province',
             type: 'select',
             colProps: { span: 7 },
             formItemProps: { label: '省份', labelWidth: '52px' },
@@ -126,7 +127,7 @@ const columns: ColumnConfig[] = [
             }
           },
           {
-            key: 'city',
+            fieldKey: 'city',
             type: 'select',
             visible: ({ row }) => Boolean(row.province),
             colProps: { span: 7 },
@@ -136,7 +137,7 @@ const columns: ColumnConfig[] = [
             }
           },
           {
-            key: 'profile.address',
+            fieldKey: 'profile.address',
             type: 'input',
             colProps: { span: 10 },
             formItemProps: { label: '地址', labelWidth: '52px' }
@@ -146,14 +147,25 @@ const columns: ColumnConfig[] = [
     ]
   },
   {
-    name: '状态',
+    label: '状态',
     props: { width: 90, align: 'center' },
-    children: [{ children: [{ key: 'status', slot: 'status' }] }]
+    children: [{ children: [{
+      fieldKey: 'status',
+      type: 'slot',
+      component: {
+        renderer: 'status',
+        props: ({ row }) => ({ type: row.status === 'enabled' ? 'success' : 'info' })
+      }
+    }] }]
   },
   {
-    name: '操作',
+    label: '操作',
     props: { width: 210, fixed: 'right', align: 'center' },
-    children: [{ children: [{ key: '__actions', slot: 'actions' }] }]
+    children: [{ children: [{
+      fieldKey: '__actions',
+      type: 'slot',
+      component: { renderer: 'actions', props: { type: 'text' } }
+    }] }]
   }
 ]
 const columnsCode = formatFormTableConfig(columns)
