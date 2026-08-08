@@ -8,13 +8,13 @@
       <el-table
         ref="tableRef"
         v-bind="props.tableProps"
-        v-on="$listeners"
+        v-on="tableListeners"
         :data="props.tableData"
         v-loading="props.loading"
       >
         <FormTableColumn
           v-for="(column, columnIndex) in visibleColumns"
-          :key="column.key || column.label || columnIndex"
+          :key="`${column.key || column.label || 'column'}:${columnIndex}`"
           :column="column"
           :column-index="columnIndex"
         />
@@ -24,7 +24,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, provide, ref, useSlots } from 'vue'
+import { computed, getCurrentInstance, provide, ref, useSlots } from 'vue'
 import FormTableColumn from './FormTableColumn.vue'
 import type {
   ColumnConfig,
@@ -67,6 +67,16 @@ const emit = defineEmits<{
 const formRef = ref<FormTableElementFormRef | null>(null)
 const tableRef = ref<FormTableElementTableRef | null>(null)
 const slots = useSlots()
+const instance = getCurrentInstance()
+const tableListeners = computed(() => {
+  const listeners = (instance?.proxy as any)?.$listeners || {}
+  return Object.keys(listeners).reduce<Record<string, (...args: unknown[]) => void>>((result, name) => {
+    if (name !== 'update:tableData' && name !== 'field-change') {
+      result[name] = listeners[name]
+    }
+    return result
+  }, {})
+})
 
 const formModel = computed(() => ({ tableData: props.tableData }))
 const formTableContext = computed(() => ({
