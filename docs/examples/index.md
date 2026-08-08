@@ -30,6 +30,7 @@ pnpm docs:dev
 | [动态插槽 ↗](http://localhost:5173/dynamic-slot-test) | `/dynamic-slot-test` | 动态显隐和 slot 更新助手 |
 | [行列操作与延迟提交 ↗](http://localhost:5173/row-column-operations) | `/row-column-operations` | 行增删复制移动、动态列和业务处理后延迟提交 |
 | [单元格合并 ↗](http://localhost:5173/cell-merge) | `/cell-merge` | 分组纵向合并、汇总行横向合并、稳定列定位和表头隐藏 |
+| [多需求费用明细 ↗](http://localhost:5173/heterogeneous-demands) | `/heterogeneous-demands` | 公共表头下按需求类型加载独立组件、处理差异字段并归一化提交 |
 | [组件调试 ↗](http://localhost:5173/debug) | `/debug` | 自定义组件事件和原生 Ref |
 | [FormTable 精简 API ↗](http://localhost:5173/form-table-docs) | `/form-table-docs` | 精简 API 速查 |
 
@@ -40,3 +41,5 @@ Playground 直接引用包源码，修改组件后无需先构建 npm 包。
 公司内部存在大量全局组件、局部业务组件和非标准绑定协议时，参考[企业内部复杂组件接入示例](./enterprise-components.md)。
 
 需要处理纵向分组、横向汇总、共享字段同步和提交归一化时，参考[单元格合并业务处理示例](./cell-merge.md)。
+
+需要把不同字段、不同业务组件的旧 DOM 表格迁移到 Vue 时，参考[多需求费用明细场景](./heterogeneous-demands.md)。

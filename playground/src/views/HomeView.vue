@@ -53,6 +53,13 @@ const examples = [
     tags: ['spanMethod', 'rowspan', 'colspan']
   },
   {
+    title: '多需求费用明细',
+    description: '模拟会务费用表：公共表头下按需求类型加载独立组件，并归一化差异数据后提交。',
+    path: '/heterogeneous-demands',
+    type: 'success',
+    tags: ['discriminated data', 'component registry', 'normalize']
+  },
+  {
     title: '调试台 API 速查',
     description: '在 Playground 内查看 props、事件、ref 方法和推荐配置约定；完整文档请返回文档总站。',
     path: '/form-table-docs',
