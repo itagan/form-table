@@ -32,28 +32,18 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineComponent, h, inject, type ComputedRef, type PropType } from 'vue'
+import { computed, inject, type ComputedRef } from 'vue'
 import FormTableRow from './FormTableRow.vue'
+import SlotRenderer from './SlotRenderer'
 import type {
   ColumnConfig,
   FormTableColumnContext,
   FormTableTableContext,
   FormTableHeaderSlotContext,
-  FormTableSlotFn,
   FormTableSlots
 } from './types'
 import { FORM_TABLE_CONTEXT_KEY, FORM_TABLE_SLOTS_KEY } from './types'
 import { createColumnContext, resolveDynamicValue } from './utils/dynamic'
-
-const SlotRenderer = defineComponent({
-  props: {
-    slotFn: { type: Function as PropType<FormTableSlotFn>, required: true },
-    slotProps: { type: Object as PropType<FormTableHeaderSlotContext>, required: true }
-  },
-  setup(props) {
-    return () => h('span', { class: 'form-table-column-header' }, props.slotFn(props.slotProps))
-  }
-})
 
 const props = defineProps<{
   column: ColumnConfig
@@ -84,11 +74,3 @@ const headerSlotProps = computed<FormTableHeaderSlotContext>(() => ({
   tableData: formTableContext.value.tableData
 }))
 </script>
-
-<style lang="less" scoped>
-.form-table-column-header {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-</style>

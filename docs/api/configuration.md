@@ -175,6 +175,7 @@ Slot 上下文说明：
 - `component.renderer` 只用于定位具名 slot；不会在 slot 内再次渲染组件。
 - `component.props` 等配置不会自动透传，调用方按自定义组件接口选择性绑定。
 - `component.listeners` 已包装字段上下文，使用 `v-on="component.listeners"` 后，slot 内组件触发同名事件即可调用配置回调。
+- Slot 内容直接渲染，不额外生成包装 `div/span`；需要 class 或布局根节点时由 Slot 自己提供。旧的内部 `.form-table-slot`、`.form-table-column-header` 节点已移除。
 - 找不到 `component.renderer` 对应的具名 slot 时，字段外层布局仍保留，内容为空。
 
 #### `itemConfig.component` 与 `component`

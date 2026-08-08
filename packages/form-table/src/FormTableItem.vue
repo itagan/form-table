@@ -3,7 +3,7 @@
     <SlotRenderer
       v-if="renderMode === 'slot' && slotFn"
       :slot-fn="slotFn"
-      :slot-context="slotContext"
+      :slot-props="slotContext"
     />
     <span v-else-if="renderMode === 'slot'" />
     <span v-else-if="renderMode === 'display'">{{ slotContext.value }}</span>
@@ -19,8 +19,9 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineComponent, h, inject, type ComputedRef, type PropType } from 'vue'
+import { computed, inject, type ComputedRef } from 'vue'
 import ComponentWrapper from './ComponentWrapper.vue'
+import SlotRenderer from './SlotRenderer'
 import type {
   ColumnConfig,
   FormItemConfig,
@@ -28,7 +29,6 @@ import type {
   FormTableFieldContext,
   FormTableTableContext,
   FormTableSlotContext,
-  FormTableSlotFn,
   FormTableSlots,
   FormTableUpdateApi,
   OptionPropsConfig,
@@ -48,16 +48,6 @@ import {
   resolveDynamicValue
 } from './utils/dynamic'
 import { resolveFieldRenderMode } from './utils/renderMode'
-
-const SlotRenderer = defineComponent({
-  props: {
-    slotFn: { type: Function as PropType<FormTableSlotFn>, required: true },
-    slotContext: { type: Object as PropType<FormTableSlotContext>, required: true }
-  },
-  setup(props) {
-    return () => h('div', { class: 'form-table-slot' }, props.slotFn(props.slotContext))
-  }
-})
 
 const props = defineProps<{
   row: TableRow
