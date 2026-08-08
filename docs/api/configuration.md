@@ -157,17 +157,156 @@ component: {
 
 字段 `visible` 同样支持运行时函数。字段联动不在配置中执行，请监听 `field-change` 后更新业务数据。
 
-动态函数只接收当前层级有意义的信息：Column 为 `tableData/columnConfig`，Row 增加 `row/index/rowConfig`，Field 再增加 `fieldKey/value/itemConfig`。组件 listener 另外获得 `setValue/updateRow`。不会用空 row、`index = -1` 或空配置补齐上下文。
+## 运行时上下文
+
+上下文字段按职责分为四类：
+
+| 类别 | 字段 | 说明 |
+| --- | --- | --- |
+| 业务数据 | `tableData`、`row`、`index`、`fieldKey`、`value` | `row` 沿用 Element UI 语义，表示 `tableData[index]`，不命名为 `rowData` |
+| 原始配置 | `columnConfig`、`rowConfig`、`itemConfig` | 返回当前 Column → Row → Item 配置路径 |
+| 更新能力 | `setValue`、`updateRow` | 只在字段 listener 和 Slot 等可执行上下文中提供 |
+| 解析结果 | `component`、`propPath` | 只在字段 Slot 中提供；`component` 已针对当前数据行解析 |
+
+数据与配置使用明确的成对命名：
+
+```text
+row          当前业务数据行
+rowConfig    当前 el-row 布局配置
+
+itemConfig   当前原始字段配置
+component    当前行解析后的组件配置
+```
+
+上下文按渲染层级逐步增加，不使用空对象或无效下标补齐：
+
+| 使用位置 | 可用上下文 |
+| --- | --- |
+| Column `visible/props` | `tableData`、`columnConfig` |
+| Row `visible/props` | Column 上下文 + `row/index/rowConfig` |
+| Item 动态配置 | Row 上下文 + `fieldKey/value/itemConfig` |
+| `component.listeners` | Item 上下文 + `setValue/updateRow` |
+| 字段 Slot | listener 上下文 + `propPath/component` |
+| 表头 Slot | `tableData/columnConfig/columnIndex/label` |
+
+`columnConfig/rowConfig/itemConfig` 是渲染或事件触发时的浅只读配置引用。不要直接修改，也不要在异步流程结束后假定它仍是最新配置；动态调整应由调用方基于稳定 `key` 替换 `columns`。
+
+### 各回调上下文速查
+
+先定义四层上下文内容：
+
+```text
+ColumnContext = tableData, columnConfig
+RowContext    = ColumnContext + row, index, rowConfig
+ItemContext   = RowContext + fieldKey, value, itemConfig
+ActionContext = ItemContext + setValue, updateRow
+```
+
+不同配置回调使用的上下文和返回值如下：
+
+| 回调位置 | 接收的上下文 | 回调返回值 |
+| --- | --- | --- |
+| `column.visible` | ColumnContext | 是否渲染当前列 `boolean` |
+| `column.props` | ColumnContext | 传给 `el-table-column` 的 props |
+| `rowConfig.visible` | RowContext | 是否渲染当前布局行 `boolean` |
+| `rowConfig.props` | RowContext | 传给 `el-row` 的 props |
+| `itemConfig.visible` | ItemContext | 是否渲染当前字段 `boolean` |
+| `itemConfig.colProps` | ItemContext | 传给 `el-col` 的 props |
+| `itemConfig.formItemProps` | ItemContext | 传给 `el-form-item` 的 props |
+| `component.props` | ItemContext | 传给实际字段组件的 props |
+| `component.options` | ItemContext | select/radio/checkbox 等使用的选项数组 |
+| `component.optionProps` | ItemContext | 选项的 label/value/disabled/key 字段映射 |
+| `component.listeners[event]` | ActionContext；后续参数为组件原始事件参数 | 无需返回值，通过更新助手修改数据 |
+
+Column 回调示例：
+
+```ts
+{
+  key: 'contact-column',
+  label: '联系人',
+  visible: ({ tableData, columnConfig }) => {
+    return columnConfig.key === 'contact-column' && tableData.length > 0
+  },
+  props: ({ tableData }) => ({
+    minWidth: tableData.length > 5 ? 360 : 280
+  })
+}
+```
+
+Row 回调示例：
+
+```ts
+{
+  key: 'contact-row',
+  visible: ({ row, index, columnConfig, rowConfig }) => {
+    console.log(columnConfig.key, rowConfig.key, index)
+    return row.hidden !== true
+  },
+  props: ({ row }) => ({
+    gutter: row.compact ? 4 : 12
+  })
+}
+```
+
+Item 动态配置示例：
+
+```ts
+{
+  key: 'city-field',
+  fieldKey: 'city',
+  type: 'select',
+  visible: ({ row, value, itemConfig }) => {
+    return itemConfig.key === 'city-field' && Boolean(row.province) && value !== 'disabled'
+  },
+  colProps: ({ index }) => ({ span: index === 0 ? 12 : 8 }),
+  formItemProps: ({ row }) => ({ label: row.cityLabel || '城市' }),
+  component: {
+    props: ({ row }) => ({ disabled: row.locked }),
+    options: ({ row }) => cityOptions[row.province] || [],
+    optionProps: () => ({ label: 'name', value: 'code' })
+  }
+}
+```
+
+组件事件回调示例：
+
+```ts
+component: {
+  listeners: {
+    change(
+      {
+        row,
+        index,
+        fieldKey,
+        value,
+        columnConfig,
+        rowConfig,
+        itemConfig,
+        setValue,
+        updateRow
+      },
+      nextValue
+    ) {
+      console.log('事件来源', columnConfig.key, rowConfig.key, itemConfig.key)
+      console.log('修改前', row, index, fieldKey, value)
+      setValue(nextValue)
+      updateRow({ touched: true })
+    }
+  }
+}
+```
+
+组件执行 `$emit('change', nextValue)` 时，配置回调依次收到 `ActionContext, nextValue`。`value` 是事件执行时的当前值，`nextValue` 才是组件传出的新值。
 
 ### 动态显隐
 
 `visible` 可传布尔值或返回布尔值的函数，并在响应式依赖变化时重新计算：
 
-| 配置层级 | 影响范围 | 函数上下文 |
+| 配置层级 | 影响范围 | 对应上下文层级 |
 | --- | --- | --- |
-| Column `visible` | 整个 `el-table-column` | `tableData`、`columnConfig` |
-| Row `visible` | 当前单元格内的一整行 `el-row` | Column 上下文 + `row/index/rowConfig` |
-| Item `visible` | 当前 `el-col` 和字段内容 | Row 上下文 + `fieldKey/value/itemConfig` |
+| Column `visible` | 整个 `el-table-column` | Column |
+| Row `visible` | 当前单元格内的一整行 `el-row` | Row |
+| Item `visible` | 当前 `el-col` 和字段内容 | Item |
 
 ```ts
 const columns: ColumnConfig[] = [{
@@ -194,7 +333,7 @@ const columns: ColumnConfig[] = [{
 - 如需在关闭字段时清空值或联动其他字段，请在业务事件中更新数据，例如监听 `field-change`，不要在 `visible` 函数中产生副作用。
 - `visible` 应保持为纯判断函数；布局变化可配合动态 `colProps` 调整剩余字段的栅格宽度。
 
-## 动态上下文使用示例
+### 完整配置示例
 
 ```ts
 const columns: ColumnConfig[] = [{
@@ -253,10 +392,7 @@ const columns: ColumnConfig[] = [{
 }]
 ```
 
-- `row` 是 `tableData[index]` 对应的数据行；`rowConfig` 才是当前布局行配置。
-- `fieldKey` 是当前字段路径，例如 `city` 或 `profile.city`，不是列配置对象。
-- `columnConfig/rowConfig/itemConfig` 返回当前原始配置；Slot 中的 `component` 则是针对当前数据行解析后的组件配置。
-- 配置引用是事件触发或渲染时刻的浅只读引用，不应直接修改或跨异步流程当作最新配置长期缓存。
+- `fieldKey` 是当前字段路径，例如 `city` 或 `profile.city`。
 - `value` 是回调执行时的当前字段值；组件事件产生的新值仍位于上下文之后，例如上面的 `nextValue`。
 - 回调中的 `row/tableData` 用于读取；字段更新使用 `setValue` 或 `updateRow`。两者在同一同步调用链中连续使用时，后一次更新会基于前一次结果继续计算。
 - 组件原始事件参数保持在字段上下文之后，例如上面的 `nextValue`。

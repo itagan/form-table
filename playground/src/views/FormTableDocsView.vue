@@ -193,7 +193,36 @@
 
     <section>
       <h2>上下文回传示例</h2>
-      <p><code>row</code> 是当前业务数据行，<code>rowConfig</code> 是布局配置；<code>columnConfig/rowConfig/itemConfig</code> 返回当前原始配置，Slot 的 <code>component</code> 返回当前行解析后的组件配置。</p>
+      <p>上下文分为业务数据、原始配置、更新能力和解析结果。<code>row</code> 沿用 Element UI 语义，表示当前业务数据行；<code>rowConfig</code> 才是布局配置。</p>
+      <div class="table-scroll">
+        <table class="context-summary">
+          <thead><tr><th>类别</th><th>字段</th><th>边界</th></tr></thead>
+          <tbody>
+            <tr><td>业务数据</td><td><code>tableData, row, index, fieldKey, value</code></td><td>用于读取当前数据位置</td></tr>
+            <tr><td>原始配置</td><td><code>columnConfig, rowConfig, itemConfig</code></td><td>浅只读的当前配置路径</td></tr>
+            <tr><td>更新能力</td><td><code>setValue, updateRow</code></td><td>listener 和字段 Slot 可用</td></tr>
+            <tr><td>解析结果</td><td><code>component, propPath</code></td><td>仅字段 Slot 可用</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><code>itemConfig.component</code> 可能仍包含动态函数；Slot 的 <code>component</code> 已根据当前数据行解析。配置动态调整时请基于稳定 key 替换 columns，不要直接修改上下文引用。</p>
+
+      <h3>不同回调的上下文</h3>
+      <div class="table-scroll">
+        <table class="context-summary callback-table">
+          <thead><tr><th>回调</th><th>上下文</th><th>返回值</th></tr></thead>
+          <tbody>
+            <tr><td><code>column.visible / props</code></td><td><code>tableData, columnConfig</code></td><td>boolean / el-table-column props</td></tr>
+            <tr><td><code>rowConfig.visible / props</code></td><td>Column 上下文 + <code>row, index, rowConfig</code></td><td>boolean / el-row props</td></tr>
+            <tr><td><code>itemConfig.visible / colProps / formItemProps</code></td><td>Row 上下文 + <code>fieldKey, value, itemConfig</code></td><td>boolean / 对应 Element props</td></tr>
+            <tr><td><code>component.props / options / optionProps</code></td><td>Item 上下文</td><td>组件 props / 选项 / 字段映射</td></tr>
+            <tr><td><code>component.listeners[event]</code></td><td>Item 上下文 + <code>setValue, updateRow</code>，后接原始事件参数</td><td>无需返回</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <pre>{{ callbackContextExample }}</pre>
+
+      <h3>组合使用示例</h3>
       <pre>{{ contextExample }}</pre>
     </section>
 
@@ -267,6 +296,31 @@ const contextExample = `{
   }]
 }`
 
+const callbackContextExample = `// Column
+visible: ({ tableData, columnConfig }) => tableData.length > 0 && columnConfig.key !== 'hidden'
+
+// Row
+props: ({ row, index, rowConfig }) => ({
+  gutter: row.compact ? 4 : 12,
+  class: (rowConfig.key || 'row') + '-' + index
+})
+
+// Item / component dynamic config
+component: {
+  props: ({ row, value, itemConfig }) => ({
+    disabled: row.locked || value === 'disabled',
+    fieldId: itemConfig.key
+  }),
+  options: ({ row }) => cityOptions[row.province] || [],
+  listeners: {
+    change({ row, fieldKey, value, columnConfig, rowConfig, itemConfig, setValue }, nextValue) {
+      console.log(row, fieldKey, value)
+      console.log(columnConfig.key, rowConfig.key, itemConfig.key)
+      setValue(nextValue)
+    }
+  }
+}`
+
 const refExample = `await formTableRef.value?.validate()
 formTableRef.value?.clearValidate()
 formTableRef.value?.getFormRef()
@@ -280,6 +334,7 @@ pre { padding: 16px; overflow: auto; background: #f6f8fa; border-radius: 8px; }
 li { margin: 8px 0; }
 .table-scroll { overflow-x: auto; }
 table { min-width: 980px; width: 100%; border-collapse: collapse; font-size: 14px; }
+.context-summary { min-width: 760px; margin: 16px 0; }
 th, td { padding: 12px; border: 1px solid #e5e7eb; text-align: left; vertical-align: top; }
 th { background: #f6f8fa; white-space: nowrap; }
 .layer-group + .layer-group { border-top: 3px solid #cbd5e1; }
