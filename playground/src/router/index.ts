@@ -54,6 +54,11 @@ const router = new VueRouter({
       component: () => import('../views/HeterogeneousDemandView.vue')
     },
     {
+      path: '/itinerary-simple',
+      name: 'itinerary-simple',
+      component: () => import('../views/ItinerarySimpleView.vue')
+    },
+    {
       path: '/enterprise-components',
       name: 'enterprise-components',
       component: () => import('../views/EnterpriseComponentsView.vue')

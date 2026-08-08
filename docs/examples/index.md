@@ -31,6 +31,7 @@ pnpm docs:dev
 | [行列操作与延迟提交 ↗](http://localhost:5173/row-column-operations) | `/row-column-operations` | 行增删复制移动、动态列和业务处理后延迟提交 |
 | [单元格合并 ↗](http://localhost:5173/cell-merge) | `/cell-merge` | 分组纵向合并、汇总行横向合并、稳定列定位和表头隐藏 |
 | [多需求费用明细 ↗](http://localhost:5173/heterogeneous-demands) | `/heterogeneous-demands` | 公共表头下按需求类型加载独立组件、处理差异字段并归一化提交 |
+| [多日议程编排 ↗](http://localhost:5173/itinerary-simple) | `/itinerary-simple` | 日期与主题纵向合并、每日多条议程编辑、组内增删排序与分组提交 |
 | [组件调试 ↗](http://localhost:5173/debug) | `/debug` | 自定义组件事件和原生 Ref |
 | [FormTable 精简 API ↗](http://localhost:5173/form-table-docs) | `/form-table-docs` | 精简 API 速查 |
 
@@ -43,3 +44,5 @@ Playground 直接引用包源码，修改组件后无需先构建 npm 包。
 需要处理纵向分组、横向汇总、共享字段同步和提交归一化时，参考[单元格合并业务处理示例](./cell-merge.md)。
 
 需要把不同字段、不同业务组件的旧 DOM 表格迁移到 Vue 时，参考[多需求费用明细场景](./heterogeneous-demands.md)。
+
+需要一个容易复制的“分组字段 + 明细行”入门实现时，参考[多日议程编排](./itinerary-simple.md)。
