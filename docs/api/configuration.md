@@ -109,6 +109,67 @@ slot              → component.renderer 具名 slot
 </template>
 ```
 
+### 使用 Vue Render Function
+
+`component.renderer` 接收标准 Vue 组件，因此可以直接传入一个使用 Render Function 定义的本地组件，无需给 Schema 增加单独的 `render` 字段：
+
+```ts
+const StatusRenderer = {
+  name: 'StatusRenderer',
+  props: {
+    value: {
+      type: Boolean,
+      default: false
+    },
+    effect: {
+      type: String,
+      default: 'light'
+    }
+  },
+  render(h) {
+    return h(
+      'el-tag',
+      {
+        props: {
+          type: this.value ? 'success' : 'info',
+          effect: this.effect
+        },
+        nativeOn: {
+          click: () => this.$emit('commit', !this.value)
+        }
+      },
+      [this.value ? '已启用' : '已停用']
+    )
+  }
+}
+```
+
+```ts
+const columns: ColumnConfig[] = [{
+  label: '状态',
+  children: [{
+    children: [{
+      key: 'status-field',
+      fieldKey: 'enabled',
+      type: 'component',
+      component: {
+        renderer: StatusRenderer,
+        props: {
+          effect: 'plain'
+        },
+        listeners: {
+          commit({ setValue }, nextValue) {
+            setValue(nextValue)
+          }
+        }
+      }
+    }]
+  }]
+}]
+```
+
+FormTable 会按普通自定义组件处理它：当前字段通过 `value` 传入，组件事件交给 `component.listeners`，数据更新仍使用 `setValue/updateRow`。Render Function 只是该 Vue 组件的内部实现，不是新的 FormTable 渲染模式。
+
 ### Slot 模式
 
 Slot 适合需要完全控制模板结构，或需要组合多个组件的字段。FormTable 仍负责外层 `el-col`、`el-form-item`、校验路径和字段更新，但不会猜测 slot 内部组件应该如何接收值、选项或事件。

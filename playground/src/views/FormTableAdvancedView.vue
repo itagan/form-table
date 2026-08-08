@@ -3,7 +3,7 @@
     <header>
       <router-link to="/">← 返回</router-link>
       <h1>复杂布局与三种渲染模式</h1>
-      <p>同一套 children 布局同时演示 type、自定义 component 和 slot。</p>
+      <p>同一套 children 布局同时演示 type、自定义 component、Render Function 组件和 slot。</p>
     </header>
 
     <section class="demo-card">
@@ -70,6 +70,25 @@ const cityOptions: Record<string, Array<{ label: string; value: string }>> = {
   zhejiang: [{ label: '杭州', value: 'hangzhou' }, { label: '宁波', value: 'ningbo' }],
   jiangsu: [{ label: '南京', value: 'nanjing' }, { label: '苏州', value: 'suzhou' }]
 }
+const ActiveRenderer = {
+  name: 'ActiveRenderer',
+  props: {
+    value: { type: Boolean, default: false },
+    effect: { type: String, default: 'light' }
+  },
+  render(this: any, h: any) {
+    return h('el-tag', {
+      props: {
+        type: this.value ? 'success' : 'info',
+        effect: this.effect
+      },
+      style: { cursor: 'pointer' },
+      nativeOn: {
+        click: () => this.$emit('commit', !this.value)
+      }
+    }, [this.value ? '活跃' : '停用'])
+  }
+}
 const tableData = ref<TableRow[]>([{
   id: 1,
   name: '张三',
@@ -77,7 +96,8 @@ const tableData = ref<TableRow[]>([{
   province: 'zhejiang',
   city: 'hangzhou',
   profile: { address: '西湖区文三路' },
-  status: 'enabled'
+  status: 'enabled',
+  active: true
 }])
 const selection = ref<TableRow[]>([])
 const formTableRef = ref<FormTableExpose>()
@@ -159,6 +179,24 @@ const columns: ColumnConfig[] = [
     }] }]
   },
   {
+    label: 'Render Function',
+    props: { width: 150, align: 'center' },
+    children: [{ children: [{
+      key: 'active-render-field',
+      fieldKey: 'active',
+      type: 'component',
+      component: {
+        renderer: ActiveRenderer,
+        props: { effect: 'plain' },
+        listeners: {
+          commit({ setValue }, nextValue) {
+            setValue(Boolean(nextValue))
+          }
+        }
+      }
+    }] }]
+  },
+  {
     label: '操作',
     props: { width: 210, fixed: 'right', align: 'center' },
     children: [{ children: [{
@@ -179,7 +217,7 @@ const handleFieldChange = (event: FormTableFieldChangePayload) => {
 }
 const addRow = () => {
   tableData.value = [...tableData.value, {
-    id: Date.now(), name: '', phone: '', province: '', city: '', profile: { address: '' }, status: 'enabled'
+    id: Date.now(), name: '', phone: '', province: '', city: '', profile: { address: '' }, status: 'enabled', active: true
   }]
 }
 const copyRow = (row: TableRow, index: number) => {
