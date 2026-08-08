@@ -10,6 +10,18 @@
 | `tableProps` | 直接传给 `el-table` |
 | `loading` | 表格 loading 状态 |
 
+存在异步保存、行排序、插入或删除时，建议通过 `tableProps.rowKey` 提供唯一且稳定的业务行标识：
+
+```vue
+<FormTable
+  :table-data="tableData"
+  :columns="columns"
+  :table-props="{ rowKey: 'id', border: true }"
+/>
+```
+
+`rowKey` 与 Element UI 一致，支持字段路径字符串或函数。
+
 ## 布局
 
 ```ts
@@ -218,6 +230,37 @@ component    当前行解析后的组件配置
 | 表头 Slot | `tableData/columnConfig/columnIndex/label` |
 
 `columnConfig/rowConfig/itemConfig` 是渲染或事件触发时的浅只读配置引用。不要直接修改，也不要在异步流程结束后假定它仍是最新配置；动态调整应由调用方基于稳定 `key` 替换 `columns`。
+
+### 异步更新与稳定行身份
+
+`row/index/value` 是事件触发时的快照，但该上下文中的 `setValue/updateRow` 会绑定当时的数据行。配置 `tableProps.rowKey` 后，助手每次执行都会在最新 `tableData` 中重新查找行，而不是继续使用旧下标：
+
+```ts
+component: {
+  listeners: {
+    async change({ row, index, setValue }, nextValue) {
+      console.log('触发时位置', row.id, index)
+      await saveCity(row.id, nextValue)
+
+      // 等待期间即使行被排序或插入，仍按 row.id 更新原数据行。
+      setValue(nextValue)
+    }
+  }
+}
+```
+
+```ts
+const tableProps = {
+  rowKey: 'id'
+  // 也可以：rowKey: row => row.id
+}
+```
+
+- `index` 不会变成实时值；它始终表示回调触发时的数据下标。
+- `field-change.index` 使用真正执行更新时重新定位到的最新下标。
+- 如果等待期间目标 `rowKey` 已不存在，更新助手会忽略本次更新，避免误写其他行。
+- 未配置 `rowKey` 时，助手会尝试根据行对象引用定位。若业务层重新创建了行对象且无法确认身份，更新同样会被忽略；复杂异步场景应始终提供 `rowKey`。
+- `rowKey` 必须在表内唯一且保持稳定，不应使用当前数组下标。
 
 ### 各回调上下文速查
 

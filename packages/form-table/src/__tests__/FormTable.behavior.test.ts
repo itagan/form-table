@@ -37,6 +37,7 @@ const inputColumns: ColumnConfig[] = [
 function mountFormTable(options: {
   tableData?: TableRow[]
   columns?: ColumnConfig[]
+  tableProps?: Record<string, any>
   scopedSlots?: Record<string, any>
   listeners?: Record<string, (...args: any[]) => void>
 } = {}) {
@@ -46,7 +47,7 @@ function mountFormTable(options: {
       tableData: options.tableData || [{ name: 'Alice' }],
       columns: options.columns || inputColumns,
       formProps: { size: 'small' },
-      tableProps: { border: true }
+      tableProps: { border: true, ...options.tableProps }
     },
     scopedSlots: options.scopedSlots,
     listeners: options.listeners,
@@ -351,6 +352,107 @@ describe('FormTable core behavior', () => {
     expect(updates).toHaveLength(2)
     expect(updates[1]?.[0]).toEqual([{ name: 'Bob', touched: true }])
     expect(original).toEqual([{ name: 'Alice', touched: false }])
+    wrapper.destroy()
+  })
+
+  it('updates the original row by rowKey after rows are replaced and reordered', async () => {
+    let savedContext: any
+    const captureContext = vi.fn((context) => {
+      savedContext = context
+    })
+    const CaptureField = {
+      props: ['value'],
+      render(this: any, h: any) {
+        return h('button', {
+          class: 'capture-row-context',
+          attrs: { type: 'button' },
+          on: { click: () => this.$emit('capture') }
+        }, this.value)
+      }
+    }
+    const wrapper = mountFormTable({
+      tableData: [
+        { id: 1, name: 'Alice' },
+        { id: 2, name: 'Bob' }
+      ],
+      tableProps: { rowKey: 'id' },
+      columns: [{
+        label: '姓名',
+        children: [{ children: [{
+          fieldKey: 'name',
+          type: 'component',
+          component: {
+            renderer: CaptureField,
+            listeners: { capture: captureContext }
+          }
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+    await wrapper.findAll('.capture-row-context').at(0).trigger('click')
+
+    await wrapper.setProps({
+      tableData: [
+        { id: 2, name: 'Bob' },
+        { id: 1, name: 'Alice' }
+      ]
+    })
+    await wrapper.vm.$nextTick()
+    savedContext.setValue('Alicia')
+
+    const updates = wrapper.emitted('update:tableData') || []
+    expect(updates[updates.length - 1]?.[0]).toEqual([
+      { id: 2, name: 'Bob' },
+      { id: 1, name: 'Alicia' }
+    ])
+    const fieldChanges = wrapper.emitted('field-change') || []
+    expect(fieldChanges[fieldChanges.length - 1]?.[0]).toMatchObject({
+      index: 1,
+      fieldKey: 'name',
+      value: 'Alicia'
+    })
+    wrapper.destroy()
+  })
+
+  it('does not update another row when the bound rowKey no longer exists', async () => {
+    let savedContext: any
+    const CaptureField = {
+      props: ['value'],
+      render(this: any, h: any) {
+        return h('button', {
+          class: 'capture-deleted-row',
+          attrs: { type: 'button' },
+          on: { click: () => this.$emit('capture') }
+        }, this.value)
+      }
+    }
+    const wrapper = mountFormTable({
+      tableData: [
+        { id: 1, name: 'Alice' },
+        { id: 2, name: 'Bob' }
+      ],
+      tableProps: { rowKey: 'id' },
+      columns: [{
+        label: '姓名',
+        children: [{ children: [{
+          fieldKey: 'name',
+          type: 'component',
+          component: {
+            renderer: CaptureField,
+            listeners: { capture: context => { savedContext = context } }
+          }
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+    await wrapper.findAll('.capture-deleted-row').at(0).trigger('click')
+    await wrapper.setProps({ tableData: [{ id: 2, name: 'Bob' }] })
+    await wrapper.vm.$nextTick()
+
+    savedContext.updateRow({ name: 'Wrong row' })
+
+    expect(wrapper.emitted('update:tableData')).toBeUndefined()
+    expect(wrapper.emitted('field-change')).toBeUndefined()
     wrapper.destroy()
   })
 

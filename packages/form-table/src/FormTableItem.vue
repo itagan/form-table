@@ -92,14 +92,17 @@ const slotFn = computed(() => props.config.type === 'slot'
   ? parentSlots[props.config.component.renderer] || null
   : null)
 const value = computed(() => runtimeContext.value.value)
-const setValue = (value: unknown) => updateApi?.setValue(props.rowIndex, props.config.fieldKey, value)
-const updateRow = (patch: Partial<TableRow>) => updateApi?.updateRow(props.rowIndex, patch)
-const fieldContext = computed<FormTableFieldContext>(() => ({
-  ...runtimeContext.value,
-  value: value.value,
-  setValue,
-  updateRow
-}))
+const fieldContext = computed<FormTableFieldContext>(() => {
+  const targetRow = props.row
+  const targetIndex = props.rowIndex
+  const targetFieldKey = props.config.fieldKey
+  return {
+    ...runtimeContext.value,
+    value: value.value,
+    setValue: nextValue => updateApi?.setValue(targetRow, targetIndex, targetFieldKey, nextValue),
+    updateRow: patch => updateApi?.updateRow(targetRow, targetIndex, patch)
+  }
+})
 const resolvedComponent = computed<ResolvedComponentConfig>(() => {
   const component = props.config.component
   const listeners = component?.listeners || {}

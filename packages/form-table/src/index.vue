@@ -95,8 +95,37 @@ const scheduleUpdateBaseReset = () => {
   })
 }
 
-const updateRow = (rowIndex: number, patch: Partial<TableRow>) => {
+const getRowIdentity = (row: TableRow) => {
+  const rowKey = props.tableProps?.rowKey
+  if (typeof rowKey === 'function') return rowKey(row)
+  if (typeof rowKey === 'string' && rowKey) return getValueByPath(row, rowKey)
+  return undefined
+}
+
+const resolveUpdateRowIndex = (
+  sourceTableData: TableRow[],
+  targetRow: TableRow,
+  fallbackIndex: number
+) => {
+  const rowKey = props.tableProps?.rowKey
+  if (typeof rowKey === 'function' || (typeof rowKey === 'string' && rowKey)) {
+    const identity = getRowIdentity(targetRow)
+    if (identity === undefined || identity === null) return -1
+    return sourceTableData.findIndex(row => Object.is(getRowIdentity(row), identity))
+  }
+
+  const referenceIndex = sourceTableData.indexOf(targetRow)
+  if (referenceIndex >= 0) return referenceIndex
+
+  // 同一同步更新链中首个更新已生成了新行对象，此时沿用其已确认的下标。
+  if (synchronousUpdateBase && sourceTableData[fallbackIndex]) return fallbackIndex
+  return -1
+}
+
+const updateRow = (targetRow: TableRow, fallbackIndex: number, patch: Partial<TableRow>) => {
   const sourceTableData = synchronousUpdateBase || props.tableData
+  const rowIndex = resolveUpdateRowIndex(sourceTableData, targetRow, fallbackIndex)
+  if (rowIndex < 0) return
   const currentRow = sourceTableData[rowIndex]
   if (!currentRow) {
     return
@@ -140,7 +169,7 @@ const updateRow = (rowIndex: number, patch: Partial<TableRow>) => {
 }
 
 const updateApi: FormTableUpdateApi = {
-  setValue: (rowIndex, fieldKey, value) => updateRow(rowIndex, { [fieldKey]: value }),
+  setValue: (row, rowIndex, fieldKey, value) => updateRow(row, rowIndex, { [fieldKey]: value }),
   updateRow
 }
 

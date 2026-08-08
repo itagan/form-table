@@ -229,6 +229,10 @@
 
       <h3>组合使用示例</h3>
       <pre>{{ contextExample }}</pre>
+
+      <h3>异步更新与 rowKey</h3>
+      <p><code>index</code> 是事件触发时快照。异步期间可能排序、插入或删除行时，应配置唯一稳定的 <code>tableProps.rowKey</code>；更新助手会在最新 tableData 中重新定位，目标行不存在时忽略更新。</p>
+      <pre>{{ asyncUpdateExample }}</pre>
     </section>
 
     <section>
@@ -379,6 +383,23 @@ const returnedContextExample = `// Column callback
   columnConfig,
   columnIndex: 0,
   label: '地区'
+}`
+
+const asyncUpdateExample = `<FormTable
+  :table-data="tableData"
+  :columns="columns"
+  :table-props="{ rowKey: 'id', border: true }"
+/>
+
+component: {
+  listeners: {
+    async change({ row, index, setValue }, nextValue) {
+      console.log('触发时位置', row.id, index)
+      await saveCity(row.id, nextValue)
+      // 行重排后仍按 id 更新原数据行；已删除则忽略。
+      setValue(nextValue)
+    }
+  }
 }`
 
 const refExample = `await formTableRef.value?.validate()

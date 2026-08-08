@@ -131,14 +131,23 @@ const optionProps = computed<OptionPropsConfig | undefined>(() => {
   return resolveDynamicValue(props.config.component?.optionProps, runtimeContext.value)
 })
 const value = computed(() => runtimeContext.value.value)
-const setValue = (nextValue: unknown) => updateApi?.setValue(props.rowIndex, props.config.fieldKey, nextValue)
-const updateRow = (patch: Partial<TableRow>) => updateApi?.updateRow(props.rowIndex, patch)
-const fieldContext = computed<FormTableFieldContext>(() => ({
-  ...runtimeContext.value,
-  value: value.value,
-  setValue,
-  updateRow
-}))
+const setValue = (nextValue: unknown) => updateApi?.setValue(
+  props.row,
+  props.rowIndex,
+  props.config.fieldKey,
+  nextValue
+)
+const fieldContext = computed<FormTableFieldContext>(() => {
+  const targetRow = props.row
+  const targetIndex = props.rowIndex
+  const targetFieldKey = props.config.fieldKey
+  return {
+    ...runtimeContext.value,
+    value: value.value,
+    setValue: nextValue => updateApi?.setValue(targetRow, targetIndex, targetFieldKey, nextValue),
+    updateRow: patch => updateApi?.updateRow(targetRow, targetIndex, patch)
+  }
+})
 const componentListeners = computed(() => {
   const listeners = props.config.component?.listeners || {}
   return Object.keys(listeners).reduce<Record<string, (...args: unknown[]) => void>>((result, name) => {

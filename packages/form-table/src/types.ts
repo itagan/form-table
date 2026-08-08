@@ -202,8 +202,8 @@ export interface FormTableExpose {
 }
 
 export interface FormTableUpdateApi {
-  setValue: (rowIndex: number, fieldKey: string, value: FormTableValue) => void
-  updateRow: (rowIndex: number, patch: Partial<TableRow>) => void
+  setValue: (row: TableRow, rowIndex: number, fieldKey: string, value: FormTableValue) => void
+  updateRow: (row: TableRow, rowIndex: number, patch: Partial<TableRow>) => void
 }
 
 export const FORM_TABLE_CONTEXT_KEY: unique symbol = Symbol('formTableContext')

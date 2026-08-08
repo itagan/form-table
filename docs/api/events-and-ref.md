@@ -71,7 +71,7 @@ component: {
 }
 ```
 
-`setValue` 与 `updateRow` 可以在同一同步回调中连续调用，后一次更新会基于前一次结果继续合并。跨异步边界后则始终以父组件最新传回的 `tableData` 为准。
+`setValue` 与 `updateRow` 可以在同一同步回调中连续调用，后一次更新会基于前一次结果继续合并。跨异步边界后始终以父组件最新传回的 `tableData` 为准；配置 `tableProps.rowKey` 后会重新定位触发事件的原数据行。目标行已删除或无法可靠定位时不会发出更新。
 
 ```vue
 <template #actions="{ row, index, updateRow, component }">

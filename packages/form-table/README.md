@@ -63,4 +63,6 @@ Table 原生事件直接透传。通过 ref 可调用 `validate()`、`resetField
 
 命名边界：`row` 是当前业务数据行，`rowConfig` 是布局配置；`itemConfig` 是原始字段配置，Slot 的 `component` 是当前行解析后的组件配置。
 
+异步 listener 中可能发生行排序、插入或删除时，请配置唯一稳定的 `tableProps.rowKey`。`setValue/updateRow` 会按 rowKey 在最新 `tableData` 中重新定位；目标行不存在时忽略更新，避免误写其他行。
+
 远程 schema 建议只返回布局、`type`、静态 props/options 等 JSON；组件对象、事件函数与 slot 实现由页面按 `fieldKey` 本地增强。核心不执行远程代码，也不维护业务组件注册表。
