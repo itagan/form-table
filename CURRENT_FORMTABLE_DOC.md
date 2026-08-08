@@ -20,6 +20,8 @@ FormTable
 - `children` 是唯一布局结构。
 - `type` 只做常用 Element UI 组件映射。
 - `component.is` 直接接收自定义组件；`component.props/listeners/options` 描述组件渲染。
+- 合法 TypeScript 配置的 `slot/component.is/type` 互斥；非类型化冲突按 `slot > component.is > type > 字段值展示` 容错。
+- 远程 JSON 只负责可序列化结构，组件、事件和 slot 在业务页面按字段 key 本地增强。
 - `slot` 绕过组件渲染器，但保留 `el-col` 和 `el-form-item`。
 - 表头必填标记等自定义展示由 `headerSlot` 显式渲染，字段校验只由 `formItemProps.rules` 决定。
 - `colProps`、`formItemProps`、`component.props` 分别透传到对应 Element UI 层。
@@ -47,4 +49,4 @@ input/slot setValue
 - Table 原生事件通过组件监听器直接下传。
 - `getFormRef()` / `getTableRef()` 返回原生实例。
 
-完整示例位于 `playground/src/views/FormTableView.vue` 和 `FormTableAdvancedView.vue`。
+基础、自定义与 slot 示例位于 `FormTableView.vue`、`FormTableAdvancedView.vue`；远程 JSON 与本地增强示例位于 `RemoteSchemaView.vue`。

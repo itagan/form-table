@@ -10,6 +10,7 @@
         <li><code>type</code> 提供 Element UI 常用组件快捷映射。</li>
         <li><code>component.is</code> 直接接收自定义组件。</li>
         <li><code>slot</code> 提供完全自定义渲染。</li>
+        <li>非类型化冲突固定按 <code>slot &gt; component.is &gt; type &gt; 字段值展示</code> 处理。</li>
         <li>行增删、复制和字段联动由业务层维护。</li>
       </ul>
     </section>
@@ -17,6 +18,12 @@
     <section>
       <h2>各层属性</h2>
       <pre>{{ propsExample }}</pre>
+    </section>
+
+    <section>
+      <h2>远程 JSON</h2>
+      <p>远程只返回布局、type、静态 props/options；组件对象、事件函数和 slot 实现在页面本地按字段 key 增强。</p>
+      <router-link to="/remote-schema">查看可运行示例 →</router-link>
     </section>
 
     <section>

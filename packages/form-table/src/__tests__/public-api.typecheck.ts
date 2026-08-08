@@ -61,6 +61,18 @@ const invalid: ColumnConfig[] = [{
   }]
 }]
 
+const conflictingModes: ColumnConfig[] = [{
+  name: '互斥渲染模式',
+  children: [{
+    children: [
+      // @ts-expect-error typed configs choose one renderer; runtime priority only guards untyped JSON/JS.
+      { key: 'name', type: 'input', component: { is: CustomInput } },
+      // @ts-expect-error slot cannot be combined with a type in typed configs.
+      { key: 'actions', slot: 'actions', type: 'text' }
+    ]
+  }]
+}]
+
 const contextBoundaries: ColumnConfig[] = [{
   name: '上下文边界',
   visible: (tableContext) => {
@@ -105,4 +117,5 @@ void named
 void plugin
 void useExpose
 void invalid
+void conflictingModes
 void contextBoundaries

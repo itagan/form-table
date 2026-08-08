@@ -110,6 +110,89 @@ describe('FormTable core behavior', () => {
     wrapper.destroy()
   })
 
+  it('uses deterministic slot > component > type priority for untyped configs', async () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const ConflictingInput = {
+      render(this: any, h: any) {
+        return h('button', { class: 'component-winner' }, 'component')
+      }
+    }
+    const wrapper = mountFormTable({
+      columns: [{
+        name: '冲突配置',
+        children: [{
+          children: [{
+            key: 'name',
+            slot: 'winner',
+            component: { is: ConflictingInput },
+            type: 'input'
+          } as any]
+        }]
+      }],
+      scopedSlots: {
+        winner: '<strong class="slot-winner">{{ props.value }}</strong>'
+      }
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.slot-winner').exists()).toBe(true)
+    expect(wrapper.find('.component-winner').exists()).toBe(false)
+    expect(wrapper.find('input').exists()).toBe(false)
+    expect(warning).toHaveBeenCalledTimes(1)
+    expect(warning.mock.calls[0][0]).toContain('slot > component > type')
+
+    wrapper.destroy()
+    warning.mockRestore()
+  })
+
+  it('lets a direct component win over type for untyped remote configs', async () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const DirectInput = {
+      props: ['value'],
+      render(this: any, h: any) {
+        return h('button', { class: 'direct-component' }, this.value)
+      }
+    }
+    const wrapper = mountFormTable({
+      columns: [{
+        name: '组件优先',
+        children: [{
+          children: [{
+            key: 'name',
+            type: 'select',
+            component: {
+              is: DirectInput,
+              options: [{ label: '不应渲染', value: 'ignored' }]
+            }
+          } as any]
+        }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.direct-component').text()).toBe('Alice')
+    expect(wrapper.find('.el-select').exists()).toBe(false)
+    expect(wrapper.find('.el-option').exists()).toBe(false)
+    expect(warning).toHaveBeenCalledTimes(1)
+
+    wrapper.destroy()
+    warning.mockRestore()
+  })
+
+  it('renders the field value when an untyped config has no renderer', async () => {
+    const wrapper = mountFormTable({
+      tableData: [{ summary: '只读内容' }],
+      columns: [{
+        name: '默认展示',
+        children: [{ children: [{ key: 'summary' } as any] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.text()).toContain('只读内容')
+    wrapper.destroy()
+  })
+
   it('renders a directly supplied component and wraps its listeners', async () => {
     const listener = vi.fn((context) => context.setValue('disabled'))
     const StatusInput = {
@@ -118,7 +201,7 @@ describe('FormTable core behavior', () => {
         return h('button', {
           class: 'status-input',
           attrs: { type: 'button' },
-          on: { click: () => this.$emit('commit') }
+          on: { click: () => this.$emit('commit', 'saved', { source: 'button' }) }
         }, this.value)
       }
     }
@@ -156,7 +239,53 @@ describe('FormTable core behavior', () => {
       'updateRow',
       'value'
     ])
+    expect(listener.mock.calls[0].slice(1)).toEqual(['saved', { source: 'button' }])
     expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{ status: 'disabled' }])
+    wrapper.destroy()
+  })
+
+  it('applies updateRow patches immutably and emits one change per field', async () => {
+    const original = [{ name: 'Alice', profile: { city: '杭州' } }]
+    const wrapper = mountFormTable({
+      tableData: original,
+      columns: [{
+        name: '批量更新',
+        children: [{ children: [{ key: 'name', slot: 'batch-update' }] }]
+      }],
+      scopedSlots: {
+        'batch-update': `
+          <button
+            type="button"
+            class="batch-update"
+            @click="props.updateRow({ name: 'Bob', 'profile.city': '宁波' })"
+          >更新</button>
+        `
+      }
+    })
+    await wrapper.vm.$nextTick()
+    await wrapper.find('.batch-update').trigger('click')
+
+    expect(original).toEqual([{ name: 'Alice', profile: { city: '杭州' } }])
+    expect(wrapper.emitted('update:tableData')).toHaveLength(1)
+    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([
+      { name: 'Bob', profile: { city: '宁波' } }
+    ])
+    expect(wrapper.emitted('field-change')?.map(([payload]) => payload)).toEqual([
+      {
+        row: { name: 'Bob', profile: { city: '宁波' } },
+        index: 0,
+        fieldKey: 'name',
+        value: 'Bob',
+        previousValue: 'Alice'
+      },
+      {
+        row: { name: 'Bob', profile: { city: '宁波' } },
+        index: 0,
+        fieldKey: 'profile.city',
+        value: '宁波',
+        previousValue: '杭州'
+      }
+    ])
     wrapper.destroy()
   })
 

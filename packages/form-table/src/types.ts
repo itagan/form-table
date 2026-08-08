@@ -90,7 +90,9 @@ interface BaseFormItemConfig {
 export interface TypeFormItemConfig extends BaseFormItemConfig {
   type: FormItemType
   slot?: never
-  component?: FieldComponentConfig
+  component?: FieldComponentConfig & {
+    is?: never
+  }
 }
 
 export interface CustomComponentFormItemConfig extends BaseFormItemConfig {

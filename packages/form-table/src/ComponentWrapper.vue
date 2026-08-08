@@ -1,5 +1,5 @@
 <template>
-  <span v-if="config.type === 'text'">{{ value }}</span>
+  <span v-if="renderMode === 'type' && config.type === 'text'">{{ value }}</span>
 
   <component
     v-else-if="isSelectLike"
@@ -18,7 +18,7 @@
   </component>
 
   <component
-    v-else-if="config.type === 'radio'"
+    v-else-if="renderMode === 'type' && config.type === 'radio'"
     :is="resolvedComponent"
     v-model="modelValue"
     v-bind="componentProps"
@@ -35,7 +35,7 @@
   </component>
 
   <component
-    v-else-if="config.type === 'checkbox'"
+    v-else-if="renderMode === 'type' && config.type === 'checkbox'"
     :is="resolvedComponent"
     v-model="modelValue"
     v-bind="componentProps"
@@ -85,11 +85,13 @@ import {
   resolveDynamicValue
 } from './utils/dynamic'
 import { getValueByPath } from './utils/path'
+import type { FieldRenderMode } from './utils/renderMode'
 
 const props = defineProps<{
   row: TableRow
   rowIndex: number
   config: FormItemConfig
+  renderMode: FieldRenderMode
 }>()
 
 const formTableContext = inject<ComputedRef<FormTableTableContext>>(
@@ -102,10 +104,11 @@ const runtimeContext = computed(() => createFieldRenderContext(
   props.config.key
 ))
 const resolvedComponent = computed(() => {
-  return props.config.component?.is || (props.config.type ? getComponentType(props.config.type) : 'span')
+  if (props.renderMode === 'component') return props.config.component?.is || 'span'
+  return props.config.type ? getComponentType(props.config.type) : 'span'
 })
 const componentProps = computed(() => ({
-  ...(props.config.type ? getRequiredProps(props.config.type) : {}),
+  ...(props.renderMode === 'type' && props.config.type ? getRequiredProps(props.config.type) : {}),
   ...(resolveDynamicValue(props.config.component?.props, runtimeContext.value) || {})
 }))
 const options = computed<FormItemOption[]>(() => {
@@ -134,5 +137,7 @@ const modelValue = computed({
   get: () => value.value,
   set: setValue
 })
-const isSelectLike = computed(() => props.config.type === 'select' || props.config.type === 'tag-input')
+const isSelectLike = computed(() => props.renderMode === 'type' && (
+  props.config.type === 'select' || props.config.type === 'tag-input'
+))
 </script>

@@ -39,7 +39,13 @@
 { key: 'actions', slot: 'actions' }
 ```
 
-三者互斥，渲染顺序为 `slot`、直接组件、type 映射。
+TypeScript 配置要求三种模式互斥。对于未经类型检查的 JavaScript 或远程 JSON 冲突配置，运行时采用固定优先级：
+
+```text
+slot > component.is > type > 字段值展示
+```
+
+开发环境只会对同一个冲突配置警告一次。`component` 仅包含 props/options/listeners、没有 `is` 时，仍然是 `type` 模式的组件参数，不算模式冲突。
 
 `component.options` 与 `component.optionProps` 用于 select/radio/checkbox；它们和各层 props 都支持函数写法。
 
@@ -52,6 +58,34 @@ component: {
 字段 `visible` 同样支持运行时函数。字段联动不在配置中执行，请监听 `field-change` 后更新业务数据。
 
 动态函数只接收当前层级有意义的信息：Column 只有 `tableData`，Row 增加 `row/index`，Field 再增加 `fieldKey`。组件 listener 另外获得 `value/setValue/updateRow`。不会用空 row、`index = -1` 等占位值补齐上下文。
+
+## 远程 JSON 与本地增强
+
+远程 schema 只承载可序列化配置，例如布局、`type`、静态 props 和 options。组件对象、函数 listener 和 slot 实现留在页面本地，不执行服务端返回的代码。
+
+```ts
+const remoteColumns = await fetchColumns()
+
+const columns = enhanceFormTableColumns(remoteColumns, {
+  phone(item) {
+    const { type, component, ...layout } = item
+    return {
+      ...layout,
+      component: {
+        is: PhoneInput,
+        props: component?.props,
+        listeners: {
+          change(context, value) {
+            context.setValue(value)
+          }
+        }
+      }
+    }
+  }
+})
+```
+
+`enhanceFormTableColumns` 是调用方的递归映射函数，示例实现在 playground；组件核心不维护业务组件注册表。
 
 列级不提供 `required` 快捷字段。表头标记使用 `headerSlot` 渲染，实际校验配置在字段的 `formItemProps.rules` 中：
 

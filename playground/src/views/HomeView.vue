@@ -22,6 +22,13 @@ const examples = [
     tags: ['visible', 'slot props', 'setValue']
   },
   {
+    title: '远程 Schema',
+    description: '演示纯 JSON 布局如何在页面本地绑定组件、事件和 slot。',
+    path: '/remote-schema',
+    type: 'success',
+    tags: ['JSON', 'local enhance', 'registry-free']
+  },
+  {
     title: '能力文档',
     description: '在调试应用内查看 props、事件、ref 方法和推荐配置约定。',
     path: '/form-table-docs',

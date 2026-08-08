@@ -1,16 +1,18 @@
 <template>
   <el-form-item v-bind="resolvedFormItemProps">
     <SlotRenderer
-      v-if="config.slot && slotFn"
+      v-if="renderMode === 'slot' && slotFn"
       :slot-fn="slotFn"
       :slot-props="slotContext"
     />
-    <span v-else-if="config.slot" />
+    <span v-else-if="renderMode === 'slot'" />
+    <span v-else-if="renderMode === 'display'">{{ slotContext.value }}</span>
     <ComponentWrapper
       v-else
       :row="row"
       :row-index="rowIndex"
       :config="config"
+      :render-mode="renderMode"
     />
   </el-form-item>
 </template>
@@ -38,6 +40,10 @@ import {
   resolveDynamicValue
 } from './utils/dynamic'
 import { getValueByPath } from './utils/path'
+import {
+  resolveFieldRenderMode,
+  warnFieldRenderConflict
+} from './utils/renderMode'
 
 const SlotRenderer = defineComponent({
   props: {
@@ -66,6 +72,10 @@ const runtimeContext = computed(() => createFieldRenderContext(
   createRowContext(formTableContext.value, props.row, props.rowIndex),
   props.config.key
 ))
+const renderMode = computed(() => {
+  warnFieldRenderConflict(props.config)
+  return resolveFieldRenderMode(props.config)
+})
 const resolvedFormItemProps = computed(() => ({
   ...(resolveDynamicValue(props.config.formItemProps, runtimeContext.value) || {}),
   prop: propPath.value
