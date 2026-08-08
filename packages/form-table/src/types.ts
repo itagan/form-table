@@ -79,15 +79,23 @@ export interface FieldModelConfig {
   valueFromEvent?: (...args: unknown[]) => FormTableValue
 }
 
+/** 根据当前字段所在行同步选择实际渲染组件。 */
+export type FieldRendererResolver = (
+  context: FormTableFieldRenderContext
+) => string | Component | undefined
+
 /**
  * 字段组件配置。
  *
- * `renderer` 在 component 模式下接收组件，在 slot 模式下接收具名 slot 名称。
+ * `renderer` 在 component 模式下接收组件，在 slot 模式下接收具名 slot 名称；
+ * component 模式还可通过 `resolveRenderer` 按当前行选择实际组件。
  * 其余配置只描述实际字段组件，不承载布局、校验或业务行为。
  */
 export interface FieldComponentConfig {
   /** component 模式为组件；slot 模式为具名插槽名称。 */
   renderer?: string | Component
+  /** component 模式按字段上下文同步选择组件；返回 undefined 时回退到 renderer。 */
+  resolveRenderer?: FieldRendererResolver
   /** 传给字段组件的属性。 */
   props?: DynamicValue<ComponentProps, FormTableFieldRenderContext>
   /** 字段组件事件及其业务处理器。 */
@@ -142,15 +150,25 @@ export interface BuiltinFormItemConfig extends BaseFormItemConfig {
   type: BuiltinFormItemType
   component?: FieldComponentConfig & {
     renderer?: never
+    resolveRenderer?: never
   }
 }
+
+/** component 模式必须提供静态 renderer 或动态 resolveRenderer。 */
+type ComponentRendererConfig =
+  | {
+      renderer: string | Component
+      resolveRenderer?: FieldRendererResolver
+    }
+  | {
+      renderer?: never
+      resolveRenderer: FieldRendererResolver
+    }
 
 /** 使用调用方提供的 Vue 组件渲染的字段配置。 */
 export interface ComponentFormItemConfig extends BaseFormItemConfig {
   type: 'component'
-  component: FieldComponentConfig & {
-    renderer: string | Component
-  }
+  component: FieldComponentConfig & ComponentRendererConfig
 }
 
 /** 使用父组件具名插槽渲染的字段配置。 */
@@ -158,6 +176,7 @@ export interface SlotFormItemConfig extends BaseFormItemConfig {
   type: 'slot'
   component: FieldComponentConfig & {
     renderer: string
+    resolveRenderer?: never
   }
 }
 

@@ -152,6 +152,43 @@ component         → component.renderer 动态组件
 slot              → component.renderer 具名 slot
 ```
 
+### 按当前行解析组件
+
+同一字段路径在不同行需要使用不同业务组件时，`type: 'component'` 可配置同步 `resolveRenderer`：
+
+```ts
+const demandEditors = {
+  venue: VenueDemandEditor,
+  hotel: HotelDemandEditor,
+  meal: MealDemandEditor
+}
+
+{
+  fieldKey: 'detail',
+  type: 'component',
+  component: {
+    resolveRenderer: ({ row }) => demandEditors[row.type],
+    props: ({ row }) => ({ readonly: row.locked }),
+    model: { prop: 'value', event: 'change' }
+  }
+}
+```
+
+`resolveRenderer` 接收完整 Item 只读上下文，返回局部组件对象、全局组件名称或 `undefined`。同时配置静态 `renderer` 时，解析器返回 `undefined` 会回退到静态组件：
+
+```ts
+component: {
+  renderer: DefaultDemandEditor,
+  resolveRenderer: ({ row }) => demandEditors[row.type]
+}
+```
+
+- component 模式必须提供 `renderer` 或 `resolveRenderer`，也可以同时提供。
+- 解析器只同步选择组件，不返回 Promise、字段配置或动态 children。
+- 保持解析器为纯函数；不要请求接口、创建新组件定义或修改行数据。
+- 动态组件继续使用同一套 `model/props/listeners/options` 配置。
+- slot 模式的 `renderer` 始终是静态具名 slot，不使用 `resolveRenderer`。
+
 三种模式共用 `component.props/options/optionProps/listeners`。slot 模式通过上下文返回同名的解析后 `component`，FormTable 不主动绑定：
 
 ```vue
@@ -464,6 +501,7 @@ ActionContext = ItemContext + setValue, updateRow
 | `itemConfig.visible` | ItemContext | 是否渲染当前字段 `boolean` |
 | `itemConfig.colProps` | ItemContext | 传给 `el-col` 的 props |
 | `itemConfig.formItemProps` | ItemContext | 传给 `el-form-item` 的 props |
+| `component.resolveRenderer` | ItemContext | 实际组件对象、全局组件名称或 `undefined` |
 | `component.props` | ItemContext | 传给实际字段组件的 props |
 | `component.options` | ItemContext | select/radio/checkbox 等使用的选项数组 |
 | `component.optionProps` | ItemContext | 选项的 label/value/disabled/key 字段映射 |

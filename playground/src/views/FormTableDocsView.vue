@@ -8,7 +8,7 @@
       <ul>
         <li><code>children</code> 描述 Column → Row → Item 布局。</li>
         <li><code>type</code> 是唯一渲染策略：内置别名、component 或 slot。</li>
-        <li><code>component.renderer</code> 指向动态组件或具名 slot。</li>
+        <li><code>component.renderer</code> 指向固定组件或具名 slot；component 模式可用 <code>resolveRenderer</code> 按行选择组件。</li>
         <li><code>component.model/props/listeners/options/optionProps</code> 描述实际字段组件。</li>
         <li>行增删、复制和字段联动由业务层维护。</li>
       </ul>
@@ -156,11 +156,17 @@
 
           <tbody class="layer-group">
             <tr>
-              <th rowspan="6" scope="rowgroup" class="layer-cell">Component</th>
+              <th rowspan="7" scope="rowgroup" class="layer-cell">Component</th>
               <td><code>renderer</code></td>
               <td>渲染目标</td>
               <td>component 模式为组件对象/名称；slot 模式为具名 slot 名称。</td>
               <td class="context-cell">—</td>
+            </tr>
+            <tr>
+              <td><code>resolveRenderer</code></td>
+              <td>按行选择组件</td>
+              <td>仅 component 模式；同步返回组件对象/名称，undefined 时回退到 renderer。</td>
+              <td class="context-cell"><code>Item 上下文</code></td>
             </tr>
             <tr>
               <td><code>model</code></td>
@@ -238,6 +244,7 @@
             <tr><td><code>rowConfig.visible / props</code></td><td>Column 上下文 + <code>row, index, rowConfig</code></td><td>boolean / el-row props</td></tr>
             <tr><td><code>itemConfig.visible / colProps / formItemProps</code></td><td>Row 上下文 + <code>fieldKey, value, itemConfig</code></td><td>boolean / 对应 Element props</td></tr>
             <tr><td><code>component.props / options / optionProps</code></td><td>Item 上下文</td><td>组件 props / 选项 / 字段映射</td></tr>
+            <tr><td><code>component.resolveRenderer</code></td><td>Item 上下文</td><td>组件对象、全局名称或 undefined</td></tr>
             <tr><td><code>component.listeners[event]</code></td><td>Item 上下文 + <code>setValue, updateRow</code>，后接原始事件参数</td><td>无需返回</td></tr>
           </tbody>
         </table>

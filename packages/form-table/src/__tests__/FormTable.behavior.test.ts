@@ -328,6 +328,114 @@ describe('FormTable core behavior', () => {
     wrapper.destroy()
   })
 
+  it('resolves the component from the current row and keeps model updates working', async () => {
+    const createEditor = (name: string, className: string) => ({
+      name,
+      props: ['value'],
+      render(this: any, h: any) {
+        return h('button', {
+          class: className,
+          attrs: { type: 'button' },
+          on: { click: () => this.$emit('input', `${this.value}-updated`) }
+        }, this.value)
+      }
+    })
+    const VenueEditor = createEditor('VenueEditor', 'venue-editor')
+    const HotelEditor = {
+      name: 'HotelEditor',
+      model: { prop: 'selected', event: 'change' },
+      props: ['selected'],
+      render(this: any, h: any) {
+        return h('button', {
+          class: 'hotel-editor',
+          attrs: { type: 'button' },
+          on: { click: () => this.$emit('change', `${this.selected}-updated`) }
+        }, this.selected)
+      }
+    }
+    const resolveRenderer = vi.fn((context: FormTableFieldRenderContext) => (
+      context.row.type === 'hotel' ? HotelEditor : VenueEditor
+    ))
+    const wrapper = mountFormTable({
+      tableData: [
+        { type: 'venue', detail: '会场需求' },
+        { type: 'hotel', detail: '酒店需求' }
+      ],
+      columns: [{
+        label: '需求说明',
+        children: [{ children: [{
+          fieldKey: 'detail',
+          type: 'component',
+          component: { resolveRenderer }
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.venue-editor').text()).toBe('会场需求')
+    expect(wrapper.find('.hotel-editor').text()).toBe('酒店需求')
+    expect(resolveRenderer).toHaveBeenCalledTimes(2)
+    expect(resolveRenderer.mock.calls[1][0]).toMatchObject({
+      row: { type: 'hotel', detail: '酒店需求' },
+      index: 1,
+      fieldKey: 'detail',
+      value: '酒店需求'
+    })
+
+    await wrapper.find('.hotel-editor').trigger('click')
+    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([
+      { type: 'venue', detail: '会场需求' },
+      { type: 'hotel', detail: '酒店需求-updated' }
+    ])
+    wrapper.destroy()
+  })
+
+  it('falls back to the static renderer when resolveRenderer returns undefined', async () => {
+    const DefaultEditor = {
+      props: ['value'],
+      render(this: any, h: any) {
+        return h('span', { class: 'default-editor' }, this.value)
+      }
+    }
+    const wrapper = mountFormTable({
+      tableData: [{ detail: '默认需求' }],
+      columns: [{
+        label: '需求说明',
+        children: [{ children: [{
+          fieldKey: 'detail',
+          type: 'component',
+          component: {
+            renderer: DefaultEditor,
+            resolveRenderer: () => undefined
+          }
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.default-editor').text()).toBe('默认需求')
+    wrapper.destroy()
+  })
+
+  it('renders an empty field when no component can be resolved', async () => {
+    const wrapper = mountFormTable({
+      tableData: [{ detail: '未支持的需求' }],
+      columns: [{
+        label: '需求说明',
+        children: [{ children: [{
+          fieldKey: 'detail',
+          type: 'component',
+          component: { resolveRenderer: () => undefined }
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.text()).not.toContain('未支持的需求')
+    expect(wrapper.find('input').exists()).toBe(false)
+    wrapper.destroy()
+  })
+
   it('preserves a component declared Vue 2 model when model config is omitted', async () => {
     const DeclaredModelSwitch = {
       model: { prop: 'checked', event: 'toggle' },

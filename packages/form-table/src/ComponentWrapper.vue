@@ -1,6 +1,8 @@
 <template>
   <span v-if="type === 'text'">{{ value }}</span>
 
+  <span v-else-if="!component.renderer" />
+
   <DynamicFieldRenderer
     v-else
     :renderer="component.renderer"
