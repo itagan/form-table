@@ -57,6 +57,11 @@ const modelVariants: ColumnConfig[] = [{
         component: { renderer: CustomInput, model: customModel }
       },
       {
+        fieldKey: 'enabled',
+        type: 'component',
+        component: { renderer: CustomInput, model: true }
+      },
+      {
         fieldKey: 'summary',
         type: 'component',
         component: { renderer: CustomInput, model: false }

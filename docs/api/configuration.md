@@ -169,7 +169,7 @@ slot              → component.renderer 具名 slot
 
 ### 自定义组件绑定协议
 
-`type: 'component'` 默认使用 Vue 2 原生 `v-model`。FormTable 把模型信息保留到真实组件解析阶段，因此组件自身声明的 `model.prop/model.event` 仍然有效：
+`type: 'component'` 在未配置 `component.model` 或显式传入 `true` 时使用 Vue 2 原生 `v-model`。FormTable 把模型信息保留到真实组件解析阶段，因此组件自身声明的 `model.prop/model.event` 仍然有效：
 
 ```ts
 const CompanySwitch = {
@@ -202,7 +202,7 @@ const CompanySwitch = {
 
 | `component.model` | 行为 |
 | --- | --- |
-| 未配置 | 使用 Vue 2 原生 `v-model`，兼容组件自己的 `model` 声明 |
+| 未配置或 `true` | 使用 Vue 2 原生 `v-model`，兼容组件自己的 `model` 声明 |
 | `{ prop, event }` | 将字段值绑定到指定 prop，并监听指定事件的第一个参数 |
 | `{ valueFromEvent }` | 从事件的全部原始参数中提取需要写回的字段值 |
 | `false` | 不注入任何模型 prop 或事件，适合纯展示组件 |
@@ -268,7 +268,7 @@ const columns: ColumnConfig[] = [{
 }]
 ```
 
-FormTable 会按普通自定义组件处理它：未配置 `component.model` 时使用组件原生 Vue 2 `v-model`，其他组件事件交给 `component.listeners`，数据更新仍可使用 `setValue/updateRow`。Render Function 只是该 Vue 组件的内部实现，不是新的 FormTable 渲染模式。
+FormTable 会按普通自定义组件处理它：未配置 `component.model` 或显式传入 `true` 时使用组件原生 Vue 2 `v-model`，其他组件事件交给 `component.listeners`，数据更新仍可使用 `setValue/updateRow`。Render Function 只是该 Vue 组件的内部实现，不是新的 FormTable 渲染模式。
 
 ### Slot 模式
 

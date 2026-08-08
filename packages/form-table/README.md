@@ -34,7 +34,7 @@ Item 的 `key` 是可选渲染身份，`fieldKey` 是必填数据路径。动态
 - `type: 'component' + component.renderer`：直接传入自定义组件。
 - `type: 'slot' + component.renderer`：完全自定义 scoped slot。
 
-`component.props/listeners/options/optionProps` 是三种模式共用的渲染配置。自定义组件默认保留 Vue 2 原生 `v-model`，也可通过 `component.model` 指定 `{ prop, event, valueFromEvent }`，或设为 `false` 禁用模型注入。slot 模式会把解析后的 `component` 通过上下文返回，由模板自行绑定。
+`component.props/listeners/options/optionProps` 是三种模式共用的渲染配置。自定义组件省略 `component.model` 或将其设为 `true` 时保留 Vue 2 原生 `v-model`；也可指定 `{ prop, event, valueFromEvent }`，或设为 `false` 禁用模型注入。slot 模式会把解析后的 `component` 通过上下文返回，由模板自行绑定。
 
 Slot 内容直接渲染，不附加内部 `div/span` 包装；需要根节点样式时由 Slot 模板自行提供。
 

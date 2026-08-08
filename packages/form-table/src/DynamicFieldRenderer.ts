@@ -10,7 +10,7 @@ interface DynamicFieldRendererProps {
   value: FormTableValue
   componentProps: ComponentProps
   componentListeners: Record<string, (...args: unknown[]) => void>
-  model?: FieldModelConfig | false
+  model?: FieldModelConfig | boolean
   onModelInput: (value: FormTableValue) => void
 }
 
@@ -41,8 +41,8 @@ function createRenderData(
 /**
  * 函数式动态组件渲染器：不创建额外组件实例，并完整保留子选项节点。
  *
- * model 未配置时写入 VNodeData.model，让 Vue 在解析真实组件后读取其 model 选项；
- * 显式配置时直接绑定指定 prop/event，false 时完全跳过受控值注入。
+ * model 未配置或为 true 时写入 VNodeData.model，让 Vue 读取真实组件的 model 选项；
+ * 对象配置直接绑定指定 prop/event，false 时完全跳过受控值注入。
  */
 export default {
   name: 'FormTableDynamicFieldRenderer',
@@ -69,7 +69,7 @@ export default {
     } = context.props
     const data = createRenderData(componentProps, componentListeners)
 
-    if (model === undefined) {
+    if (model === undefined || model === true) {
       // 交给 Vue 在运行时识别组件声明的 model.prop/model.event。
       data.model = { value, callback: onModelInput }
     } else if (model !== false) {

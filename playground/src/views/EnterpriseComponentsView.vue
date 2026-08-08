@@ -45,6 +45,14 @@
           <p><code>BusinessSkuSelector</code>、<code>MoneyInput</code>、<code>BusinessAttachmentUploader</code></p>
         </article>
         <article>
+          <h2>默认双向绑定</h2>
+          <p>数量字段显式设置 <code>model: true</code>，采用组件原生 Vue 2 v-model 协议。</p>
+        </article>
+        <article>
+          <h2>自定义绑定协议</h2>
+          <p>组织、供应商、金额和附件通过 model 对象适配非标准属性、事件及复杂载荷。</p>
+        </article>
+        <article>
           <h2>手动双向绑定</h2>
           <p>物料组件通过 <code>props</code> 接收当前值，再由 <code>listeners</code> 一次写回物料及其关联字段。</p>
         </article>
@@ -273,6 +281,8 @@ const columns: ColumnConfig[] = [
           type: 'number',
           colProps: { span: 10 },
           component: {
+            // true 与省略 model 等价，使用 el-input-number 原生 value/input 协议。
+            model: true,
             props: ({ row }) => ({
               disabled: !editable.value || asPurchaseRow(row).locked,
               min: 1,

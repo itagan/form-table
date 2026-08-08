@@ -359,6 +359,40 @@ describe('FormTable core behavior', () => {
     wrapper.destroy()
   })
 
+  it('treats model true as the component native Vue 2 model', async () => {
+    const DeclaredModelSwitch = {
+      model: { prop: 'checked', event: 'toggle' },
+      props: ['checked'],
+      render(this: any, h: any) {
+        return h('button', {
+          class: 'explicit-default-model-switch',
+          attrs: { type: 'button' },
+          on: { click: () => this.$emit('toggle', !this.checked) }
+        }, String(this.checked))
+      }
+    }
+    const wrapper = mountFormTable({
+      tableData: [{ enabled: true }],
+      columns: [{
+        label: '启用',
+        children: [{ children: [{
+          fieldKey: 'enabled',
+          type: 'component',
+          component: {
+            renderer: DeclaredModelSwitch,
+            model: true
+          }
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.explicit-default-model-switch').text()).toBe('true')
+    await wrapper.find('.explicit-default-model-switch').trigger('click')
+    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{ enabled: false }])
+    wrapper.destroy()
+  })
+
   it('supports a custom model prop, event, value extractor, and same-event listener', async () => {
     const selectionListener = vi.fn()
     const UserSelector = {

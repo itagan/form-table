@@ -96,8 +96,8 @@ export interface FieldComponentConfig {
   options?: DynamicValue<FormItemOption[], FormTableFieldRenderContext>
   /** 自定义选项字段映射。 */
   optionProps?: DynamicValue<OptionPropsConfig, FormTableFieldRenderContext>
-  /** 自定义受控值协议；false 表示不向组件注入任何双向绑定。 */
-  model?: FieldModelConfig | false
+  /** true/未配置使用组件原生 v-model；对象自定义协议；false 完全关闭绑定。 */
+  model?: FieldModelConfig | boolean
 }
 
 export type BuiltinFormItemType =
@@ -220,7 +220,7 @@ export interface ResolvedComponentConfig {
   listeners: Record<string, (...args: unknown[]) => void>
   options: FormItemOption[]
   optionProps?: OptionPropsConfig
-  model?: FieldModelConfig | false
+  model?: FieldModelConfig | boolean
 }
 
 /** 字段插槽可使用的完整上下文。 */
