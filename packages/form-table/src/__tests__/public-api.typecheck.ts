@@ -11,6 +11,7 @@ import FormTable, {
 } from '../index'
 
 const CustomInput: Component = { name: 'CustomInput' }
+const AlternativeInput: Component = { name: 'AlternativeInput' }
 const rows: TableRow[] = [{ name: 'Alice', profile: { city: '杭州' } }]
 const columns: ColumnConfig[] = [{
   label: '基本信息',
@@ -70,6 +71,33 @@ const modelVariants: ColumnConfig[] = [{
   }]
 }]
 
+const dynamicRendererVariants: ColumnConfig[] = [{
+  label: '按行解析组件',
+  children: [{
+    children: [
+      {
+        fieldKey: 'profile',
+        type: 'component',
+        component: {
+          resolveRenderer: ({ row, fieldKey, value }) => {
+            void fieldKey
+            void value
+            return row.kind === 'alternative' ? AlternativeInput : CustomInput
+          }
+        }
+      },
+      {
+        fieldKey: 'name',
+        type: 'component',
+        component: {
+          renderer: CustomInput,
+          resolveRenderer: ({ row }) => row.useDefault ? undefined : AlternativeInput
+        }
+      }
+    ]
+  }]
+}]
+
 const props: FormTableProps = {
   tableData: rows,
   columns,
@@ -103,10 +131,16 @@ const invalidModes: ColumnConfig[] = [{
     children: [
       // @ts-expect-error builtin modes resolve their own renderer.
       { fieldKey: 'name', type: 'input', component: { renderer: CustomInput } },
-      // @ts-expect-error component mode requires component.renderer.
+      // @ts-expect-error component mode requires renderer or resolveRenderer.
       { fieldKey: 'custom', type: 'component', component: { props: {} } },
+      // @ts-expect-error builtin modes cannot dynamically replace their renderer.
+      { fieldKey: 'dynamic-input', type: 'input', component: { resolveRenderer: () => CustomInput } },
       // @ts-expect-error slot renderer must be a string name.
-      { fieldKey: 'actions', type: 'slot', component: { renderer: CustomInput } }
+      { fieldKey: 'actions', type: 'slot', component: { renderer: CustomInput } },
+      // @ts-expect-error slot names remain static and do not use component resolution.
+      { fieldKey: 'dynamic-slot', type: 'slot', component: { renderer: 'actions', resolveRenderer: () => CustomInput } },
+      // @ts-expect-error component resolution is synchronous and does not accept Promise results.
+      { fieldKey: 'async-renderer', type: 'component', component: { resolveRenderer: async () => CustomInput } }
     ]
   }]
 }]

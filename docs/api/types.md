@@ -4,7 +4,7 @@
 
 - `ColumnConfig`、`RowConfig`、`FormItemConfig`
 - `BuiltinFormItemConfig`、`ComponentFormItemConfig`、`SlotFormItemConfig`
-- `FieldComponentConfig`、`FieldModelConfig`、`BuiltinFormItemType`、`FormItemType`
+- `FieldComponentConfig`、`FieldModelConfig`、`FieldRendererResolver`、`BuiltinFormItemType`、`FormItemType`
 - `FormItemOption`、`OptionPropsConfig`、`ResolvedComponentConfig`
 - `TableRow`、`FormTableRecord`、`FormTableProps`
 - `FormTableTableContext`、`FormTableColumnContext`、`FormTableRowContext`、`FormTableFieldRenderContext`
@@ -25,14 +25,15 @@ type FormItemConfig =
 
 三种 Item 都支持可选 `key` 作为稳定渲染身份，并要求 `fieldKey` 指向行数据路径。`key` 不参与取值、更新或表单校验路径计算。
 
-`type` 明确决定模式，`component.renderer` 的类型随模式收窄：
+`type` 明确决定模式。component 模式要求静态 `renderer` 或动态 `resolveRenderer` 至少存在一个；slot 模式只接受静态字符串名称：
 
 ```ts
 interface ComponentFormItemConfig {
   type: 'component'
-  component: FieldComponentConfig & {
-    renderer: string | Component
-  }
+  component: FieldComponentConfig & (
+    | { renderer: string | Component; resolveRenderer?: FieldRendererResolver }
+    | { renderer?: never; resolveRenderer: FieldRendererResolver }
+  )
 }
 
 interface SlotFormItemConfig {
@@ -42,6 +43,14 @@ interface SlotFormItemConfig {
   }
 }
 ```
+
+```ts
+type FieldRendererResolver = (
+  context: FormTableFieldRenderContext
+) => string | Component | undefined
+```
+
+`resolveRenderer` 返回 `undefined` 时回退到静态 `renderer`。它只在 component 模式使用，避免与 Vue 函数组件及具名 slot 解析产生歧义。
 
 动态配置上下文按层级收敛：
 

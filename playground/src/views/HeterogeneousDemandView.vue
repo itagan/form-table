@@ -31,15 +31,6 @@
           <strong class="demand-type-label">{{ getDemandTypeLabel(row.type) }}</strong>
         </template>
 
-        <template #scene-description="{ row, value, setValue }">
-          <component
-            :is="getDescriptionEditor(row.type)"
-            :value="value"
-            :mode="row.type"
-            @change="setValue"
-          />
-        </template>
-
         <template #scene-schedule="{ row, value, setValue }">
           <div v-if="requiresSchedule(row.type)" class="schedule-editor">
             <el-date-picker
@@ -244,12 +235,19 @@ const columns: ColumnConfig[] = [
       {
         key: 'complex-description',
         fieldKey: 'detail',
-        type: 'slot',
+        type: 'component',
         visible: ({ row }) => isComplexType(asDemandRow(row).type),
         formItemProps: ({ row }) => ({
           rules: [{ validator: (_rule: unknown, value: DemandDetail, callback: ValidationCallback) => validateDetail(asDemandRow(row).type, value, callback), trigger: 'change' }]
         }),
-        component: { renderer: 'scene-description' }
+        component: {
+          resolveRenderer: ({ row }) => descriptionEditors[asDemandRow(row).type as keyof typeof descriptionEditors],
+          props: ({ row }) => {
+            const type = asDemandRow(row).type
+            return type === 'flight' || type === 'train' || type === 'car' ? { mode: type } : {}
+          },
+          model: { prop: 'value', event: 'change' }
+        }
       },
       {
         key: 'other-expense-type',
@@ -334,7 +332,6 @@ const columns: ColumnConfig[] = [
   }
 ]
 
-const getDescriptionEditor = (type: DemandType) => descriptionEditors[type as keyof typeof descriptionEditors]
 const getDemandTypeLabel = (type: DemandType) => demandTypeLabels[type]
 const requiresSchedule = (type: DemandType) => type !== 'other' && type !== 'guest'
 const requiresEndTime = (type: DemandType) => type === 'venue' || type === 'hotel' || type === 'car'

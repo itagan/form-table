@@ -34,10 +34,22 @@ interface DemandRow {
 
 示例刻意展示两种处理方式：
 
-- 会场、酒店、用餐、交通使用独立业务组件，并通过组件注册表按 `row.type` 选择。
+- 会场、酒店、用餐、交通使用独立业务组件，并通过 `component.resolveRenderer` 和组件注册表按 `row.type` 选择。
 - “其他”和“嘉宾”的结构简单，直接使用 FormTable Item 的 `visible` 和嵌套 `fieldKey`。
 
-复杂业务组件使用受控协议：接收当前 `detail`，发生变化时发出新的对象，由 Slot 的 `setValue` 写回 FormTable。组件不读取 DOM，也不把内部状态作为最终提交数据。
+复杂业务组件使用受控协议：接收当前 `detail`，发生变化时发出新的对象。FormTable 根据配置的 `value/change` 模型协议写回字段，不需要页面 Slot 参与组件选择。组件不读取 DOM，也不把内部状态作为最终提交数据。
+
+```ts
+{
+  fieldKey: 'detail',
+  type: 'component',
+  component: {
+    resolveRenderer: ({ row }) => demandEditors[row.type],
+    props: ({ row }) => ({ mode: row.type }),
+    model: { prop: 'value', event: 'change' }
+  }
+}
+```
 
 ## 需求类型是唯一分组
 

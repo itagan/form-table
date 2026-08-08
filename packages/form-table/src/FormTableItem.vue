@@ -95,6 +95,16 @@ const builtinType = computed<BuiltinFormItemType | null>(() => {
     : props.config.type
 })
 
+/** 按渲染模式解析最终组件，保留可辨识联合的类型收窄。 */
+const resolveFieldRenderer = () => {
+  const config = props.config
+  if (config.type === 'component') {
+    return config.component.resolveRenderer?.(runtimeContext.value) ?? config.component.renderer
+  }
+  if (config.type === 'slot') return config.component.renderer
+  return getComponentType(config.type)
+}
+
 /** 动态字段配置集中解析一次，渲染层只消费结果，避免重复执行用户回调。 */
 const resolvedComponent = computed<ResolvedComponentConfig>(() => {
   const component = props.config.component
@@ -105,9 +115,7 @@ const resolvedComponent = computed<ResolvedComponentConfig>(() => {
   }, {})
 
   return {
-    renderer: props.config.type === 'component' || props.config.type === 'slot'
-      ? component?.renderer
-      : getComponentType(builtinType.value as BuiltinFormItemType),
+    renderer: resolveFieldRenderer(),
     props: {
       ...(builtinType.value ? getRequiredProps(builtinType.value) : {}),
       ...(resolveDynamicValue(component?.props, runtimeContext.value) || {})
