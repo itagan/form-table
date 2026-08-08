@@ -9,7 +9,7 @@
         <li><code>children</code> 描述 Column → Row → Item 布局。</li>
         <li><code>type</code> 是唯一渲染策略：内置别名、component 或 slot。</li>
         <li><code>component.renderer</code> 指向动态组件或具名 slot。</li>
-        <li><code>component.props/listeners/options</code> 是三种模式共用的配置。</li>
+        <li><code>component.model/props/listeners/options/optionProps</code> 描述实际字段组件。</li>
         <li>行增删、复制和字段联动由业务层维护。</li>
       </ul>
     </section>
@@ -156,16 +156,23 @@
 
           <tbody class="layer-group">
             <tr>
-              <th rowspan="5" scope="rowgroup" class="layer-cell">Component</th>
+              <th rowspan="6" scope="rowgroup" class="layer-cell">Component</th>
               <td><code>renderer</code></td>
               <td>渲染目标</td>
               <td>component 模式为组件对象/名称；slot 模式为具名 slot 名称。</td>
-              <td rowspan="4" class="context-cell"><code>Item 上下文</code><br><code>columnConfig</code><br><code>rowConfig</code><br><code>itemConfig</code></td>
+              <td class="context-cell">—</td>
+            </tr>
+            <tr>
+              <td><code>model</code></td>
+              <td>字段值绑定策略</td>
+              <td>省略或 <code>true</code> 使用原生 v-model；对象适配自定义协议；<code>false</code> 关闭自动绑定。</td>
+              <td class="context-cell">—</td>
             </tr>
             <tr>
               <td><code>props</code></td>
               <td>实际字段组件</td>
               <td>静态对象或动态函数，结果直接透传。</td>
+              <td rowspan="3" class="context-cell"><code>Item 上下文</code><br><code>columnConfig</code><br><code>rowConfig</code><br><code>itemConfig</code></td>
             </tr>
             <tr>
               <td><code>options</code></td>
@@ -186,6 +193,20 @@
           </tbody>
         </table>
       </div>
+
+      <h3>组件绑定策略</h3>
+      <p><code>component.model</code> 明确区分默认绑定、自定义协议和关闭自动绑定。关闭后仍可通过动态 props 与 listeners 手动同步，也可以只展示或处理事件而不写回表格。</p>
+      <div class="table-scroll">
+        <table class="context-summary model-table">
+          <thead><tr><th>model</th><th>行为</th><th>适用场景</th></tr></thead>
+          <tbody>
+            <tr><td>省略或 <code>true</code></td><td>使用组件原生 Vue 2 v-model</td><td>标准 <code>value/input</code>，或组件自身声明了 model</td></tr>
+            <tr><td><code>{ prop, event, valueFromEvent }</code></td><td>按指定协议自动写回当前字段</td><td>非标准属性、事件或复杂事件载荷</td></tr>
+            <tr><td><code>false</code></td><td>不注入任何模型属性和更新事件</td><td>手动同步、纯展示或命令型组件</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <pre>{{ modelExample }}</pre>
 
       <h3>完整结构</h3>
       <pre>{{ propsExample }}</pre>
@@ -265,6 +286,7 @@ const propsExample = `{
         rules: [{ required: true }]
       },
       component: {
+        model: true,                 // 显式使用组件原生 v-model
         props: { clearable: true },
         listeners: {},
         options: []
@@ -371,6 +393,7 @@ const returnedContextExample = `// Column callback
   propPath: 'tableData.0.city',
   component: {
     renderer: 'city-editor',
+    model: true,
     props: { disabled: false },
     listeners: {},
     options: [{ label: '杭州', value: 'hangzhou' }],
@@ -384,6 +407,41 @@ const returnedContextExample = `// Column callback
   columnConfig,
   columnIndex: 0,
   label: '地区'
+}`
+
+const modelExample = `// 1. 默认双向绑定；true 与省略 model 等价
+component: {
+  renderer: StandardInput,
+  model: true
+}
+
+// 2. 非标准协议：从复杂事件载荷中提取当前字段值
+component: {
+  renderer: UserSelector,
+  model: {
+    prop: 'selectedId',
+    event: 'select-user',
+    valueFromEvent: user => user.id
+  }
+}
+
+// 3. 关闭自动 model，通过 props + listeners 手动同步
+component: {
+  renderer: SkuSelector,
+  model: false,
+  props: ({ value }) => ({ selectedSkuId: value }),
+  listeners: {
+    'select-sku'({ updateRow }, sku) {
+      updateRow({ skuId: sku.id, skuName: sku.name })
+    }
+  }
+}
+
+// 4. 完全不需要双向绑定，只传展示属性
+component: {
+  renderer: StatusDisplay,
+  model: false,
+  props: ({ value }) => ({ status: value })
 }`
 
 const asyncUpdateExample = `<FormTable
