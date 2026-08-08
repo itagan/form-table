@@ -83,10 +83,10 @@ const selection = ref<TableRow[]>([])
 const formTableRef = ref<FormTableExpose>()
 
 const columns: ColumnConfig[] = [
-  { name: '', props: { type: 'selection', width: 48 }, children: [] },
-  { name: '序号', props: { type: 'index', width: 64, align: 'center' }, children: [] },
+  { label: '', props: { type: 'selection', width: 48 }, children: [] },
+  { label: '序号', props: { type: 'index', width: 64, align: 'center' }, children: [] },
   {
-    name: '联系人信息',
+    label: '联系人信息',
     headerSlot: 'contact-header',
     props: { minWidth: 600 },
     children: [
@@ -94,14 +94,14 @@ const columns: ColumnConfig[] = [
         props: { gutter: 10 },
         children: [
           {
-            key: 'name',
+            fieldKey: 'name',
             type: 'input',
             colProps: { span: 8 },
             formItemProps: { label: '姓名', labelWidth: '52px', rules: [{ required: true, message: '请输入姓名' }] },
             component: { props: { clearable: true } }
           },
           {
-            key: 'phone',
+            fieldKey: 'phone',
             colProps: { span: 16 },
             formItemProps: { label: '手机', labelWidth: '52px' },
             component: {
@@ -116,7 +116,7 @@ const columns: ColumnConfig[] = [
         props: { gutter: 10 },
         children: [
           {
-            key: 'province',
+            fieldKey: 'province',
             type: 'select',
             colProps: { span: 7 },
             formItemProps: { label: '省份', labelWidth: '52px' },
@@ -126,7 +126,7 @@ const columns: ColumnConfig[] = [
             }
           },
           {
-            key: 'city',
+            fieldKey: 'city',
             type: 'select',
             visible: ({ row }) => Boolean(row.province),
             colProps: { span: 7 },
@@ -136,7 +136,7 @@ const columns: ColumnConfig[] = [
             }
           },
           {
-            key: 'profile.address',
+            fieldKey: 'profile.address',
             type: 'input',
             colProps: { span: 10 },
             formItemProps: { label: '地址', labelWidth: '52px' }
@@ -146,14 +146,14 @@ const columns: ColumnConfig[] = [
     ]
   },
   {
-    name: '状态',
+    label: '状态',
     props: { width: 90, align: 'center' },
-    children: [{ children: [{ key: 'status', slot: 'status' }] }]
+    children: [{ children: [{ fieldKey: 'status', slot: 'status' }] }]
   },
   {
-    name: '操作',
+    label: '操作',
     props: { width: 210, fixed: 'right', align: 'center' },
-    children: [{ children: [{ key: '__actions', slot: 'actions' }] }]
+    children: [{ children: [{ fieldKey: '__actions', slot: 'actions' }] }]
   }
 ]
 const columnsCode = formatFormTableConfig(columns)

@@ -3,7 +3,7 @@ import type { ColumnConfig, FormItemConfig } from '@itagan/form-table'
 export type FormItemEnhancement = (item: FormItemConfig) => FormItemConfig
 
 /**
- * 业务层按字段 key 增强远程 JSON；核心组件无需了解组件注册表或事件名称映射。
+ * 业务层按 fieldKey 增强远程 JSON；核心组件无需了解组件注册表或事件名称映射。
  */
 export function enhanceFormTableColumns(
   columns: ColumnConfig[],
@@ -13,7 +13,7 @@ export function enhanceFormTableColumns(
     ...column,
     children: column.children.map((row) => ({
       ...row,
-      children: row.children.map((item) => enhancements[item.key]?.(item) || item)
+      children: row.children.map((item) => enhancements[item.fieldKey]?.(item) || item)
     }))
   }))
 }

@@ -81,9 +81,12 @@ export type FormItemType =
   | 'tag-input'
 
 interface BaseFormItemConfig {
-  key: string
+  /** 行数据字段路径，例如 `name`、`profile.city`。 */
+  fieldKey: string
   visible?: DynamicValue<boolean, FormTableFieldRenderContext>
+  /** 直接传给 el-col。 */
   colProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext>
+  /** 直接传给 el-form-item。 */
   formItemProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext>
 }
 
@@ -117,15 +120,18 @@ export type FormItemConfig =
 export interface RowConfig {
   key?: string
   visible?: DynamicValue<boolean, FormTableRowContext>
+  /** 直接传给 el-row。 */
   props?: DynamicValue<ComponentProps, FormTableRowContext>
   children: FormItemConfig[]
 }
 
 export interface ColumnConfig {
   key?: string
-  name: string
+  /** el-table-column 的表头文本。 */
+  label: string
   headerSlot?: string
   visible?: DynamicValue<boolean, FormTableTableContext>
+  /** 直接传给 el-table-column。 */
   props?: DynamicValue<ComponentProps, FormTableTableContext>
   children: RowConfig[]
 }

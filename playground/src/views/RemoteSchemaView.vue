@@ -42,29 +42,29 @@ import { formatFormTableConfig } from '../utils/formatFormTableConfig'
 
 const remoteSchemaJson = `[
   {
-    "name": "联系人",
+    "label": "联系人",
     "children": [
       {
         "children": [
           {
-            "key": "name",
+            "fieldKey": "name",
             "type": "input",
             "colProps": { "span": 6 },
             "component": { "props": { "placeholder": "请输入姓名" } }
           },
           {
-            "key": "phone",
+            "fieldKey": "phone",
             "type": "input",
             "colProps": { "span": 8 },
             "component": { "props": { "placeholder": "请输入手机号" } }
           },
           {
-            "key": "enabled",
+            "fieldKey": "enabled",
             "type": "switch",
             "colProps": { "span": 5 }
           },
           {
-            "key": "actions",
+            "fieldKey": "actions",
             "slot": "actions",
             "colProps": { "span": 5 }
           }

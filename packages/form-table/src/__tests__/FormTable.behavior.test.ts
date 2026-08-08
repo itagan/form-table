@@ -16,12 +16,12 @@ localVue.use(ElementUI)
 
 const inputColumns: ColumnConfig[] = [
   {
-    name: '姓名',
+    label: '姓名',
     children: [
       {
         children: [
           {
-            key: 'name',
+            fieldKey: 'name',
             type: 'input',
             component: {
               props: { placeholder: '请输入姓名' }
@@ -79,8 +79,8 @@ describe('FormTable core behavior', () => {
     const wrapper = mountFormTable({
       tableData: [{ profile: { city: '杭州' } }],
       columns: [{
-        name: '城市',
-        children: [{ children: [{ key: 'profile.city', type: 'input' }] }]
+        label: '城市',
+        children: [{ children: [{ fieldKey: 'profile.city', type: 'input' }] }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -96,8 +96,8 @@ describe('FormTable core behavior', () => {
     const wrapper = mountFormTable({
       tableData: [{ school: '一中' }],
       columns: [{
-        name: '学校',
-        children: [{ children: [{ key: 'school', slot: 'school' }] }]
+        label: '学校',
+        children: [{ children: [{ fieldKey: 'school', slot: 'school' }] }]
       }],
       scopedSlots: {
         school: '<button type="button" class="slot-setter" @click="props.setValue(\'二中\')">{{ props.value }}</button>'
@@ -119,10 +119,10 @@ describe('FormTable core behavior', () => {
     }
     const wrapper = mountFormTable({
       columns: [{
-        name: '冲突配置',
+        label: '冲突配置',
         children: [{
           children: [{
-            key: 'name',
+            fieldKey: 'name',
             slot: 'winner',
             component: { is: ConflictingInput },
             type: 'input'
@@ -155,10 +155,10 @@ describe('FormTable core behavior', () => {
     }
     const wrapper = mountFormTable({
       columns: [{
-        name: '组件优先',
+        label: '组件优先',
         children: [{
           children: [{
-            key: 'name',
+            fieldKey: 'name',
             type: 'select',
             component: {
               is: DirectInput,
@@ -183,8 +183,8 @@ describe('FormTable core behavior', () => {
     const wrapper = mountFormTable({
       tableData: [{ summary: '只读内容' }],
       columns: [{
-        name: '默认展示',
-        children: [{ children: [{ key: 'summary' } as any] }]
+        label: '默认展示',
+        children: [{ children: [{ fieldKey: 'summary' } as any] }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -208,10 +208,10 @@ describe('FormTable core behavior', () => {
     const wrapper = mountFormTable({
       tableData: [{ status: 'enabled' }],
       columns: [{
-        name: '状态',
+        label: '状态',
         children: [{
           children: [{
-            key: 'status',
+            fieldKey: 'status',
             component: {
               is: StatusInput,
               listeners: { commit: listener }
@@ -249,8 +249,8 @@ describe('FormTable core behavior', () => {
     const wrapper = mountFormTable({
       tableData: original,
       columns: [{
-        name: '批量更新',
-        children: [{ children: [{ key: 'name', slot: 'batch-update' }] }]
+        label: '批量更新',
+        children: [{ children: [{ fieldKey: 'name', slot: 'batch-update' }] }]
       }],
       scopedSlots: {
         'batch-update': `
@@ -297,13 +297,13 @@ describe('FormTable core behavior', () => {
       ? [{ label: '杭州', value: 'hangzhou' }]
       : [])
     const columns: ColumnConfig[] = [{
-      name: '地区',
+      label: '地区',
       visible: columnVisible,
       children: [{
         props: rowProps,
         children: [
           {
-            key: 'province',
+            fieldKey: 'province',
             type: 'select',
             colProps: { span: 12 },
             component: {
@@ -311,7 +311,7 @@ describe('FormTable core behavior', () => {
             }
           },
           {
-            key: 'city',
+            fieldKey: 'city',
             type: 'select',
             visible: fieldVisible,
             colProps: { span: 12 },

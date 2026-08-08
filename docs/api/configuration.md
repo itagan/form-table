@@ -14,12 +14,12 @@
 
 ```ts
 {
-  name: '基本信息',
+  label: '基本信息',
   props: { minWidth: 400 },       // el-table-column
   children: [{
     props: { gutter: 8 },         // el-row
     children: [{
-      key: 'name',
+      fieldKey: 'name',
       type: 'input',
       colProps: { span: 12 },     // el-col
       formItemProps: {},          // el-form-item
@@ -29,14 +29,18 @@
 }
 ```
 
+- Column 的 `label` 是表头文本，`props` 直接传给 `el-table-column`。
+- Row 的 `props` 直接传给 `el-row`。
+- Item 的 `fieldKey` 是行数据路径；`colProps` 与 `formItemProps` 分别传给 `el-col` 和 `el-form-item`。
+
 ## 渲染模式
 
 ```ts
-{ key: 'name', type: 'input' }
+{ fieldKey: 'name', type: 'input' }
 
-{ key: 'phone', component: { is: PhoneInput, props: {} } }
+{ fieldKey: 'phone', component: { is: PhoneInput, props: {} } }
 
-{ key: 'actions', slot: 'actions' }
+{ fieldKey: 'actions', slot: 'actions' }
 ```
 
 TypeScript 配置要求三种模式互斥。对于未经类型检查的 JavaScript 或远程 JSON 冲突配置，运行时采用固定优先级：

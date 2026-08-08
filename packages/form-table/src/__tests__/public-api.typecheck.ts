@@ -11,23 +11,23 @@ import FormTable, {
 const CustomInput: Component = { name: 'CustomInput' }
 const rows: TableRow[] = [{ name: 'Alice', profile: { city: '杭州' } }]
 const columns: ColumnConfig[] = [{
-  name: '基本信息',
+  label: '基本信息',
   children: [{
     props: { gutter: 8 },
     children: [
       {
-        key: 'name',
+        fieldKey: 'name',
         type: 'input',
         colProps: { span: 8 },
         formItemProps: { label: '姓名', rules: [{ required: true }] },
         component: { props: { clearable: true } }
       },
       {
-        key: 'profile.city',
+        fieldKey: 'profile.city',
         component: { is: CustomInput }
       },
       {
-        key: 'actions',
+        fieldKey: 'actions',
         slot: 'actions'
       }
     ]
@@ -51,10 +51,10 @@ async function useExpose(expose: FormTableExpose) {
 }
 
 const invalid: ColumnConfig[] = [{
-  name: '错误配置',
+  label: '错误配置',
   children: [{
     children: [{
-      key: 'bad',
+      fieldKey: 'bad',
       // @ts-expect-error unknown type aliases are rejected.
       type: 'unknown'
     }]
@@ -62,19 +62,36 @@ const invalid: ColumnConfig[] = [{
 }]
 
 const conflictingModes: ColumnConfig[] = [{
-  name: '互斥渲染模式',
+  label: '互斥渲染模式',
   children: [{
     children: [
       // @ts-expect-error typed configs choose one renderer; runtime priority only guards untyped JSON/JS.
-      { key: 'name', type: 'input', component: { is: CustomInput } },
+      { fieldKey: 'name', type: 'input', component: { is: CustomInput } },
       // @ts-expect-error slot cannot be combined with a type in typed configs.
-      { key: 'actions', slot: 'actions', type: 'text' }
+      { fieldKey: 'actions', slot: 'actions', type: 'text' }
     ]
   }]
 }]
 
+const renamedColumn: ColumnConfig = {
+  label: '新字段名',
+  // @ts-expect-error ColumnConfig uses label; legacy name is not accepted.
+  name: '旧字段名',
+  children: []
+}
+
+const renamedItem: ColumnConfig = {
+  label: '字段路径',
+  children: [{
+    children: [
+      // @ts-expect-error FormItemConfig uses fieldKey; legacy key is not accepted.
+      { key: 'name', type: 'input' }
+    ]
+  }]
+}
+
 const contextBoundaries: ColumnConfig[] = [{
-  name: '上下文边界',
+  label: '上下文边界',
   visible: (tableContext) => {
     void tableContext.tableData
     // @ts-expect-error column callbacks do not have a current row.
@@ -90,7 +107,7 @@ const contextBoundaries: ColumnConfig[] = [{
       return true
     },
     children: [{
-      key: 'name',
+      fieldKey: 'name',
       type: 'input',
       visible: (fieldContext) => {
         void fieldContext.row
@@ -118,4 +135,6 @@ void plugin
 void useExpose
 void invalid
 void conflictingModes
+void renamedColumn
+void renamedItem
 void contextBoundaries

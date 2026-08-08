@@ -6,12 +6,12 @@ Vue 2.7 + Element UI 的表格内表单组件。组件只负责布局、字段�
 
 ```ts
 const columns = [{
-  name: '基本信息',
+  label: '基本信息',
   props: { minWidth: 320 },
   children: [{
     props: { gutter: 8 },
     children: [{
-      key: 'name',
+      fieldKey: 'name',
       type: 'input',
       colProps: { span: 12 },
       formItemProps: {
@@ -58,4 +58,4 @@ Table 原生事件直接透传。通过 ref 可调用 `validate()`、`resetField
 
 动态配置只获得当前层级有意义的上下文：Column 为 `tableData`，Row 增加 `row/index`，Field 增加 `fieldKey`。组件 listener 额外获得 `value/setValue/updateRow`，不再回传占位字段。
 
-远程 schema 建议只返回布局、`type`、静态 props/options 等 JSON；组件对象、事件函数与 slot 实现由页面按字段 key 本地增强。核心不执行远程代码，也不维护业务组件注册表。
+远程 schema 建议只返回布局、`type`、静态 props/options 等 JSON；组件对象、事件函数与 slot 实现由页面按 `fieldKey` 本地增强。核心不执行远程代码，也不维护业务组件注册表。

@@ -22,7 +22,7 @@
 
     <section>
       <h2>远程 JSON</h2>
-      <p>远程只返回布局、type、静态 props/options；组件对象、事件函数和 slot 实现在页面本地按字段 key 增强。</p>
+      <p>远程只返回布局、type、静态 props/options；组件对象、事件函数和 slot 实现在页面本地按 fieldKey 增强。</p>
       <router-link to="/remote-schema">查看可运行示例 →</router-link>
     </section>
 
@@ -36,12 +36,12 @@
 
 <script lang="ts" setup>
 const propsExample = `{
-  name: '姓名',                 // el-table-column label
+  label: '姓名',                // el-table-column label
   props: { minWidth: 180 },    // el-table-column
   children: [{
     props: { gutter: 8 },      // el-row
     children: [{
-      key: 'name',
+      fieldKey: 'name',
       type: 'input',
       colProps: { span: 12 },  // el-col
       formItemProps: {         // el-form-item

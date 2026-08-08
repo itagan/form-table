@@ -52,15 +52,15 @@ const tableData = ref<TableRow[]>([
 ])
 const columns: ColumnConfig[] = [
   {
-    name: '内容',
+    label: '内容',
     props: { minWidth: 420 },
     children: [
       {
         props: { gutter: 10 },
         children: [
-          { key: 'title', type: 'input', colProps: { span: 16 } },
+          { fieldKey: 'title', type: 'input', colProps: { span: 16 } },
           {
-            key: 'showDetail',
+            fieldKey: 'showDetail',
             type: 'switch',
             colProps: { span: 8 },
             formItemProps: { label: '详情', labelWidth: '48px' }
@@ -69,7 +69,7 @@ const columns: ColumnConfig[] = [
       },
       {
         children: [{
-          key: 'detail',
+          fieldKey: 'detail',
           slot: 'detail',
           visible: ({ row }) => row.showDetail === true
         }]
@@ -77,14 +77,14 @@ const columns: ColumnConfig[] = [
     ]
   },
   {
-    name: '评分',
+    label: '评分',
     props: { width: 180 },
-    children: [{ children: [{ key: 'score', slot: 'score' }] }]
+    children: [{ children: [{ fieldKey: 'score', slot: 'score' }] }]
   },
   {
-    name: '操作',
+    label: '操作',
     props: { width: 90, align: 'center' },
-    children: [{ children: [{ key: '__actions', slot: 'actions' }] }]
+    children: [{ children: [{ fieldKey: '__actions', slot: 'actions' }] }]
   }
 ]
 const columnsCode = formatFormTableConfig(columns)

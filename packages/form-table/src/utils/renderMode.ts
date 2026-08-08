@@ -3,7 +3,7 @@ import type { FieldComponentConfig, FormItemType } from '../types'
 export type FieldRenderMode = 'slot' | 'component' | 'type' | 'display'
 
 interface FieldRenderConfig {
-  key: string
+  fieldKey: string
   slot?: string
   type?: FormItemType
   component?: FieldComponentConfig
@@ -34,7 +34,7 @@ export function warnFieldRenderConflict(config: FieldRenderConfig) {
 
   warnedConfigs.add(config)
   console.warn(
-    `[FormTable] field "${config.key}" has multiple render modes (${sources.join(', ')}); ` +
+    `[FormTable] field "${config.fieldKey}" has multiple render modes (${sources.join(', ')}); ` +
     `using ${resolveFieldRenderMode(config)} by priority: slot > component > type.`
   )
 }

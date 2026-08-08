@@ -67,10 +67,10 @@ const formTableContext = inject<ComputedRef<FormTableTableContext>>(
 )
 const updateApi = inject<FormTableUpdateApi>(FORM_TABLE_UPDATE_KEY)
 const parentSlots = inject<FormTableSlots>(FORM_TABLE_SLOTS_KEY, {})
-const propPath = computed(() => `tableData.${props.rowIndex}.${props.config.key}`)
+const propPath = computed(() => `tableData.${props.rowIndex}.${props.config.fieldKey}`)
 const runtimeContext = computed(() => createFieldRenderContext(
   createRowContext(formTableContext.value, props.row, props.rowIndex),
-  props.config.key
+  props.config.fieldKey
 ))
 const renderMode = computed(() => {
   warnFieldRenderConflict(props.config)
@@ -83,12 +83,12 @@ const resolvedFormItemProps = computed(() => ({
 const slotFn = computed(() => props.config.slot
   ? parentSlots[props.config.slot] || null
   : null)
-const setValue = (value: unknown) => updateApi?.setValue(props.rowIndex, props.config.key, value)
+const setValue = (value: unknown) => updateApi?.setValue(props.rowIndex, props.config.fieldKey, value)
 const updateRow = (patch: Partial<TableRow>) => updateApi?.updateRow(props.rowIndex, patch)
 const slotContext = computed<FormTableSlotContext>(() => ({
   ...runtimeContext.value,
   propPath: propPath.value,
-  value: getValueByPath(props.row, props.config.key),
+  value: getValueByPath(props.row, props.config.fieldKey),
   setValue,
   updateRow
 }))

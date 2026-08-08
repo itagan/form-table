@@ -36,9 +36,9 @@ const tableData = ref<TableRow[]>([{ phone: '+8613800138000', status: 'enabled' 
 const formTableRef = ref<FormTableExpose>()
 const columns: ColumnConfig[] = [
   {
-    name: '手机',
+    label: '手机',
     children: [{ children: [{
-      key: 'phone',
+      fieldKey: 'phone',
       component: {
         is: PhoneInput,
         props: { size: 'small' },
@@ -47,9 +47,9 @@ const columns: ColumnConfig[] = [
     }] }]
   },
   {
-    name: '状态展示',
+    label: '状态展示',
     children: [{ children: [{
-      key: 'status',
+      fieldKey: 'status',
       component: {
         is: StatusTag,
         props: {

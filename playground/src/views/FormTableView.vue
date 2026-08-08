@@ -50,20 +50,20 @@ const tableData = ref<TableRow[]>([
 const required = (message: string, trigger = 'blur') => [{ required: true, message, trigger }]
 const columns: ColumnConfig[] = [
   {
-    name: '姓名和年龄',
+    label: '姓名和年龄',
     props: { minWidth: 320 },
     children: [{
       props: { gutter: 10 },
       children: [
         {
-          key: 'name',
+          fieldKey: 'name',
           type: 'input',
           colProps: { span: 12 },
           formItemProps: { rules: required('请输入姓名') },
           component: { props: { placeholder: '请输入姓名', clearable: true } }
         },
         {
-          key: 'age',
+          fieldKey: 'age',
           type: 'number',
           colProps: { span: 12 },
           formItemProps: { rules: required('请输入年龄', 'change') },
@@ -73,11 +73,11 @@ const columns: ColumnConfig[] = [
     }]
   },
   {
-    name: '学校',
+    label: '学校',
     props: { minWidth: 200 },
     children: [{
       children: [{
-        key: 'school',
+        fieldKey: 'school',
         type: 'select',
         formItemProps: { rules: required('请选择学校', 'change') },
         component: {
