@@ -30,26 +30,61 @@ interface DemandRow {
 
 例如酒店的 `detail` 包含酒店名称、房间名称、房间数量、床型、入住人数和早餐；机票的 `detail` 则包含舱位、出发城市和到达城市。不要把所有场景字段平铺为一个包含大量空值的对象。
 
-## 简单配置与复杂组件并用
+## 配置、公共组件与场景组件并用
 
-示例刻意展示两种处理方式：
+示例按差异程度使用三种处理方式：
 
 - 会场、酒店、用餐、交通使用独立业务组件，并通过 `component.resolveRenderer` 和组件注册表按 `row.type` 选择。
 - “其他”和“嘉宾”的结构简单，直接使用 FormTable Item 的 `visible` 和嵌套 `fieldKey`。
+- 使用时间与数量/单价结构稳定，分别使用固定的 `DemandScheduleEditor` 和 `DemandPricingEditor`，通过动态 props 获取需求类型和只读状态。
+- 总预算是纯计算展示，操作按钮需要页面行为，继续使用 Slot。
 
-复杂业务组件使用受控协议：接收当前 `detail`，发生变化时发出新的对象。FormTable 根据配置的 `value/change` 模型协议写回字段，不需要页面 Slot 参与组件选择。组件不读取 DOM，也不把内部状态作为最终提交数据。
+所有编辑组件遵守相同的受控契约：接收 `value/demandType/readonly`，发生变化时发出新的对象。FormTable 根据配置的 `value/change` 模型协议写回字段，不需要页面 Slot 参与组件选择。组件不读取 DOM，也不把内部状态作为最终提交数据。
+
+```ts
+interface DemandEditorProps<T> {
+  value: T
+  demandType: DemandType
+  readonly?: boolean
+}
+```
+
+差异较大的需求说明配置动态组件，并提供未知类型兜底：
 
 ```ts
 {
   fieldKey: 'detail',
   type: 'component',
   component: {
+    renderer: UnsupportedDemandEditor,
     resolveRenderer: ({ row }) => demandEditors[row.type],
-    props: ({ row }) => ({ mode: row.type }),
+    props: ({ row }) => ({
+      demandType: row.type,
+      readonly: readonlyMode.value
+    }),
     model: { prop: 'value', event: 'change' }
   }
 }
 ```
+
+结构稳定的公共列直接配置固定组件：
+
+```ts
+{
+  fieldKey: 'pricing',
+  type: 'component',
+  component: {
+    renderer: DemandPricingEditor,
+    props: ({ row }) => ({
+      demandType: row.type,
+      readonly: readonlyMode.value
+    }),
+    model: { prop: 'value', event: 'change' }
+  }
+}
+```
+
+调试页的“只读模式”会同时作用于场景组件、公共组件和少量 FormTable 内置字段，用于验证协议一致性。组件注册表和 columns 都保持稳定，只读变化通过响应式动态 props 下发。
 
 ## 需求类型是唯一分组
 
@@ -71,7 +106,7 @@ const payload = rows.map(row => ({
   demandType: row.type,
   demandTypeName: demandTypeLabels[row.type],
   detail: row.detail,
-  schedule: requiresSchedule(row.type) ? row.schedule : undefined,
+  schedule: requiresDemandSchedule(row.type) ? row.schedule : undefined,
   pricing: row.pricing,
   totalBudget: calculateDemandTotal(row)
 }))

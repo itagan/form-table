@@ -1,6 +1,15 @@
 import type { TableRow } from '@itagan/form-table'
 
 export type DemandType = 'venue' | 'hotel' | 'meal' | 'flight' | 'train' | 'car' | 'other' | 'guest'
+export type ComplexDemandType = Exclude<DemandType, 'other' | 'guest'>
+export type TransportDemandType = Extract<DemandType, 'flight' | 'train' | 'car'>
+
+/** 所有场景编辑器遵循相同的受控输入、只读和事件协议。 */
+export interface DemandEditorProps<T> {
+  value: T
+  demandType: DemandType
+  readonly?: boolean
+}
 
 export interface DemandDetail {
   [key: string]: unknown
@@ -106,3 +115,8 @@ export const calculateDemandTotal = (row: DemandRow) => {
   const unitPrice = Math.max(0, Number(row.pricing.unitPrice) || 0)
   return Number((quantity * unitPrice).toFixed(2))
 }
+
+export const requiresDemandSchedule = (type: DemandType) => type !== 'other' && type !== 'guest'
+export const requiresDemandEndTime = (type: DemandType) => type === 'venue' || type === 'hotel' || type === 'car'
+export const getDemandStartPlaceholder = (type: DemandType) => type === 'hotel' ? '入住时间' : type === 'meal' ? '就餐时间' : '开始/出发时间'
+export const getDemandEndPlaceholder = (type: DemandType) => type === 'hotel' ? '离店时间' : '结束时间'
