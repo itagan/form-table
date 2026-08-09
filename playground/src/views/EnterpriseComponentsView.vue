@@ -14,6 +14,7 @@
         <el-button size="small" @click="validate">校验表格</el-button>
       </div>
 
+      <!-- #region docs-enterprise-form-table -->
       <FormTable
         ref="formTableRef"
         :table-data="tableData"
@@ -34,6 +35,7 @@
           </el-button>
         </template>
       </FormTable>
+      <!-- #endregion docs-enterprise-form-table -->
 
       <div class="explanation-grid">
         <article>
