@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Improved
+
+- 优化动态 Column 渲染身份：唯一 `column.key` 在增删、显隐和同顺序配置替换时保持稳定，仅在已有列相对顺序变化时整体换代以同步 Element UI 列顺序。
+
 ### Fixed
 
 - 内置字段类型只保留 Element UI 默认提供的组件映射；移除非 Element UI 内置的 `tree-select`，此类组件统一通过 `type: 'component'` 接入。

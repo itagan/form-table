@@ -60,10 +60,14 @@ tableData.value = tableData.value.filter((_, index) => index !== deleteIndex)
 }
 ```
 
-- Column 的 `label` 是表头文本，`props` 直接传给 `el-table-column`。
+- Column 的 `label` 是表头文本，`props` 直接传给 `el-table-column`。动态增删、显隐或替换列配置时应提供唯一稳定的 `key`。
 - Row 的 `props` 直接传给 `el-row`。
 - Item 的 `key` 是可选渲染身份，`fieldKey` 是必填的数据路径；`colProps` 与 `formItemProps` 分别传给 `el-col` 和 `el-form-item`。
 - 动态增删、排序、切换渲染器或重复使用同一 `fieldKey` 时建议提供稳定的 Item `key`；否则默认使用 `fieldKey`。
+
+唯一 `column.key` 会在列增删、动态显隐以及同顺序配置替换时复用仍然存在的列包装实例。已有列的相对顺序发生变化时，FormTable 会更新内部顺序版本并重新挂载可见列，确保 Element UI 按新顺序注册。未配置或重复的 Column key 按 `label + sourceIndex` 降级，不保证结构变化后的实例稳定性。
+
+Element UI 的表体单元格按位置渲染；删除或插入中间列时，即使右侧 Column 包装实例得到复用，发生位置移动的单元格内容仍可能重新创建。不要把未提交业务状态只保存在字段组件内部，应及时同步到 `tableData`。
 
 ## 校验规则
 

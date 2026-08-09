@@ -28,6 +28,8 @@ const columns = [{
 
 Item 的 `key` 是可选渲染身份，`fieldKey` 是必填数据路径。动态增删、排序或重复使用同一 `fieldKey` 时建议提供稳定 `key`。
 
+动态 Column 应提供唯一稳定的 `key`。列增删、显隐或同顺序配置替换会尽量复用仍存在的列包装实例；已有列相对顺序变化时会重新挂载可见列，以保持 Element UI 的注册顺序正确。
+
 字段通过 `type` 明确选择渲染模式：
 
 - `type: 'input'`：常用 Element UI 组件快捷映射。
