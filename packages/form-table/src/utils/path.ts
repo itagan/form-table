@@ -10,11 +10,24 @@ function isObjectLike(value: unknown): value is FormTableRecord {
 /**
  * 将 `a.b[0].c` 归一化为路径片段数组。
  */
-function normalizePath(path: string): string[] {
-  return path
+const NORMALIZED_PATH_CACHE_LIMIT = 512
+const normalizedPathCache = new Map<string, readonly string[]>()
+
+function normalizePath(path: string): readonly string[] {
+  const cached = normalizedPathCache.get(path)
+  if (cached) return cached
+
+  const segments = path
     .replace(/\[(\d+)\]/g, '.$1')
     .split('.')
     .filter(Boolean)
+
+  if (normalizedPathCache.size >= NORMALIZED_PATH_CACHE_LIMIT) {
+    const oldestPath = normalizedPathCache.keys().next().value
+    if (oldestPath !== undefined) normalizedPathCache.delete(oldestPath)
+  }
+  normalizedPathCache.set(path, segments)
+  return segments
 }
 
 /**
