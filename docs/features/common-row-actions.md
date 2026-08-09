@@ -187,4 +187,4 @@ const actionColumn: ColumnConfig = {
 - 行结构变化会改变 Element Form 的数组下标校验路径，应在 `nextTick` 后调用 `clearValidate()`。
 - 页面直接增删行不会触发 FormTable 的 `update:tableData` 或 `field-change`；保存、埋点等副作用由页面同时处理。
 
-确认后删除、校验通过后新增、移动行和异步提交的更多模式见[行、列与延迟提交](../guide/row-column-operations.md)。
+确认后删除、校验通过后新增、移动行和异步提交的更多模式见[行列操作与异步提交](./row-column-operations.md)。
