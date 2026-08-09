@@ -253,13 +253,14 @@
           </tbody>
         </table>
       </div>
+      <p>上表是所有上下文字段的分类，不表示每个位置都会收到全部字段。例如列级 <code>cellSlot</code> 只有 <code>row/index/columnConfig/updateRow</code>，不会补齐 fieldKey、value 或 component。</p>
       <p><code>itemConfig.component</code> 可能仍包含动态函数；Slot 的 <code>component</code> 已根据当前数据行解析。配置动态调整时请基于稳定 key 替换 columns，不要直接修改上下文引用。</p>
       <p><code>itemConfig.component</code> 用于读取原始配置来源，<code>component</code> 用于直接绑定 Slot 内组件。后者已解析动态 props/options，并包装 listeners；不要在 Slot 中自行执行原始配置函数。</p>
 
-      <h3>不同回调的上下文</h3>
+      <h3>不同回调与 Slot 的上下文</h3>
       <div class="table-scroll">
         <table class="context-summary callback-table">
-          <thead><tr><th>回调</th><th>上下文</th><th>返回值</th></tr></thead>
+          <thead><tr><th>位置</th><th>上下文</th><th>返回值 / 用途</th></tr></thead>
           <tbody>
             <tr><td><code>column.visible / props</code></td><td><code>tableData, columnConfig</code></td><td>boolean / el-table-column props</td></tr>
             <tr><td><code>rowConfig.visible / props</code></td><td>Column 上下文 + <code>row, index, rowConfig</code></td><td>boolean / el-row props</td></tr>
@@ -267,6 +268,7 @@
             <tr><td><code>component.props / options / optionProps</code></td><td>Item 上下文</td><td>组件 props / 选项 / 字段映射</td></tr>
             <tr><td><code>component.resolveRenderer</code></td><td>Item 上下文</td><td>组件对象、全局名称或 undefined</td></tr>
             <tr><td><code>component.listeners[event]</code></td><td>Item 上下文 + <code>setValue, updateRow</code>，后接原始事件参数</td><td>无需返回</td></tr>
+            <tr><td><code>column.cellSlot</code></td><td><code>row, index, columnConfig, updateRow</code></td><td>直接渲染单元格，无字段上下文</td></tr>
           </tbody>
         </table>
       </div>
@@ -383,7 +385,15 @@ component: {
       setValue(nextValue)
     }
   }
-}`
+}
+
+// cellSlot 是 scoped Slot，不是列级动态配置回调
+<template #actions="{ row, index, columnConfig, updateRow }">
+  <button @click="updateRow({ enabled: !row.enabled })">
+    {{ columnConfig.label }} {{ index }}
+  </button>
+</template>
+`
 
 const returnedContextExample = `// Column callback
 {
@@ -431,6 +441,14 @@ const returnedContextExample = `// Column callback
     options: [{ label: '杭州', value: 'hangzhou' }],
     optionProps: undefined
   }
+}
+
+// cellSlot scope
+{
+  row: tableData[0],
+  index: 0,
+  columnConfig, // { key: 'actions-column', cellSlot: 'actions', ... }
+  updateRow: Function
 }
 
 // Header Slot

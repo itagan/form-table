@@ -60,7 +60,9 @@ Slot 内容直接渲染，不附加内部 `div/span` 包装；需要根节点样
 }
 ```
 
-`cellSlot` 与 `children` 互斥，不需要 `fieldKey`，也不创建 `el-row/el-col/el-form-item`。其 Slot 只接收 `row/index/columnConfig/updateRow`。
+`cellSlot` 与 `children` 互斥，不需要 `fieldKey`，也不创建 `el-row/el-col/el-form-item`。其 Slot 只接收 `row/index/columnConfig/updateRow`，不提供 `value/setValue/propPath/component`。需要字段取值、写回或校验时应使用 `type: 'slot'` 字段 Slot。
+
+`row` 和 `columnConfig` 按浅只读约定使用；`index` 是当前渲染下标；`updateRow` 不可变地更新当前行，发出 `update:tableData`，并为每个实际变化的 patch 字段发出 `field-change`。patch key 可使用 `profile.enabled` 等嵌套路径。
 
 ## 使用
 
