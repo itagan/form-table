@@ -136,3 +136,7 @@ el-row → el-col → el-form-item → 实际字段组件
 性能优化应先由实验数据定位瓶颈，再决定缓存、响应依赖拆分或虚拟化方案，避免为了理论上的大数据量增加常规场景复杂度。
 
 可复制的批量更新、按需编辑、动态配置优化和虚拟滚动决策示例见[性能优化建议](./performance-optimization.md)。
+
+## 相关 API
+
+[FormTable Props](../api/form-table.md) · [Component 配置](../api/component.md)

@@ -166,3 +166,7 @@ async function approve({ row, updateRow }) {
 - 异步结束后使用旧 `index` 修改数组：行排序后可能写错目标。
 - 用 `setValue` 更新其他字段：应改用 `updateRow`。
 - 通过 `updateRow` 修改 `rowKey`：行身份必须由页面业务层维护。
+
+## 相关 API
+
+[FormTable Props](../api/form-table.md) · [事件与 Ref](../api/events-and-ref.md)

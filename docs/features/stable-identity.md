@@ -99,3 +99,7 @@ item.key → Vue 渲染身份
 - 每次 computed 重新生成随机 key：每次渲染都被视为新节点。
 - 认为 `fieldKey` 总能替代 Item key：重复字段和动态布局中不成立。
 - 异步结束后执行 `tableData[index] = ...`：旧 index 可能对应其他行。
+
+## 相关 API
+
+[Column / Row / Item](../api/columns.md) · [Slot 与上下文](../api/contexts.md)
