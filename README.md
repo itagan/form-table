@@ -53,10 +53,10 @@ import type { ColumnConfig, TableRow } from '@itagan/form-table'
 
 FormTable 将 Vue 和 Element UI 声明为 peer dependencies，不会重复安装或注册它们。接入前请确认项目已安装并注册 Element UI，且依赖版本满足：
 
-- `vue@^2.7.7`
-- `element-ui@^2.15.14`
+- `vue@^2.7.1`
+- `element-ui@^2.4.9`
 
-即 Vue `>=2.7.7 <3.0.0`、Element UI `>=2.15.14 <3.0.0`。低于这些版本时应先升级宿主项目；无法升级时，不建议忽略 peer dependency 警告强制安装，当前版本也不保证兼容。Vue 3 暂不支持，Element Plus 不能直接替代本组件的 Element UI 依赖。处理方式详见[快速开始的版本兼容说明](./docs/guide/quick-start.md#版本不满足时)。
+即 Vue `>=2.7.1 <3.0.0`、Element UI `>=2.4.9 <3.0.0`。日常开发和完整回归使用 Vue `2.7.16`、Element UI `2.15.14`；最低版本组合也已通过现有行为测试。Vue `2.7.0`、Vue 2.6 及更早版本不受支持，Vue 3 暂不支持。处理方式详见[快速开始的版本兼容说明](./docs/guide/quick-start.md#版本不满足时)。
 
 ## 调试页面
 

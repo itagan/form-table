@@ -8,7 +8,9 @@ Vue 2.7 + Element UI 的表格内表单组件。组件只负责布局、字段�
 pnpm add @itagan/form-table
 ```
 
-Vue 和 Element UI 由使用方预先安装、注册，当前支持 Vue `>=2.7.7 <3.0.0` 与 Element UI `>=2.15.14 <3.0.0`。版本低于要求时请先升级宿主项目；无法升级时，不建议忽略 peer dependency 警告强制安装，当前版本也不保证兼容。
+Vue 和 Element UI 由使用方预先安装、注册，当前支持 Vue `>=2.7.1 <3.0.0` 与 Element UI `>=2.4.9 <3.0.0`。日常开发和完整回归使用 Vue `2.7.16`、Element UI `2.15.14`，最低版本组合也已通过现有行为测试。
+
+Vue `2.7.0`、Vue 2.6 及更早版本不受支持；Element UI 低于 `2.4.9` 时缺少 FormTable 表头 Slot 所需的 Table 表头 scoped slot。旧项目应先升级到支持范围，不能升级时不建议忽略 peer dependency 警告强制安装。
 
 Vue 3 暂不支持。本组件依赖 Vue 2.7 和 Element UI 2.x，不能通过将 Element UI 替换为 Element Plus 直接用于 Vue 3 项目。
 
