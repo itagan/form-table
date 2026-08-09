@@ -48,15 +48,17 @@
     </section>
 
     <section class="result-grid">
-      <div class="result-card">
-        <h2>当前响应式行数据</h2>
+      <DemoCollapsiblePanel class="result-card" title="当前响应式行数据">
         <pre>{{ JSON.stringify(tableData, null, 2) }}</pre>
-      </div>
-      <div class="result-card">
-        <h2>归一化提交数据</h2>
+      </DemoCollapsiblePanel>
+      <DemoCollapsiblePanel
+        class="result-card"
+        title="归一化提交数据"
+        :default-open="submittedPayload !== null"
+      >
         <p v-if="!submittedPayload" class="empty-result">点击“校验并生成提交数据”后显示。</p>
         <pre v-else>{{ JSON.stringify(submittedPayload, null, 2) }}</pre>
-      </div>
+      </DemoCollapsiblePanel>
     </section>
   </main>
 </template>
@@ -67,6 +69,7 @@ import type { Component } from 'vue'
 import { Message } from 'element-ui'
 import FormTable from '@itagan/form-table'
 import type { ColumnConfig, FormTableExpose, TableRow } from '@itagan/form-table'
+import DemoCollapsiblePanel from '../components/DemoCollapsiblePanel.vue'
 import VenueDemandEditor from '../components/demand-demo/VenueDemandEditor.vue'
 import HotelDemandEditor from '../components/demand-demo/HotelDemandEditor.vue'
 import MealDemandEditor from '../components/demand-demo/MealDemandEditor.vue'

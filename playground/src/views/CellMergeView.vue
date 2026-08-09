@@ -46,8 +46,9 @@
         </article>
       </div>
 
-      <h2>当前跨度计算</h2>
-      <pre>{{ JSON.stringify({ departmentSpans, mergeDepartment, mergeSummary }, null, 2) }}</pre>
+      <DemoCollapsiblePanel class="span-panel" title="当前跨度计算">
+        <pre>{{ JSON.stringify({ departmentSpans, mergeDepartment, mergeSummary }, null, 2) }}</pre>
+      </DemoCollapsiblePanel>
     </section>
   </main>
 </template>
@@ -56,6 +57,7 @@
 import { computed, ref } from 'vue'
 import FormTable from '@itagan/form-table'
 import type { ColumnConfig, TableRow } from '@itagan/form-table'
+import DemoCollapsiblePanel from '../components/DemoCollapsiblePanel.vue'
 
 interface MergeDemoRow extends TableRow {
   id: string
@@ -253,6 +255,7 @@ const resetRows = () => {
   margin: 0;
   color: #64748b;
 }
+.span-panel { margin-top: 20px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; }
 
 pre {
   max-height: 300px;

@@ -18,18 +18,17 @@
     </FormTable>
 
     <section class="config-grid">
-      <div>
-        <h2>远程 JSON</h2>
+      <DemoCollapsiblePanel class="config-card" title="远程 JSON">
         <pre>{{ remoteSchemaJson }}</pre>
-      </div>
-      <div>
-        <h2>本地增强后的 columns</h2>
+      </DemoCollapsiblePanel>
+      <DemoCollapsiblePanel class="config-card" title="本地增强后的 columns">
         <pre>{{ enhancedConfig }}</pre>
-      </div>
+      </DemoCollapsiblePanel>
     </section>
 
-    <h2>当前数据</h2>
-    <pre>{{ JSON.stringify(tableData, null, 2) }}</pre>
+    <DemoCollapsiblePanel class="data-card" title="当前数据">
+      <pre>{{ JSON.stringify(tableData, null, 2) }}</pre>
+    </DemoCollapsiblePanel>
   </main>
 </template>
 
@@ -37,6 +36,7 @@
 import { computed, ref } from 'vue'
 import FormTable, { type ColumnConfig, type FormItemConfig, type TableRow } from '@itagan/form-table'
 import PhoneInput from '../components/CustomComponents/PhoneInput.vue'
+import DemoCollapsiblePanel from '../components/DemoCollapsiblePanel.vue'
 import { enhanceFormTableColumns } from '../utils/enhanceFormTableColumns'
 import { formatFormTableConfig } from '../utils/formatFormTableConfig'
 
@@ -113,6 +113,8 @@ const enhancedConfig = computed(() => formatFormTableConfig(columns))
 <style scoped>
 .remote-schema-page { max-width: 1200px; margin: 0 auto; padding: 32px; }
 .config-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-top: 24px; }
+.config-card, .data-card { padding: 20px; border-radius: 10px; background: #fff; }
+.data-card { margin-top: 20px; }
 pre { padding: 16px; overflow: auto; background: #f6f8fa; border-radius: 8px; }
 @media (max-width: 900px) { .config-grid { grid-template-columns: 1fr; } }
 </style>

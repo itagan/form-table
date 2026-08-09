@@ -77,22 +77,27 @@
     </section>
 
     <section class="details-grid">
-      <article class="detail-card">
-        <h2>当前 cellSlot scope</h2>
+      <DemoCollapsiblePanel
+        class="detail-card"
+        title="当前 cellSlot scope"
+        :default-open="inspectedContext !== null"
+      >
         <p v-if="!inspectedContext" class="empty">点击组合信息、状态、金额或“查看 scope”。</p>
         <pre v-else>{{ JSON.stringify(inspectedContext, null, 2) }}</pre>
-      </article>
-      <article class="detail-card">
-        <h2>最近 field-change</h2>
+      </DemoCollapsiblePanel>
+      <DemoCollapsiblePanel
+        class="detail-card"
+        title="最近 field-change"
+        :default-open="fieldEvents.length > 0"
+      >
         <p v-if="fieldEvents.length === 0" class="empty">修改评分、切换状态或执行异步通过后显示。</p>
         <pre v-else>{{ JSON.stringify(fieldEvents, null, 2) }}</pre>
-      </article>
+      </DemoCollapsiblePanel>
     </section>
 
-    <section class="code-card">
-      <h2>配置对照</h2>
+    <DemoCollapsiblePanel class="code-card" title="配置对照">
       <pre>{{ configurationExample }}</pre>
-    </section>
+    </DemoCollapsiblePanel>
   </main>
 </template>
 
@@ -107,6 +112,7 @@ import type {
   FormTableFieldChangePayload,
   TableRow
 } from '@itagan/form-table'
+import DemoCollapsiblePanel from '../components/DemoCollapsiblePanel.vue'
 
 interface DemoRow extends TableRow {
   id: number

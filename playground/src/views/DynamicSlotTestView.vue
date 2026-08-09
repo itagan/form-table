@@ -35,13 +35,11 @@
       <el-button class="add-button" type="primary" @click="addRow">添加行</el-button>
     </section>
 
-    <section class="demo-card">
-      <h2>组件配置</h2>
+    <DemoCollapsiblePanel class="demo-card" title="组件配置">
       <pre>{{ columnsCode }}</pre>
-    </section>
+    </DemoCollapsiblePanel>
 
-    <section class="demo-card docs-section">
-      <h2>Slot 如何绑定</h2>
+    <DemoCollapsiblePanel class="demo-card docs-section" title="Slot 如何绑定">
       <p><code>component.renderer</code> 是具名 Slot 的 key。配置中的 props、listeners 和 options 会先解析，再通过 Slot 上下文的 <code>component</code> 返回。</p>
       <pre>{{ slotCode }}</pre>
       <ul>
@@ -49,10 +47,9 @@
         <li><code>updateRow</code> 用于一次更新当前行的多个字段。</li>
         <li>配置不会自动绑定到 Slot 内部组件，应按组件接口使用 <code>v-bind</code>、<code>v-on</code> 或显式属性。</li>
       </ul>
-    </section>
+    </DemoCollapsiblePanel>
 
-    <section class="demo-card docs-section">
-      <h2>动态显隐层级</h2>
+    <DemoCollapsiblePanel class="demo-card docs-section" title="动态显隐层级">
       <table>
         <thead><tr><th>层级</th><th>隐藏范围</th><th>可用上下文</th></tr></thead>
         <tbody>
@@ -63,7 +60,7 @@
       </table>
       <p>显隐只改变渲染，不会删除字段值。需要关闭时清空详情，应由业务事件更新数据，不要在 visible 判断中修改 row。</p>
       <pre>{{ visibleCode }}</pre>
-    </section>
+    </DemoCollapsiblePanel>
   </main>
 </template>
 
@@ -71,6 +68,7 @@
 import { ref } from 'vue'
 import FormTable from '@itagan/form-table'
 import type { ColumnConfig, TableRow } from '@itagan/form-table'
+import DemoCollapsiblePanel from '../components/DemoCollapsiblePanel.vue'
 import { formatFormTableConfig } from '../utils/formatFormTableConfig'
 
 const tableData = ref<TableRow[]>([
