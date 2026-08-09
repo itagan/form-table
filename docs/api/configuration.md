@@ -152,6 +152,24 @@ component         → component.renderer 动态组件
 slot              → component.renderer 具名 slot
 ```
 
+内置类型只映射 Element UI 默认提供的组件。Element UI 未提供的 Tree Select 等组件不进入内置类型，应使用 `type: 'component'` 显式接入。
+
+同一 Element UI 组件的不同用法不增加额外类型。例如可创建多标签选择继续使用 `type: 'select'`：
+
+```ts
+{
+  fieldKey: 'tags',
+  type: 'select',
+  component: {
+    props: {
+      multiple: true,
+      filterable: true,
+      allowCreate: true
+    }
+  }
+}
+```
+
 ### 按当前行解析组件
 
 同一字段路径在不同行需要使用不同业务组件时，`type: 'component'` 可配置同步 `resolveRenderer`：
