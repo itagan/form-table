@@ -11,6 +11,7 @@
         <li><code>component.renderer</code> 指向固定组件或具名 slot；component 模式可用 <code>resolveRenderer</code> 按行选择组件。</li>
         <li><code>component.model/props/listeners/options/optionProps</code> 描述实际字段组件。</li>
         <li>行增删、复制和字段联动由业务层维护。</li>
+        <li><code>tableData</code> 是受控数据：本地立即回写，后端保存可以独立延迟。</li>
       </ul>
     </section>
 
@@ -59,7 +60,7 @@
               <th rowspan="6" scope="rowgroup" class="layer-cell">Column</th>
               <td><code>key</code></td>
               <td>渲染标识</td>
-              <td>可选；动态增删或重排列时建议提供。</td>
+              <td>动态列应唯一稳定；增删、显隐和同顺序替换时用于复用列包装实例。</td>
               <td rowspan="6" class="context-cell"><code>tableData</code><br><code>columnConfig</code></td>
             </tr>
             <tr>
@@ -261,6 +262,10 @@
       <h3>异步更新与 rowKey</h3>
       <p><code>rowKey</code> 是可选能力。普通同步输入、增删和保留对象引用的排序不需要配置；只有异步等待期间可能刷新、克隆或替换全部行对象时才建议提供。<code>index</code> 是事件触发时快照，更新助手会重新定位，目标行不存在时忽略更新。</p>
       <pre>{{ asyncUpdateExample }}</pre>
+
+      <h3>动态列与受控回写</h3>
+      <p>唯一稳定的 <code>column.key</code> 会在列增删、显隐和同顺序配置替换时保持列包装身份；已有列真实重排时会重新挂载可见列，以同步 Element UI 注册顺序。中间列变化后，发生位移的表体单元格仍可能重建，字段状态应保存在 <code>tableData</code>。</p>
+      <p>收到 <code>update:tableData</code> 后应立即更新父组件状态，不要延迟或防抖本地回写。需要控制请求频率时，只对后端保存做防抖或批量处理。</p>
     </section>
 
     <section>

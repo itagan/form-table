@@ -30,6 +30,8 @@ Item 的 `key` 是可选渲染身份，`fieldKey` 是必填数据路径。动态
 
 动态 Column 应提供唯一稳定的 `key`。列增删、显隐或同顺序配置替换会尽量复用仍存在的列包装实例；已有列相对顺序变化时会重新挂载可见列，以保持 Element UI 的注册顺序正确。
 
+动态 Item 也建议提供唯一稳定的 `key`。未提供时使用 `fieldKey + 当前可见下标` 降级，前方字段显隐或增删后可能重新挂载后续字段。Element UI 表体单元格本身按可见位置渲染，中间列变化后发生位移的单元格内容仍可能重建，因此业务状态必须及时同步到 `tableData`。
+
 字段通过 `type` 明确选择渲染模式：
 
 - `type: 'input'`：常用 Element UI 组件快捷映射。
@@ -75,5 +77,7 @@ Table 原生事件直接透传。通过 ref 可调用 `validate()`、`resetField
 命名边界：`row` 是当前业务数据行，`rowConfig` 是布局配置；`itemConfig` 是原始字段配置，Slot 的 `component` 是当前行解析后的组件配置。
 
 `tableProps.rowKey` 是可选能力。普通同步编辑和增删行依靠对象引用即可；异步 listener 等待期间可能刷新、克隆或替换全部行对象时，建议配置唯一稳定的 rowKey。更新助手会在最新 `tableData` 中重新定位，目标行不存在时忽略更新，避免误写其他行。
+
+`tableData` 是受控数据：收到 `update:tableData` 后应立即更新父组件状态，不能对本地回写做防抖或等待接口成功。后端保存可以独立延迟、合并或防抖；推荐顺序是“立即更新本地 `tableData` → 延迟保存最新快照”。
 
 远程 schema 建议只返回布局、`type`、静态 props/options 等 JSON；组件对象、事件函数与 slot 实现由页面按 `fieldKey` 本地增强。核心不执行远程代码，也不维护业务组件注册表。

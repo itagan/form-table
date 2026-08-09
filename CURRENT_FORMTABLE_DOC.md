@@ -40,7 +40,16 @@ input/slot setValue
 → field-change
 ```
 
+`tableData` 是受控数据。调用方收到 `update:tableData` 后必须立即回写；后端保存可以独立防抖或等待确认，但不能延迟父组件接收新数组。异步 listener 期间可能重建行对象时，可通过稳定 `tableProps.rowKey` 在最新数据中重新定位原行。
+
 组件不再维护 `formData.tableData`、默认行、行增删复制移动或递归字段联动。调用方监听 `field-change` 并直接维护自己的数组。
+
+## 动态渲染身份
+
+- 唯一稳定的 `column.key` 会在列增删、显隐和同顺序配置替换时复用已有 Column 包装实例。
+- 已有列相对顺序改变时会重新挂载可见列，确保 Element UI 按新顺序注册。
+- 动态 Item 应提供唯一稳定的 `item.key`；否则前方字段显隐或增删可能使后续字段重新挂载。
+- Element UI 表体单元格按可见位置渲染，中间列变化后发生位移的单元格仍可能重建；业务状态必须保存在 `tableData`。
 
 ## Element UI 能力
 

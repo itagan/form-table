@@ -24,6 +24,19 @@ function handleFieldChange({ row, index, fieldKey, value, previousValue }) {
 }
 ```
 
+### 受控数据回写协议
+
+`tableData` 是受控数据。父组件收到 `update:tableData` 后应立即把新数组传回 FormTable，例如直接使用 `@update:tableData="tableData = $event"`。同一同步调用链中的连续 `setValue/updateRow` 会基于前一次结果合并；微任务结束后，组件重新以父组件传入的 `tableData` 为准。
+
+因此，不要防抖或异步等待 `update:tableData` 的本地回写，否则后续编辑可能读取旧 props 并覆盖先前结果。接口持久化可以独立防抖：先立即更新本地 `tableData`，再将最新快照交给保存任务。
+
+```ts
+function handleTableDataUpdate(nextTableData) {
+  tableData.value = nextTableData
+  scheduleSave(nextTableData) // 仅后端保存允许延迟
+}
+```
+
 ## Slot 上下文
 
 字段 Slot 在 Item 上下文基础上增加更新能力和解析结果：
