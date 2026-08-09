@@ -69,3 +69,6 @@ propPath: tableData.0.profile.city
 | `columns[].headerHint`、Item `hint` | [原生 title 提示](../features/native-title.md) |
 | `columns[].headerSlot` | [自定义表头](../features/custom-header.md) |
 | `columns[].cellSlot` | [`cellSlot` 列级单元格](../features/cell-slot.md) |
+| 各层 `visible` 与动态 props | [动态显隐与配置更新](../features/dynamic-configuration.md) |
+| Column / Row / Item `key` | [稳定身份与异步安全](../features/stable-identity.md) |
+| `formItemProps.rules` | [校验、清理与重置](../features/validation-reset.md) |

@@ -4,6 +4,8 @@
 
 ## FormTable Props
 
+> 只需要查询更新入口、事件和异步回写时，直接阅读[数据更新与受控回写](../features/data-updates.md)。
+
 | 属性 | 说明 |
 | --- | --- |
 | `tableData` | 表格行数据，唯一编辑数据源 |
@@ -87,6 +89,8 @@ Element UI 的表体单元格按位置渲染；删除或插入中间列时，即
 三种 key 相互独立，均要求在各自作用域内唯一、稳定，不应使用当前数组下标。
 
 ## 校验规则
+
+> 提交校验、单字段校验、行变化清理和受控重置见[校验、清理与重置](../features/validation-reset.md)。
 
 字段校验直接使用 Element UI `el-form-item` 的 `rules`。FormTable 只负责根据当前行下标和 `fieldKey` 生成完整 `prop`，不重新定义 required、pattern 或 validator 协议：
 
@@ -591,6 +595,8 @@ component    当前行解析后的组件配置
 
 ### 异步更新与稳定行身份
 
+> rowKey、Column/Row/Item key 的不同职责见[稳定身份与异步安全](../features/stable-identity.md)。
+
 `row/index/value` 是事件触发时的快照，但该上下文中的 `setValue/updateRow` 会绑定当时的数据行。配置 `tableProps.rowKey` 后，助手每次执行都会在最新 `tableData` 中重新查找行，而不是继续使用旧下标：
 
 ```ts
@@ -880,6 +886,8 @@ Item 动态配置实际收到：
 这里的三个 `*Config` 与调用方传入 `columns` 中的对应对象是同一引用，不是深拷贝；`component` 和 `header` 则是 FormTable 对动态配置求值后生成的解析结果。不要在 Slot 中自行执行原始 `component.props`、`headerProps` 或 `headerHint` 函数。
 
 ### 动态显隐
+
+> 各层 visible、动态 props 和不可变替换 columns 的独立示例见[动态显隐与配置更新](../features/dynamic-configuration.md)。
 
 `visible` 可传布尔值或返回布尔值的函数，并在响应式依赖变化时重新计算：
 

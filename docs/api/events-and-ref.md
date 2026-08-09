@@ -1,5 +1,7 @@
 # 事件与 Ref
 
+> 按任务阅读：[数据更新与受控回写](../features/data-updates.md) · [校验、清理与重置](../features/validation-reset.md)
+
 ## 自有事件
 
 | 事件 | 参数 |

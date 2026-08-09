@@ -41,6 +41,10 @@ export default defineConfig({
         text: '功能专题',
         items: [
           { text: '专题索引', link: '/features/' },
+          { text: '数据更新与受控回写', link: '/features/data-updates' },
+          { text: '校验、清理与重置', link: '/features/validation-reset' },
+          { text: '动态显隐与配置更新', link: '/features/dynamic-configuration' },
+          { text: '稳定身份与异步安全', link: '/features/stable-identity' },
           { text: '原生 title 提示', link: '/features/native-title' },
           { text: '自定义表头', link: '/features/custom-header' },
           { text: 'cellSlot 列级单元格', link: '/features/cell-slot' },

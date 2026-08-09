@@ -50,6 +50,8 @@ FormTable
 
 ## 功能专题
 
+高频单一能力可直接查询：[数据更新](../features/data-updates.md)、[校验与重置](../features/validation-reset.md)、[动态配置](../features/dynamic-configuration.md)、[稳定身份](../features/stable-identity.md)。
+
 | 功能 | 文档 | 可运行演示 |
 | --- | --- | --- |
 | 原生 title 提示 | [配置与使用](../features/native-title.md) | [`/form-table`](http://localhost:5173/form-table) |
