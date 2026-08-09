@@ -45,7 +45,7 @@ Item 的 `key` 是可选渲染身份，`fieldKey` 是必填数据路径。动态
 
 `component.props/listeners/options/optionProps` 是三种模式共用的渲染配置。自定义组件省略 `component.model` 或将其设为 `true` 时保留 Vue 2 原生 `v-model`；也可指定 `{ prop, event, valueFromEvent }`，或设为 `false` 禁用模型注入。slot 模式会把解析后的 `component` 通过上下文返回，由模板自行绑定。
 
-原生悬浮提示不增加包装节点。默认表头通过 `column.headerProps.title` 配置；内置、text 和自定义字段通过 `component.props.title` 配置，由实际组件决定属性落点（例如 `el-input` 会传给内部 input）。slot 模式由模板把 `component.props` 绑定到需要承载 title 的节点。`title` 应传字符串或动态返回字符串，布尔值 `true` 只会按原生属性显示为 `"true"`。
+外层悬浮提示使用 `column.headerHint` 和 Item 的 `hint`，当前将字符串作为原生 `title` 应用到默认表头文本节点或已有 `el-form-item`，不会增加包装节点。`headerProps.title`、`formItemProps.title` 和 `component.props.title` 仍按各自目标原样透传，用于调用方需要精确控制底层节点的场景。提示内容应是字符串或动态返回字符串；空字符串不显示浏览器提示，`null/undefined` 移除提示。未来可在 `hint` 语义下扩展 Tooltip，而不改变字符串默认使用原生 title 的行为。
 
 Slot 内容直接渲染，不附加内部 `div/span` 包装；需要根节点样式时由 Slot 模板自行提供。
 

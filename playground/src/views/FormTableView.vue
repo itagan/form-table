@@ -60,12 +60,12 @@ const columns: ColumnConfig[] = [
           type: 'input',
           colProps: { span: 12 },
           formItemProps: { rules: required('请输入姓名') },
+          hint: ({ value }) => value ? String(value) : undefined,
           component: {
-            props: ({ value }) => ({
+            props: {
               placeholder: '请输入姓名',
-              clearable: true,
-              title: value ? String(value) : undefined
-            })
+              clearable: true
+            }
           }
         },
         {
