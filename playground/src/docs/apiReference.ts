@@ -112,6 +112,7 @@ export const refRows = [
 ]
 
 export const featureCards = [
+  { title: '性能与大数据量', path: '/performance', description: '可调场景测量渲染、输入、updateRow、动态列和 DOM 规模。', tags: ['performance', 'large data', 'benchmark'] },
   { title: '数据更新与受控回写', path: '/cell-slot', description: '自动 model、setValue、updateRow、字段事件和异步更新。', tags: ['tableData', 'setValue', 'field-change'] },
   { title: '校验、清理与重置', path: '/form-table', description: '字段 rules、整表校验、清理状态和受控数据重置。', tags: ['rules', 'validate', 'clearValidate'] },
   { title: '动态显隐与配置', path: '/dynamic-slot-test', description: 'Column、Row、Item visible 与动态组件属性。', tags: ['visible', 'dynamic props'] },
