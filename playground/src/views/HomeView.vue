@@ -81,6 +81,13 @@ const examples = [
     tags: ['API', 'guide', 'examples']
   },
   {
+    title: '大数据量性能实验',
+    description: '可调行列规模，对比纯展示、编辑和动态配置的渲染及更新指标。',
+    path: '/performance',
+    type: 'warning',
+    tags: ['performance', 'large data', 'DOM count']
+  },
+  {
     title: '组件调试',
     description: '用于验证自定义组件对象直传、事件和原生 Ref。',
     path: '/debug',

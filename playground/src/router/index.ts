@@ -34,6 +34,11 @@ const router = new VueRouter({
       component: () => import('../views/FormTableDocsView.vue')
     },
     {
+      path: '/performance',
+      name: 'performance',
+      component: () => import('../views/PerformanceView.vue')
+    },
+    {
       path: '/remote-schema',
       name: 'remote-schema',
       component: () => import('../views/RemoteSchemaView.vue')
