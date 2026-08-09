@@ -31,20 +31,44 @@ pnpm add vue@^2.7.1 element-ui@^2.4.9
 
 ## 基础使用
 
+在应用入口注册 Element UI，并引入 Element UI 与 FormTable 的样式：
+
+```ts
+// main.ts
+import Vue from 'vue'
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
+import '@itagan/form-table/style.css'
+import App from './App.vue'
+
+Vue.use(ElementUI)
+
+new Vue({
+  render: h => h(App)
+}).$mount('#app')
+```
+
+然后在页面中直接引入并使用 FormTable：
+
 ```vue
 <template>
-  <FormTable
-    v-model="tableData"
-    :columns="columns"
-    :table-props="{ border: true }"
-  />
+  <div>
+    <FormTable
+      ref="formTableRef"
+      v-model="tableData"
+      :columns="columns"
+      :table-props="{ border: true }"
+    />
+    <el-button @click="validateTable">校验</el-button>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue'
 import FormTable from '@itagan/form-table'
-import type { ColumnConfig } from '@itagan/form-table'
+import type { ColumnConfig, FormTableExpose } from '@itagan/form-table'
 
+const formTableRef = ref<FormTableExpose | null>(null)
 const tableData = ref([{ name: '张三' }])
 const columns: ColumnConfig[] = [{
   label: '姓名',
@@ -61,8 +85,12 @@ const columns: ColumnConfig[] = [{
     }]
   }]
 }]
+
+const validateTable = () => formTableRef.value?.validate()
 </script>
 ```
+
+输入框应可以正常编辑；清空“姓名”后点击“校验”，`validate()` 会得到 `false` 并显示必填提示。后续页面可继续沿用同一份全局注册和样式入口。
 
 根组件 `v-model` 绑定整张表的 `tableData`，底层复用 `tableData/update:tableData`。已有的 `:table-data.sync="tableData"` 继续兼容；需要在回写时执行保存等逻辑，可显式监听 `@update:tableData`。
 

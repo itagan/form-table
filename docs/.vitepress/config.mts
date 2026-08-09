@@ -1,5 +1,8 @@
 import { defineConfig } from 'vitepress'
 
+const localPlaygroundUrl = 'http://localhost:5173'
+const playgroundSiteUrl = (process.env.VITE_PLAYGROUND_SITE_URL || localPlaygroundUrl).replace(/\/+$/, '')
+
 export default defineConfig({
   title: 'FormTable',
   description: 'Vue 2.7 + Element UI editable form table component.',
@@ -7,14 +10,34 @@ export default defineConfig({
   cleanUrls: true,
   // 本地 Playground 与文档开发服务不属于静态构建产物，构建阶段无法解析这些地址。
   ignoreDeadLinks: [/^http:\/\/localhost:517[34](?:\/|$)/],
+  markdown: {
+    config(md) {
+      const defaultLinkOpen = md.renderer.rules.link_open
+
+      md.renderer.rules.link_open = (tokens, index, options, env, self) => {
+        const hrefIndex = tokens[index].attrIndex('href')
+        if (hrefIndex >= 0) {
+          const href = tokens[index].attrs?.[hrefIndex]?.[1]
+          if (href?.startsWith(localPlaygroundUrl)) {
+            tokens[index].attrSet('href', `${playgroundSiteUrl}${href.slice(localPlaygroundUrl.length)}`)
+          }
+        }
+
+        return defaultLinkOpen
+          ? defaultLinkOpen(tokens, index, options, env, self)
+          : self.renderToken(tokens, index, options)
+      }
+    }
+  },
   themeConfig: {
     logo: '/logo.svg',
     nav: [
       { text: '快速开始', link: '/guide/quick-start' },
       { text: 'API', link: '/api/configuration' },
       { text: '示例', link: '/examples/' },
-      { text: 'Playground', link: 'http://localhost:5173/' },
-      { text: '发布', link: '/migration/npm-package' }
+      { text: 'Playground', link: `${playgroundSiteUrl}/` },
+      { text: '发布', link: '/migration/npm-package' },
+      { text: '源码', link: 'https://gitee.com/itagan/form-table' }
     ],
     sidebar: [
       {
@@ -71,9 +94,6 @@ export default defineConfig({
           { text: 'npm 包发布准备', link: '/migration/npm-package' }
         ]
       }
-    ],
-    socialLinks: [
-      { icon: 'github', link: 'https://gitee.com/itagan/form-table' }
     ],
     search: {
       provider: 'local'
