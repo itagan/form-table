@@ -39,7 +39,7 @@ pnpm docs:dev
 
 Playground 直接引用包源码，修改组件后无需先构建 npm 包。
 
-操作列、末尾新增、当前行后插入、复制和删除的入门代码参考[常见操作列与行增删](../guide/common-row-actions.md)；确认、移动和异步提交等进阶模式参考[行、列与延迟提交](../guide/row-column-operations.md)。
+操作列、末尾新增、当前行后插入、复制和删除的入门代码参考[常见操作列与行增删](../features/common-row-actions.md)；确认、移动和异步提交等进阶模式参考[行、列与延迟提交](../guide/row-column-operations.md)。
 
 公司内部存在大量全局组件、局部业务组件和非标准绑定协议时，参考[企业内部复杂组件接入示例](./enterprise-components.md)。
 
