@@ -266,7 +266,7 @@ component: {
 }
 ```
 
-内置和自定义 component 模式会把 props 传给实际组件，并将 `component.props.title` 同步到组件根 DOM；即使目标组件设置了 `inheritAttrs: false`，也不需要额外包装节点。text 模式直接把 props 绑定到已有 span。slot 模式不会自动绑定 `component.props`，应在模板中使用 `v-bind="component.props"`。`headerSlot` 和 `column.props.renderHeader` 同样由调用方完全控制，因此不会自动应用 `headerProps`。
+内置和自定义 component 模式会把 props 原样传给实际组件，由组件决定属性落点。例如 Element UI `el-input` 设置了 `inheritAttrs: false`，但会通过 `v-bind="$attrs"` 把 title 传给内部原生 input；FormTable 不再重复写到 `.el-input` 根节点。其他自定义组件如果关闭 attrs 继承，应自行把 `$attrs` 绑定到目标节点。text 模式直接把 props 绑定到已有 span。slot 模式不会自动绑定 `component.props`，应在模板中使用 `v-bind="component.props"`。`headerSlot` 和 `column.props.renderHeader` 同样由调用方完全控制，因此不会自动应用 `headerProps`。
 
 `title` 保持原生 HTML 属性语义，应传字符串或动态返回字符串；不要使用 `title: true`，否则浏览器提示内容通常是字符串 `"true"`。Select、日期、对象等字段的显示文本可能不同于原始 value，应由调用方明确生成最终提示内容。
 

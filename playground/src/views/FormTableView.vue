@@ -61,11 +61,11 @@ const columns: ColumnConfig[] = [
           colProps: { span: 12 },
           formItemProps: { rules: required('请输入姓名') },
           component: {
-            props: {
+            props: ({ value }) => ({
               placeholder: '请输入姓名',
               clearable: true,
-              title: '请输入人员真实姓名'
-            }
+              title: value ? String(value) : undefined
+            })
           }
         },
         {

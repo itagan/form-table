@@ -340,45 +340,16 @@ describe('FormTable core behavior', () => {
     await wrapper.vm.$nextTick()
 
     const inputRoot = wrapper.find('.el-input')
-    expect(inputRoot.attributes('title')).toBe('编辑：Alice')
+    const nativeInput = wrapper.find('.el-input__inner')
+    expect(inputRoot.attributes('title')).toBeUndefined()
+    expect(nativeInput.attributes('title')).toBe('编辑：Alice')
     expect(inputRoot.element.parentElement?.classList.contains('el-form-item__content')).toBe(true)
 
     await wrapper.setProps({ tableData: [{ name: 'Bob' }] })
-    expect(inputRoot.attributes('title')).toBe('编辑：Bob')
+    expect(nativeInput.attributes('title')).toBe('编辑：Bob')
 
     await wrapper.setProps({ tableData: [{ name: '' }] })
-    expect(inputRoot.attributes('title')).toBeUndefined()
-    wrapper.destroy()
-  })
-
-  it('applies native title to a custom component root even when attrs inheritance is disabled', async () => {
-    const CustomInput = {
-      inheritAttrs: false,
-      props: ['value'],
-      render(this: any, h: any) {
-        return h('button', {
-          class: 'custom-title-target',
-          attrs: { type: 'button' }
-        }, this.value)
-      }
-    }
-    const wrapper = mountFormTable({
-      tableData: [{ status: '待审批' }],
-      columns: [{
-        label: '状态',
-        children: [{ children: [{
-          fieldKey: 'status',
-          type: 'component',
-          component: {
-            renderer: CustomInput,
-            props: { title: '查看审批状态' }
-          }
-        }] }]
-      }]
-    })
-    await wrapper.vm.$nextTick()
-
-    expect(wrapper.find('.custom-title-target').attributes('title')).toBe('查看审批状态')
+    expect(nativeInput.attributes('title')).toBeUndefined()
     wrapper.destroy()
   })
 
