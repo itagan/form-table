@@ -89,3 +89,7 @@ Slot 中获得的是当前渲染已经解析好的 `header`，不要再次执行
 | 完全遵循 Element UI render-header 协议 | `columns[].props.renderHeader` |
 
 `headerSlot` 与 `props.renderHeader` 都表示调用方接管表头，两者不要同时配置。Element UI 的 selection、index、expand 功能列表头继续遵循原生行为。
+
+## 相关 API
+
+[Column / Row / Item](../api/columns.md) · [Slot 与上下文](../api/contexts.md)

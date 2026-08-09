@@ -85,3 +85,7 @@ hint: ({ value }) => schoolLabelMap[value] || ''
 - 字符串形式始终保持原生 title 语义，避免未来扩展 Tooltip 时改变现有性能和 DOM。
 - `component.props.title` 是否落在内部 input，取决于实际组件是否透传 `$attrs`。
 - 自定义表头、字段 Slot 内部节点和 Element UI 功能列表头由调用方自行绑定提示。
+
+## 相关 API
+
+[Column / Row / Item](../api/columns.md) · [Slot 与上下文](../api/contexts.md)

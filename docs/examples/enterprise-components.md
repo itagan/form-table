@@ -123,6 +123,8 @@ import BusinessAttachmentUploader from '@/components/EnterpriseComponents/Busine
 
 将列定义放在独立工厂中，集中接收权限、上传参数和页面操作。不要在模板中内联创建 columns。
 
+::: details 展开完整 columns 工厂
+
 ```ts
 // src/views/PurchaseRequest/createPurchaseColumns.ts
 import type { ColumnConfig, TableRow } from '@itagan/form-table'
@@ -440,7 +442,17 @@ export function createPurchaseColumns(
 }
 ```
 
+:::
+
 ## 页面完整用法
+
+下面的核心模板直接引用持续参与类型检查和构建的 Playground 源文件：
+
+<<< ../../playground/src/views/EnterpriseComponentsView.vue#docs-enterprise-form-table
+
+下面另保留一份带接口提交的独立业务页面写法，用于迁移参考。
+
+::: details 展开完整业务页面
 
 ```vue
 <template>
@@ -574,6 +586,8 @@ const submit = async () => {
 }
 </script>
 ```
+
+:::
 
 示例中的 `purchaseApi` 代表业务项目自己的接口层，不由 FormTable 提供。
 

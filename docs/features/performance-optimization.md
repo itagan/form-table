@@ -276,3 +276,7 @@ const columns = [{
 - [ ] 需要虚拟滚动时已确认校验、行高、合并和固定列限制。
 
 遇到退化时，先在 [Performance Lab](http://localhost:5173/performance) 对比纯展示、编辑和动态配置场景，再根据 DOM 节点数、回调计数和具体操作耗时定位优化层级。
+
+## 相关 API
+
+[FormTable Props](../api/form-table.md) · [数据更新与受控回写](./data-updates.md) · [稳定身份与异步安全](./stable-identity.md)

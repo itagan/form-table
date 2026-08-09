@@ -129,3 +129,7 @@ component: {
 | 不对应单一字段的整格展示或操作 | [`columns[].cellSlot`](./cell-slot.md) |
 
 更完整的组件 Mock、类型声明、columns 工厂和提交示例见[企业复杂组件接入示例](../examples/enterprise-components.md)。
+
+## 相关 API
+
+[Component 配置](../api/component.md) · [Slot 与上下文](../api/contexts.md)

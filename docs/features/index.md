@@ -12,8 +12,6 @@
 | [校验、清理与重置](./validation-reset.md) | Item `formItemProps.rules` | `validate/clearValidate/resetFields` | Element Form 校验状态 |
 | [动态显隐与配置更新](./dynamic-configuration.md) | 各层 `visible`、动态 props | 替换 `columns` | 响应式布局与组件配置 |
 | [稳定身份与异步安全](./stable-identity.md) | `rowKey`、Column/Row/Item `key` | 异步 `setValue/updateRow` | 正确定位数据与渲染节点 |
-| [性能与大数据量](./performance.md) | 行数、Item 数、渲染模式 | Performance Lab 可调实验 | 渲染、更新、DOM 与回调指标 |
-| [性能优化建议](./performance-optimization.md) | 挂载规模、更新频率、校验范围 | 分页、按需编辑、批量回写 | 优化路径与虚拟滚动决策 |
 | [原生 title 提示](./native-title.md) | `columns[].headerHint`、Item `hint` | 默认表头与字段外层自动应用 | 浏览器原生提示 |
 
 ## 渲染扩展
@@ -24,13 +22,20 @@
 | [`cellSlot` 列级单元格](./cell-slot.md) | `columns[].cellSlot` | 父组件同名 scoped Slot | [`/cell-slot`](http://localhost:5173/cell-slot) |
 | [自定义字段组件](./custom-component.md) | Item `type: 'component'` | `component.renderer/model/props/listeners` | [`/enterprise-components`](http://localhost:5173/enterprise-components) |
 
-## 配置来源与业务组合
+## 业务组合
 
 | 功能 | 配置入口 | 使用入口 | 可运行演示 |
 | --- | --- | --- | --- |
 | [远程 Schema 与本地增强](./remote-schema.md) | 可序列化 `ColumnConfig[]` | 页面增强组件、事件和 Slot | [`/remote-schema`](http://localhost:5173/remote-schema) |
 | [常见操作列与行增删](./common-row-actions.md) | `cellSlot`、`tableData`、`rowKey` | 末尾新增、后插、复制、删除 | [`/row-column-operations`](http://localhost:5173/row-column-operations) |
 | [行列操作与异步提交](./row-column-operations.md) | `tableData`、`columns`、`tableProps.rowKey` | 页面业务函数 | [`/row-column-operations`](http://localhost:5173/row-column-operations) |
+
+## 性能
+
+| 功能点 | 评估入口 | 落地入口 | 结果 |
+| --- | --- | --- | --- |
+| [性能与大数据量](./performance.md) | 行数、Item 数、渲染模式 | Performance Lab 可调实验 | 渲染、更新、DOM 与回调指标 |
+| [性能优化建议](./performance-optimization.md) | 挂载规模、更新频率、校验范围 | 分页、按需编辑、批量回写 | 优化路径与虚拟滚动决策 |
 
 ## 文档分层
 

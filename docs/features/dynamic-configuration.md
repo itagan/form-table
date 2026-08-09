@@ -134,3 +134,7 @@ columns[].children[].children[].key
 - 直接修改 `itemConfig.component.props`：破坏调用方配置的单向数据流。
 - 用数组下标作为动态列 key：插入或排序后会复用错误身份。
 - 在 `resolveRenderer` 中动态 import Promise：解析器只支持同步组件结果。
+
+## 相关 API
+
+[Column / Row / Item](../api/columns.md) · [Component 配置](../api/component.md) · [Slot 与上下文](../api/contexts.md)

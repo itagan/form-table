@@ -36,7 +36,6 @@ export default defineConfig({
       { text: 'API', link: '/api/configuration' },
       { text: '示例', link: '/examples/' },
       { text: 'Playground', link: `${playgroundSiteUrl}/` },
-      { text: '发布', link: '/migration/npm-package' },
       { text: '源码', link: 'https://gitee.com/itagan/form-table' }
     ],
     sidebar: [
@@ -63,19 +62,43 @@ export default defineConfig({
         text: '功能专题',
         items: [
           { text: '专题索引', link: '/features/' },
-          { text: '常见操作列与行增删', link: '/features/common-row-actions' },
-          { text: '行列操作与异步提交', link: '/features/row-column-operations' },
-          { text: '数据更新与受控回写', link: '/features/data-updates' },
-          { text: '校验、清理与重置', link: '/features/validation-reset' },
-          { text: '动态显隐与配置更新', link: '/features/dynamic-configuration' },
-          { text: '稳定身份与异步安全', link: '/features/stable-identity' },
-          { text: '性能与大数据量', link: '/features/performance' },
-          { text: '性能优化建议', link: '/features/performance-optimization' },
-          { text: '原生 title 提示', link: '/features/native-title' },
-          { text: '自定义表头', link: '/features/custom-header' },
-          { text: 'cellSlot 列级单元格', link: '/features/cell-slot' },
-          { text: '自定义字段组件', link: '/features/custom-component' },
-          { text: '远程 Schema', link: '/features/remote-schema' }
+          {
+            text: '基础能力',
+            collapsed: false,
+            items: [
+              { text: '数据更新与受控回写', link: '/features/data-updates' },
+              { text: '校验、清理与重置', link: '/features/validation-reset' },
+              { text: '动态显隐与配置更新', link: '/features/dynamic-configuration' },
+              { text: '稳定身份与异步安全', link: '/features/stable-identity' },
+              { text: '原生 title 提示', link: '/features/native-title' }
+            ]
+          },
+          {
+            text: '渲染扩展',
+            collapsed: false,
+            items: [
+              { text: '自定义表头', link: '/features/custom-header' },
+              { text: 'cellSlot 列级单元格', link: '/features/cell-slot' },
+              { text: '自定义字段组件', link: '/features/custom-component' }
+            ]
+          },
+          {
+            text: '业务组合',
+            collapsed: false,
+            items: [
+              { text: '远程 Schema', link: '/features/remote-schema' },
+              { text: '常见操作列与行增删', link: '/features/common-row-actions' },
+              { text: '行列操作与异步提交', link: '/features/row-column-operations' }
+            ]
+          },
+          {
+            text: '性能',
+            collapsed: false,
+            items: [
+              { text: '性能与大数据量', link: '/features/performance' },
+              { text: '性能优化建议', link: '/features/performance-optimization' }
+            ]
+          }
         ]
       },
       {
@@ -89,7 +112,7 @@ export default defineConfig({
         ]
       },
       {
-        text: '迁移与发布',
+        text: '维护者',
         items: [
           { text: 'npm 包发布准备', link: '/migration/npm-package' }
         ]

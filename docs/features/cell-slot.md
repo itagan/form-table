@@ -138,3 +138,7 @@ Playground [`/cell-slot`](http://localhost:5173/cell-slot) 同时演示：
 - 异步更新与 rowKey。
 - 字段 Slot 的对照展示。
 - 实际 `FormTableCellSlotContext` 检视面板。
+
+## 相关 API
+
+[Column / Row / Item](../api/columns.md) · [Slot 与上下文](../api/contexts.md) · [事件与 Ref](../api/events-and-ref.md)
