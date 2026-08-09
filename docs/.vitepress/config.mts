@@ -21,15 +21,26 @@ export default defineConfig({
         text: '指南',
         items: [
           { text: '快速开始', link: '/guide/quick-start' },
+          { text: '完整配置指南', link: '/guide/configuration-guide' },
           { text: '行、列与延迟提交', link: '/guide/row-column-operations' }
         ]
       },
       {
         text: 'API',
         items: [
-          { text: '配置 API', link: '/api/configuration' },
+          { text: 'API 总览', link: '/api/configuration' },
+          { text: 'FormTable Props', link: '/api/form-table' },
+          { text: 'Column / Row / Item', link: '/api/columns' },
+          { text: 'Component 配置', link: '/api/component' },
+          { text: 'Slot 与上下文', link: '/api/contexts' },
           { text: '事件与 Ref API', link: '/api/events-and-ref' },
           { text: '类型边界', link: '/api/types' }
+        ]
+      },
+      {
+        text: '功能专题',
+        items: [
+          { text: 'cellSlot 列级单元格', link: '/features/cell-slot' }
         ]
       },
       {
@@ -38,7 +49,8 @@ export default defineConfig({
           { text: '示例索引', link: '/examples/' },
           { text: '企业复杂组件接入', link: '/examples/enterprise-components' },
           { text: '单元格合并', link: '/examples/cell-merge' },
-          { text: '多需求费用明细', link: '/examples/heterogeneous-demands' }
+          { text: '多需求费用明细', link: '/examples/heterogeneous-demands' },
+          { text: '多日议程编排', link: '/examples/itinerary-simple' }
         ]
       },
       {
