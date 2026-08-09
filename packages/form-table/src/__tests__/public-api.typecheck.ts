@@ -2,6 +2,7 @@ import type { Component, PluginObject } from 'vue'
 import FormTable, {
   FormTable as NamedFormTable,
   FormTablePlugin,
+  type BuiltinFormItemType,
   type ColumnConfig,
   type FieldModelConfig,
   type FormTableExpose,
@@ -9,6 +10,16 @@ import FormTable, {
   type FormTableProps,
   type TableRow
 } from '../index'
+
+// Element UI 未默认提供 Tree Select，不允许作为 FormTable 内置类型使用。
+// @ts-expect-error tree-select 应通过 type: 'component' 显式接入
+const unsupportedBuiltinType: BuiltinFormItemType = 'tree-select'
+void unsupportedBuiltinType
+
+// tag-input 是 el-select 的参数组合，不作为独立内置类型维护。
+// @ts-expect-error 应使用 type: 'select' 配合 multiple/filterable/allowCreate
+const redundantBuiltinAlias: BuiltinFormItemType = 'tag-input'
+void redundantBuiltinAlias
 
 const CustomInput: Component = { name: 'CustomInput' }
 const AlternativeInput: Component = { name: 'AlternativeInput' }

@@ -18,21 +18,14 @@ const componentTypeMap: Record<BuiltinFormItemType, string> = {
   color: 'el-color-picker',
   upload: 'el-upload',
   cascader: 'el-cascader',
-  'tree-select': 'el-tree-select',
-  autocomplete: 'el-autocomplete',
-  'tag-input': 'el-select'
+  autocomplete: 'el-autocomplete'
 }
 
 /** 只补充 type 别名本身必需的属性。 */
 const typeRequiredProps: Partial<Record<BuiltinFormItemType, ComponentProps>> = {
   textarea: { type: 'textarea' },
   date: { type: 'date' },
-  datetime: { type: 'datetime' },
-  'tag-input': {
-    multiple: true,
-    filterable: true,
-    allowCreate: true
-  }
+  datetime: { type: 'datetime' }
 }
 
 /** 将公开的内置字段类型转换为实际 Vue 组件名称。 */

@@ -35,6 +35,10 @@ Item 的 `key` 是可选渲染身份，`fieldKey` 是必填数据路径。动态
 - `type: 'component' + component.resolveRenderer`：根据当前行同步选择实际组件，可配合静态 renderer 兜底。
 - `type: 'slot' + component.renderer`：完全自定义 scoped slot。
 
+内置 `type` 只映射 Element UI 默认提供的组件。Element UI 未提供的组件（例如 Tree Select）不属于内置类型，应通过 `type: 'component'` 接入业务组件或第三方组件。
+
+可创建多标签选择不设单独别名，直接使用 `type: 'select'`，并在 `component.props` 中配置 `{ multiple: true, filterable: true, allowCreate: true }`。
+
 `component.props/listeners/options/optionProps` 是三种模式共用的渲染配置。自定义组件省略 `component.model` 或将其设为 `true` 时保留 Vue 2 原生 `v-model`；也可指定 `{ prop, event, valueFromEvent }`，或设为 `false` 禁用模型注入。slot 模式会把解析后的 `component` 通过上下文返回，由模板自行绑定。
 
 Slot 内容直接渲染，不附加内部 `div/span` 包装；需要根节点样式时由 Slot 模板自行提供。

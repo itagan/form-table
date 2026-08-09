@@ -125,9 +125,7 @@ export type BuiltinFormItemType =
   | 'color'
   | 'upload'
   | 'cascader'
-  | 'tree-select'
   | 'autocomplete'
-  | 'tag-input'
 
 /** 字段支持的全部渲染模式。 */
 export type FormItemType = BuiltinFormItemType | 'component' | 'slot'
