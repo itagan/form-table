@@ -2,6 +2,8 @@
 
 > 可运行实验：[打开 Performance Lab ↗](http://localhost:5173/performance)
 
+需要直接选择业务优化方案时，参阅[性能优化建议](./performance-optimization.md)。本页聚焦如何测量、记录和解释性能数据。
+
 FormTable 基于 Element UI Table 和 Form，不包含虚拟滚动。数据规模应按实际渲染单元估算，而不只看行数：
 
 ```text
@@ -123,3 +125,5 @@ el-row → el-col → el-form-item → 实际字段组件
 | 大量校验规则 | 提交时分批校验，避免所有复杂 validator 同时运行 |
 
 性能优化应先由实验数据定位瓶颈，再决定缓存、响应依赖拆分或虚拟化方案，避免为了理论上的大数据量增加常规场景复杂度。
+
+可复制的批量更新、按需编辑、动态配置优化和虚拟滚动决策示例见[性能优化建议](./performance-optimization.md)。

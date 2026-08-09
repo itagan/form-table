@@ -54,7 +54,7 @@ FormTable
 
 高频单一能力可直接查询：[数据更新](../features/data-updates.md)、[校验与重置](../features/validation-reset.md)、[动态配置](../features/dynamic-configuration.md)、[稳定身份](../features/stable-identity.md)。
 
-大数据量边界、测量方式和优化建议见[性能与大数据量](../features/performance.md)，可运行实验位于 [`/performance`](http://localhost:5173/performance)。
+大数据量边界与测量方式见[性能与大数据量](../features/performance.md)，具体落地方案见[性能优化建议](../features/performance-optimization.md)，可运行实验位于 [`/performance`](http://localhost:5173/performance)。
 
 | 功能 | 文档 | 可运行演示 |
 | --- | --- | --- |
