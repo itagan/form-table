@@ -57,11 +57,11 @@
 
           <tbody class="layer-group">
             <tr>
-              <th rowspan="8" scope="rowgroup" class="layer-cell">Column</th>
+              <th rowspan="9" scope="rowgroup" class="layer-cell">Column</th>
               <td><code>key</code></td>
               <td>渲染标识</td>
               <td>动态列应唯一稳定；增删、显隐和同顺序替换时用于复用列包装实例。</td>
-              <td rowspan="8" class="context-cell"><code>tableData</code><br><code>columnConfig</code></td>
+              <td rowspan="9" class="context-cell"><code>tableData</code><br><code>columnConfig</code></td>
             </tr>
             <tr>
               <td><code>label</code></td>
@@ -96,7 +96,12 @@
             <tr>
               <td><code>children</code></td>
               <td>RowConfig[]</td>
-              <td>列单元格内的行布局。</td>
+              <td>列单元格内的行布局；与 <code>cellSlot</code> 互斥。</td>
+            </tr>
+            <tr>
+              <td><code>cellSlot</code></td>
+              <td>列级 scoped slot</td>
+              <td>直接渲染单元格；接收 <code>row/index/columnConfig/updateRow</code>，不需要 fieldKey。</td>
             </tr>
           </tbody>
 
@@ -243,7 +248,7 @@
           <tbody>
             <tr><td>业务数据</td><td><code>tableData, row, index, fieldKey, value</code></td><td>用于读取当前数据位置</td></tr>
             <tr><td>原始配置</td><td><code>columnConfig, rowConfig, itemConfig</code></td><td>浅只读的当前配置路径</td></tr>
-            <tr><td>更新能力</td><td><code>setValue, updateRow</code></td><td>listener 和字段 Slot 可用</td></tr>
+            <tr><td>更新能力</td><td><code>setValue, updateRow</code></td><td>列级 cellSlot 只提供 updateRow；字段 listener/Slot 可用两者</td></tr>
             <tr><td>解析结果</td><td><code>component, propPath</code></td><td>仅字段 Slot 可用</td></tr>
           </tbody>
         </table>

@@ -201,15 +201,18 @@ const updateItemConfig = (
   itemKey: string,
   updater: (item: FormItemConfig) => FormItemConfig
 ) => {
-  columns.value = columns.value.map(column => ({
-    ...column,
-    children: column.children.map(rowConfig => ({
-      ...rowConfig,
-      children: rowConfig.children.map(item => {
-        return item.key === itemKey ? updater(item) : item
-      })
-    }))
-  }))
+  columns.value = columns.value.map(column => {
+    if (!column.children) return column // cellSlot 列没有字段配置
+    return {
+      ...column,
+      children: column.children.map(rowConfig => ({
+        ...rowConfig,
+        children: rowConfig.children.map(item => {
+          return item.key === itemKey ? updater(item) : item
+        })
+      }))
+    }
+  })
 }
 ```
 

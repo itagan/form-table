@@ -33,12 +33,12 @@
           </el-tag>
         </template>
 
-        <template #actions="{ row, index, updateRow, component }">
-          <el-button v-bind="component.props" @click="updateRow({ status: row.status === 'enabled' ? 'disabled' : 'enabled' })">
+        <template #actions="{ row, index, updateRow }">
+          <el-button type="text" @click="updateRow({ status: row.status === 'enabled' ? 'disabled' : 'enabled' })">
             切换状态
           </el-button>
-          <el-button v-bind="component.props" @click="copyRow(row, index)">复制</el-button>
-          <el-button v-bind="component.props" class="danger" @click="removeRow(index)">删除</el-button>
+          <el-button type="text" @click="copyRow(row, index)">复制</el-button>
+          <el-button type="text" class="danger" @click="removeRow(index)">删除</el-button>
         </template>
       </FormTable>
 
@@ -201,13 +201,10 @@ const columns: ColumnConfig[] = [
     }] }]
   },
   {
+    key: 'actions-column',
     label: '操作',
     props: { width: 210, fixed: 'right', align: 'center' },
-    children: [{ children: [{
-      fieldKey: '__actions',
-      type: 'slot',
-      component: { renderer: 'actions', props: { type: 'text' } }
-    }] }]
+    cellSlot: 'actions'
   }
 ]
 const columnsCode = formatFormTableConfig(columns)
