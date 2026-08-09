@@ -139,6 +139,54 @@ describe('FormTable core behavior', () => {
     wrapper.destroy()
   })
 
+  it('only invalidates dynamic callbacks that read changed reactive data', async () => {
+    const rowCount = 300
+    const targetIndex = 150
+    const rowPropsResolver = vi.fn(({ row }: FormTableRowContext) => ({
+      gutter: row.id === 1 ? 0 : 2
+    }))
+    const componentPropsResolver = vi.fn(({ row, tableData }: FormTableFieldRenderContext) => ({
+      placeholder: `${row.name}-${tableData[0]?.name}`
+    }))
+    const wrapper = mount({
+      components: { FormTable },
+      data: () => ({
+        tableData: Array.from({ length: rowCount }, (_, index) => ({
+          id: index + 1,
+          name: `User ${index + 1}`
+        })),
+        columns: [{
+          key: 'name-column',
+          label: '姓名',
+          children: [{
+            key: 'name-row',
+            props: rowPropsResolver,
+            children: [{
+              key: 'name-item',
+              fieldKey: 'name',
+              type: 'input',
+              component: { props: componentPropsResolver }
+            }]
+          }]
+        }] as ColumnConfig[]
+      }),
+      template: '<FormTable v-model="tableData" :columns="columns" :table-props="{ rowKey: \'id\' }" />'
+    }, { localVue, attachTo: document.body })
+    await wrapper.vm.$nextTick()
+
+    expect(rowPropsResolver).toHaveBeenCalledTimes(rowCount)
+    expect(componentPropsResolver).toHaveBeenCalledTimes(rowCount)
+
+    await wrapper.findAll('input').at(targetIndex).setValue('Updated User')
+    await wrapper.vm.$nextTick()
+
+    // 只读取当前 row 的回调仅重新计算目标行。
+    expect(rowPropsResolver).toHaveBeenCalledTimes(rowCount + 1)
+    // 显式读取 tableData 的回调会为全部行重新计算。
+    expect(componentPropsResolver).toHaveBeenCalledTimes(rowCount * 2)
+    wrapper.destroy()
+  })
+
   it('keeps nested field paths working', async () => {
     const wrapper = mountFormTable({
       tableData: [{ profile: { city: '杭州' } }],
@@ -1239,6 +1287,46 @@ describe('FormTable core behavior', () => {
     expect(updates).toHaveLength(2)
     expect(updates[1]?.[0]).toEqual([{ name: 'Bob', touched: true }])
     expect(original).toEqual([{ name: 'Alice', touched: false }])
+    wrapper.destroy()
+  })
+
+  it('reuses the rowKey index during consecutive synchronous updates', async () => {
+    const rowCount = 20
+    const rowKey = vi.fn((row: TableRow) => row.id)
+    const wrapper = mountFormTable({
+      tableData: Array.from({ length: rowCount }, (_, index) => ({
+        id: index + 1,
+        name: `User ${index + 1}`,
+        touched: false
+      })),
+      tableProps: { rowKey },
+      columns: [{
+        label: '连续更新',
+        children: [{ children: [{
+          fieldKey: 'name',
+          type: 'slot',
+          component: { renderer: 'indexed-compose-update' }
+        }] }]
+      }],
+      scopedSlots: {
+        'indexed-compose-update': `
+          <button
+            v-if="props.index === 0"
+            type="button"
+            class="indexed-compose-update"
+            @click="props.setValue('Updated'); props.updateRow({ touched: true })"
+          >更新</button>
+        `
+      }
+    })
+    await wrapper.vm.$nextTick()
+    rowKey.mockClear()
+
+    await wrapper.find('.indexed-compose-update').trigger('click')
+
+    expect(rowKey.mock.calls.length).toBeLessThan(rowCount * 2)
+    const updates = wrapper.emitted('update:tableData') || []
+    expect(updates[1]?.[0]?.[0]).toEqual({ id: 1, name: 'Updated', touched: true })
     wrapper.destroy()
   })
 

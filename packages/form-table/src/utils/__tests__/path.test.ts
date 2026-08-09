@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { getValueByPath, setValueByPath } from '../path'
 
 describe('path utils', () => {
@@ -51,5 +51,25 @@ describe('path utils', () => {
         }
       }
     })
+  })
+
+  it('reuses normalized paths and evicts the oldest entry after the cache limit', () => {
+    const replaceSpy = vi.spyOn(String.prototype, 'replace')
+    const source = { cacheBoundary: {} }
+    const paths = Array.from({ length: 520 }, (_, index) => `cacheBoundary.${index}`)
+
+    try {
+      paths.forEach(path => getValueByPath(source, path))
+      const initialNormalizationCount = replaceSpy.mock.calls.length
+      expect(initialNormalizationCount).toBe(520)
+
+      getValueByPath(source, paths[0])
+      expect(replaceSpy).toHaveBeenCalledTimes(initialNormalizationCount + 1)
+
+      getValueByPath(source, paths[paths.length - 1])
+      expect(replaceSpy).toHaveBeenCalledTimes(initialNormalizationCount + 1)
+    } finally {
+      replaceSpy.mockRestore()
+    }
   })
 })
