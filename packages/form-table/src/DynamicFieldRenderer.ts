@@ -1,4 +1,11 @@
-import type { Component, CreateElement, RenderContext, VNode, VNodeData } from 'vue'
+import type {
+  Component,
+  CreateElement,
+  DirectiveOptions,
+  RenderContext,
+  VNode,
+  VNodeData
+} from 'vue'
 import type {
   ComponentProps,
   FieldModelConfig,
@@ -23,6 +30,25 @@ interface ModelVNodeData extends VNodeData {
 }
 
 /**
+ * Vue 组件可通过 inheritAttrs: false 阻止 title 落到真实 DOM。
+ * 指令直接同步组件根元素，在不增加包装节点的前提下统一原生提示行为。
+ */
+const nativeTitleDirective: DirectiveOptions = {
+  bind: (element, binding) => {
+    if (binding.value === undefined || binding.value === null) return
+    element.setAttribute('title', String(binding.value))
+  },
+  update: (element, binding) => {
+    if (binding.value === undefined || binding.value === null) {
+      element.removeAttribute('title')
+      return
+    }
+    element.setAttribute('title', String(binding.value))
+  },
+  unbind: element => element.removeAttribute('title')
+}
+
+/**
  * 将 class/style 从普通 attrs 中分离，保持 v-bind 在组件上的原生 Vue 2 语义。
  */
 function createRenderData(
@@ -30,12 +56,22 @@ function createRenderData(
   componentListeners: Record<string, (...args: unknown[]) => void>
 ): ModelVNodeData {
   const { class: className, style, ...attrs } = componentProps
-  return {
+  const data: ModelVNodeData = {
     attrs,
     class: className,
     style,
     on: { ...componentListeners }
   }
+
+  if (Object.prototype.hasOwnProperty.call(componentProps, 'title')) {
+    data.directives = [{
+      name: 'form-table-native-title',
+      value: componentProps.title,
+      def: nativeTitleDirective
+    }]
+  }
+
+  return data
 }
 
 /**

@@ -1,5 +1,5 @@
 <template>
-  <span v-if="type === 'text'">{{ value }}</span>
+  <span v-if="type === 'text'" v-bind="component.props">{{ value }}</span>
 
   <span v-else-if="!component.renderer" />
 
