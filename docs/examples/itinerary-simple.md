@@ -32,13 +32,13 @@ const updateGroupField = (target, field, value) => {
 }
 ```
 
-时间、名称、城市和地点都是独立行字段：简单输入框和下拉框直接通过 FormTable 配置；时间范围和内部议程选择器使用字段 Slot。议程序号与操作按钮不参与表单字段绑定，使用列级 `cellSlot`，不再为它们配置虚拟 `fieldKey`。
+该页的日期、主题、时间范围和议程名称虽然包含输入控件，但模板只读取 `row`，数据更新、分组同步和内部选择器行为都由页面处理。它们不使用 FormTable 的 `value/setValue/propPath/rules/component`，因此与议程序号、操作按钮一样使用列级 `cellSlot`。城市和地点仍使用 FormTable 内置字段绑定。
 
 ```ts
 {
-  key: 'sequence-column',
-  label: '议程',
-  cellSlot: 'sequence-label'
+  key: 'topic-column',
+  label: '议程主题',
+  cellSlot: 'day-topic'
 },
 {
   key: 'action-column',
@@ -46,6 +46,8 @@ const updateGroupField = (target, field, value) => {
   cellSlot: 'row-actions'
 }
 ```
+
+`cellSlot` 不限于纯文本或操作按钮；它可以包含输入控件。是否使用它，取决于该单元格是否需要 FormTable 的字段取值、写回和校验语义；如果未来要为议程主题增加 `rules` 或使用 `setValue`，应再改回字段 Slot。
 
 ## 使用外部库拖拽排序
 
