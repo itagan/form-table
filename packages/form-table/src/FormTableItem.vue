@@ -31,6 +31,7 @@ import type {
   FormTableSlotContext,
   FormTableSlots,
   FormTableUpdateApi,
+  FormTableValue,
   OptionPropsConfig,
   ResolvedComponentConfig,
   TableRow
@@ -41,6 +42,7 @@ import {
 } from './types'
 import {
   createFieldRenderContext,
+  extendLazyContext,
   resolveDynamicValue
 } from './utils/dynamic'
 
@@ -92,14 +94,14 @@ const slotFn = computed(() => props.config.type === 'slot'
 
 /** 在只读渲染上下文上增加安全的数据更新方法，供监听器和插槽使用。 */
 const fieldContext = computed<FormTableFieldContext>(() => {
+  const context = runtimeContext.value
   const targetRow = props.rowContext.row as TableRow
   const targetFieldKey = props.config.fieldKey
-  return {
-    ...runtimeContext.value,
+  return extendLazyContext(context, {
     // 闭包绑定当前行与字段，配置切换后旧事件不会误更新新字段。
-    setValue: nextValue => updateApi?.setValue(targetRow, targetFieldKey, nextValue),
-    updateRow: patch => updateApi?.updateRow(targetRow, patch)
-  }
+    setValue: (nextValue: FormTableValue) => updateApi?.setValue(targetRow, targetFieldKey, nextValue),
+    updateRow: (patch: Partial<TableRow>) => updateApi?.updateRow(targetRow, patch)
+  })
 })
 
 /** 内置类型用于查找默认 Element UI 组件；component/slot 使用配置的 renderer。 */
@@ -142,9 +144,15 @@ const resolvedComponent = computed<ResolvedComponentConfig>(() => {
 })
 
 /** 插槽上下文额外暴露校验路径和已经解析完成的组件配置。 */
-const slotContext = computed<FormTableSlotContext>(() => ({
-  ...fieldContext.value,
-  propPath: propPath.value,
-  component: resolvedComponent.value
-}))
+const slotContext = computed<FormTableSlotContext>(() => {
+  const context = fieldContext.value
+  return extendLazyContext(context, {
+    get propPath() {
+      return propPath.value
+    },
+    get component() {
+      return resolvedComponent.value
+    }
+  })
+})
 </script>

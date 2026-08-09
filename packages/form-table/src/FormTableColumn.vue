@@ -44,7 +44,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, type ComputedRef } from 'vue'
+import { computed, inject } from 'vue'
 import FormTableRow from './FormTableRow.vue'
 import SlotRenderer from './SlotRenderer'
 import type {
@@ -60,7 +60,12 @@ import type {
   TableRow
 } from './types'
 import { FORM_TABLE_CONTEXT_KEY, FORM_TABLE_SLOTS_KEY, FORM_TABLE_UPDATE_KEY } from './types'
-import { createColumnContext, resolveDynamicValue } from './utils/dynamic'
+import {
+  createColumnContext,
+  createTableContext,
+  extendLazyContext,
+  resolveDynamicValue
+} from './utils/dynamic'
 
 /** 当前列配置及其在可见列集合中的下标。 */
 const props = defineProps<{
@@ -69,9 +74,9 @@ const props = defineProps<{
 }>()
 
 /** 根组件提供的表级响应式数据，是列动态回调的基础上下文。 */
-const formTableContext = inject<ComputedRef<FormTableTableContext>>(
+const formTableContext = inject<FormTableTableContext>(
   FORM_TABLE_CONTEXT_KEY,
-  computed(() => ({ tableData: [] }))
+  createTableContext(() => [])
 )
 
 /** 父组件具名插槽集合，用于解析表头和列级单元格 Slot。 */
@@ -82,7 +87,7 @@ const updateApi = inject<FormTableUpdateApi>(FORM_TABLE_UPDATE_KEY)
 
 /** 合并表级数据和当前列配置，供列属性、表头和下级行共同复用。 */
 const columnContext = computed<FormTableColumnContext>(() => createColumnContext(
-  formTableContext.value,
+  formTableContext,
   props.column
 ))
 
@@ -145,11 +150,12 @@ const shouldRenderHeader = computed(() => {
 })
 
 /** 传给自定义表头插槽的完整列上下文。 */
-const headerSlotProps = computed<FormTableHeaderSlotContext>(() => ({
-  columnConfig: props.column,
-  columnIndex: props.columnIndex,
-  header: resolvedHeader.value,
-  label: props.column.label,
-  tableData: formTableContext.value.tableData
-}))
+const headerSlotProps = computed<FormTableHeaderSlotContext>(() => extendLazyContext(
+  columnContext.value,
+  {
+    columnIndex: props.columnIndex,
+    header: resolvedHeader.value,
+    label: props.column.label
+  }
+))
 </script>
