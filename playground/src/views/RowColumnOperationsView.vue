@@ -6,7 +6,7 @@
 
     <section class="demo-card">
       <div class="toolbar">
-        <el-button type="primary" @click="addAfterValidate">校验后新增</el-button>
+        <el-button type="primary" @click="addAfterValidate">校验后末尾新增</el-button>
         <el-button @click="showRemark = !showRemark">
           {{ showRemark ? '移除备注列' : '增加备注列' }}
         </el-button>
@@ -41,6 +41,7 @@
 
         <template #actions="{ row }">
           <div class="row-actions">
+            <el-button type="text" @click="insertAfter(row)">后插一行</el-button>
             <el-button type="text" @click="copyRow(row)">复制</el-button>
             <el-button type="text" @click="moveRow(row, -1)">上移</el-button>
             <el-button type="text" @click="moveRow(row, 1)">下移</el-button>
@@ -60,6 +61,7 @@
           <li>输入评分只修改页面草稿，不触发 <code>setValue</code>。</li>
           <li>点击提交后执行异步检查，成功后才调用配置 listener 中的更新助手。</li>
           <li>删除先确认，再按稳定 <code>_rowKey</code> 删除。</li>
+          <li>工具栏在末尾新增；操作列可在当前行后插入或复制。</li>
           <li>列显隐和换序通过重新生成 <code>columns</code> 完成。</li>
         </ul>
       </div>
@@ -158,13 +160,8 @@ const remarkColumn: ColumnConfig = {
 const actionColumn: ColumnConfig = {
   key: 'action-column',
   label: '操作',
-  props: { minWidth: 220, fixed: 'right' },
-  children: [{ children: [{
-    key: 'action-field',
-    fieldKey: '_rowKey',
-    type: 'slot',
-    component: { renderer: 'actions' }
-  }] }]
+  props: { minWidth: 300, fixed: 'right' },
+  cellSlot: 'actions'
 }
 
 const columns = computed<ColumnConfig[]>(() => {
@@ -213,6 +210,17 @@ const addAfterValidate = async () => {
   tableData.value = [
     ...tableData.value,
     { _rowKey: createRowKey(), name: '', score: 60, remark: '' }
+  ]
+  clearStructureValidation()
+}
+
+const insertAfter = (source: OperationRow) => {
+  const index = tableData.value.findIndex(row => row._rowKey === source._rowKey)
+  if (index < 0) return
+  tableData.value = [
+    ...tableData.value.slice(0, index + 1),
+    { _rowKey: createRowKey(), name: '', score: 60, remark: '' },
+    ...tableData.value.slice(index + 1)
   ]
   clearStructureValidation()
 }
