@@ -3,12 +3,15 @@ import FormTable, {
   FormTable as NamedFormTable,
   FormTablePlugin,
   type BuiltinFormItemType,
+  type CellSlotColumnConfig,
   type ColumnConfig,
   type FieldModelConfig,
+  type FormTableCellSlotContext,
   type FormTableExpose,
   type FormTableHeaderSlotContext,
   type FormTableHint,
   type FormTableProps,
+  type LayoutColumnConfig,
   type ResolvedHeaderConfig,
   type TableRow
 } from '../index'
@@ -58,6 +61,23 @@ const columns: ColumnConfig[] = [{
     ]
   }]
 }]
+
+const cellSlotColumn: CellSlotColumnConfig = {
+  key: 'actions-column',
+  label: '操作',
+  cellSlot: 'row-actions',
+  props: { width: 120 }
+}
+const layoutColumn: LayoutColumnConfig = {
+  label: '姓名',
+  children: [{ children: [{ fieldKey: 'name', type: 'input' }] }]
+}
+// @ts-expect-error cellSlot columns do not accept Row/Item children.
+const mixedColumnModes: ColumnConfig = {
+  label: '错误列模式',
+  cellSlot: 'row-actions',
+  children: []
+}
 
 const customModel: FieldModelConfig = {
   prop: 'selectedId',
@@ -266,7 +286,22 @@ headerContext.columnConfig.label = '新表头'
 // @ts-expect-error legacy column alias is not exposed.
 void headerContext.column
 
+declare const cellSlotContext: FormTableCellSlotContext
+void cellSlotContext.row
+void cellSlotContext.index
+void cellSlotContext.columnConfig.cellSlot
+cellSlotContext.updateRow({ name: 'Bob' })
+// @ts-expect-error cellSlot rows are read-only; use updateRow instead.
+cellSlotContext.row.name = 'Bob'
+// @ts-expect-error cellSlot context has no field binding semantics.
+void cellSlotContext.fieldKey
+// @ts-expect-error cellSlot column configuration is read-only.
+cellSlotContext.columnConfig.label = '新操作'
+
 void props
+void cellSlotColumn
+void layoutColumn
+void mixedColumnModes
 void modelVariants
 void component
 void named

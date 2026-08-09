@@ -24,14 +24,21 @@
     </template>
 
     <template v-slot="scope">
-      <FormTableRow
-        v-for="(rowConfig, rowIndex) in column.children"
-        :key="rowConfig.key || rowIndex"
-        :row="scope.row"
-        :row-index="scope.$index"
-        :column-context="columnContext"
-        :row-config="rowConfig"
+      <SlotRenderer
+        v-if="cellSlotFn"
+        :slot-fn="cellSlotFn"
+        :slot-props="createCellSlotContext(scope.row, scope.$index)"
       />
+      <template v-else>
+        <FormTableRow
+          v-for="(rowConfig, rowIndex) in layoutRows"
+          :key="rowConfig.key || rowIndex"
+          :row="scope.row"
+          :row-index="scope.$index"
+          :column-context="columnContext"
+          :row-config="rowConfig"
+        />
+      </template>
     </template>
   </el-table-column>
 </template>
@@ -41,14 +48,18 @@ import { computed, inject, type ComputedRef } from 'vue'
 import FormTableRow from './FormTableRow.vue'
 import SlotRenderer from './SlotRenderer'
 import type {
+  CellSlotColumnConfig,
   ColumnConfig,
+  FormTableCellSlotContext,
   FormTableColumnContext,
   FormTableTableContext,
   FormTableHeaderSlotContext,
   FormTableSlots,
-  ResolvedHeaderConfig
+  FormTableUpdateApi,
+  ResolvedHeaderConfig,
+  TableRow
 } from './types'
-import { FORM_TABLE_CONTEXT_KEY, FORM_TABLE_SLOTS_KEY } from './types'
+import { FORM_TABLE_CONTEXT_KEY, FORM_TABLE_SLOTS_KEY, FORM_TABLE_UPDATE_KEY } from './types'
 import { createColumnContext, resolveDynamicValue } from './utils/dynamic'
 
 /** 当前列配置及其在可见列集合中的下标。 */
@@ -63,8 +74,11 @@ const formTableContext = inject<ComputedRef<FormTableTableContext>>(
   computed(() => ({ tableData: [] }))
 )
 
-/** 父组件具名插槽集合，用于解析 column.headerSlot。 */
+/** 父组件具名插槽集合，用于解析表头和列级单元格 Slot。 */
 const parentSlots = inject<FormTableSlots>(FORM_TABLE_SLOTS_KEY, {})
+
+/** 根组件下发的行更新入口，供列级单元格 Slot 执行业务操作。 */
+const updateApi = inject<FormTableUpdateApi>(FORM_TABLE_UPDATE_KEY)
 
 /** 合并表级数据和当前列配置，供列属性、表头和下级行共同复用。 */
 const columnContext = computed<FormTableColumnContext>(() => createColumnContext(
@@ -98,6 +112,25 @@ const defaultHeaderProps = computed(() => {
 
 // Element UI 的功能列由 type 驱动，不应挂载普通字段的 scoped slot。
 const isNativeColumn = computed(() => ['index', 'selection', 'expand'].includes(columnProps.value.type))
+
+/** cellSlot 列不经过 Row/Item 字段渲染链路。 */
+const cellSlotFn = computed(() => {
+  const slotName = 'cellSlot' in props.column ? props.column.cellSlot : undefined
+  return slotName ? parentSlots[slotName] || null : null
+})
+
+/** 仅布局列具有 children；cellSlot 列缺失对应 Slot 时保持空单元格。 */
+const layoutRows = computed(() => 'children' in props.column
+  ? props.column.children || []
+  : [])
+
+/** 为当前单元格构造无字段语义的精简 Slot 上下文。 */
+const createCellSlotContext = (row: TableRow, index: number): FormTableCellSlotContext => ({
+  row,
+  index,
+  columnConfig: props.column as CellSlotColumnConfig,
+  updateRow: patch => updateApi?.updateRow(row, patch)
+})
 
 /** 根据配置名称查找实际存在的父级表头插槽。 */
 const headerSlotFn = computed(() => props.column.headerSlot

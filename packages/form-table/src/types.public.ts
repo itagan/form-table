@@ -1,6 +1,7 @@
 export type {
   BuiltinFormItemConfig,
   BuiltinFormItemType,
+  CellSlotColumnConfig,
   ColumnConfig,
   ComponentProps,
   ComponentFormItemConfig,
@@ -14,6 +15,7 @@ export type {
   FormTableElementFormRef,
   FormTableElementTableRef,
   FormTableExpose,
+  FormTableCellSlotContext,
   FormTableColumnContext,
   FormTableFieldChangePayload,
   FormTableFieldContext,
@@ -26,6 +28,7 @@ export type {
   FormTableSlotContext,
   FormTableTableContext,
   FormTableValue,
+  LayoutColumnConfig,
   OptionPropsConfig,
   ResolvedComponentConfig,
   ResolvedHeaderConfig,
