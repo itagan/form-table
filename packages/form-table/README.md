@@ -40,6 +40,33 @@ const columns = [{
 }]
 ```
 
+需要让动态配置回调获得具体业务行类型时，可使用零运行时开销的泛型助手：
+
+```ts
+import { defineFormTableColumns, type TableRow } from '@itagan/form-table'
+
+interface PurchaseRow extends TableRow {
+  name: string
+  amount: number
+}
+
+const columns = defineFormTableColumns<PurchaseRow>([{
+  label: '采购信息',
+  visible: ({ tableData }) => tableData.some(row => row.amount > 0),
+  children: [{
+    children: [{
+      fieldKey: 'amount',
+      type: 'number',
+      component: {
+        props: ({ row }) => ({ disabled: row.amount <= 0 })
+      }
+    }]
+  }]
+}])
+```
+
+不使用该助手的现有 `ColumnConfig[]` 写法保持兼容；`fieldKey` 仍为支持嵌套路径的字符串。
+
 Item 的 `key` 是可选渲染身份，`fieldKey` 是必填数据路径。动态增删、排序或重复使用同一 `fieldKey` 时建议提供稳定 `key`。
 
 动态 Column 应提供唯一稳定的 `key`。列增删、显隐或同顺序配置替换会尽量复用仍存在的列包装实例；已有列相对顺序变化时会重新挂载可见列，以保持 Element UI 的注册顺序正确。

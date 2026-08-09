@@ -6,18 +6,18 @@ import type {
 } from '../types'
 import { getValueByPath, setValueByPath } from '../utils/path'
 
-type RowKey = string | ((row: TableRow) => FormTableValue) | undefined
+type RowKey<TRow extends TableRow = TableRow> = string | ((row: TRow) => FormTableValue) | undefined
 
-interface ControlledTableUpdateOptions {
-  getTableData: () => TableRow[]
-  getRowKey: () => RowKey
-  emitUpdate: (data: TableRow[]) => void
-  emitFieldChange: (payload: FormTableFieldChangePayload) => void
+interface ControlledTableUpdateOptions<TRow extends TableRow = TableRow> {
+  getTableData: () => TRow[]
+  getRowKey: () => RowKey<TRow>
+  emitUpdate: (data: TRow[]) => void
+  emitFieldChange: (payload: FormTableFieldChangePayload<TRow>) => void
 }
 
-interface IdentityIndex {
-  source: TableRow[]
-  rowKey: Exclude<RowKey, undefined>
+interface IdentityIndex<TRow extends TableRow = TableRow> {
+  source: TRow[]
+  rowKey: Exclude<RowKey<TRow>, undefined>
   indexes: Map<unknown, number>
   duplicates: Set<unknown>
 }
@@ -32,12 +32,12 @@ const normalizeIdentity = (identity: FormTableValue) => (
 )
 
 /** 集中管理受控表格的不可变更新、同步组合以及稳定行定位。 */
-export function useControlledTableUpdate(
-  options: ControlledTableUpdateOptions
-): FormTableUpdateApi {
-  let synchronousUpdateBase: TableRow[] | null = null
-  const synchronousRowIndexes = new Map<TableRow, number>()
-  let synchronousIdentityIndex: IdentityIndex | null = null
+export function useControlledTableUpdate<TRow extends TableRow = TableRow>(
+  options: ControlledTableUpdateOptions<TRow>
+): FormTableUpdateApi<TRow> {
+  let synchronousUpdateBase: TRow[] | null = null
+  const synchronousRowIndexes = new Map<TRow, number>()
+  let synchronousIdentityIndex: IdentityIndex<TRow> | null = null
   let updateBaseResetPending = false
 
   const scheduleUpdateBaseReset = () => {
@@ -51,13 +51,13 @@ export function useControlledTableUpdate(
     })
   }
 
-  const getRowIdentity = (row: TableRow, rowKey: Exclude<RowKey, undefined>) => (
+  const getRowIdentity = (row: TRow, rowKey: Exclude<RowKey<TRow>, undefined>) => (
     typeof rowKey === 'function' ? rowKey(row) : getValueByPath(row, rowKey)
   )
 
   const getIdentityIndex = (
-    sourceTableData: TableRow[],
-    rowKey: Exclude<RowKey, undefined>
+    sourceTableData: TRow[],
+    rowKey: Exclude<RowKey<TRow>, undefined>
   ) => {
     if (
       synchronousIdentityIndex?.source === sourceTableData
@@ -79,8 +79,8 @@ export function useControlledTableUpdate(
   }
 
   const resolveUpdateRowIndex = (
-    sourceTableData: TableRow[],
-    targetRow: TableRow
+    sourceTableData: TRow[],
+    targetRow: TRow
   ) => {
     const rowKey = options.getRowKey()
     if (typeof rowKey === 'function' || (typeof rowKey === 'string' && rowKey)) {
@@ -98,7 +98,7 @@ export function useControlledTableUpdate(
     return synchronousRowIndexes.get(targetRow) ?? -1
   }
 
-  const updateRow = (targetRow: TableRow, patch: Partial<TableRow>) => {
+  const updateRow = (targetRow: TRow, patch: Partial<TRow>) => {
     const sourceTableData = synchronousUpdateBase || options.getTableData()
     const rowIndex = resolveUpdateRowIndex(sourceTableData, targetRow)
     if (rowIndex < 0) return
@@ -165,7 +165,7 @@ export function useControlledTableUpdate(
   }
 
   return {
-    setValue: (row, fieldKey, value) => updateRow(row, { [fieldKey]: value }),
+    setValue: (row, fieldKey, value) => updateRow(row, { [fieldKey]: value } as Partial<TRow>),
     updateRow
   }
 }

@@ -36,9 +36,9 @@ export function extendLazyContext<Base extends object, Extension extends object>
 /**
  * 分层构造动态配置上下文，使列、行、字段回调只看到其所在层级的数据。
  */
-export function createTableContext(
-  getTableData: () => ReadonlyArray<TableRow>
-): FormTableTableContext {
+export function createTableContext<TRow extends TableRow = TableRow>(
+  getTableData: () => ReadonlyArray<TRow>
+): FormTableTableContext<TRow> {
   return {
     get tableData() {
       return getTableData()
@@ -47,22 +47,22 @@ export function createTableContext(
 }
 
 /** 在表级上下文上附加当前列配置。 */
-export function createColumnContext(
-  tableContext: FormTableTableContext,
-  columnConfig: Readonly<ColumnConfig>
-): FormTableColumnContext {
+export function createColumnContext<TRow extends TableRow = TableRow>(
+  tableContext: FormTableTableContext<TRow>,
+  columnConfig: Readonly<ColumnConfig<TRow>>
+): FormTableColumnContext<TRow> {
   return extendLazyContext(tableContext, {
     columnConfig
   })
 }
 
 /** 在列级上下文上附加当前数据行、下标和布局行配置。 */
-export function createRowContext(
-  columnContext: FormTableColumnContext,
-  row: Readonly<TableRow>,
+export function createRowContext<TRow extends TableRow = TableRow>(
+  columnContext: FormTableColumnContext<TRow>,
+  row: Readonly<TRow>,
   index: number,
-  rowConfig: Readonly<RowConfig>
-): FormTableRowContext {
+  rowConfig: Readonly<RowConfig<TRow>>
+): FormTableRowContext<TRow> {
   return extendLazyContext(columnContext, {
     row,
     index,
@@ -71,10 +71,10 @@ export function createRowContext(
 }
 
 /** 在行级上下文上读取字段值并附加当前字段配置。 */
-export function createFieldRenderContext(
-  rowContext: FormTableRowContext,
-  itemConfig: Readonly<FormItemConfig>
-): FormTableFieldRenderContext {
+export function createFieldRenderContext<TRow extends TableRow = TableRow>(
+  rowContext: FormTableRowContext<TRow>,
+  itemConfig: Readonly<FormItemConfig<TRow>>
+): FormTableFieldRenderContext<TRow> {
   return extendLazyContext(rowContext, {
     fieldKey: itemConfig.fieldKey,
     get value() {

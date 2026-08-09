@@ -1,5 +1,6 @@
 import type { PluginObject } from 'vue'
 import FormTable from './index.vue'
+export { defineFormTableColumns } from './defineFormTableColumns'
 
 export * from './types.public'
 export { FormTable }
