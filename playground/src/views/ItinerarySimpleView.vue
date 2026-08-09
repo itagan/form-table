@@ -180,11 +180,11 @@ const tableProps = computed(() => ({ border: true, rowKey: '_rowKey', spanMethod
 const columns: ColumnConfig[] = [
   {
     key: 'date-column', label: '议程日期', props: { prop: 'dateLabel', width: 150, align: 'center' },
-    children: [{ children: [{ key: 'date-field', fieldKey: 'dateLabel', type: 'slot', component: { renderer: 'day-date' } }] }]
+    cellSlot: 'day-date'
   },
   {
     key: 'topic-column', label: '议程主题', props: { prop: 'topic', minWidth: 200 },
-    children: [{ children: [{ key: 'topic-field', fieldKey: 'topic', type: 'slot', component: { renderer: 'day-topic' } }] }]
+    cellSlot: 'day-topic'
   },
   {
     key: 'sequence-column', label: '议程', props: { width: 82, align: 'center' },
@@ -192,11 +192,11 @@ const columns: ColumnConfig[] = [
   },
   {
     key: 'time-column', label: '时间计划', props: { minWidth: 230 },
-    children: [{ children: [{ key: 'time-field', fieldKey: 'timeRange', type: 'slot', component: { renderer: 'time-plan' } }] }]
+    cellSlot: 'time-plan'
   },
   {
     key: 'name-column', label: '议程名称', props: { minWidth: 280 },
-    children: [{ children: [{ key: 'name-field', fieldKey: 'name', type: 'slot', component: { renderer: 'itinerary-name' } }] }]
+    cellSlot: 'itinerary-name'
   },
   {
     key: 'city-column', label: '议程城市', props: { minWidth: 150 },
