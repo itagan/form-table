@@ -57,11 +57,11 @@
 
           <tbody class="layer-group">
             <tr>
-              <th rowspan="7" scope="rowgroup" class="layer-cell">Column</th>
+              <th rowspan="8" scope="rowgroup" class="layer-cell">Column</th>
               <td><code>key</code></td>
               <td>渲染标识</td>
               <td>动态列应唯一稳定；增删、显隐和同顺序替换时用于复用列包装实例。</td>
-              <td rowspan="7" class="context-cell"><code>tableData</code><br><code>columnConfig</code></td>
+              <td rowspan="8" class="context-cell"><code>tableData</code><br><code>columnConfig</code></td>
             </tr>
             <tr>
               <td><code>label</code></td>
@@ -77,6 +77,11 @@
               <td><code>headerProps</code></td>
               <td>默认表头文本节点</td>
               <td>可配置原生 <code>title</code>、class、style 和 aria 属性；自定义表头不自动应用。</td>
+            </tr>
+            <tr>
+              <td><code>headerHint</code></td>
+              <td>默认表头外层提示</td>
+              <td>字符串或动态字符串；当前使用原生 title，自定义及功能列表头不自动应用。</td>
             </tr>
             <tr>
               <td><code>headerSlot</code></td>
@@ -122,11 +127,11 @@
 
           <tbody class="layer-group">
             <tr>
-              <th rowspan="7" scope="rowgroup" class="layer-cell">Item</th>
+              <th rowspan="8" scope="rowgroup" class="layer-cell">Item</th>
               <td><code>key</code></td>
               <td>渲染标识</td>
               <td>可选；动态增删、排序或重复 fieldKey 时建议提供。</td>
-              <td rowspan="7" class="context-cell"><code>tableData</code><br><code>columnConfig</code><br><code>row</code><br><code>index</code><br><code>rowConfig</code><br><code>fieldKey</code><br><code>value</code><br><code>itemConfig</code></td>
+              <td rowspan="8" class="context-cell"><code>tableData</code><br><code>columnConfig</code><br><code>row</code><br><code>index</code><br><code>rowConfig</code><br><code>fieldKey</code><br><code>value</code><br><code>itemConfig</code></td>
             </tr>
             <tr>
               <td><code>fieldKey</code></td>
@@ -147,6 +152,11 @@
               <td><code>formItemProps</code></td>
               <td>el-form-item</td>
               <td>配置 <code>label</code>、<code>rules</code> 等；校验路径由组件根据 fieldKey 自动生成。</td>
+            </tr>
+            <tr>
+              <td><code>hint</code></td>
+              <td>字段外层提示</td>
+              <td>字符串或动态字符串；当前作为原生 title 应用于已有 el-form-item。</td>
             </tr>
             <tr>
               <td><code>type</code></td>

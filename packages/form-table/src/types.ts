@@ -47,6 +47,8 @@ export interface FormTableFieldContext extends FormTableFieldRenderContext {
 
 /** 支持直接值或根据运行时上下文计算的动态值。 */
 export type DynamicValue<T, Context> = T | ((context: Context) => T)
+/** FormTable 外层提示内容；当前使用原生 title，未来可扩展其他提示渲染方式。 */
+export type FormTableHint = string
 /** 字段组件事件监听器签名，第一个参数固定为字段上下文。 */
 export type FormTableFieldListener = (
   context: FormTableFieldContext,
@@ -141,6 +143,8 @@ interface BaseFormItemConfig {
   colProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext>
   /** 直接传给 el-form-item。 */
   formItemProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext>
+  /** 字段外层提示；当前作为原生 title 应用于 el-form-item。 */
+  hint?: DynamicValue<FormTableHint | null | undefined, FormTableFieldRenderContext>
 }
 
 /** 使用内置 type 映射渲染的字段配置。 */
@@ -206,6 +210,8 @@ export interface ColumnConfig {
   headerSlot?: string
   /** 传给默认表头文本节点；可用于配置原生 title、class、style 和 aria 属性。 */
   headerProps?: DynamicValue<ComponentProps, FormTableColumnContext>
+  /** 默认表头提示；当前作为原生 title 应用于表头文本节点。 */
+  headerHint?: DynamicValue<FormTableHint | null | undefined, FormTableColumnContext>
   /** 静态或动态显隐配置。 */
   visible?: DynamicValue<boolean, FormTableColumnContext>
   /** 直接传给 el-table-column。 */

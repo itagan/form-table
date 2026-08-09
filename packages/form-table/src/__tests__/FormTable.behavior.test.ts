@@ -209,6 +209,7 @@ describe('FormTable core behavior', () => {
             children: [{ children: [{
               fieldKey: 'multiple',
               type: 'slot',
+              hint: '多根内容',
               component: { renderer: 'multiple-slot' }
             }] }]
           }]
@@ -229,6 +230,7 @@ describe('FormTable core behavior', () => {
     expect(wrapper.find('.transparent-first').exists()).toBe(true)
     expect(wrapper.find('.transparent-second').exists()).toBe(true)
     expect(wrapper.find('.form-table-slot').exists()).toBe(false)
+    expect(wrapper.find('.el-form-item').attributes('title')).toBe('多根内容')
     wrapper.destroy()
   })
 
@@ -238,6 +240,7 @@ describe('FormTable core behavior', () => {
         key: 'school-column',
         label: '学校',
         headerSlot: 'school-header',
+        headerHint: '不会应用到自定义表头',
         headerProps: { title: '不会应用到自定义表头' },
         children: [{ children: [{ fieldKey: 'name', type: 'input' }] }]
       }],
@@ -256,16 +259,20 @@ describe('FormTable core behavior', () => {
     wrapper.destroy()
   })
 
-  it('applies static and dynamic properties to the default header text node', async () => {
+  it('applies headerHint and other properties to the default header text node', async () => {
     const headerProps = vi.fn(({ tableData, columnConfig }: FormTableColumnContext) => ({
-      title: `${columnConfig.label}：${tableData.length} 条`,
+      class: `records-${tableData.length}`,
       'aria-label': `${columnConfig.label}说明`
     }))
+    const headerHint = vi.fn(({ tableData, columnConfig }: FormTableColumnContext) => (
+      `${columnConfig.label}：${tableData.length} 条`
+    ))
     const wrapper = mountFormTable({
       tableData: [{ name: 'Alice' }, { name: 'Bob' }],
       columns: [{
         label: '姓名',
         headerProps,
+        headerHint,
         children: [{ children: [{ fieldKey: 'name', type: 'input' }] }]
       }]
     })
@@ -274,7 +281,9 @@ describe('FormTable core behavior', () => {
     const header = wrapper.find('.form-table-column-header')
     expect(header.attributes('title')).toBe('姓名：2 条')
     expect(header.attributes('aria-label')).toBe('姓名说明')
+    expect(header.classes()).toContain('records-2')
     expect(headerProps).toHaveBeenCalledTimes(1)
+    expect(headerHint).toHaveBeenCalledTimes(1)
     expect(Object.keys(headerProps.mock.calls[0][0]).sort()).toEqual([
       'columnConfig',
       'tableData'
@@ -318,6 +327,57 @@ describe('FormTable core behavior', () => {
     const text = wrapper.find('.summary-text')
     expect(text.text()).toBe('完整说明')
     expect(text.attributes('title')).toBe('查看：完整说明')
+    wrapper.destroy()
+  })
+
+  it('applies dynamic field hints to el-form-item without changing component attrs', async () => {
+    const hint = vi.fn(({ value }: FormTableFieldRenderContext) => (
+      value ? `完整内容：${value}` : undefined
+    ))
+    const wrapper = mountFormTable({
+      tableData: [{ name: 'Alice' }],
+      columns: [{
+        label: '姓名',
+        children: [{ children: [{
+          fieldKey: 'name',
+          type: 'input',
+          hint
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    const formItem = wrapper.find('.el-form-item')
+    const nativeInput = wrapper.find('.el-input__inner')
+    expect(formItem.attributes('title')).toBe('完整内容：Alice')
+    expect(nativeInput.attributes('title')).toBeUndefined()
+    expect(hint).toHaveBeenCalledTimes(1)
+
+    await wrapper.setProps({ tableData: [{ name: '' }] })
+    expect(formItem.attributes('title')).toBeUndefined()
+    expect(hint).toHaveBeenCalledTimes(2)
+    wrapper.destroy()
+  })
+
+  it('preserves title passthrough at header, form-item, and component layers', async () => {
+    const wrapper = mountFormTable({
+      tableData: [{ name: 'Alice' }],
+      columns: [{
+        label: '姓名',
+        headerProps: { title: '底层表头提示' },
+        children: [{ children: [{
+          fieldKey: 'name',
+          type: 'input',
+          formItemProps: { title: '底层字段提示' },
+          component: { props: { title: '底层组件提示' } }
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.form-table-column-header').attributes('title')).toBe('底层表头提示')
+    expect(wrapper.find('.el-form-item').attributes('title')).toBe('底层字段提示')
+    expect(wrapper.find('.el-input__inner').attributes('title')).toBe('底层组件提示')
     wrapper.destroy()
   })
 

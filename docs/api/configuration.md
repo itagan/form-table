@@ -46,8 +46,9 @@ tableData.value = tableData.value.filter((_, index) => index !== deleteIndex)
 {
   label: '基本信息',
   props: { minWidth: 400 },       // el-table-column
+  headerHint: '基本信息说明',      // 默认表头原生 title
   headerProps: {                  // 默认表头文本节点
-    title: '基本信息说明'
+    'aria-label': '基本信息'
   },
   children: [{
     props: { gutter: 8 },         // el-row
@@ -55,6 +56,7 @@ tableData.value = tableData.value.filter((_, index) => index !== deleteIndex)
       key: 'primary-name',        // 可选，稳定渲染身份
       fieldKey: 'name',
       type: 'input',
+      hint: ({ value }) => String(value || ''), // el-form-item 原生 title
       colProps: { span: 12 },     // el-col
       formItemProps: {},          // el-form-item
       component: { props: {} }    // el-input
@@ -63,9 +65,9 @@ tableData.value = tableData.value.filter((_, index) => index !== deleteIndex)
 }
 ```
 
-- Column 的 `label` 是表头文本，`props` 直接传给 `el-table-column`，`headerProps` 传给默认表头文本节点。动态增删、显隐或替换列配置时应提供唯一稳定的 `key`。
+- Column 的 `label` 是表头文本，`props` 直接传给 `el-table-column`，`headerProps` 传给默认表头文本节点，`headerHint` 是默认表头的外层提示。动态增删、显隐或替换列配置时应提供唯一稳定的 `key`。
 - Row 的 `props` 直接传给 `el-row`。
-- Item 的 `key` 是可选渲染身份，`fieldKey` 是必填的数据路径；`colProps` 与 `formItemProps` 分别传给 `el-col` 和 `el-form-item`。
+- Item 的 `key` 是可选渲染身份，`fieldKey` 是必填的数据路径；`colProps` 与 `formItemProps` 分别传给 `el-col` 和 `el-form-item`，`hint` 是字段外层提示。
 - 动态增删、排序、切换渲染器或重复使用同一 `fieldKey` 时建议提供稳定的 Item `key`；否则默认使用 `fieldKey`。
 
 唯一 `column.key` 会在列增删、动态显隐以及同顺序配置替换时复用仍然存在的列包装实例。已有列的相对顺序发生变化时，FormTable 会更新内部顺序版本并重新挂载可见列，确保 Element UI 按新顺序注册。未配置或重复的 Column key 按 `label + sourceIndex` 降级，不保证结构变化后的实例稳定性。
@@ -239,36 +241,36 @@ component: {
 </template>
 ```
 
-### 原生 title 提示
+### 外层提示与原生 title
 
-默认表头使用 `headerProps.title`，支持根据列上下文动态计算：
+默认表头使用 `headerHint`，支持根据列上下文动态计算：
 
 ```ts
 {
   label: '结算金额',
-  headerProps: ({ tableData }) => ({
-    title: `包含税费；当前共 ${tableData.length} 条记录`
-  })
+  headerHint: ({ tableData }) =>
+    `包含税费；当前共 ${tableData.length} 条记录`
 }
 ```
 
-字段使用现有的 `component.props.title`，不会增加包装节点：
+字段使用 Item 的 `hint`。字符串会作为原生 title 应用到已有 `el-form-item`，不会增加包装节点，也不依赖实际字段组件如何转发 attrs：
 
 ```ts
 {
   fieldKey: 'remark',
   type: 'text',
-  component: {
-    props: ({ value }) => ({
-      title: value == null ? undefined : String(value)
-    })
-  }
+  hint: ({ value }) =>
+    value == null ? undefined : String(value)
 }
 ```
 
-内置和自定义 component 模式会把 props 原样传给实际组件，由组件决定属性落点。例如 Element UI `el-input` 设置了 `inheritAttrs: false`，但会通过 `v-bind="$attrs"` 把 title 传给内部原生 input；FormTable 不再重复写到 `.el-input` 根节点。其他自定义组件如果关闭 attrs 继承，应自行把 `$attrs` 绑定到目标节点。text 模式直接把 props 绑定到已有 span。slot 模式不会自动绑定 `component.props`，应在模板中使用 `v-bind="component.props"`。`headerSlot` 和 `column.props.renderHeader` 同样由调用方完全控制，因此不会自动应用 `headerProps`。
+`hint/headerHint` 只负责外层提示，不修改或复制任何 props。`headerProps.title`、`formItemProps.title` 和 `component.props.title` 仍按各自目标原样透传；例如 Element UI `el-input` 会通过 `$attrs` 把 `component.props.title` 传给内部 input。调用方需要精确控制底层提示节点时可以继续使用这些属性。字段 Slot 也会自动获得外层 `hint`，其内部 title 仍由模板自行绑定。
 
-`title` 保持原生 HTML 属性语义，应传字符串或动态返回字符串；不要使用 `title: true`，否则浏览器提示内容通常是字符串 `"true"`。Select、日期、对象等字段的显示文本可能不同于原始 value，应由调用方明确生成最终提示内容。
+提示保持原生 HTML title 的内容语义：应传字符串或动态返回字符串；空字符串不会显示浏览器提示，`null/undefined` 会移除提示。Select、日期、对象等字段的显示文本可能不同于原始 value，应由调用方明确生成最终字符串。
+
+字符串形式将始终默认使用原生 title。未来若增加 Tooltip，将通过 `hint` 的对象配置扩展渲染方式，不改变现有字符串配置的行为和性能特征。
+
+`headerSlot` 和 `column.props.renderHeader` 由调用方完全控制，因此不会自动应用 `headerHint/headerProps`。Element UI 的 `selection/index/expand` 功能列同样保持原生表头行为。
 
 ### 自定义组件绑定协议
 
@@ -505,7 +507,7 @@ component    当前行解析后的组件配置
 
 | 使用位置 | 可用上下文 |
 | --- | --- |
-| Column `visible/props/headerProps` | `tableData`、`columnConfig` |
+| Column `visible/props/headerProps/headerHint` | `tableData`、`columnConfig` |
 | Row `visible/props` | Column 上下文 + `row/index/rowConfig` |
 | Item 动态配置 | Row 上下文 + `fieldKey/value/itemConfig` |
 | `component.listeners` | Item 上下文 + `setValue/updateRow` |
@@ -563,11 +565,13 @@ ActionContext = ItemContext + setValue, updateRow
 | `column.visible` | ColumnContext | 是否渲染当前列 `boolean` |
 | `column.props` | ColumnContext | 传给 `el-table-column` 的 props |
 | `column.headerProps` | ColumnContext | 传给默认表头文本节点的 props |
+| `column.headerHint` | ColumnContext | 默认表头的原生 title 字符串或空值 |
 | `rowConfig.visible` | RowContext | 是否渲染当前布局行 `boolean` |
 | `rowConfig.props` | RowContext | 传给 `el-row` 的 props |
 | `itemConfig.visible` | ItemContext | 是否渲染当前字段 `boolean` |
 | `itemConfig.colProps` | ItemContext | 传给 `el-col` 的 props |
 | `itemConfig.formItemProps` | ItemContext | 传给 `el-form-item` 的 props |
+| `itemConfig.hint` | ItemContext | 字段外层的原生 title 字符串或空值 |
 | `component.resolveRenderer` | ItemContext | 实际组件对象、全局组件名称或 `undefined` |
 | `component.props` | ItemContext | 传给实际字段组件的 props |
 | `component.options` | ItemContext | select/radio/checkbox 等使用的选项数组 |
