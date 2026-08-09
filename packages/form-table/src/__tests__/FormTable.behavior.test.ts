@@ -148,6 +148,61 @@ describe('FormTable core behavior', () => {
     wrapper.destroy()
   })
 
+  it('renders a cellSlot column without field wrappers or a virtual fieldKey', async () => {
+    const original = [{ id: 1, name: 'Alice', enabled: true }]
+    const wrapper = mountFormTable({
+      tableData: original,
+      columns: [{
+        key: 'actions-column',
+        label: '操作',
+        cellSlot: 'row-actions',
+        props: { width: 120, align: 'center' }
+      }],
+      scopedSlots: {
+        'row-actions': `<button
+          type="button"
+          class="cell-slot-action"
+          :data-index="props.index"
+          :data-column-key="props.columnConfig.key"
+          @click="props.updateRow({ enabled: !props.row.enabled })"
+        >{{ props.row.name }}|{{ props.fieldKey === undefined }}|{{ props.propPath === undefined }}</button>`
+      }
+    })
+    await wrapper.vm.$nextTick()
+
+    const button = wrapper.find('.cell-slot-action')
+    expect(button.text()).toBe('Alice|true|true')
+    expect(button.attributes('data-index')).toBe('0')
+    expect(button.attributes('data-column-key')).toBe('actions-column')
+    expect(wrapper.find('.el-form-item').exists()).toBe(false)
+    expect(wrapper.find('.el-row').exists()).toBe(false)
+    expect(wrapper.find('.el-col').exists()).toBe(false)
+
+    await button.trigger('click')
+    expect(original).toEqual([{ id: 1, name: 'Alice', enabled: true }])
+    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([
+      { id: 1, name: 'Alice', enabled: false }
+    ])
+    expect(wrapper.emitted('field-change')?.[0]?.[0]).toMatchObject({
+      fieldKey: 'enabled',
+      value: false,
+      previousValue: true
+    })
+    wrapper.destroy()
+  })
+
+  it('keeps a cellSlot column empty when its named slot is missing', async () => {
+    const wrapper = mountFormTable({
+      columns: [{ label: '操作', cellSlot: 'missing-actions' }]
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.text()).toContain('操作')
+    expect(wrapper.text()).not.toContain('Alice')
+    expect(wrapper.find('.el-form-item').exists()).toBe(false)
+    wrapper.destroy()
+  })
+
   it('renders native, component, multiple-root, and empty slots without wrapper elements', async () => {
     localVue.component('transparent-slot-root', {
       props: ['value'],

@@ -2,17 +2,25 @@
 
 包入口导出：
 
-- `ColumnConfig`、`RowConfig`、`FormItemConfig`
+- `ColumnConfig`、`LayoutColumnConfig`、`CellSlotColumnConfig`、`RowConfig`、`FormItemConfig`
 - `BuiltinFormItemConfig`、`ComponentFormItemConfig`、`SlotFormItemConfig`
 - `FieldComponentConfig`、`FieldModelConfig`、`FieldRendererResolver`、`BuiltinFormItemType`、`FormItemType`
 - `FormItemOption`、`OptionPropsConfig`、`ResolvedComponentConfig`、`ResolvedHeaderConfig`
 - `TableRow`、`FormTableRecord`、`FormTableProps`
 - `FormTableTableContext`、`FormTableColumnContext`、`FormTableRowContext`、`FormTableFieldRenderContext`
-- `FormTableFieldContext`、`FormTableSlotContext`
+- `FormTableFieldContext`、`FormTableSlotContext`、`FormTableCellSlotContext`
 - `FormTableFieldChangePayload`、`FormTableHeaderSlotContext`
 - `FormTableExpose`、`FormTableElementFormRef`、`FormTableElementTableRef`
 
 运行时入口只导出默认组件、`FormTable` 和 `FormTablePlugin`。上下文注入 key、内部更新 API、动态解析和渲染模式工具都不属于公共入口。
+
+列配置通过联合类型互斥：
+
+```ts
+type ColumnConfig = LayoutColumnConfig | CellSlotColumnConfig
+```
+
+`LayoutColumnConfig` 使用 `children` 进入 Row/Item 字段渲染链路；`CellSlotColumnConfig` 使用 `cellSlot` 直接渲染单元格，不接受 `children`，也不需要 `fieldKey`。它的 Slot 上下文为 `row/index/columnConfig/updateRow`。
 
 三种字段配置通过联合类型互斥：
 
@@ -60,6 +68,7 @@ Row visible/props        → Column 信息 + row, index, rowConfig
 Field 动态配置           → Row 信息 + fieldKey, value, itemConfig
 component.listeners      → Field 信息 + setValue, updateRow
 字段 slot                → Listener 信息 + propPath, component
+列级 cellSlot            → row, index, columnConfig, updateRow
 ```
 
 `FormTableSlotContext.itemConfig.component` 保留调用方传入的原始配置；`FormTableSlotContext.component` 的类型是 `ResolvedComponentConfig`，包含针对当前数据行解析并归一化后的 `props/listeners/options/optionProps/model`，用于直接绑定 Slot 内组件。

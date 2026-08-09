@@ -49,6 +49,19 @@ Item 的 `key` 是可选渲染身份，`fieldKey` 是必填数据路径。动态
 
 Slot 内容直接渲染，不附加内部 `div/span` 包装；需要根节点样式时由 Slot 模板自行提供。
 
+不参与字段绑定的操作列、状态组合或图片单元格可直接使用列级 `cellSlot`：
+
+```ts
+{
+  key: 'actions-column',
+  label: '操作',
+  cellSlot: 'actions',
+  props: { width: 160, fixed: 'right' }
+}
+```
+
+`cellSlot` 与 `children` 互斥，不需要 `fieldKey`，也不创建 `el-row/el-col/el-form-item`。其 Slot 只接收 `row/index/columnConfig/updateRow`。
+
 ## 使用
 
 ```vue
@@ -61,8 +74,8 @@ Slot 内容直接渲染，不附加内部 `div/span` 包装；需要根节点样
   @field-change="handleFieldChange"
   @selection-change="handleSelectionChange"
 >
-  <template #actions="{ row, index, updateRow, component }">
-    <el-button v-bind="component.props" @click="updateRow({ enabled: !row.enabled })">切换</el-button>
+  <template #actions="{ row, index, updateRow }">
+    <el-button @click="updateRow({ enabled: !row.enabled })">切换</el-button>
     <el-button @click="removeRow(index)">删除</el-button>
   </template>
 </FormTable>
@@ -74,7 +87,7 @@ Table 原生事件直接透传。通过 ref 可调用 `validate()`、`resetField
 
 表头必填标记等展示使用 `headerSlot` 明确渲染；Slot 除原始 `columnConfig` 外还会收到已解析的 `header.props/header.hint`，由模板自行选择绑定节点。字段是否必填只由 `formItemProps.rules` 决定。
 
-动态配置只获得当前层级有意义的上下文：Column 为 `tableData/columnConfig`，Row 增加 `row/index/rowConfig`，Field 增加 `fieldKey/value/itemConfig`。组件 listener 额外获得 `setValue/updateRow`；slot 上下文再提供 `propPath/component`，不回传占位字段。数据和配置引用采用类型层面的浅只读约束，运行时不冻结对象。
+动态配置只获得当前层级有意义的上下文：Column 为 `tableData/columnConfig`，Row 增加 `row/index/rowConfig`，Field 增加 `fieldKey/value/itemConfig`。组件 listener 额外获得 `setValue/updateRow`；字段 Slot 再提供 `propPath/component`；列级 cellSlot 只提供 `row/index/columnConfig/updateRow`。数据和配置引用采用类型层面的浅只读约束，运行时不冻结对象。
 
 命名边界：`row` 是当前业务数据行，`rowConfig` 是布局配置；`itemConfig` 是原始字段配置，字段 Slot 的 `component` 是当前行解析后的组件配置，表头 Slot 的 `header` 是已解析的表头展示配置。
 

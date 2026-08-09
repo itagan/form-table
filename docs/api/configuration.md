@@ -375,6 +375,30 @@ const columns: ColumnConfig[] = [{
 
 FormTable 会按普通自定义组件处理它：未配置 `component.model` 或显式传入 `true` 时使用组件原生 Vue 2 `v-model`，其他组件事件交给 `component.listeners`，数据更新仍可使用 `setValue/updateRow`。Render Function 只是该 Vue 组件的内部实现，不是新的 FormTable 渲染模式。
 
+### 列级 cellSlot
+
+`cellSlot` 适合操作按钮、状态组合、图片和多字段拼接等不参与表单字段绑定的单元格。它直接渲染具名 Slot，不创建 `el-row`、`el-col` 或 `el-form-item`，也不需要虚拟 `fieldKey`。
+
+```ts
+const columns: ColumnConfig[] = [{
+  key: 'actions-column',
+  label: '操作',
+  cellSlot: 'row-actions',
+  props: { width: 160, fixed: 'right', align: 'center' }
+}]
+```
+
+```vue
+<template #row-actions="{ row, index, columnConfig, updateRow }">
+  <el-button type="text" @click="updateRow({ enabled: !row.enabled })">
+    切换状态
+  </el-button>
+  <el-button type="text" @click="removeRow(index)">删除</el-button>
+</template>
+```
+
+`cellSlot` 与 `children` 在 `ColumnConfig` 联合类型中互斥。其上下文只包含 `row/index/columnConfig/updateRow`，不提供 `fieldKey/value/setValue/propPath/component`。`updateRow` 继续使用受控数据更新协议；未找到对应具名 Slot 时渲染空单元格。Element UI 的 `selection/index/expand` 功能列继续只使用 `props.type`，不与 `cellSlot` 混用。
+
 ### Slot 模式
 
 Slot 适合需要完全控制模板结构，或需要组合多个组件的字段。FormTable 仍负责外层 `el-col`、`el-form-item`、校验路径和字段更新，但不会猜测 slot 内部组件应该如何接收值、选项或事件。
@@ -490,7 +514,7 @@ component: {
 | --- | --- | --- |
 | 业务数据 | `tableData`、`row`、`index`、`fieldKey`、`value` | `row` 沿用 Element UI 语义，表示 `tableData[index]`，不命名为 `rowData` |
 | 原始配置 | `columnConfig`、`rowConfig`、`itemConfig` | 返回当前 Column → Row → Item 配置路径 |
-| 更新能力 | `setValue`、`updateRow` | 只在字段 listener 和 Slot 等可执行上下文中提供 |
+| 更新能力 | `setValue`、`updateRow` | 字段 listener/Slot 可用两者；列级 cellSlot 只提供 `updateRow` |
 | 解析结果 | `component`、`header`、`propPath` | 字段 Slot 获得已解析的 `component`；表头 Slot 获得已解析的 `header` |
 
 数据与配置使用明确的成对命名：
@@ -512,6 +536,7 @@ component    当前行解析后的组件配置
 | Item 动态配置 | Row 上下文 + `fieldKey/value/itemConfig` |
 | `component.listeners` | Item 上下文 + `setValue/updateRow` |
 | 字段 Slot | listener 上下文 + `propPath/component` |
+| 列级 cellSlot | `row/index/columnConfig/updateRow` |
 | 表头 Slot | `tableData/columnConfig/columnIndex/label/header` |
 
 `columnConfig/rowConfig/itemConfig` 是渲染或事件触发时的浅只读配置引用。不要直接修改，也不要在异步流程结束后假定它仍是最新配置；动态调整应由调用方基于稳定 `key` 替换 `columns`。

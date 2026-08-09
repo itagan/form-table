@@ -200,8 +200,8 @@ export interface RowConfig {
   children: FormItemConfig[]
 }
 
-/** 单个 el-table-column 配置，可包含多个布局行。 */
-export interface ColumnConfig {
+/** 所有 el-table-column 共用的表头、显隐和透传配置。 */
+interface BaseColumnConfig {
   /** 列的稳定渲染身份；动态增删、显隐或替换配置时应保持唯一。 */
   key?: string
   /** el-table-column 的表头文本。 */
@@ -216,9 +216,36 @@ export interface ColumnConfig {
   visible?: DynamicValue<boolean, FormTableColumnContext>
   /** 直接传给 el-table-column。 */
   props?: DynamicValue<ComponentProps, FormTableColumnContext>
+}
+
+/** 通过 Row/Item 布局渲染表单字段的列。 */
+export interface LayoutColumnConfig extends BaseColumnConfig {
   /** 当前列内的布局行配置。 */
   children: RowConfig[]
+  cellSlot?: never
 }
+
+/** 直接使用父组件具名 Slot 渲染单元格的列。 */
+export interface CellSlotColumnConfig extends BaseColumnConfig {
+  /** 单元格 scoped slot 名称；不创建 Row/Item 或表单字段上下文。 */
+  cellSlot: string
+  children?: never
+}
+
+/** 列级单元格 Slot 可使用的精简上下文。 */
+export interface FormTableCellSlotContext {
+  /** 当前业务数据行。 */
+  row: Readonly<TableRow>
+  /** 当前数据行在 tableData 中的渲染下标。 */
+  index: number
+  /** 当前 cellSlot 列配置。 */
+  columnConfig: Readonly<CellSlotColumnConfig>
+  /** 不可变地批量更新当前行，patch 的 key 支持字段路径。 */
+  updateRow: (patch: Partial<TableRow>) => void
+}
+
+/** 普通列使用 children，列级自定义单元格使用 cellSlot，两者互斥。 */
+export type ColumnConfig = LayoutColumnConfig | CellSlotColumnConfig
 
 /** FormTable 组件的公开 props 类型。 */
 export interface FormTableProps {

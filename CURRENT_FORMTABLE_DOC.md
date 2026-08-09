@@ -9,21 +9,23 @@ FormTable
 └─ el-form
    └─ el-table
       └─ Column → el-table-column
-         └─ Row → el-row
-            └─ Item → el-col + el-form-item
-               ├─ type/component → 字段组件
-               └─ slot → 具名 scoped slot
+         ├─ children → Row → el-row
+         │  └─ Item → el-col + el-form-item
+         │     ├─ type/component → 字段组件
+         │     └─ slot → 字段具名 scoped slot
+         └─ cellSlot → 列级具名 scoped slot
 ```
 
 ## API 边界
 
-- `children` 是唯一布局结构。
+- 普通表单列使用 `children` 布局；不参与字段绑定的单元格可使用与其互斥的列级 `cellSlot`。
 - `type` 是唯一渲染策略：内置别名、`component` 动态组件或 `slot` 自定义模板。
 - `component.renderer` 在 component 模式下是 Vue 组件，在 slot 模式下是具名 slot 名称。
 - `component.props/listeners/options/optionProps` 是三种渲染模式共用的配置来源。
 - `component.model` 可声明自定义组件的 `prop/event/valueFromEvent`；未配置时保留 Vue 2 原生 `v-model`，`false` 表示不注入模型绑定。
 - 远程 JSON 只负责可序列化结构，组件、事件和 slot 在业务页面按 `fieldKey` 本地增强。
 - `type: 'slot'` 绕过组件渲染器，但保留 `el-col` 和 `el-form-item`；解析后的 component 配置通过同名上下文返回模板。
+- 列级 `cellSlot` 不创建 Row/Item，不需要 `fieldKey`，只提供 `row/index/columnConfig/updateRow`。
 - 表头必填标记等自定义展示由 `headerSlot` 显式渲染，字段校验只由 `formItemProps.rules` 决定。
 - 表头 Slot 同时获得原始 `columnConfig` 和已解析的 `header.props/header.hint`，不会自行执行动态配置函数。
 - `colProps`、`formItemProps`、`component.props` 分别透传到对应 Element UI 层。
