@@ -270,7 +270,7 @@ component: {
 
 字符串形式将始终默认使用原生 title。未来若增加 Tooltip，将通过 `hint` 的对象配置扩展渲染方式，不改变现有字符串配置的行为和性能特征。
 
-`headerSlot` 和 `column.props.renderHeader` 由调用方完全控制，因此不会自动应用 `headerHint/headerProps`。Element UI 的 `selection/index/expand` 功能列同样保持原生表头行为。
+`headerSlot` 和 `column.props.renderHeader` 由调用方完全控制，因此不会自动应用 `headerHint/headerProps`。具名 `headerSlot` 会收到已解析的 `header.props/header.hint` 供模板绑定；原生 `renderHeader` 继续完全遵循 Element UI 协议。Element UI 的 `selection/index/expand` 功能列同样保持原生表头行为。
 
 ### 自定义组件绑定协议
 
@@ -491,7 +491,7 @@ component: {
 | 业务数据 | `tableData`、`row`、`index`、`fieldKey`、`value` | `row` 沿用 Element UI 语义，表示 `tableData[index]`，不命名为 `rowData` |
 | 原始配置 | `columnConfig`、`rowConfig`、`itemConfig` | 返回当前 Column → Row → Item 配置路径 |
 | 更新能力 | `setValue`、`updateRow` | 只在字段 listener 和 Slot 等可执行上下文中提供 |
-| 解析结果 | `component`、`propPath` | 只在字段 Slot 中提供；`component` 已针对当前数据行解析 |
+| 解析结果 | `component`、`header`、`propPath` | 字段 Slot 获得已解析的 `component`；表头 Slot 获得已解析的 `header` |
 
 数据与配置使用明确的成对命名：
 
@@ -512,7 +512,7 @@ component    当前行解析后的组件配置
 | Item 动态配置 | Row 上下文 + `fieldKey/value/itemConfig` |
 | `component.listeners` | Item 上下文 + `setValue/updateRow` |
 | 字段 Slot | listener 上下文 + `propPath/component` |
-| 表头 Slot | `tableData/columnConfig/columnIndex/label` |
+| 表头 Slot | `tableData/columnConfig/columnIndex/label/header` |
 
 `columnConfig/rowConfig/itemConfig` 是渲染或事件触发时的浅只读配置引用。不要直接修改，也不要在异步流程结束后假定它仍是最新配置；动态调整应由调用方基于稳定 `key` 替换 `columns`。
 
@@ -796,11 +796,15 @@ Item 动态配置实际收到：
   tableData,
   columnConfig,
   columnIndex: 0,
-  label: '地区'
+  label: '地区',
+  header: {
+    props: { 'aria-label': '地区说明' },
+    hint: '请选择业务地区'
+  }
 }
 ```
 
-这里的三个 `*Config` 与调用方传入 `columns` 中的对应对象是同一引用，不是深拷贝；`component` 则是 FormTable 为当前业务数据行生成的新解析结果。
+这里的三个 `*Config` 与调用方传入 `columns` 中的对应对象是同一引用，不是深拷贝；`component` 和 `header` 则是 FormTable 对动态配置求值后生成的解析结果。不要在 Slot 中自行执行原始 `component.props`、`headerProps` 或 `headerHint` 函数。
 
 ### 动态显隐
 

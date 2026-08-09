@@ -5,6 +5,7 @@
 ### Improved
 
 - 增加无包装节点的外层提示 API：默认表头使用 `column.headerHint`，字段使用 Item `hint`，当前将字符串作为原生 title 应用到默认表头文本节点或已有 `el-form-item`；各层 props 中的 title 继续原样透传。
+- 表头 Slot 新增已解析的 `header.props/header.hint`，与原始 `columnConfig` 分工，避免模板重复执行动态表头配置。
 - 优化动态 Column 渲染身份：唯一 `column.key` 在增删、显隐和同顺序配置替换时保持稳定，仅在已有列相对顺序变化时整体换代以同步 Element UI 列顺序。
 - 补充动态行列优化说明，明确 `rowKey`、`column.key`、`item.key` 的职责，以及受控数据立即回写、后端保存可延迟的边界。
 
