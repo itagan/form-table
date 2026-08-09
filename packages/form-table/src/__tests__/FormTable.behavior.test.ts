@@ -510,6 +510,38 @@ describe('FormTable core behavior', () => {
     wrapper.destroy()
   })
 
+  it('forwards text field listeners with the field context and original event arguments', async () => {
+    const click = vi.fn()
+    const wrapper = mountFormTable({
+      tableData: [{ summary: '只读摘要' }],
+      columns: [{
+        label: '摘要',
+        children: [{ children: [{
+          fieldKey: 'summary',
+          type: 'text',
+          component: {
+            props: { class: 'clickable-summary', title: '查看摘要' },
+            listeners: { click }
+          }
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    await wrapper.find('.clickable-summary').trigger('click')
+
+    expect(click).toHaveBeenCalledTimes(1)
+    expect(click.mock.calls[0][0]).toMatchObject({
+      row: { summary: '只读摘要' },
+      index: 0,
+      fieldKey: 'summary',
+      value: '只读摘要'
+    })
+    expect(click.mock.calls[0][1]).toBeInstanceOf(Event)
+    expect(wrapper.find('.clickable-summary').attributes('title')).toBe('查看摘要')
+    wrapper.destroy()
+  })
+
   it('applies dynamic field hints to el-form-item without changing component attrs', async () => {
     const hint = vi.fn(({ value }: FormTableFieldRenderContext) => (
       value ? `完整内容：${value}` : undefined

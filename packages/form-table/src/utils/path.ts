@@ -12,6 +12,16 @@ function isObjectLike(value: unknown): value is FormTableRecord {
  */
 const NORMALIZED_PATH_CACHE_LIMIT = 512
 const normalizedPathCache = new Map<string, readonly string[]>()
+const UNSAFE_PATH_SEGMENTS = new Set(['__proto__', 'prototype', 'constructor'])
+const ARRAY_INDEX_SEGMENT = /^(0|[1-9]\d*)$/
+
+/** 拒绝可能改变或穿透对象原型链的字段路径。 */
+function assertSafePath(path: string, segments: readonly string[]) {
+  const unsafeSegment = segments.find(segment => UNSAFE_PATH_SEGMENTS.has(segment))
+  if (unsafeSegment) {
+    throw new TypeError(`Unsafe FormTable field path "${path}": segment "${unsafeSegment}" is not allowed`)
+  }
+}
 
 function normalizePath(path: string): readonly string[] {
   const cached = normalizedPathCache.get(path)
@@ -21,6 +31,8 @@ function normalizePath(path: string): readonly string[] {
     .replace(/\[(\d+)\]/g, '.$1')
     .split('.')
     .filter(Boolean)
+
+  assertSafePath(path, segments)
 
   if (normalizedPathCache.size >= NORMALIZED_PATH_CACHE_LIMIT) {
     const oldestPath = normalizedPathCache.keys().next().value
@@ -40,7 +52,10 @@ export function getValueByPath(source: FormTableRecord, path: string): FormTable
   let current: FormTableValue = source
 
   for (const segment of segments) {
-    if (!isObjectLike(current)) {
+    if (
+      !isObjectLike(current)
+      || !Object.prototype.hasOwnProperty.call(current, segment)
+    ) {
       return undefined
     }
 
@@ -78,13 +93,15 @@ export function setValueByPath<T extends FormTableRecord>(
       return
     }
 
-    const nextValue = current[segment]
+    const nextValue = Object.prototype.hasOwnProperty.call(current, segment)
+      ? current[segment]
+      : undefined
     if (Array.isArray(nextValue)) {
       current[segment] = [...nextValue]
     } else if (isObjectLike(nextValue)) {
       current[segment] = { ...nextValue }
     } else {
-      current[segment] = {}
+      current[segment] = ARRAY_INDEX_SEGMENT.test(segments[index + 1]) ? [] : {}
     }
 
     current = current[segment]

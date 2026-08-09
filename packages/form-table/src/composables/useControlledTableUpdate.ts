@@ -123,10 +123,20 @@ export function useControlledTableUpdate(
 
     if (changes.length === 0) return
 
+    const rowKey = options.getRowKey()
+    if (
+      rowKey !== undefined
+      && !Object.is(getRowIdentity(currentRow, rowKey), getRowIdentity(nextRow, rowKey))
+    ) {
+      if (import.meta.env.DEV) {
+        console.warn('[FormTable] tableProps.rowKey is an immutable row identity; updateRow rejected a patch that changes it.')
+      }
+      return
+    }
+
     const nextTableData = [...sourceTableData]
     nextTableData[rowIndex] = nextRow
 
-    const rowKey = options.getRowKey()
     if (
       synchronousIdentityIndex?.source === sourceTableData
       && synchronousIdentityIndex.rowKey === rowKey
