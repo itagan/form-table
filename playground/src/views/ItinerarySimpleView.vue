@@ -105,11 +105,14 @@
       </FormTable>
     </section>
 
-    <section class="result-card">
-      <h2>提交数据</h2>
+    <DemoCollapsiblePanel
+      class="result-card"
+      title="提交数据"
+      :default-open="submittedRows !== null"
+    >
       <p v-if="!submittedRows" class="empty-result">点击“生成提交数据”后显示，提交前会按日期分组。</p>
       <pre v-else>{{ JSON.stringify(submittedRows, null, 2) }}</pre>
-    </section>
+    </DemoCollapsiblePanel>
   </main>
 </template>
 
@@ -119,6 +122,7 @@ import { Message } from 'element-ui'
 import Sortable from 'sortablejs'
 import FormTable from '@itagan/form-table'
 import type { ColumnConfig, FormTableExpose, TableRow } from '@itagan/form-table'
+import DemoCollapsiblePanel from '../components/DemoCollapsiblePanel.vue'
 
 /** 表格的编辑行；同一 dayId 的行共同组成一天的议程。 */
 interface ItineraryRow extends TableRow {

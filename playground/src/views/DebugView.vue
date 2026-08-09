@@ -15,10 +15,13 @@
       <div class="actions">
         <el-button @click="logRefs">打印原生 Ref</el-button>
       </div>
-      <h2>组件配置</h2>
-      <pre>{{ columnsCode }}</pre>
-      <h2>当前数据</h2>
-      <pre>{{ JSON.stringify(tableData, null, 2) }}</pre>
+
+      <DemoCollapsiblePanel class="embedded-panel" title="组件配置">
+        <pre>{{ columnsCode }}</pre>
+      </DemoCollapsiblePanel>
+      <DemoCollapsiblePanel class="embedded-panel" title="当前数据">
+        <pre>{{ JSON.stringify(tableData, null, 2) }}</pre>
+      </DemoCollapsiblePanel>
     </section>
   </main>
 </template>
@@ -29,6 +32,7 @@ import FormTable from '@itagan/form-table'
 import type { ColumnConfig, FormTableExpose, TableRow } from '@itagan/form-table'
 import PhoneInput from '../components/CustomComponents/PhoneInput.vue'
 import StatusTag from '../components/CustomComponents/StatusTag.vue'
+import DemoCollapsiblePanel from '../components/DemoCollapsiblePanel.vue'
 import { formatFormTableConfig } from '../utils/formatFormTableConfig'
 
 const tableData = ref<TableRow[]>([{ phone: '+8613800138000', status: 'enabled' }])
@@ -74,5 +78,6 @@ const logRefs = () => {
 .demo-page { max-width: 900px; margin: 0 auto; padding: 32px; }
 .demo-card { margin-top: 20px; padding: 24px; background: #fff; border-radius: 12px; }
 .actions { margin-top: 20px; }
+.embedded-panel { margin-top: 20px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; }
 pre { padding: 16px; background: #f6f8fa; border-radius: 8px; }
 </style>

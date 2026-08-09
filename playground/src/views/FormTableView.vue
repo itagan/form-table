@@ -22,15 +22,13 @@
       </div>
     </section>
 
-    <section class="demo-card">
-      <h2>组件配置</h2>
+    <DemoCollapsiblePanel class="demo-card" title="组件配置">
       <pre>{{ columnsCode }}</pre>
-    </section>
+    </DemoCollapsiblePanel>
 
-    <section class="demo-card">
-      <h2>当前数据</h2>
+    <DemoCollapsiblePanel class="demo-card" title="当前数据">
       <pre>{{ JSON.stringify(tableData, null, 2) }}</pre>
-    </section>
+    </DemoCollapsiblePanel>
   </main>
 </template>
 
@@ -39,6 +37,7 @@ import { ref } from 'vue'
 import { Message } from 'element-ui'
 import FormTable from '@itagan/form-table'
 import type { ColumnConfig, FormTableExpose, TableRow } from '@itagan/form-table'
+import DemoCollapsiblePanel from '../components/DemoCollapsiblePanel.vue'
 import { formatFormTableConfig } from '../utils/formatFormTableConfig'
 
 const tableData = ref<TableRow[]>([

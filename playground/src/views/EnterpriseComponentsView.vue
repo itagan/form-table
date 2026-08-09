@@ -62,8 +62,9 @@
         </article>
       </div>
 
-      <h2>当前业务数据</h2>
-      <pre>{{ JSON.stringify(tableData, null, 2) }}</pre>
+      <DemoCollapsiblePanel class="data-panel" title="当前业务数据">
+        <pre>{{ JSON.stringify(tableData, null, 2) }}</pre>
+      </DemoCollapsiblePanel>
       <p class="document-path">
         完整采购场景代码与架构说明：<code>docs/examples/enterprise-components.md</code>
       </p>
@@ -78,6 +79,7 @@ import type { ColumnConfig, FormTableExpose, TableRow } from '@itagan/form-table
 import BusinessSkuSelector from '../components/EnterpriseComponents/BusinessSkuSelector.vue'
 import BusinessAttachmentUploader from '../components/EnterpriseComponents/BusinessAttachmentUploader.vue'
 import MoneyInput from '../components/EnterpriseComponents/MoneyInput.vue'
+import DemoCollapsiblePanel from '../components/DemoCollapsiblePanel.vue'
 
 interface PurchaseRow extends TableRow {
   id: string
@@ -456,6 +458,7 @@ const validate = async () => {
   margin: 0;
   color: #64748b;
 }
+.data-panel { margin-top: 20px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; }
 
 .danger-button {
   color: #f56c6c;

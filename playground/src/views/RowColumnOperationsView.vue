@@ -51,10 +51,9 @@
     </section>
 
     <section class="demo-card two-column">
-      <div>
-        <h2>当前数据</h2>
+      <DemoCollapsiblePanel class="data-panel" title="当前数据">
         <pre>{{ JSON.stringify(tableData, null, 2) }}</pre>
-      </div>
+      </DemoCollapsiblePanel>
       <div>
         <h2>关键边界</h2>
         <ul>
@@ -73,6 +72,7 @@ import { computed, nextTick, ref } from 'vue'
 import { Message, MessageBox } from 'element-ui'
 import FormTable from '@itagan/form-table'
 import type { ColumnConfig, FormTableExpose, TableRow } from '@itagan/form-table'
+import DemoCollapsiblePanel from '../components/DemoCollapsiblePanel.vue'
 
 type OperationRow = TableRow & {
   _rowKey: string
@@ -268,6 +268,7 @@ const removeAfterConfirm = async (row: OperationRow) => {
 .row-actions { white-space: nowrap; }
 .danger { color: #f56c6c; }
 .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.data-panel { min-width: 0; }
 pre { padding: 16px; overflow: auto; background: #f6f8fa; border-radius: 8px; }
 li { margin: 10px 0; line-height: 1.6; }
 @media (max-width: 800px) { .two-column { grid-template-columns: 1fr; } }
