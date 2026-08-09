@@ -377,7 +377,7 @@ FormTable 会按普通自定义组件处理它：未配置 `component.model` 或
 
 ### 列级 cellSlot
 
-`cellSlot` 适合操作按钮、状态组合、图片和多字段拼接等不参与表单字段绑定的单元格。它直接渲染具名 Slot，不创建 `el-row`、`el-col` 或 `el-form-item`，也不需要虚拟 `fieldKey`。
+`cellSlot` 是列级的单元格渲染出口，适合操作按钮、状态组合、图片、派生值和多字段拼接等不参与 FormTable 字段绑定的单元格。它从 `el-table-column` 直接进入具名 Slot，不创建 `el-row`、`el-col` 或 `el-form-item`，也不需要虚拟 `fieldKey`。
 
 ```ts
 const columns: ColumnConfig[] = [{
@@ -397,7 +397,45 @@ const columns: ColumnConfig[] = [{
 </template>
 ```
 
-`cellSlot` 与 `children` 在 `ColumnConfig` 联合类型中互斥。其上下文只包含 `row/index/columnConfig/updateRow`，不提供 `fieldKey/value/setValue/propPath/component`。`updateRow` 继续使用受控数据更新协议；未找到对应具名 Slot 时渲染空单元格。Element UI 的 `selection/index/expand` 功能列继续只使用 `props.type`，不与 `cellSlot` 混用。
+`cellSlot` 与 `children` 在 `ColumnConfig` 联合类型中互斥。列仍可使用共用的 `key/label/visible/props/headerSlot/headerProps/headerHint`，但不能再配置 Row/Item 布局。
+
+| 需求 | 推荐方式 | 原因 |
+| --- | --- | --- |
+| 操作按钮、状态、图片、派生金额 | `column.cellSlot` | 不需要字段路径和校验 |
+| 多字段组合展示 | `column.cellSlot` | 可直接从 `row` 读取多个值 |
+| 需要 `fieldKey/value/setValue` | `type: 'slot'` 字段 Slot | 需要 FormTable 字段取值和写回协议 |
+| 需要 `formItemProps.rules/propPath` | `type: 'slot'` 字段 Slot | 需要 `el-form-item` 校验语义 |
+| Element UI 选择、序号、展开列 | `column.props.type` | 继续使用 `selection/index/expand` 原生能力 |
+
+#### cellSlot 上下文
+
+Slot scope 类型是 `FormTableCellSlotContext`：
+
+| 字段 | 类型 | 含义 |
+| --- | --- | --- |
+| `row` | `Readonly<TableRow>` | 当前业务数据行，不应直接修改 |
+| `index` | `number` | 当前渲染时的数据下标，不是异步操作结束后的实时下标 |
+| `columnConfig` | `Readonly<CellSlotColumnConfig>` | 当前列的原始配置，包含 `cellSlot`、`key`、`label` 和其他列级属性 |
+| `updateRow(patch)` | `(patch: Partial<TableRow>) => void` | 不可变地合并更新当前行，patch key 支持嵌套路径 |
+
+`cellSlot` 不会为上下文补齐无意义的字段，因此没有 `tableData/columnIndex/fieldKey/value/setValue/rowConfig/itemConfig/propPath/component`。`column.visible/props/headerProps/headerHint` 仍是列配置的动态回调，它们接收 `tableData/columnConfig`；`cellSlot` 本身是 Vue scoped Slot，接收上表中的单元格上下文，两者不是同一类回调。
+
+`updateRow` 使用与字段 Slot 相同的受控更新通道：不修改原行，发出新的 `update:tableData`，并为 patch 中每个实际变化的字段发出一次 `field-change`。父组件应立即回写新数组。配置稳定且唯一的 `tableProps.rowKey` 后，异步处理中调用 `updateRow` 会在最新数据中重新定位原行；目标行已删除或 rowKey 重复时忽略更新。
+
+```vue
+<template #row-actions="{ updateRow }">
+  <el-button
+    @click="updateRow({
+      status: 'approved',
+      'audit.operatorId': currentUser.id
+    })"
+  >通过</el-button>
+</template>
+```
+
+上例只发出一个新数组，但 `status` 和 `audit.operatorId` 如果都发生变化，会各自产生一次 `field-change`。与当前值相同的 patch 项会被跳过；所有项都未变时不发出任何更新事件。
+
+Slot 返回的 VNode 会直接进入 Element UI 单元格，FormTable 不添加内部包装节点。未找到 `cellSlot` 对应的具名 Slot 时渲染空单元格。`selection/index/expand` 功能列继续只使用 `props.type`，不与 `cellSlot` 混用。
 
 ### Slot 模式
 
@@ -538,6 +576,8 @@ component    当前行解析后的组件配置
 | 字段 Slot | listener 上下文 + `propPath/component` |
 | 列级 cellSlot | `row/index/columnConfig/updateRow` |
 | 表头 Slot | `tableData/columnConfig/columnIndex/label/header` |
+
+`cellSlot` 是渲染入口，不是上表中 `visible/props` 这类动态配置函数。它的 Slot scope 由每个实际单元格生成，所以有 `row/index`；列级动态配置在没有当前行时求值，所以只有 `tableData/columnConfig`。
 
 `columnConfig/rowConfig/itemConfig` 是渲染或事件触发时的浅只读配置引用。不要直接修改，也不要在异步流程结束后假定它仍是最新配置；动态调整应由调用方基于稳定 `key` 替换 `columns`。
 

@@ -20,7 +20,23 @@
 type ColumnConfig = LayoutColumnConfig | CellSlotColumnConfig
 ```
 
-`LayoutColumnConfig` 使用 `children` 进入 Row/Item 字段渲染链路；`CellSlotColumnConfig` 使用 `cellSlot` 直接渲染单元格，不接受 `children`，也不需要 `fieldKey`。它的 Slot 上下文为 `row/index/columnConfig/updateRow`。
+`LayoutColumnConfig` 使用 `children` 进入 Row/Item 字段渲染链路；`CellSlotColumnConfig` 使用 `cellSlot` 直接渲染单元格，不接受 `children`，也不需要 `fieldKey`。
+
+```ts
+interface CellSlotColumnConfig extends BaseColumnConfig {
+  cellSlot: string
+  children?: never
+}
+
+interface FormTableCellSlotContext {
+  row: Readonly<TableRow>
+  index: number
+  columnConfig: Readonly<CellSlotColumnConfig>
+  updateRow: (patch: Partial<TableRow>) => void
+}
+```
+
+`BaseColumnConfig` 是内部的共用结构，不单独从包入口导出；它表示两种列共用的 `key/label/headerSlot/headerProps/headerHint/visible/props`。`FormTableCellSlotContext` 不继承字段上下文，因此不包含 `fieldKey/value/setValue/propPath/component`，也不会为不存在的字段语义提供空占位值。
 
 三种字段配置通过联合类型互斥：
 

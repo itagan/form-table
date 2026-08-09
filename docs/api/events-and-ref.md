@@ -16,6 +16,7 @@ Element Table 的 `row-click`、`selection-change`、`sort-change` 等事件直�
 | `@update:tableData="handler"` | 更新后的 `TableRow[]` | 否 |
 | `@field-change="handler"` | `{ row, index, fieldKey, value, previousValue }` | 否 |
 | `component.listeners[event]` | `ActionContext, ...组件原始事件参数` | 是 |
+| `cellSlot` scoped Slot | `{ row, index, columnConfig, updateRow }` | 是 |
 | Element Table 原生事件 | Element UI 原始事件参数 | 否 |
 
 ```ts
@@ -38,6 +39,31 @@ function handleTableDataUpdate(nextTableData) {
 ```
 
 ## Slot 上下文
+
+### 列级 cellSlot
+
+`cellSlot` 直接渲染整个单元格，不经过 Row/Item 字段链路。它的 scope 只提供当前单元格确实可用的内容：
+
+| 字段 | 说明 |
+| --- | --- |
+| `row` | 当前行的浅只读业务数据 |
+| `index` | Slot 渲染时的行下标 |
+| `columnConfig` | 当前浅只读 `CellSlotColumnConfig` 原始引用 |
+| `updateRow(patch)` | 不可变地更新当前行，patch key 支持嵌套路径 |
+
+```vue
+<template #row-actions="{ row, index, columnConfig, updateRow }">
+  <span>{{ columnConfig.label }}：{{ row.name }}</span>
+  <el-button @click="updateRow({ enabled: !row.enabled })">切换</el-button>
+  <el-button @click="removeRow(index)">删除</el-button>
+</template>
+```
+
+`index` 是渲染快照，适合立即执行的页面操作；异步数据更新应使用已绑定当前行的 `updateRow`，并为表格配置唯一稳定的 `tableProps.rowKey`。`updateRow` 发出 `update:tableData`，并为每个实际变化的 patch 字段发出 `field-change`。
+
+`cellSlot` 不提供 `tableData/columnIndex/fieldKey/value/setValue/rowConfig/itemConfig/propPath/component`。需要字段值、字段校验或已解析组件配置时，应改用 `type: 'slot'` 字段 Slot。
+
+### 字段 Slot
 
 字段 Slot 在 Item 上下文基础上增加更新能力和解析结果：
 
@@ -87,13 +113,14 @@ component: {
 `setValue` 与 `updateRow` 可以在同一同步回调中连续调用，后一次更新会基于前一次结果继续合并。跨异步边界后始终以父组件最新传回的 `tableData` 为准；配置 `tableProps.rowKey` 后会重新定位触发事件的原数据行。目标行已删除或无法可靠定位时不会发出更新。
 
 ```vue
-<template #actions="{ row, index, updateRow, component }">
-  <el-button
+<template #score-editor="{ value, setValue, updateRow, component }">
+  <ScoreEditor
     v-bind="component.props"
     v-on="component.listeners"
-    @click="updateRow({ enabled: !row.enabled })"
-  >切换</el-button>
-  <el-button @click="removeRow(index)">删除</el-button>
+    :value="value"
+    @input="setValue"
+  />
+  <el-button @click="updateRow({ scoreTouched: true })">标记已编辑</el-button>
 </template>
 ```
 
