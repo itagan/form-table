@@ -18,6 +18,13 @@ const examples = [
     tags: ['slot', 'component.renderer', 'dynamic']
   },
   {
+    title: 'cellSlot 列级单元格',
+    description: '独立演示组合展示、派生值、行操作、异步 rowKey 和字段 Slot 对照。',
+    path: '/cell-slot',
+    type: 'primary',
+    tags: ['cellSlot', 'updateRow', 'slot context']
+  },
+  {
     title: '动态插槽',
     description: '验证动态显隐、字段上下文和 slot 更新助手。',
     path: '/dynamic-slot-test',
@@ -68,7 +75,7 @@ const examples = [
   },
   {
     title: '调试台 API 速查',
-    description: '在 Playground 内查看 props、事件、ref 方法和推荐配置约定；完整文档请返回文档总站。',
+    description: '按完整配置路径搜索 API，对照回调上下文、渲染方式、事件和 Ref。',
     path: '/form-table-docs',
     type: 'info',
     tags: ['API', 'guide', 'examples']
@@ -98,7 +105,7 @@ const examples = [
           <el-button type="primary">打开基础示例</el-button>
         </router-link>
         <router-link to="/form-table-docs">
-          <el-button>查看精简 API</el-button>
+          <el-button>查看 API 速查</el-button>
         </router-link>
         <a :href="docsSiteUrl" class="docs-site-action">
           <el-button type="success" plain icon="el-icon-document">返回文档总站</el-button>

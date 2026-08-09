@@ -38,6 +38,6 @@ const columns: ColumnConfig[] = [{
 </script>
 ```
 
-复杂布局、自定义组件和 slot 参考 Playground 的 `/form-table-advanced`。
+复杂布局、自定义组件和字段 Slot 参考 Playground 的 `/form-table-advanced`。列级自定义单元格参考 [`cellSlot` 专题](../features/cell-slot.md) 和 `/cell-slot` 演示。
 
 行增删、动态列以及确认或接口成功后再修改表格，参考[行、列与延迟提交](./row-column-operations.md)。
