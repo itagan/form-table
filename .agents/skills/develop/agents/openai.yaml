@@ -1,0 +1,4 @@
+interface:
+  display_name: "Standard Development"
+  short_description: "按标准 Git 分支流程完成代码开发、完整验证、提交并合并到主分支"
+  default_prompt: "Use $develop to implement this change through a tested feature or fix branch and merge it into master."
