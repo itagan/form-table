@@ -56,4 +56,21 @@ describe('useControlledTableUpdate row identity', () => {
       previousValue: 'Alice'
     }))
   })
+
+  it('treats an empty rowKey as unconfigured', () => {
+    const original = { name: 'Alice' }
+    let tableData: TableRow[] = [original]
+    const emitFieldChange = vi.fn()
+    const updateApi = useControlledTableUpdate({
+      getTableData: () => tableData,
+      getRowKey: () => '',
+      emitUpdate: nextTableData => { tableData = nextTableData },
+      emitFieldChange
+    })
+
+    updateApi.updateRow(original, { name: 'Alicia' })
+
+    expect(tableData).toEqual([{ name: 'Alicia' }])
+    expect(emitFieldChange).toHaveBeenCalledOnce()
+  })
 })
