@@ -22,7 +22,7 @@ FormTable 不直接修改 `tableData`。字段输入、`setValue` 或 `updateRow
 />
 ```
 
-本地回写必须立即执行；后端保存可在独立流程中防抖。详细事件语义见 [事件与 Ref](./events-and-ref.md)。
+本地回写必须立即执行；后端保存可在独立流程中防抖。各种更新入口、事件结果和异步行为见[数据更新与受控回写](../features/data-updates.md)。
 
 ## Element UI 透传
 
@@ -41,4 +41,4 @@ const tableProps = {
 }
 ```
 
-`tableProps.rowKey` 在异步字段回调或 `cellSlot.updateRow` 中用于重新定位原数据行。rowKey 必须唯一、稳定，不应使用数组下标。
+`tableProps.rowKey` 在异步字段回调或 `cellSlot.updateRow` 中用于重新定位原数据行。rowKey 必须唯一、稳定，不应使用数组下标。不同 key 的职责和配置时机见[稳定身份与异步安全](../features/stable-identity.md)。

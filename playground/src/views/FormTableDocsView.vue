@@ -25,7 +25,7 @@
         </div>
       </div>
       <div class="feature-grid">
-        <router-link v-for="feature in featureCards" :key="feature.path" :to="feature.path" class="feature-card">
+        <router-link v-for="feature in featureCards" :key="feature.title" :to="feature.path" class="feature-card">
           <strong>{{ feature.title }}</strong>
           <p>{{ feature.description }}</p>
           <span v-for="tag in feature.tags" :key="tag">{{ tag }}</span>
