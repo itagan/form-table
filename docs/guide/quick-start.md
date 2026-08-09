@@ -11,12 +11,14 @@ FormTable 将 Vue 和 Element UI 声明为 peer dependencies，不会重复安�
 - `vue@^2.7.1`
 - `element-ui@^2.4.9`
 
-对应的支持范围是 Vue `>=2.7.1 <3.0.0`、Element UI `>=2.4.9 <3.0.0`。组件当前使用 Vue `2.7.16`、Element UI `2.15.14` 进行日常开发和完整回归测试；最低版本组合 Vue `2.7.1`、Element UI `2.4.9` 已通过现有行为测试。
+对应的支持范围是 Vue `>=2.7.1 <3.0.0`、Element UI `>=2.4.9 <3.0.0`。最低版本组合 Vue `2.7.1`、Element UI `2.4.9` 已通过现有行为测试。
+
+**最佳建议版本：Vue `2.7.16` + Element UI `2.15.14`。** 两者分别是 Vue 2 和 Element UI 2 的最终发布版本，包含各自 Vue 2 生态中最完整的修复；FormTable 也使用该组合进行日常开发和完整回归测试。新项目或没有旧版本约束的项目应优先采用此组合。
 
 ### 版本不满足时
 
 - Vue `2.7.0` 或更早版本：请先升级到 Vue `^2.7.1`。组件使用 Vue 2.7 内置的 Composition API，Vue 2.6 及更早版本不受支持；Vue `2.7.0` 在兼容测试中也存在渲染异常。
-- Element UI 版本低于 `2.4.9`：请先升级到 `^2.4.9`。FormTable 的表头 Slot 依赖 Element UI `2.4.9` 引入的 Table 表头 scoped slot；若不受旧项目约束，仍建议使用 `2.15.14`。
+- Element UI 版本低于 `2.4.9`：请先升级到 `^2.4.9`。FormTable 的表头 Slot 依赖 Element UI `2.4.9` 引入的 Table 表头 scoped slot；若不受旧项目约束，建议直接升级到最终版本 `2.15.14`。
 - Vue 3：暂不支持。本组件基于 Vue 2.7 和 Element UI 2.x，不能在 Vue 3 项目中通过替换为 Element Plus 直接使用。
 
 升级宿主项目依赖时，可单独执行：

@@ -56,7 +56,7 @@ FormTable 将 Vue 和 Element UI 声明为 peer dependencies，不会重复安�
 - `vue@^2.7.1`
 - `element-ui@^2.4.9`
 
-即 Vue `>=2.7.1 <3.0.0`、Element UI `>=2.4.9 <3.0.0`。日常开发和完整回归使用 Vue `2.7.16`、Element UI `2.15.14`；最低版本组合也已通过现有行为测试。Vue `2.7.0`、Vue 2.6 及更早版本不受支持，Vue 3 暂不支持。处理方式详见[快速开始的版本兼容说明](./docs/guide/quick-start.md#版本不满足时)。
+即 Vue `>=2.7.1 <3.0.0`、Element UI `>=2.4.9 <3.0.0`。最佳建议组合是 Vue `2.7.16` + Element UI `2.15.14`：两者分别是 Vue 2 和 Element UI 2 的最终发布版本，也是 FormTable 的完整回归测试版本。Vue `2.7.0`、Vue 2.6 及更早版本不受支持，Vue 3 暂不支持。处理方式详见[快速开始的版本兼容说明](./docs/guide/quick-start.md#版本不满足时)。
 
 ## 调试页面
 
