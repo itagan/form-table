@@ -238,6 +238,7 @@ describe('FormTable core behavior', () => {
         key: 'school-column',
         label: '学校',
         headerSlot: 'school-header',
+        headerProps: { title: '不会应用到自定义表头' },
         children: [{ children: [{ fieldKey: 'name', type: 'input' }] }]
       }],
       scopedSlots: {
@@ -255,6 +256,32 @@ describe('FormTable core behavior', () => {
     wrapper.destroy()
   })
 
+  it('applies static and dynamic properties to the default header text node', async () => {
+    const headerProps = vi.fn(({ tableData, columnConfig }: FormTableColumnContext) => ({
+      title: `${columnConfig.label}：${tableData.length} 条`,
+      'aria-label': `${columnConfig.label}说明`
+    }))
+    const wrapper = mountFormTable({
+      tableData: [{ name: 'Alice' }, { name: 'Bob' }],
+      columns: [{
+        label: '姓名',
+        headerProps,
+        children: [{ children: [{ fieldKey: 'name', type: 'input' }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    const header = wrapper.find('.form-table-column-header')
+    expect(header.attributes('title')).toBe('姓名：2 条')
+    expect(header.attributes('aria-label')).toBe('姓名说明')
+    expect(headerProps).toHaveBeenCalledTimes(1)
+    expect(Object.keys(headerProps.mock.calls[0][0]).sort()).toEqual([
+      'columnConfig',
+      'tableData'
+    ])
+    wrapper.destroy()
+  })
+
   it('renders the field value when an untyped config has no renderer', async () => {
     const wrapper = mountFormTable({
       tableData: [{ summary: '只读内容' }],
@@ -266,6 +293,92 @@ describe('FormTable core behavior', () => {
     await wrapper.vm.$nextTick()
 
     expect(wrapper.text()).toContain('只读内容')
+    wrapper.destroy()
+  })
+
+  it('applies component props, including native title, to text fields', async () => {
+    const wrapper = mountFormTable({
+      tableData: [{ summary: '完整说明' }],
+      columns: [{
+        label: '摘要',
+        children: [{ children: [{
+          fieldKey: 'summary',
+          type: 'text',
+          component: {
+            props: ({ value }) => ({
+              title: `查看：${value}`,
+              class: 'summary-text'
+            })
+          }
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    const text = wrapper.find('.summary-text')
+    expect(text.text()).toBe('完整说明')
+    expect(text.attributes('title')).toBe('查看：完整说明')
+    wrapper.destroy()
+  })
+
+  it('passes native title through to built-in field components without an extra wrapper', async () => {
+    const wrapper = mountFormTable({
+      tableData: [{ name: 'Alice' }],
+      columns: [{
+        label: '姓名',
+        children: [{ children: [{
+          fieldKey: 'name',
+          type: 'input',
+          component: {
+            props: ({ value }) => ({
+              title: value ? `编辑：${value}` : undefined
+            })
+          }
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    const inputRoot = wrapper.find('.el-input')
+    expect(inputRoot.attributes('title')).toBe('编辑：Alice')
+    expect(inputRoot.element.parentElement?.classList.contains('el-form-item__content')).toBe(true)
+
+    await wrapper.setProps({ tableData: [{ name: 'Bob' }] })
+    expect(inputRoot.attributes('title')).toBe('编辑：Bob')
+
+    await wrapper.setProps({ tableData: [{ name: '' }] })
+    expect(inputRoot.attributes('title')).toBeUndefined()
+    wrapper.destroy()
+  })
+
+  it('applies native title to a custom component root even when attrs inheritance is disabled', async () => {
+    const CustomInput = {
+      inheritAttrs: false,
+      props: ['value'],
+      render(this: any, h: any) {
+        return h('button', {
+          class: 'custom-title-target',
+          attrs: { type: 'button' }
+        }, this.value)
+      }
+    }
+    const wrapper = mountFormTable({
+      tableData: [{ status: '待审批' }],
+      columns: [{
+        label: '状态',
+        children: [{ children: [{
+          fieldKey: 'status',
+          type: 'component',
+          component: {
+            renderer: CustomInput,
+            props: { title: '查看审批状态' }
+          }
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.custom-title-target').attributes('title')).toBe('查看审批状态')
     wrapper.destroy()
   })
 

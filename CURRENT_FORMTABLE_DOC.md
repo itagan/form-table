@@ -26,6 +26,7 @@ FormTable
 - `type: 'slot'` 绕过组件渲染器，但保留 `el-col` 和 `el-form-item`；解析后的 component 配置通过同名上下文返回模板。
 - 表头必填标记等自定义展示由 `headerSlot` 显式渲染，字段校验只由 `formItemProps.rules` 决定。
 - `colProps`、`formItemProps`、`component.props` 分别透传到对应 Element UI 层。
+- `column.headerProps` 传给默认表头文本节点；原生提示使用 `headerProps.title`，字段提示使用 `component.props.title`，不增加通用包装节点。
 - 动态上下文按层级提供：Column 只有 `tableData`，Row 增加 `row/index`，Field 再增加 `fieldKey`；不会回传空 row 或 `index = -1` 等占位值。
 - 组件 listener 在 Field 上下文后继续接收组件原始事件参数；字段 slot 再增加 `propPath/component`。
 - `fieldKey` 支持 `profile.city` 和 `items[0].name` 路径。
@@ -55,7 +56,7 @@ input/slot setValue
 
 - `formProps` 直接传给 `el-form`。
 - `tableProps` 直接传给 `el-table`。
-- `column.props`、`row.props`、`colProps`、`formItemProps`、`component.props` 原样透传。
+- `column.props`、`column.headerProps`、`row.props`、`colProps`、`formItemProps`、`component.props` 原样透传到各自目标。
 - Table 原生事件通过组件监听器直接下传。
 - `getFormRef()` / `getTableRef()` 返回原生实例。
 

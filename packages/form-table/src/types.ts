@@ -204,6 +204,8 @@ export interface ColumnConfig {
   label: string
   /** 自定义表头使用的父组件具名插槽。 */
   headerSlot?: string
+  /** 传给默认表头文本节点；可用于配置原生 title、class、style 和 aria 属性。 */
+  headerProps?: DynamicValue<ComponentProps, FormTableColumnContext>
   /** 静态或动态显隐配置。 */
   visible?: DynamicValue<boolean, FormTableColumnContext>
   /** 直接传给 el-table-column。 */

@@ -55,7 +55,7 @@ type FieldRendererResolver = (
 动态配置上下文按层级收敛：
 
 ```text
-Column visible/props     → tableData, columnConfig
+Column visible/props/headerProps → tableData, columnConfig
 Row visible/props        → Column 信息 + row, index, rowConfig
 Field 动态配置           → Row 信息 + fieldKey, value, itemConfig
 component.listeners      → Field 信息 + setValue, updateRow
@@ -79,3 +79,5 @@ interface FieldModelConfig {
 `row/tableData` 与 `columnConfig/rowConfig/itemConfig` 在回调类型中采用浅层只读约束；运行时不会冻结原对象。字段更新使用 `setValue` 或 `updateRow`，配置调整由调用方替换 `columns`。
 
 表头 slot 接收 `tableData/label/columnIndex/columnConfig`。`columnIndex` 是动态显隐过滤后的可见列下标，不保证等于原始 `columns` 数组下标。
+
+`ColumnConfig.headerProps` 传给默认表头文本节点，可配置原生 `title`、class、style 和 aria 属性。存在 `headerSlot` 或 `column.props.renderHeader` 时，自定义表头优先并自行负责这些属性。

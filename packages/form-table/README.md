@@ -45,6 +45,8 @@ Item 的 `key` 是可选渲染身份，`fieldKey` 是必填数据路径。动态
 
 `component.props/listeners/options/optionProps` 是三种模式共用的渲染配置。自定义组件省略 `component.model` 或将其设为 `true` 时保留 Vue 2 原生 `v-model`；也可指定 `{ prop, event, valueFromEvent }`，或设为 `false` 禁用模型注入。slot 模式会把解析后的 `component` 通过上下文返回，由模板自行绑定。
 
+原生悬浮提示不增加包装节点。默认表头通过 `column.headerProps.title` 配置；内置、text 和自定义字段通过 `component.props.title` 配置，component 模式会把 title 同步到真实组件根 DOM。slot 模式由模板把 `component.props` 绑定到需要承载 title 的节点。`title` 应传字符串或动态返回字符串，布尔值 `true` 只会按原生属性显示为 `"true"`。
+
 Slot 内容直接渲染，不附加内部 `div/span` 包装；需要根节点样式时由 Slot 模板自行提供。
 
 ## 使用

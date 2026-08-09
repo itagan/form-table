@@ -26,6 +26,10 @@ const AlternativeInput: Component = { name: 'AlternativeInput' }
 const rows: TableRow[] = [{ name: 'Alice', profile: { city: '杭州' } }]
 const columns: ColumnConfig[] = [{
   label: '基本信息',
+  headerProps: ({ tableData, columnConfig }) => ({
+    title: `${columnConfig.label}：${tableData.length} 条`,
+    'aria-label': columnConfig.label
+  }),
   children: [{
     props: { gutter: 8 },
     children: [
@@ -34,7 +38,7 @@ const columns: ColumnConfig[] = [{
         type: 'input',
         colProps: { span: 8 },
         formItemProps: { label: '姓名', rules: [{ required: true }] },
-        component: { props: { clearable: true } }
+        component: { props: ({ value }) => ({ clearable: true, title: String(value ?? '') }) }
       },
       {
         fieldKey: 'profile.city',

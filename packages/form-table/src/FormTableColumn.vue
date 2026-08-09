@@ -16,6 +16,11 @@
         :slot-fn="headerSlotFn"
         :slot-props="headerSlotProps"
       />
+      <span
+        v-else
+        class="form-table-column-header"
+        v-bind="headerProps"
+      >{{ column.label }}</span>
     </template>
 
     <template v-slot="scope">
@@ -69,6 +74,9 @@ const columnContext = computed<FormTableColumnContext>(() => createColumnContext
 /** 解析静态或函数形式的 el-table-column 透传属性。 */
 const columnProps = computed(() => resolveDynamicValue(props.column.props, columnContext.value) || {})
 
+/** 解析默认表头文本节点属性；自定义表头继续由调用方完全控制。 */
+const headerProps = computed(() => resolveDynamicValue(props.column.headerProps, columnContext.value) || {})
+
 // Element UI 的功能列由 type 驱动，不应挂载普通字段的 scoped slot。
 const isNativeColumn = computed(() => ['index', 'selection', 'expand'].includes(columnProps.value.type))
 
@@ -77,10 +85,11 @@ const headerSlotFn = computed(() => props.column.headerSlot
   ? parentSlots[props.column.headerSlot] || null
   : null)
 
-/** 仅在没有原生 renderHeader 且插槽真实存在时接管表头渲染。 */
+/** 仅在没有原生 renderHeader 且确有自定义内容或属性时接管普通列表头。 */
 const shouldRenderHeader = computed(() => {
   // 原生 renderHeader 的优先级高于 FormTable 的具名表头插槽。
-  return typeof columnProps.value.renderHeader !== 'function' && Boolean(headerSlotFn.value)
+  return typeof columnProps.value.renderHeader !== 'function'
+    && (Boolean(headerSlotFn.value) || Object.keys(headerProps.value).length > 0)
 })
 
 /** 传给自定义表头插槽的完整列上下文。 */

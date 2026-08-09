@@ -46,6 +46,9 @@ tableData.value = tableData.value.filter((_, index) => index !== deleteIndex)
 {
   label: '基本信息',
   props: { minWidth: 400 },       // el-table-column
+  headerProps: {                  // 默认表头文本节点
+    title: '基本信息说明'
+  },
   children: [{
     props: { gutter: 8 },         // el-row
     children: [{
@@ -60,7 +63,7 @@ tableData.value = tableData.value.filter((_, index) => index !== deleteIndex)
 }
 ```
 
-- Column 的 `label` 是表头文本，`props` 直接传给 `el-table-column`。动态增删、显隐或替换列配置时应提供唯一稳定的 `key`。
+- Column 的 `label` 是表头文本，`props` 直接传给 `el-table-column`，`headerProps` 传给默认表头文本节点。动态增删、显隐或替换列配置时应提供唯一稳定的 `key`。
 - Row 的 `props` 直接传给 `el-row`。
 - Item 的 `key` 是可选渲染身份，`fieldKey` 是必填的数据路径；`colProps` 与 `formItemProps` 分别传给 `el-col` 和 `el-form-item`。
 - 动态增删、排序、切换渲染器或重复使用同一 `fieldKey` 时建议提供稳定的 Item `key`；否则默认使用 `fieldKey`。
@@ -235,6 +238,37 @@ component: {
   />
 </template>
 ```
+
+### 原生 title 提示
+
+默认表头使用 `headerProps.title`，支持根据列上下文动态计算：
+
+```ts
+{
+  label: '结算金额',
+  headerProps: ({ tableData }) => ({
+    title: `包含税费；当前共 ${tableData.length} 条记录`
+  })
+}
+```
+
+字段使用现有的 `component.props.title`，不会增加包装节点：
+
+```ts
+{
+  fieldKey: 'remark',
+  type: 'text',
+  component: {
+    props: ({ value }) => ({
+      title: value == null ? undefined : String(value)
+    })
+  }
+}
+```
+
+内置和自定义 component 模式会把 props 传给实际组件，并将 `component.props.title` 同步到组件根 DOM；即使目标组件设置了 `inheritAttrs: false`，也不需要额外包装节点。text 模式直接把 props 绑定到已有 span。slot 模式不会自动绑定 `component.props`，应在模板中使用 `v-bind="component.props"`。`headerSlot` 和 `column.props.renderHeader` 同样由调用方完全控制，因此不会自动应用 `headerProps`。
+
+`title` 保持原生 HTML 属性语义，应传字符串或动态返回字符串；不要使用 `title: true`，否则浏览器提示内容通常是字符串 `"true"`。Select、日期、对象等字段的显示文本可能不同于原始 value，应由调用方明确生成最终提示内容。
 
 ### 自定义组件绑定协议
 
@@ -471,7 +505,7 @@ component    当前行解析后的组件配置
 
 | 使用位置 | 可用上下文 |
 | --- | --- |
-| Column `visible/props` | `tableData`、`columnConfig` |
+| Column `visible/props/headerProps` | `tableData`、`columnConfig` |
 | Row `visible/props` | Column 上下文 + `row/index/rowConfig` |
 | Item 动态配置 | Row 上下文 + `fieldKey/value/itemConfig` |
 | `component.listeners` | Item 上下文 + `setValue/updateRow` |
@@ -528,6 +562,7 @@ ActionContext = ItemContext + setValue, updateRow
 | --- | --- | --- |
 | `column.visible` | ColumnContext | 是否渲染当前列 `boolean` |
 | `column.props` | ColumnContext | 传给 `el-table-column` 的 props |
+| `column.headerProps` | ColumnContext | 传给默认表头文本节点的 props |
 | `rowConfig.visible` | RowContext | 是否渲染当前布局行 `boolean` |
 | `rowConfig.props` | RowContext | 传给 `el-row` 的 props |
 | `itemConfig.visible` | ItemContext | 是否渲染当前字段 `boolean` |
