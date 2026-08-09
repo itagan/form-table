@@ -93,6 +93,8 @@ component: {
 
 patch 的 key 支持嵌套路径。相同值会跳过；所有字段都未变化时，不发出 `update:tableData` 或 `field-change`。
 
+字段路径不允许包含 `__proto__`、`prototype` 或 `constructor` 片段；组件会立即抛出包含完整路径的错误，避免配置穿透对象原型链。缺失的嵌套结构会按路径创建，`items[0].name` 中的 `items` 会创建为数组。
+
 `cellSlot` 只提供 `updateRow`，因为它没有明确的 `fieldKey`：
 
 ```vue
@@ -155,9 +157,12 @@ async function approve({ row, updateRow }) {
 
 异步等待期间行可能排序、插入或被服务端新对象替换。配置唯一稳定的 `rowKey` 后，更新助手会在最新 `tableData` 中重新定位原行；目标不存在或 key 重复时忽略更新。详见[稳定身份与异步安全](./stable-identity.md)。
 
+`rowKey` 是不可变的行身份。`setValue` 或 `updateRow` 一旦尝试改变字符串路径、嵌套路径或函数型 `rowKey` 的返回值，整个 patch 会被拒绝，不产生任何更新事件；行身份变更应由页面业务层替换 `tableData` 完成。
+
 ## 常见错误
 
 - 直接执行 `row.name = '新值'`：绕过受控回写和字段事件。
 - 防抖 `update:tableData`：后续编辑可能基于旧 props 覆盖前一次结果。
 - 异步结束后使用旧 `index` 修改数组：行排序后可能写错目标。
 - 用 `setValue` 更新其他字段：应改用 `updateRow`。
+- 通过 `updateRow` 修改 `rowKey`：行身份必须由页面业务层维护。

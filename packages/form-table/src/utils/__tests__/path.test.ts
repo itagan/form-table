@@ -53,6 +53,43 @@ describe('path utils', () => {
     })
   })
 
+  it('creates missing arrays for canonical numeric path segments', () => {
+    const row: {
+      untouched: { value: boolean }
+      items?: Array<{ name: string }>
+    } = { untouched: { value: true } }
+
+    const nextRow = setValueByPath(row, 'items[0].name', 'Alice')
+
+    expect(nextRow).toEqual({
+      untouched: { value: true },
+      items: [{ name: 'Alice' }]
+    })
+    expect(Array.isArray(nextRow.items)).toBe(true)
+    expect(nextRow.untouched).toBe(row.untouched)
+    expect(row).toEqual({ untouched: { value: true } })
+  })
+
+  it('does not read inherited properties', () => {
+    const row = Object.create({ inherited: 'hidden' })
+    row.own = 'visible'
+
+    expect(getValueByPath(row, 'own')).toBe('visible')
+    expect(getValueByPath(row, 'inherited')).toBeUndefined()
+  })
+
+  it.each(['__proto__', 'prototype', 'constructor'])(
+    'rejects unsafe %s path segments for reads and writes',
+    (segment) => {
+      const path = `profile.${segment}.polluted`
+
+      expect(() => getValueByPath({}, path)).toThrowError(TypeError)
+      expect(() => getValueByPath({}, path)).toThrowError(path)
+      expect(() => setValueByPath({}, path, true)).toThrowError(TypeError)
+      expect(() => setValueByPath({}, path, true)).toThrowError(path)
+    }
+  )
+
   it('reuses normalized paths and evicts the oldest entry after the cache limit', () => {
     const replaceSpy = vi.spyOn(String.prototype, 'replace')
     const source = { cacheBoundary: {} }
