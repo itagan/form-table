@@ -72,11 +72,11 @@ Table 原生事件直接透传。通过 ref 可调用 `validate()`、`resetField
 
 字段规则直接配置在 `formItemProps.rules`。`resetFields()` 保持 Element UI 原生语义；受控场景由调用方恢复 `tableData` 后调用 `clearValidate()`。单字段校验等底层能力可通过 `getFormRef()` 使用。
 
-表头必填标记等展示使用 `headerSlot` 明确渲染；字段是否必填只由 `formItemProps.rules` 决定。
+表头必填标记等展示使用 `headerSlot` 明确渲染；Slot 除原始 `columnConfig` 外还会收到已解析的 `header.props/header.hint`，由模板自行选择绑定节点。字段是否必填只由 `formItemProps.rules` 决定。
 
 动态配置只获得当前层级有意义的上下文：Column 为 `tableData/columnConfig`，Row 增加 `row/index/rowConfig`，Field 增加 `fieldKey/value/itemConfig`。组件 listener 额外获得 `setValue/updateRow`；slot 上下文再提供 `propPath/component`，不回传占位字段。数据和配置引用采用类型层面的浅只读约束，运行时不冻结对象。
 
-命名边界：`row` 是当前业务数据行，`rowConfig` 是布局配置；`itemConfig` 是原始字段配置，Slot 的 `component` 是当前行解析后的组件配置。
+命名边界：`row` 是当前业务数据行，`rowConfig` 是布局配置；`itemConfig` 是原始字段配置，字段 Slot 的 `component` 是当前行解析后的组件配置，表头 Slot 的 `header` 是已解析的表头展示配置。
 
 `tableProps.rowKey` 是可选能力。普通同步编辑和增删行依靠对象引用即可；异步 listener 等待期间可能刷新、克隆或替换全部行对象时，建议配置唯一稳定的 rowKey。更新助手会在最新 `tableData` 中重新定位，目标行不存在时忽略更新，避免误写其他行。
 

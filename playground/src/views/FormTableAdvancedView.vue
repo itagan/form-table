@@ -17,12 +17,14 @@
         @field-change="handleFieldChange"
         @selection-change="selection = $event"
       >
-        <template #contact-header="{ label }">
-          <span class="required-mark">*</span>
-          <span>{{ label }}</span>
-          <el-tooltip content="一个单元格内包含两行栅格布局">
-            <i class="el-icon-question" />
-          </el-tooltip>
+        <template #contact-header="{ label, header }">
+          <span v-bind="header.props">
+            <span class="required-mark">*</span>
+            <span>{{ label }}</span>
+            <el-tooltip :content="header.hint">
+              <i class="el-icon-question" />
+            </el-tooltip>
+          </span>
         </template>
 
         <template #status="{ value, component }">
@@ -108,6 +110,8 @@ const columns: ColumnConfig[] = [
   {
     label: '联系人信息',
     headerSlot: 'contact-header',
+    headerHint: '一个单元格内包含两行栅格布局',
+    headerProps: { 'aria-label': '联系人信息说明' },
     props: { minWidth: 600 },
     children: [
       {

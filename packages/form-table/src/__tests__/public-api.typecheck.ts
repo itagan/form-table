@@ -9,6 +9,7 @@ import FormTable, {
   type FormTableHeaderSlotContext,
   type FormTableHint,
   type FormTableProps,
+  type ResolvedHeaderConfig,
   type TableRow
 } from '../index'
 
@@ -257,6 +258,9 @@ const contextBoundaries: ColumnConfig[] = [{
 declare const headerContext: FormTableHeaderSlotContext
 void headerContext.columnIndex
 void headerContext.columnConfig.key
+const resolvedHeader: ResolvedHeaderConfig = headerContext.header
+void resolvedHeader.props
+void resolvedHeader.hint
 // @ts-expect-error header slot column configuration is read-only.
 headerContext.columnConfig.label = '新表头'
 // @ts-expect-error legacy column alias is not exposed.

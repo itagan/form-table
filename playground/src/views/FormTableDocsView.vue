@@ -86,7 +86,7 @@
             <tr>
               <td><code>headerSlot</code></td>
               <td>表头 scoped slot</td>
-              <td>接收 <code>label/columnConfig/columnIndex/tableData</code>；columnIndex 是显隐过滤后的可见列下标。</td>
+              <td>接收 <code>label/columnConfig/columnIndex/tableData/header</code>；header 包含已解析的 props/hint。</td>
             </tr>
             <tr>
               <td><code>visible</code></td>

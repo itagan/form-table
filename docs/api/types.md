@@ -5,7 +5,7 @@
 - `ColumnConfig`、`RowConfig`、`FormItemConfig`
 - `BuiltinFormItemConfig`、`ComponentFormItemConfig`、`SlotFormItemConfig`
 - `FieldComponentConfig`、`FieldModelConfig`、`FieldRendererResolver`、`BuiltinFormItemType`、`FormItemType`
-- `FormItemOption`、`OptionPropsConfig`、`ResolvedComponentConfig`
+- `FormItemOption`、`OptionPropsConfig`、`ResolvedComponentConfig`、`ResolvedHeaderConfig`
 - `TableRow`、`FormTableRecord`、`FormTableProps`
 - `FormTableTableContext`、`FormTableColumnContext`、`FormTableRowContext`、`FormTableFieldRenderContext`
 - `FormTableFieldContext`、`FormTableSlotContext`
@@ -78,8 +78,8 @@ interface FieldModelConfig {
 
 `row/tableData` 与 `columnConfig/rowConfig/itemConfig` 在回调类型中采用浅层只读约束；运行时不会冻结原对象。字段更新使用 `setValue` 或 `updateRow`，配置调整由调用方替换 `columns`。
 
-表头 slot 接收 `tableData/label/columnIndex/columnConfig`。`columnIndex` 是动态显隐过滤后的可见列下标，不保证等于原始 `columns` 数组下标。
+表头 slot 接收 `tableData/label/columnIndex/columnConfig/header`。`columnIndex` 是动态显隐过滤后的可见列下标，不保证等于原始 `columns` 数组下标；`header` 包含已解析的 `props/hint`，供自定义表头自行绑定。
 
-`ColumnConfig.headerProps` 传给默认表头文本节点，可配置原生 `title`、class、style 和 aria 属性。存在 `headerSlot` 或 `column.props.renderHeader` 时，自定义表头优先并自行负责这些属性。
+`ColumnConfig.headerProps` 传给默认表头文本节点，可配置原生 `title`、class、style 和 aria 属性。存在 `headerSlot` 或 `column.props.renderHeader` 时，自定义表头优先；具名 Slot 可从解析后的 `header.props/header.hint` 选择性绑定，原生 `renderHeader` 自行负责展示属性。
 
 `ColumnConfig.headerHint` 和 Item 的 `hint` 当前接受字符串或动态返回字符串，分别作为默认表头文本节点与 `el-form-item` 的原生 title。空字符串不显示浏览器提示，`null/undefined` 移除提示；字符串语义为未来扩展 Tooltip 保持稳定。

@@ -248,6 +248,12 @@ export interface ResolvedComponentConfig {
   model?: FieldModelConfig | boolean
 }
 
+/** 动态配置求值后交给默认表头和表头插槽使用的展示配置。 */
+export interface ResolvedHeaderConfig {
+  props: ComponentProps
+  hint?: FormTableHint | null
+}
+
 /** 字段插槽可使用的完整上下文。 */
 export interface FormTableSlotContext extends FormTableFieldContext {
   propPath: string
@@ -258,6 +264,8 @@ export interface FormTableSlotContext extends FormTableFieldContext {
 export interface FormTableHeaderSlotContext extends FormTableColumnContext {
   columnIndex: number
   label: string
+  /** 已解析的表头属性与提示；自定义表头自行选择绑定节点。 */
+  header: ResolvedHeaderConfig
 }
 
 /** Vue 2 scoped slot 的统一函数签名。 */

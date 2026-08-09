@@ -19,7 +19,7 @@
       <span
         v-else
         class="form-table-column-header"
-        v-bind="resolvedHeaderProps"
+        v-bind="defaultHeaderProps"
       >{{ column.label }}</span>
     </template>
 
@@ -45,7 +45,8 @@ import type {
   FormTableColumnContext,
   FormTableTableContext,
   FormTableHeaderSlotContext,
-  FormTableSlots
+  FormTableSlots,
+  ResolvedHeaderConfig
 } from './types'
 import { FORM_TABLE_CONTEXT_KEY, FORM_TABLE_SLOTS_KEY } from './types'
 import { createColumnContext, resolveDynamicValue } from './utils/dynamic'
@@ -74,17 +75,21 @@ const columnContext = computed<FormTableColumnContext>(() => createColumnContext
 /** 解析静态或函数形式的 el-table-column 透传属性。 */
 const columnProps = computed(() => resolveDynamicValue(props.column.props, columnContext.value) || {})
 
-/**
- * 解析默认表头文本节点属性，并将 headerHint 映射为原生 title。
- * 未配置 headerHint 时保留 headerProps 的底层透传结果。
- */
-const resolvedHeaderProps = computed(() => {
-  const headerProps = resolveDynamicValue(props.column.headerProps, columnContext.value) || {}
-  if (!Object.prototype.hasOwnProperty.call(props.column, 'headerHint')) return headerProps
+/** 表头属性和提示只求值一次，默认表头与自定义 Slot 共享同一解析结果。 */
+const resolvedHeader = computed<ResolvedHeaderConfig>(() => ({
+  props: resolveDynamicValue(props.column.headerProps, columnContext.value) || {},
+  hint: resolveDynamicValue(props.column.headerHint, columnContext.value)
+}))
 
-  const otherHeaderProps = { ...headerProps }
+/** 默认表头把 hint 映射为原生 title；自定义 Slot 则自行决定如何绑定。 */
+const defaultHeaderProps = computed(() => {
+  if (!Object.prototype.hasOwnProperty.call(props.column, 'headerHint')) {
+    return resolvedHeader.value.props
+  }
+
+  const otherHeaderProps = { ...resolvedHeader.value.props }
   delete otherHeaderProps.title
-  const headerHint = resolveDynamicValue(props.column.headerHint, columnContext.value)
+  const headerHint = resolvedHeader.value.hint
   return {
     ...otherHeaderProps,
     ...(headerHint === undefined || headerHint === null ? {} : { title: headerHint })
@@ -103,13 +108,14 @@ const headerSlotFn = computed(() => props.column.headerSlot
 const shouldRenderHeader = computed(() => {
   // 原生 renderHeader 的优先级高于 FormTable 的具名表头插槽。
   return typeof columnProps.value.renderHeader !== 'function'
-    && (Boolean(headerSlotFn.value) || Object.keys(resolvedHeaderProps.value).length > 0)
+    && (Boolean(headerSlotFn.value) || Object.keys(defaultHeaderProps.value).length > 0)
 })
 
 /** 传给自定义表头插槽的完整列上下文。 */
 const headerSlotProps = computed<FormTableHeaderSlotContext>(() => ({
   columnConfig: props.column,
   columnIndex: props.columnIndex,
+  header: resolvedHeader.value,
   label: props.column.label,
   tableData: formTableContext.value.tableData
 }))
