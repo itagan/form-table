@@ -17,6 +17,8 @@ const columns: ColumnConfig[] = [{
 
 ## 使用示例
 
+这里只展示最小的当前行更新和删除；末尾新增、当前行后插入、复制与删除的完整组合见[常见操作列与行增删](../guide/common-row-actions.md)。
+
 ```vue
 <template #row-actions="{ row, index, updateRow }">
   <el-button @click="updateRow({ enabled: !row.enabled })">切换</el-button>
