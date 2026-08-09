@@ -46,6 +46,7 @@ export default defineConfig({
           { text: '动态显隐与配置更新', link: '/features/dynamic-configuration' },
           { text: '稳定身份与异步安全', link: '/features/stable-identity' },
           { text: '性能与大数据量', link: '/features/performance' },
+          { text: '性能优化建议', link: '/features/performance-optimization' },
           { text: '原生 title 提示', link: '/features/native-title' },
           { text: '自定义表头', link: '/features/custom-header' },
           { text: 'cellSlot 列级单元格', link: '/features/cell-slot' },
