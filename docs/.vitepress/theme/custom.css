@@ -1,0 +1,30 @@
+/*
+ * VitePress 默认会在超宽屏上把整套文档布局居中，导致侧边栏左侧出现大块空白。
+ * 宽屏下保持侧边栏贴近视口左侧，并给配置表格更多正文宽度；窄屏继续使用默认布局。
+ */
+@media (min-width: 1440px) {
+  .VPNavBar.has-sidebar .title {
+    width: var(--vp-sidebar-width) !important;
+    padding-left: 32px !important;
+    padding-right: 32px !important;
+  }
+
+  .VPNavBar.has-sidebar .content {
+    padding-left: var(--vp-sidebar-width) !important;
+    padding-right: 32px !important;
+  }
+
+  .VPSidebar {
+    width: var(--vp-sidebar-width) !important;
+    padding-left: 32px !important;
+    padding-right: 32px !important;
+  }
+
+  .VPContent.has-sidebar {
+    padding-left: var(--vp-sidebar-width) !important;
+  }
+
+  .VPDoc.has-aside .content-container {
+    max-width: 880px !important;
+  }
+}
