@@ -52,7 +52,11 @@ FormTable
 
 | 功能 | 文档 | 可运行演示 |
 | --- | --- | --- |
+| 原生 title 提示 | [配置与使用](../features/native-title.md) | [`/form-table`](http://localhost:5173/form-table) |
+| 自定义表头 | [配置与使用](../features/custom-header.md) | [`/form-table-advanced`](http://localhost:5173/form-table-advanced) |
 | 列级单元格 Slot | [`cellSlot` 专题](../features/cell-slot.md) | [`/cell-slot`](http://localhost:5173/cell-slot) |
+| 自定义字段组件 | [配置与使用](../features/custom-component.md) | [`/enterprise-components`](http://localhost:5173/enterprise-components) |
+| 远程 Schema | [配置与本地增强](../features/remote-schema.md) | [`/remote-schema`](http://localhost:5173/remote-schema) |
 | 行列动态操作 | [行、列与延迟提交](../guide/row-column-operations.md) | [`/row-column-operations`](http://localhost:5173/row-column-operations) |
 | 企业自定义组件 | [复杂组件接入](../examples/enterprise-components.md) | [`/enterprise-components`](http://localhost:5173/enterprise-components) |
 | 单元格合并 | [合并业务处理](../examples/cell-merge.md) | [`/cell-merge`](http://localhost:5173/cell-merge) |
@@ -63,3 +67,5 @@ FormTable
 
 - API 参考：快速确认属性路径、类型、默认值和回调上下文。
 - 完整配置指南：解释不同模式如何组合、为什么这样配置。
+
+所有独立能力及其配置、使用和演示入口见[功能专题索引](../features/index.md)。

@@ -245,6 +245,8 @@ component: {
 
 ### 外层提示与原生 title
 
+> 独立配置和页面使用示例见[原生 title 提示](../features/native-title.md)；图标与 Tooltip 表头见[自定义表头](../features/custom-header.md)。
+
 默认表头使用 `headerHint`，支持根据列上下文动态计算：
 
 ```ts
@@ -275,6 +277,8 @@ component: {
 `headerSlot` 和 `column.props.renderHeader` 由调用方完全控制，因此不会自动应用 `headerHint/headerProps`。具名 `headerSlot` 会收到已解析的 `header.props/header.hint` 供模板绑定；原生 `renderHeader` 继续完全遵循 Element UI 协议。Element UI 的 `selection/index/expand` 功能列同样保持原生表头行为。
 
 ### 自定义组件绑定协议
+
+> 从标准 v-model、非标准协议到按行选择组件的独立示例见[自定义字段组件](../features/custom-component.md)。
 
 `type: 'component'` 在未配置 `component.model` 或显式传入 `true` 时使用 Vue 2 原生 `v-model`。FormTable 把模型信息保留到真实组件解析阶段，因此组件自身声明的 `model.prop/model.event` 仍然有效：
 
@@ -378,6 +382,8 @@ const columns: ColumnConfig[] = [{
 FormTable 会按普通自定义组件处理它：未配置 `component.model` 或显式传入 `true` 时使用组件原生 Vue 2 `v-model`，其他组件事件交给 `component.listeners`，数据更新仍可使用 `setValue/updateRow`。Render Function 只是该 Vue 组件的内部实现，不是新的 FormTable 渲染模式。
 
 ### 列级 cellSlot
+
+> 独立配置、Slot 使用、上下文和异步更新示例见 [`cellSlot` 专题](../features/cell-slot.md)。
 
 `cellSlot` 是列级的单元格渲染出口，适合操作按钮、状态组合、图片、派生值和多字段拼接等不参与 FormTable 字段绑定的单元格。它从 `el-table-column` 直接进入具名 Slot，不创建 `el-row`、`el-col` 或 `el-form-item`，也不需要虚拟 `fieldKey`。
 
@@ -973,6 +979,8 @@ const columns: ColumnConfig[] = [{
 - 组件原始事件参数保持在字段上下文之后，例如上面的 `nextValue`。
 
 ## 远程 JSON 与本地增强
+
+> 从远程配置、本地组件映射到页面使用的独立示例见[远程 Schema 与本地增强](../features/remote-schema.md)。
 
 远程 schema 只承载可序列化配置，例如布局、`type`、静态 props 和 options。组件对象、函数 listener 和 slot 实现留在页面本地，不执行服务端返回的代码。
 

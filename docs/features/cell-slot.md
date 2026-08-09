@@ -4,7 +4,7 @@
 
 `cellSlot` 是与 Row / Item 字段链路并列的列级渲染入口。它适合操作按钮、状态、图片、派生值和多字段组合展示。
 
-## 最小配置
+## 配置示例
 
 ```ts
 const columns: ColumnConfig[] = [{
@@ -14,6 +14,8 @@ const columns: ColumnConfig[] = [{
   props: { width: 180, fixed: 'right' }
 }]
 ```
+
+## 使用示例
 
 ```vue
 <template #row-actions="{ row, index, updateRow }">
