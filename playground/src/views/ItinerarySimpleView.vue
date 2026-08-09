@@ -66,7 +66,7 @@
           />
         </template>
 
-        <template #sequence-label="{ value }">
+        <template #sequence-label="{ row }">
           <div class="sequence-cell">
             <i
               class="el-icon-rank itinerary-drag-handle"
@@ -75,7 +75,7 @@
               aria-label="拖动调整议程顺序"
               title="拖动调整议程顺序"
             />
-            <el-tag size="small">议程{{ value }}</el-tag>
+            <el-tag size="small">议程{{ row.sequence }}</el-tag>
           </div>
         </template>
 
@@ -188,10 +188,7 @@ const columns: ColumnConfig[] = [
   },
   {
     key: 'sequence-column', label: '议程', props: { width: 82, align: 'center' },
-    children: [{ children: [{
-      key: 'sequence-field', fieldKey: 'sequence', type: 'slot',
-      component: { renderer: 'sequence-label' }
-    }] }]
+    cellSlot: 'sequence-label'
   },
   {
     key: 'time-column', label: '时间计划', props: { minWidth: 230 },
@@ -220,7 +217,7 @@ const columns: ColumnConfig[] = [
   },
   {
     key: 'action-column', label: '操作', props: { width: 190, fixed: 'right', align: 'center' },
-    children: [{ children: [{ key: 'action-field', fieldKey: '_rowKey', type: 'slot', component: { renderer: 'row-actions' } }] }]
+    cellSlot: 'row-actions'
   }
 ]
 

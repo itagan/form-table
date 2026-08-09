@@ -37,7 +37,7 @@ interface DemandRow {
 - 会场、酒店、用餐、交通使用独立业务组件，并通过 `component.resolveRenderer` 和组件注册表按 `row.type` 选择。
 - “其他”和“嘉宾”的结构简单，直接使用 FormTable Item 的 `visible` 和嵌套 `fieldKey`。
 - 使用时间与数量/单价结构稳定，分别使用固定的 `DemandScheduleEditor` 和 `DemandPricingEditor`，通过动态 props 获取需求类型和只读状态。
-- 总预算是纯计算展示，操作按钮需要页面行为，继续使用 Slot。
+- 需求类型、总预算和操作按钮都不参与表单字段绑定，使用列级 `cellSlot`，避免虚拟 `fieldKey` 和多余的表单包装节点。
 
 所有编辑组件遵守相同的受控契约：接收 `value/demandType/readonly`，发生变化时发出新的对象。FormTable 根据配置的 `value/change` 模型协议写回字段，不需要页面 Slot 参与组件选择。组件不读取 DOM，也不把内部状态作为最终提交数据。
 
@@ -81,6 +81,21 @@ interface DemandEditorProps<T> {
     }),
     model: { prop: 'value', event: 'change' }
   }
+}
+```
+
+纯展示和行操作列直接配置具名单元格 Slot：
+
+```ts
+{
+  key: 'budget-column',
+  label: '总费用预算',
+  cellSlot: 'total-budget'
+},
+{
+  key: 'actions-column',
+  label: '操作',
+  cellSlot: 'row-actions'
 }
 ```
 

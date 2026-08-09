@@ -188,9 +188,7 @@ const columns: ColumnConfig[] = [
     key: 'type-column',
     label: '需求类型',
     props: { prop: 'demandType', width: 132, fixed: 'left', align: 'center' },
-    children: [{ children: [{
-      key: 'type-field', fieldKey: 'type', type: 'slot', component: { renderer: 'demand-type' }
-    }] }]
+    cellSlot: 'demand-type'
   },
   {
     key: 'description-column',
@@ -295,17 +293,13 @@ const columns: ColumnConfig[] = [
     key: 'budget-column',
     label: '总费用预算',
     props: { width: 150, align: 'right' },
-    children: [{ children: [{
-      key: 'budget-field', fieldKey: 'pricing', type: 'slot', component: { renderer: 'total-budget', model: false }
-    }] }]
+    cellSlot: 'total-budget'
   },
   {
     key: 'actions-column',
     label: '操作',
     props: { width: 112, fixed: 'right', align: 'center' },
-    children: [{ children: [{
-      key: 'actions-field', fieldKey: '_rowKey', type: 'slot', component: { renderer: 'row-actions', model: false }
-    }] }]
+    cellSlot: 'row-actions'
   }
 ]
 

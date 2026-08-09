@@ -32,7 +32,20 @@ const updateGroupField = (target, field, value) => {
 }
 ```
 
-时间、名称、城市和地点都是独立行字段：简单输入框和下拉框直接通过 FormTable 配置；时间范围、内部议程选择器与操作按钮通过插槽接入。
+时间、名称、城市和地点都是独立行字段：简单输入框和下拉框直接通过 FormTable 配置；时间范围和内部议程选择器使用字段 Slot。议程序号与操作按钮不参与表单字段绑定，使用列级 `cellSlot`，不再为它们配置虚拟 `fieldKey`。
+
+```ts
+{
+  key: 'sequence-column',
+  label: '议程',
+  cellSlot: 'sequence-label'
+},
+{
+  key: 'action-column',
+  label: '操作',
+  cellSlot: 'row-actions'
+}
+```
 
 ## 使用外部库拖拽排序
 
