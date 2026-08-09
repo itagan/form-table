@@ -57,11 +57,11 @@
 
           <tbody class="layer-group">
             <tr>
-              <th rowspan="6" scope="rowgroup" class="layer-cell">Column</th>
+              <th rowspan="7" scope="rowgroup" class="layer-cell">Column</th>
               <td><code>key</code></td>
               <td>渲染标识</td>
               <td>动态列应唯一稳定；增删、显隐和同顺序替换时用于复用列包装实例。</td>
-              <td rowspan="6" class="context-cell"><code>tableData</code><br><code>columnConfig</code></td>
+              <td rowspan="7" class="context-cell"><code>tableData</code><br><code>columnConfig</code></td>
             </tr>
             <tr>
               <td><code>label</code></td>
@@ -72,6 +72,11 @@
               <td><code>props</code></td>
               <td>el-table-column</td>
               <td>例如 <code>width</code>、<code>minWidth</code>、<code>align</code>、<code>type</code>。</td>
+            </tr>
+            <tr>
+              <td><code>headerProps</code></td>
+              <td>默认表头文本节点</td>
+              <td>可配置原生 <code>title</code>、class、style 和 aria 属性；自定义表头不自动应用。</td>
             </tr>
             <tr>
               <td><code>headerSlot</code></td>
