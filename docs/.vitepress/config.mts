@@ -22,6 +22,7 @@ export default defineConfig({
         items: [
           { text: '快速开始', link: '/guide/quick-start' },
           { text: '完整配置指南', link: '/guide/configuration-guide' },
+          { text: '常见操作列与行增删', link: '/guide/common-row-actions' },
           { text: '行、列与延迟提交', link: '/guide/row-column-operations' }
         ]
       },
