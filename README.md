@@ -56,6 +56,8 @@ FormTable 将 Vue 和 Element UI 声明为 peer dependencies，不会重复安�
 - `vue@^2.7.7`
 - `element-ui@^2.15.14`
 
+即 Vue `>=2.7.7 <3.0.0`、Element UI `>=2.15.14 <3.0.0`。低于这些版本时应先升级宿主项目；无法升级时，不建议忽略 peer dependency 警告强制安装，当前版本也不保证兼容。Vue 3 暂不支持，Element Plus 不能直接替代本组件的 Element UI 依赖。处理方式详见[快速开始的版本兼容说明](./docs/guide/quick-start.md#版本不满足时)。
+
 ## 调试页面
 
 本地启动后主要路由：
