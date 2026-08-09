@@ -21,8 +21,7 @@ export default defineConfig({
         text: '指南',
         items: [
           { text: '快速开始', link: '/guide/quick-start' },
-          { text: '完整配置指南', link: '/guide/configuration-guide' },
-          { text: '行、列与延迟提交', link: '/guide/row-column-operations' }
+          { text: '完整配置指南', link: '/guide/configuration-guide' }
         ]
       },
       {
@@ -42,6 +41,7 @@ export default defineConfig({
         items: [
           { text: '专题索引', link: '/features/' },
           { text: '常见操作列与行增删', link: '/features/common-row-actions' },
+          { text: '行列操作与异步提交', link: '/features/row-column-operations' },
           { text: '数据更新与受控回写', link: '/features/data-updates' },
           { text: '校验、清理与重置', link: '/features/validation-reset' },
           { text: '动态显隐与配置更新', link: '/features/dynamic-configuration' },

@@ -29,7 +29,7 @@ pnpm docs:dev
 | [远程 Schema ↗](http://localhost:5173/remote-schema) | `/remote-schema` | 远程纯 JSON 配置与页面本地组件、事件增强 |
 | [企业复杂组件接入 ↗](http://localhost:5173/enterprise-components) | `/enterprise-components` | 企业全局组件、局部业务组件、自定义绑定协议与复杂事件联动 |
 | [动态插槽 ↗](http://localhost:5173/dynamic-slot-test) | `/dynamic-slot-test` | 动态显隐和 slot 更新助手 |
-| [行列操作与延迟提交 ↗](http://localhost:5173/row-column-operations) | `/row-column-operations` | 行增删复制移动、动态列和业务处理后延迟提交 |
+| [行列操作与异步提交 ↗](http://localhost:5173/row-column-operations) | `/row-column-operations` | 行增删复制移动、动态列和业务处理后异步提交 |
 | [单元格合并 ↗](http://localhost:5173/cell-merge) | `/cell-merge` | 分组纵向合并、汇总行横向合并、稳定列定位和表头隐藏 |
 | [多需求费用明细 ↗](http://localhost:5173/heterogeneous-demands) | `/heterogeneous-demands` | 公共表头下按需求类型加载独立组件、处理差异字段并归一化提交 |
 | [多日议程编排 ↗](http://localhost:5173/itinerary-simple) | `/itinerary-simple` | 日期与主题纵向合并、SortableJS 组内拖拽、行操作与分组提交 |
@@ -39,7 +39,7 @@ pnpm docs:dev
 
 Playground 直接引用包源码，修改组件后无需先构建 npm 包。
 
-操作列、末尾新增、当前行后插入、复制和删除的入门代码参考[常见操作列与行增删](../features/common-row-actions.md)；确认、移动和异步提交等进阶模式参考[行、列与延迟提交](../guide/row-column-operations.md)。
+操作列、末尾新增、当前行后插入、复制和删除的入门代码参考[常见操作列与行增删](../features/common-row-actions.md)；确认、移动和异步提交等进阶模式参考[行列操作与异步提交](../features/row-column-operations.md)。
 
 公司内部存在大量全局组件、局部业务组件和非标准绑定协议时，参考[企业内部复杂组件接入示例](./enterprise-components.md)。
 

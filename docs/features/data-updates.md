@@ -1,6 +1,6 @@
 # 数据更新与受控回写
 
-> 可运行 Demo：[`cellSlot` 更新助手 ↗](http://localhost:5173/cell-slot) · [行列操作与延迟提交 ↗](http://localhost:5173/row-column-operations)
+> 可运行 Demo：[`cellSlot` 更新助手 ↗](http://localhost:5173/cell-slot) · [行列操作与异步提交 ↗](http://localhost:5173/row-column-operations)
 
 `tableData` 是 FormTable 唯一的数据源。根组件 `v-model` 映射到 `tableData/update:tableData`；组件内部不会直接修改传入数组，字段输入、`setValue` 和 `updateRow` 都会生成新数组交给父组件。
 

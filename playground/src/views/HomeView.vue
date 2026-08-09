@@ -46,7 +46,7 @@ const examples = [
     tags: ['custom model', 'global component', 'business component']
   },
   {
-    title: '行列操作与延迟提交',
+    title: '行列操作与异步提交',
     description: '演示行增删复制移动、动态列，以及业务检查成功后才写入字段。',
     path: '/row-column-operations',
     type: 'warning',

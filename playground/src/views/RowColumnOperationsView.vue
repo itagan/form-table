@@ -1,7 +1,7 @@
 <template>
   <main class="demo-page">
     <router-link to="/">← 返回</router-link>
-    <h1>行、列与延迟提交</h1>
+    <h1>行列操作与异步提交</h1>
     <p>行和列由调用方维护；评分使用独立草稿，只有业务检查完成后才写入 tableData。</p>
 
     <section class="demo-card">
