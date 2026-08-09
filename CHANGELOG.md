@@ -4,7 +4,7 @@
 
 ### Improved
 
-- 安装文档仅保留 FormTable 的安装命令，并单独说明项目需要预先安装、注册及满足的 Vue 和 Element UI peer dependency 版本。
+- 安装文档仅保留 FormTable 的安装命令，并单独说明项目需要预先安装、注册及满足的 Vue 和 Element UI peer dependency 版本，以及低版本升级建议和 Vue 3 暂不支持的兼容边界。
 - 新增与 `children` 互斥的列级 `cellSlot`，用于操作列和纯展示组合单元格；不需要虚拟 `fieldKey`，也不创建 Row/Item 表单包装节点，高级、议程和费用明细示例已同步迁移。
 - 增加无包装节点的外层提示 API：默认表头使用 `column.headerHint`，字段使用 Item `hint`，当前将字符串作为原生 title 应用到默认表头文本节点或已有 `el-form-item`；各层 props 中的 title 继续原样透传。
 - 表头 Slot 新增已解析的 `header.props/header.hint`，与原始 `columnConfig` 分工，避免模板重复执行动态表头配置。
