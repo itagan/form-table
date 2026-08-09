@@ -115,6 +115,30 @@ describe('FormTable core behavior', () => {
     wrapper.destroy()
   })
 
+  it('keeps unrelated row references when editing a large data set', async () => {
+    const rowCount = 300
+    const targetIndex = 150
+    const original = Array.from({ length: rowCount }, (_, index) => ({
+      id: index + 1,
+      name: `User ${index + 1}`
+    }))
+    const wrapper = mountFormTable({ tableData: original })
+    await wrapper.vm.$nextTick()
+
+    const inputs = wrapper.findAll('input')
+    expect(inputs.length).toBe(rowCount)
+    await inputs.at(targetIndex).setValue('Updated User')
+
+    const nextTableData = wrapper.emitted('update:tableData')?.[0]?.[0] as TableRow[]
+    expect(nextTableData).toHaveLength(rowCount)
+    expect(nextTableData[targetIndex]).toEqual({ id: targetIndex + 1, name: 'Updated User' })
+    expect(nextTableData[targetIndex]).not.toBe(original[targetIndex])
+    expect(nextTableData[targetIndex - 1]).toBe(original[targetIndex - 1])
+    expect(nextTableData[targetIndex + 1]).toBe(original[targetIndex + 1])
+    expect(original[targetIndex].name).toBe(`User ${targetIndex + 1}`)
+    wrapper.destroy()
+  })
+
   it('keeps nested field paths working', async () => {
     const wrapper = mountFormTable({
       tableData: [{ profile: { city: '杭州' } }],
