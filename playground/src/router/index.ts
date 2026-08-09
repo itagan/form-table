@@ -24,6 +24,11 @@ const router = new VueRouter({
       component: () => import('../views/FormTableAdvancedView.vue')
     },
     {
+      path: '/cell-slot',
+      name: 'cell-slot',
+      component: () => import('../views/CellSlotView.vue')
+    },
+    {
       path: '/form-table-docs',
       name: 'form-table-docs',
       component: () => import('../views/FormTableDocsView.vue')

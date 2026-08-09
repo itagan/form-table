@@ -1,536 +1,211 @@
 <template>
-  <main class="docs-page">
-    <router-link to="/">← 返回</router-link>
-    <h1>FormTable 精简 API</h1>
+  <main class="api-page">
+    <router-link to="/">← 返回示例首页</router-link>
 
-    <section>
-      <h2>核心边界</h2>
-      <ul>
-        <li><code>children</code> 描述 Column → Row → Item 布局。</li>
-        <li><code>type</code> 是唯一渲染策略：内置别名、component 或 slot。</li>
-        <li><code>component.renderer</code> 指向固定组件或具名 slot；component 模式可用 <code>resolveRenderer</code> 按行选择组件。</li>
-        <li><code>component.model/props/listeners/options/optionProps</code> 描述实际字段组件。</li>
-        <li>行增删、复制和字段联动由业务层维护。</li>
-        <li><code>tableData</code> 是受控数据：本地立即回写，后端保存可以独立延迟。</li>
-      </ul>
+    <header class="api-hero">
+      <div>
+        <p class="eyebrow">FormTable API Explorer</p>
+        <h1>配置路径与运行时上下文</h1>
+        <p>按完整路径查找配置，按调用位置确认上下文。复杂功能进入独立演示，不在 API 表内混写教程。</p>
+      </div>
+      <el-input
+        v-model="keyword"
+        class="api-search"
+        clearable
+        prefix-icon="el-icon-search"
+        placeholder="搜索路径、类型、目标或说明"
+      />
+    </header>
+
+    <section class="feature-section">
+      <div class="section-heading">
+        <div>
+          <h2>功能专题</h2>
+          <p>跨配置层级或包含完整业务流程的能力，单独提供可运行示例。</p>
+        </div>
+      </div>
+      <div class="feature-grid">
+        <router-link v-for="feature in featureCards" :key="feature.path" :to="feature.path" class="feature-card">
+          <strong>{{ feature.title }}</strong>
+          <p>{{ feature.description }}</p>
+          <span v-for="tag in feature.tags" :key="tag">{{ tag }}</span>
+        </router-link>
+      </div>
     </section>
 
-    <section>
-      <h2>各层属性</h2>
-      <p>配置按实际渲染结构分层。节点自身的 <code>props</code> 只透传给该层对应的 Element UI 组件。</p>
+    <section class="reference-section">
+      <el-tabs v-model="activeTab">
+        <el-tab-pane label="配置路径" name="paths">
+          <div class="tree-panel">
+            <strong>配置树</strong>
+            <code>FormTable → columns[] → children[] (Row) → children[] (Item) → component</code>
+            <small><code>[]</code> 表示数组元素，<code>.</code> 表示对象属性；表格中的路径可直接用于定位类型和文档。</small>
+          </div>
 
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>层级</th>
-              <th>属性</th>
-              <th>目标/作用</th>
-              <th>说明</th>
-              <th>动态函数上下文</th>
-            </tr>
-          </thead>
-          <tbody class="layer-group">
-            <tr>
-              <th rowspan="4" scope="rowgroup" class="layer-cell">FormTable</th>
-              <td><code>tableData</code></td>
-              <td>el-table data</td>
-              <td>唯一编辑数据源，通过 <code>update:tableData</code> 返回新数组。</td>
-              <td rowspan="4" class="context-cell">—</td>
-            </tr>
-            <tr>
-              <td><code>columns</code></td>
-              <td>Column → Row → Item</td>
-              <td>完整布局与字段渲染配置。</td>
-            </tr>
-            <tr>
-              <td><code>formProps</code> / <code>tableProps</code></td>
-              <td>el-form / el-table</td>
-              <td>直接透传 Element UI 原生属性。</td>
-            </tr>
-            <tr>
-              <td><code>loading</code></td>
-              <td>el-table v-loading</td>
-              <td>控制表格加载状态。</td>
-            </tr>
-          </tbody>
+          <el-empty v-if="visibleApiGroups.length === 0" description="没有匹配的 API" />
+          <article v-for="group in visibleApiGroups" :key="group.id" class="api-group">
+            <div class="group-heading">
+              <h2>{{ group.title }}</h2>
+              <p>{{ group.description }}</p>
+            </div>
+            <el-table :data="group.entries" border stripe size="mini">
+              <el-table-column label="完整路径" min-width="330">
+                <template #default="{ row }"><code class="path-code">{{ row.path }}</code></template>
+              </el-table-column>
+              <el-table-column prop="type" label="类型" min-width="210" />
+              <el-table-column prop="defaultValue" label="默认 / 必填" width="105" />
+              <el-table-column prop="target" label="目标" min-width="180" />
+              <el-table-column label="说明" min-width="280">
+                <template #default="{ row }">
+                  <div>{{ row.description }}</div>
+                  <el-tag v-if="row.context" size="mini" type="info">{{ row.context }}</el-tag>
+                </template>
+              </el-table-column>
+            </el-table>
+          </article>
+        </el-tab-pane>
 
-          <tbody class="layer-group">
-            <tr>
-              <th rowspan="9" scope="rowgroup" class="layer-cell">Column</th>
-              <td><code>key</code></td>
-              <td>渲染标识</td>
-              <td>动态列应唯一稳定；增删、显隐和同顺序替换时用于复用列包装实例。</td>
-              <td rowspan="9" class="context-cell"><code>tableData</code><br><code>columnConfig</code></td>
-            </tr>
-            <tr>
-              <td><code>label</code></td>
-              <td>el-table-column label</td>
-              <td>列头文本；复杂表头使用 <code>headerSlot</code>。</td>
-            </tr>
-            <tr>
-              <td><code>props</code></td>
-              <td>el-table-column</td>
-              <td>例如 <code>width</code>、<code>minWidth</code>、<code>align</code>、<code>type</code>。</td>
-            </tr>
-            <tr>
-              <td><code>headerProps</code></td>
-              <td>默认表头文本节点</td>
-              <td>可配置原生 <code>title</code>、class、style 和 aria 属性；自定义表头不自动应用。</td>
-            </tr>
-            <tr>
-              <td><code>headerHint</code></td>
-              <td>默认表头外层提示</td>
-              <td>字符串或动态字符串；当前使用原生 title，自定义及功能列表头不自动应用。</td>
-            </tr>
-            <tr>
-              <td><code>headerSlot</code></td>
-              <td>表头 scoped slot</td>
-              <td>接收 <code>label/columnConfig/columnIndex/tableData/header</code>；header 包含已解析的 props/hint。</td>
-            </tr>
-            <tr>
-              <td><code>visible</code></td>
-              <td>列显隐</td>
-              <td>静态布尔值或动态函数。</td>
-            </tr>
-            <tr>
-              <td><code>children</code></td>
-              <td>RowConfig[]</td>
-              <td>列单元格内的行布局；与 <code>cellSlot</code> 互斥。</td>
-            </tr>
-            <tr>
-              <td><code>cellSlot</code></td>
-              <td>列级 scoped slot</td>
-              <td>直接渲染单元格；接收 <code>row/index/columnConfig/updateRow</code>，不需要 fieldKey。</td>
-            </tr>
-          </tbody>
+        <el-tab-pane label="上下文矩阵" name="contexts">
+          <div class="tab-intro">
+            <h2>上下文由调用位置决定</h2>
+            <p>不补齐无意义的占位字段。配置对象是浅只读约定；数据更新使用 <code>setValue</code> 或 <code>updateRow</code>。</p>
+          </div>
+          <el-table :data="contextRows" border stripe>
+            <el-table-column label="配置 / Slot 位置" min-width="330">
+              <template #default="{ row }"><code>{{ row.location }}</code></template>
+            </el-table-column>
+            <el-table-column label="上下文类型" min-width="210">
+              <template #default="{ row }"><code>{{ row.context }}</code></template>
+            </el-table-column>
+            <el-table-column prop="fields" label="实际字段" min-width="460" />
+          </el-table>
 
-          <tbody class="layer-group">
-            <tr>
-              <th rowspan="4" scope="rowgroup" class="layer-cell">Row</th>
-              <td><code>key</code></td>
-              <td>渲染标识</td>
-              <td>可选；同一列内有动态行布局时建议提供。</td>
-              <td rowspan="4" class="context-cell"><code>tableData</code><br><code>columnConfig</code><br><code>row</code><br><code>index</code><br><code>rowConfig</code></td>
-            </tr>
-            <tr>
-              <td><code>props</code></td>
-              <td>el-row</td>
-              <td>例如 <code>gutter</code>、<code>justify</code>、<code>align</code>。</td>
-            </tr>
-            <tr>
-              <td><code>visible</code></td>
-              <td>行布局显隐</td>
-              <td>静态布尔值或动态函数。</td>
-            </tr>
-            <tr>
-              <td><code>children</code></td>
-              <td>FormItemConfig[]</td>
-              <td>当前栅格行中的字段列表。</td>
-            </tr>
-          </tbody>
+          <div class="boundary-grid">
+            <article>
+              <h3>cellSlot</h3>
+              <code>{ row, index, columnConfig, updateRow }</code>
+              <p>整格渲染，不提供 fieldKey、value、setValue、表单校验或组件解析结果。</p>
+              <router-link to="/cell-slot">打开专题演示 →</router-link>
+            </article>
+            <article>
+              <h3>字段 Slot</h3>
+              <code>ActionContext + { propPath, component }</code>
+              <p>绑定明确字段，支持校验和 setValue，适合完全自定义的字段交互。</p>
+              <router-link to="/form-table-advanced">查看高级示例 →</router-link>
+            </article>
+          </div>
+        </el-tab-pane>
 
-          <tbody class="layer-group">
-            <tr>
-              <th rowspan="8" scope="rowgroup" class="layer-cell">Item</th>
-              <td><code>key</code></td>
-              <td>渲染标识</td>
-              <td>可选；动态增删、排序或重复 fieldKey 时建议提供。</td>
-              <td rowspan="8" class="context-cell"><code>tableData</code><br><code>columnConfig</code><br><code>row</code><br><code>index</code><br><code>rowConfig</code><br><code>fieldKey</code><br><code>value</code><br><code>itemConfig</code></td>
-            </tr>
-            <tr>
-              <td><code>fieldKey</code></td>
-              <td>行数据字段路径</td>
-              <td>支持 <code>name</code>、<code>profile.city</code>、<code>items[0].name</code>。</td>
-            </tr>
-            <tr>
-              <td><code>visible</code></td>
-              <td>字段显隐</td>
-              <td>静态布尔值或动态函数。</td>
-            </tr>
-            <tr>
-              <td><code>colProps</code></td>
-              <td>el-col</td>
-              <td>控制字段栅格，例如 <code>span</code>、<code>offset</code>。</td>
-            </tr>
-            <tr>
-              <td><code>formItemProps</code></td>
-              <td>el-form-item</td>
-              <td>配置 <code>label</code>、<code>rules</code> 等；校验路径由组件根据 fieldKey 自动生成。</td>
-            </tr>
-            <tr>
-              <td><code>hint</code></td>
-              <td>字段外层提示</td>
-              <td>字符串或动态字符串；当前作为原生 title 应用于已有 el-form-item。</td>
-            </tr>
-            <tr>
-              <td><code>type</code></td>
-              <td>字段渲染策略</td>
-              <td>内置别名，或明确使用 <code>component</code>、<code>slot</code>。</td>
-            </tr>
-            <tr>
-              <td><code>component</code></td>
-              <td>统一渲染配置</td>
-              <td>配置 renderer、属性、事件和选项；slot 模式通过同名 <code>component</code> 上下文返回。</td>
-            </tr>
-          </tbody>
+        <el-tab-pane label="渲染方式" name="modes">
+          <div class="tab-intro">
+            <h2>先按语义选择渲染入口</h2>
+            <p>是否存在字段绑定与表单交互，是 <code>cellSlot</code> 和字段渲染链路的主要分界。</p>
+          </div>
+          <el-table :data="renderModes" border stripe>
+            <el-table-column prop="mode" label="方式" width="120" />
+            <el-table-column label="配置入口" min-width="260"><template #default="{ row }"><code>{{ row.config }}</code></template></el-table-column>
+            <el-table-column prop="fieldKey" label="fieldKey" width="100" />
+            <el-table-column prop="validation" label="表单校验" width="100" />
+            <el-table-column label="上下文" min-width="210"><template #default="{ row }"><code>{{ row.scope }}</code></template></el-table-column>
+            <el-table-column prop="usage" label="适用场景" min-width="240" />
+          </el-table>
 
-          <tbody class="layer-group">
-            <tr>
-              <th rowspan="7" scope="rowgroup" class="layer-cell">Component</th>
-              <td><code>renderer</code></td>
-              <td>渲染目标</td>
-              <td>component 模式为组件对象/名称；slot 模式为具名 slot 名称。</td>
-              <td class="context-cell">—</td>
-            </tr>
-            <tr>
-              <td><code>resolveRenderer</code></td>
-              <td>按行选择组件</td>
-              <td>仅 component 模式；同步返回组件对象/名称，undefined 时回退到 renderer。</td>
-              <td class="context-cell"><code>Item 上下文</code></td>
-            </tr>
-            <tr>
-              <td><code>model</code></td>
-              <td>字段值绑定策略</td>
-              <td>省略或 <code>true</code> 使用原生 v-model；对象适配自定义协议；<code>false</code> 关闭自动绑定。</td>
-              <td class="context-cell">—</td>
-            </tr>
-            <tr>
-              <td><code>props</code></td>
-              <td>实际字段组件</td>
-              <td>静态对象或动态函数，结果直接透传。</td>
-              <td rowspan="3" class="context-cell"><code>Item 上下文</code><br><code>columnConfig</code><br><code>rowConfig</code><br><code>itemConfig</code></td>
-            </tr>
-            <tr>
-              <td><code>options</code></td>
-              <td>选项型组件</td>
-              <td>用于 select、radio、checkbox 等选项渲染。</td>
-            </tr>
-            <tr>
-              <td><code>optionProps</code></td>
-              <td>选项字段映射</td>
-              <td>自定义 label、value、disabled、key 字段名。</td>
-            </tr>
-            <tr>
-              <td><code>listeners</code></td>
-              <td>实际组件事件</td>
-              <td>首参为字段上下文，后续参数保持组件原始事件参数。</td>
-              <td class="context-cell"><code>Item 上下文</code><br>+ <code>setValue</code><br><code>updateRow</code></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+          <div class="model-panel">
+            <h3>component.model</h3>
+            <div><code>省略 / true</code><span>使用组件原生 Vue 2 v-model</span></div>
+            <div><code>{ prop, event, valueFromEvent }</code><span>适配非标准绑定协议</span></div>
+            <div><code>false</code><span>关闭自动绑定，适合纯展示或手动同步</span></div>
+          </div>
+        </el-tab-pane>
 
-      <h3>组件绑定策略</h3>
-      <p><code>component.model</code> 明确区分默认绑定、自定义协议和关闭自动绑定。关闭后仍可通过动态 props 与 listeners 手动同步，也可以只展示或处理事件而不写回表格。</p>
-      <div class="table-scroll">
-        <table class="context-summary model-table">
-          <thead><tr><th>model</th><th>行为</th><th>适用场景</th></tr></thead>
-          <tbody>
-            <tr><td>省略或 <code>true</code></td><td>使用组件原生 Vue 2 v-model</td><td>标准 <code>value/input</code>，或组件自身声明了 model</td></tr>
-            <tr><td><code>{ prop, event, valueFromEvent }</code></td><td>按指定协议自动写回当前字段</td><td>非标准属性、事件或复杂事件载荷</td></tr>
-            <tr><td><code>false</code></td><td>不注入任何模型属性和更新事件</td><td>手动同步、纯展示或命令型组件</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <pre>{{ modelExample }}</pre>
+        <el-tab-pane label="事件与 Ref" name="events">
+          <div class="tab-intro">
+            <h2>公开事件</h2>
+            <p><code>tableData</code> 是受控数据，<code>update:tableData</code> 应立即回写；后端持久化可以单独防抖。</p>
+          </div>
+          <el-table :data="eventRows" border stripe>
+            <el-table-column label="事件" min-width="220"><template #default="{ row }"><code>{{ row.name }}</code></template></el-table-column>
+            <el-table-column label="参数" min-width="340"><template #default="{ row }"><code>{{ row.payload }}</code></template></el-table-column>
+            <el-table-column prop="description" label="说明" min-width="360" />
+          </el-table>
 
-      <h3>完整结构</h3>
-      <pre>{{ propsExample }}</pre>
-    </section>
-
-    <section>
-      <h2>上下文回传示例</h2>
-      <p>上下文分为业务数据、原始配置、更新能力和解析结果。<code>row</code> 沿用 Element UI 语义，表示当前业务数据行；<code>rowConfig</code> 才是布局配置。</p>
-      <div class="table-scroll">
-        <table class="context-summary">
-          <thead><tr><th>类别</th><th>字段</th><th>边界</th></tr></thead>
-          <tbody>
-            <tr><td>业务数据</td><td><code>tableData, row, index, fieldKey, value</code></td><td>用于读取当前数据位置</td></tr>
-            <tr><td>原始配置</td><td><code>columnConfig, rowConfig, itemConfig</code></td><td>浅只读的当前配置路径</td></tr>
-            <tr><td>更新能力</td><td><code>setValue, updateRow</code></td><td>列级 cellSlot 只提供 updateRow；字段 listener/Slot 可用两者</td></tr>
-            <tr><td>解析结果</td><td><code>component, propPath</code></td><td>仅字段 Slot 可用</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p>上表是所有上下文字段的分类，不表示每个位置都会收到全部字段。例如列级 <code>cellSlot</code> 只有 <code>row/index/columnConfig/updateRow</code>，不会补齐 fieldKey、value 或 component。</p>
-      <p><code>itemConfig.component</code> 可能仍包含动态函数；Slot 的 <code>component</code> 已根据当前数据行解析。配置动态调整时请基于稳定 key 替换 columns，不要直接修改上下文引用。</p>
-      <p><code>itemConfig.component</code> 用于读取原始配置来源，<code>component</code> 用于直接绑定 Slot 内组件。后者已解析动态 props/options，并包装 listeners；不要在 Slot 中自行执行原始配置函数。</p>
-
-      <h3>不同回调与 Slot 的上下文</h3>
-      <div class="table-scroll">
-        <table class="context-summary callback-table">
-          <thead><tr><th>位置</th><th>上下文</th><th>返回值 / 用途</th></tr></thead>
-          <tbody>
-            <tr><td><code>column.visible / props</code></td><td><code>tableData, columnConfig</code></td><td>boolean / el-table-column props</td></tr>
-            <tr><td><code>rowConfig.visible / props</code></td><td>Column 上下文 + <code>row, index, rowConfig</code></td><td>boolean / el-row props</td></tr>
-            <tr><td><code>itemConfig.visible / colProps / formItemProps</code></td><td>Row 上下文 + <code>fieldKey, value, itemConfig</code></td><td>boolean / 对应 Element props</td></tr>
-            <tr><td><code>component.props / options / optionProps</code></td><td>Item 上下文</td><td>组件 props / 选项 / 字段映射</td></tr>
-            <tr><td><code>component.resolveRenderer</code></td><td>Item 上下文</td><td>组件对象、全局名称或 undefined</td></tr>
-            <tr><td><code>component.listeners[event]</code></td><td>Item 上下文 + <code>setValue, updateRow</code>，后接原始事件参数</td><td>无需返回</td></tr>
-            <tr><td><code>column.cellSlot</code></td><td><code>row, index, columnConfig, updateRow</code></td><td>直接渲染单元格，无字段上下文</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <pre>{{ callbackContextExample }}</pre>
-
-      <h3>实际回传对象示例</h3>
-      <p>以下对象基于第 1 行的 <code>city</code> 字段。三个 <code>*Config</code> 是 columns 中的原始对象引用，<code>component</code> 是当前行解析结果。</p>
-      <pre>{{ returnedContextExample }}</pre>
-
-      <h3>组合使用示例</h3>
-      <pre>{{ contextExample }}</pre>
-
-      <h3>异步更新与 rowKey</h3>
-      <p><code>rowKey</code> 是可选能力。普通同步输入、增删和保留对象引用的排序不需要配置；只有异步等待期间可能刷新、克隆或替换全部行对象时才建议提供。<code>index</code> 是事件触发时快照，更新助手会重新定位，目标行不存在时忽略更新。</p>
-      <pre>{{ asyncUpdateExample }}</pre>
-
-      <h3>动态列与受控回写</h3>
-      <p>唯一稳定的 <code>column.key</code> 会在列增删、显隐和同顺序配置替换时保持列包装身份；已有列真实重排时会重新挂载可见列，以同步 Element UI 注册顺序。中间列变化后，发生位移的表体单元格仍可能重建，字段状态应保存在 <code>tableData</code>。</p>
-      <p>收到 <code>update:tableData</code> 后应立即更新父组件状态，不要延迟或防抖本地回写。需要控制请求频率时，只对后端保存做防抖或批量处理。</p>
-    </section>
-
-    <section>
-      <h2>远程 JSON</h2>
-      <p>远程只返回布局、type、静态 props/options；组件对象、事件函数和 slot 实现在页面本地按 fieldKey 增强。</p>
-      <router-link to="/remote-schema">查看可运行示例 →</router-link>
-    </section>
-
-    <section>
-      <h2>公开事件和 Ref</h2>
-      <p>组件事件只有 <code>update:tableData</code> 和 <code>field-change</code>；Table 原生事件直接透传。</p>
-      <p><code>resetFields()</code> 保持 Element UI 原生语义；受控数据由页面恢复后调用 <code>clearValidate()</code>。单字段校验使用 <code>getFormRef().validateField()</code>。</p>
-      <pre>{{ refExample }}</pre>
+          <div class="tab-intro ref-heading"><h2>公开 Ref</h2></div>
+          <el-table :data="refRows" border stripe>
+            <el-table-column label="方法" min-width="220"><template #default="{ row }"><code>{{ row.name }}</code></template></el-table-column>
+            <el-table-column label="返回值" min-width="220"><template #default="{ row }"><code>{{ row.result }}</code></template></el-table-column>
+            <el-table-column prop="description" label="说明" min-width="420" />
+          </el-table>
+        </el-tab-pane>
+      </el-tabs>
     </section>
   </main>
 </template>
 
 <script lang="ts" setup>
-const propsExample = `{
-  label: '姓名',                // el-table-column label
-  props: { minWidth: 180 },    // el-table-column
-  children: [{
-    props: { gutter: 8 },      // el-row
-    children: [{
-      key: 'primary-name',       // 稳定渲染身份
-      fieldKey: 'name',
-      type: 'input',
-      colProps: { span: 12 },  // el-col
-      formItemProps: {         // el-form-item
-        rules: [{ required: true }]
-      },
-      component: {
-        model: true,                 // 显式使用组件原生 v-model
-        props: { clearable: true },
-        listeners: {},
-        options: []
-      }
-    }]
-  }]
-}`
+import { computed, ref } from 'vue'
+import {
+  apiGroups,
+  contextRows,
+  eventRows,
+  featureCards,
+  refRows,
+  renderModes
+} from '../docs/apiReference'
 
-const contextExample = `{
-  label: '地区',
-  visible: ({ tableData, columnConfig }) => columnConfig.key !== 'hidden' && tableData.length > 0,
-  props: ({ tableData, columnConfig }) => ({
-    className: columnConfig.key,
-    minWidth: tableData.length > 5 ? 360 : 280
-  }),
-  children: [{
-    visible: ({ row, rowConfig }) => rowConfig.key !== 'hidden' && row.hidden !== true,
-    props: ({ row, index, rowConfig }) => ({
-      gutter: row.compact ? 4 : 12,
-      class: (rowConfig.key || 'data-row') + '-' + index
-    }),
-    children: [{
-      fieldKey: 'city',
-      type: 'select',
-      visible: ({ row, fieldKey, value, itemConfig }) => itemConfig.key !== 'hidden' && fieldKey === 'city' && Boolean(row.province) && value !== 'disabled',
-      colProps: ({ index }) => ({ span: index === 0 ? 12 : 8 }),
-      component: {
-        props: ({ row }) => ({ disabled: row.locked }),
-        options: ({ row }) => cityOptions[row.province] || [],
-        listeners: {
-          change({ row, index, fieldKey, value, itemConfig, setValue, updateRow }, nextValue) {
-            console.log('修改前', row, index, fieldKey, value, itemConfig.key)
-            setValue(nextValue)
-            updateRow({ cityTouched: true })
-          }
-        }
-      }
-    }]
-  }]
-}`
+const activeTab = ref('paths')
+const keyword = ref('')
 
-const callbackContextExample = `// Column
-visible: ({ tableData, columnConfig }) => tableData.length > 0 && columnConfig.key !== 'hidden'
+const visibleApiGroups = computed(() => {
+  const query = keyword.value.trim().toLowerCase()
+  if (!query) return apiGroups
 
-// Row
-props: ({ row, index, rowConfig }) => ({
-  gutter: row.compact ? 4 : 12,
-  class: (rowConfig.key || 'row') + '-' + index
+  return apiGroups
+    .map(group => ({
+      ...group,
+      entries: group.entries.filter(entry =>
+        [entry.path, entry.type, entry.target, entry.description, entry.context]
+          .filter(Boolean)
+          .some(value => String(value).toLowerCase().includes(query))
+      )
+    }))
+    .filter(group => group.entries.length > 0)
 })
-
-// Item / component dynamic config
-component: {
-  props: ({ row, value, itemConfig }) => ({
-    disabled: row.locked || value === 'disabled',
-    fieldId: itemConfig.key
-  }),
-  options: ({ row }) => cityOptions[row.province] || [],
-  listeners: {
-    change({ row, fieldKey, value, columnConfig, rowConfig, itemConfig, setValue }, nextValue) {
-      console.log(row, fieldKey, value)
-      console.log(columnConfig.key, rowConfig.key, itemConfig.key)
-      setValue(nextValue)
-    }
-  }
-}
-
-// cellSlot 是 scoped Slot，不是列级动态配置回调
-<template #actions="{ row, index, columnConfig, updateRow }">
-  <button @click="updateRow({ enabled: !row.enabled })">
-    {{ columnConfig.label }} {{ index }}
-  </button>
-</template>
-`
-
-const returnedContextExample = `// Column callback
-{
-  tableData,
-  columnConfig // { key: 'region-column', label: '地区', ... }
-}
-
-// Row callback
-{
-  tableData,
-  columnConfig,
-  row: tableData[0], // { id: 1, province: 'zhejiang', city: 'hangzhou' }
-  index: 0,
-  rowConfig // { key: 'region-row', children: [...] }
-}
-
-// Item dynamic callback
-{
-  tableData,
-  columnConfig,
-  row: tableData[0],
-  index: 0,
-  rowConfig,
-  fieldKey: 'city',
-  value: 'hangzhou',
-  itemConfig // { key: 'city-field', fieldKey: 'city', type: 'slot', ... }
-}
-
-// component listener first argument
-{
-  ...itemContext,
-  setValue: Function,
-  updateRow: Function
-}
-
-// Field Slot
-{
-  ...actionContext,
-  propPath: 'tableData.0.city',
-  component: {
-    renderer: 'city-editor',
-    model: true,
-    props: { disabled: false },
-    listeners: {},
-    options: [{ label: '杭州', value: 'hangzhou' }],
-    optionProps: undefined
-  }
-}
-
-// cellSlot scope
-{
-  row: tableData[0],
-  index: 0,
-  columnConfig, // { key: 'actions-column', cellSlot: 'actions', ... }
-  updateRow: Function
-}
-
-// Header Slot
-{
-  tableData,
-  columnConfig,
-  columnIndex: 0,
-  label: '地区'
-}`
-
-const modelExample = `// 1. 默认双向绑定；true 与省略 model 等价
-component: {
-  renderer: StandardInput,
-  model: true
-}
-
-// 2. 非标准协议：从复杂事件载荷中提取当前字段值
-component: {
-  renderer: UserSelector,
-  model: {
-    prop: 'selectedId',
-    event: 'select-user',
-    valueFromEvent: user => user.id
-  }
-}
-
-// 3. 关闭自动 model，通过 props + listeners 手动同步
-component: {
-  renderer: SkuSelector,
-  model: false,
-  props: ({ value }) => ({ selectedSkuId: value }),
-  listeners: {
-    'select-sku'({ updateRow }, sku) {
-      updateRow({ skuId: sku.id, skuName: sku.name })
-    }
-  }
-}
-
-// 4. 完全不需要双向绑定，只传展示属性
-component: {
-  renderer: StatusDisplay,
-  model: false,
-  props: ({ value }) => ({ status: value })
-}`
-
-const asyncUpdateExample = `<FormTable
-  :table-data="tableData"
-  :columns="columns"
-  :table-props="{ rowKey: 'id', border: true }"
-/>
-
-component: {
-  listeners: {
-    async change({ row, index, setValue }, nextValue) {
-      console.log('触发时位置', row.id, index)
-      await saveCity(row.id, nextValue)
-      // 行重排后仍按 id 更新原数据行；已删除则忽略。
-      setValue(nextValue)
-    }
-  }
-}`
-
-const refExample = `await formTableRef.value?.validate()
-formTableRef.value?.resetFields()
-formTableRef.value?.clearValidate()
-formTableRef.value?.getFormRef()?.validateField('tableData.0.name')
-formTableRef.value?.getFormRef()
-formTableRef.value?.getTableRef()`
 </script>
 
 <style scoped>
-.docs-page { max-width: 1120px; margin: 0 auto; padding: 32px; }
-section { margin-top: 20px; padding: 24px; background: #fff; border-radius: 12px; }
-pre { padding: 16px; overflow: auto; background: #f6f8fa; border-radius: 8px; }
-li { margin: 8px 0; }
-.table-scroll { overflow-x: auto; }
-table { min-width: 980px; width: 100%; border-collapse: collapse; font-size: 14px; }
-.context-summary { min-width: 760px; margin: 16px 0; }
-th, td { padding: 12px; border: 1px solid #e5e7eb; text-align: left; vertical-align: top; }
-th { background: #f6f8fa; white-space: nowrap; }
-.layer-group + .layer-group { border-top: 3px solid #cbd5e1; }
-.layer-cell { color: #1d4ed8; background: #eff6ff; text-align: center; vertical-align: middle; }
-.context-cell { color: #475569; background: #f8fafc; line-height: 1.8; vertical-align: middle; }
-h3 { margin-top: 24px; }
+.api-page { max-width: 1280px; margin: 0 auto; padding: 32px; color: #1f2937; }
+.api-hero { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; margin: 18px 0 24px; padding: 28px; border: 1px solid #dbe5f1; border-radius: 16px; background: linear-gradient(135deg, #f8fbff, #eef5ff); }
+.api-hero h1 { margin: 0; font-size: 32px; }
+.api-hero p:not(.eyebrow) { max-width: 720px; margin: 12px 0 0; color: #526071; }
+.eyebrow { margin: 0 0 8px; color: #2563eb; font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.api-search { flex: 0 0 340px; }
+.feature-section, .reference-section { margin-top: 20px; padding: 24px; border-radius: 14px; background: #fff; box-shadow: 0 8px 26px rgba(15, 23, 42, .06); }
+.section-heading h2, .group-heading h2, .tab-intro h2 { margin: 0; }
+.section-heading p, .group-heading p, .tab-intro p { margin: 8px 0 0; color: #64748b; }
+.feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-top: 18px; }
+.feature-card { padding: 16px; border: 1px solid #e2e8f0; border-radius: 10px; color: inherit; text-decoration: none; transition: border-color .2s, transform .2s; }
+.feature-card:hover { border-color: #60a5fa; transform: translateY(-2px); }
+.feature-card p { min-height: 42px; margin: 8px 0 12px; color: #64748b; font-size: 13px; }
+.feature-card span { display: inline-block; margin: 3px 5px 0 0; padding: 2px 7px; border-radius: 99px; background: #eff6ff; color: #2563eb; font-size: 11px; }
+.tree-panel { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin: 8px 0 22px; padding: 16px; border-left: 4px solid #3b82f6; background: #f8fafc; }
+.tree-panel small { flex-basis: 100%; color: #64748b; }
+.api-group + .api-group { margin-top: 30px; }
+.group-heading { margin-bottom: 12px; }
+.path-code { color: #1d4ed8; font-weight: 600; white-space: nowrap; }
+.el-tag { margin-top: 6px; }
+.boundary-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 20px; }
+.boundary-grid article, .model-panel { padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; }
+.boundary-grid h3, .model-panel h3 { margin: 0 0 10px; }
+.boundary-grid p { color: #64748b; }
+.model-panel { margin-top: 20px; }
+.model-panel div { display: grid; grid-template-columns: minmax(230px, 1fr) 2fr; gap: 16px; padding: 10px 0; border-top: 1px solid #e2e8f0; }
+.ref-heading { margin-top: 28px; }
+code { font-family: SFMono-Regular, Consolas, 'Liberation Mono', monospace; }
+@media (max-width: 760px) {
+  .api-page { padding: 18px; }
+  .api-hero { align-items: stretch; flex-direction: column; }
+  .api-search { flex-basis: auto; width: 100%; }
+  .boundary-grid { grid-template-columns: 1fr; }
+  .model-panel div { grid-template-columns: 1fr; gap: 5px; }
+}
 </style>
