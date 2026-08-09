@@ -2,6 +2,7 @@ import type { Component, PluginObject } from 'vue'
 import FormTable, {
   FormTable as NamedFormTable,
   FormTablePlugin,
+  defineFormTableColumns,
   type BuiltinFormItemType,
   type CellSlotColumnConfig,
   type ColumnConfig,
@@ -30,6 +31,37 @@ const CustomInput: Component = { name: 'CustomInput' }
 const AlternativeInput: Component = { name: 'AlternativeInput' }
 const completeValueHint: FormTableHint = '完整字段值'
 const rows: TableRow[] = [{ name: 'Alice', profile: { city: '杭州' } }]
+
+interface PurchaseRow extends TableRow {
+  name: string
+  amount: number
+}
+
+const typedColumns = defineFormTableColumns<PurchaseRow>([{
+  label: '采购信息',
+  visible: ({ tableData }) => {
+    tableData[0]?.amount.toFixed(2)
+    // @ts-expect-error known business fields keep their declared value types.
+    tableData[0]?.name.toFixed(2)
+    return true
+  },
+  children: [{
+    children: [{
+      fieldKey: 'amount',
+      type: 'input',
+      component: {
+        props: ({ row }) => ({ placeholder: row.name }),
+        listeners: {
+          change(context) {
+            context.updateRow({ amount: 100 })
+            // @ts-expect-error updateRow preserves known business field value types.
+            context.updateRow({ amount: 'invalid' })
+          }
+        }
+      }
+    }]
+  }]
+}])
 const columns: ColumnConfig[] = [{
   label: '基本信息',
   headerHint: ({ tableData, columnConfig }) => `${columnConfig.label}：${tableData.length} 条`,
@@ -299,10 +331,12 @@ void cellSlotContext.fieldKey
 cellSlotContext.columnConfig.label = '新操作'
 
 void props
+void typedColumns
 void cellSlotColumn
 void layoutColumn
 void mixedColumnModes
 void modelVariants
+void dynamicRendererVariants
 void component
 void named
 void plugin

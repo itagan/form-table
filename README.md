@@ -23,8 +23,10 @@ docs/                # 仓库级文档入口
 ```bash
 pnpm install
 pnpm dev
+pnpm lint
 pnpm type-check
 pnpm test
+pnpm test:coverage
 pnpm build
 pnpm release:check
 ```
@@ -32,10 +34,12 @@ pnpm release:check
 命令说明：
 
 - `pnpm dev`：启动 `playground`，用于本地调试组件。
+- `pnpm lint`：检查组件包和 playground 的 TypeScript/Vue 代码规范。
 - `pnpm type-check`：检查组件包和 playground。
 - `pnpm test`：运行组件包核心逻辑单测。
+- `pnpm test:coverage`：运行组件测试并校验覆盖率阈值。
 - `pnpm build`：先构建 npm 包，再构建 playground。
-- `pnpm release:check`：执行测试、类型检查、构建和 npm 打包预检。
+- `pnpm release:check`：执行 Lint、覆盖率测试、类型检查、构建、文档和 npm 打包预检。
 - `pnpm --filter @itagan/form-table build`：只构建可发布 npm 包。
 
 ## npm 包使用

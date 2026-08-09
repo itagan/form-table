@@ -7,7 +7,26 @@ export default defineConfig({
   plugins: [vue2()],
   test: {
     environment: 'jsdom',
-    setupFiles: ['./src/__tests__/setup.ts']
+    setupFiles: ['./src/__tests__/setup.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json-summary', 'html'],
+      all: true,
+      include: ['src/**/*.{ts,vue}'],
+      exclude: [
+        'src/**/*.d.ts',
+        'src/**/__tests__/**',
+        'src/types.ts',
+        'src/types.public.ts',
+        'src/public-types.ts'
+      ],
+      thresholds: {
+        statements: 80,
+        branches: 70,
+        functions: 75,
+        lines: 80
+      }
+    }
   },
   resolve: {
     alias: {

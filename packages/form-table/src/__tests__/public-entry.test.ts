@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { VueConstructor } from 'vue'
-import FormTable, { FormTable as NamedFormTable, FormTablePlugin } from '../index'
+import FormTable, {
+  FormTable as NamedFormTable,
+  FormTablePlugin,
+  defineFormTableColumns
+} from '../index'
 import * as publicEntry from '../index'
 
 describe('public package entry', () => {
@@ -9,11 +13,12 @@ describe('public package entry', () => {
     expect(NamedFormTable).toBe(FormTable)
   })
 
-  it('keeps runtime exports limited to the component and plugin', () => {
+  it('keeps runtime exports limited to the supported public API', () => {
     expect(Object.keys(publicEntry).sort()).toEqual([
       'FormTable',
       'FormTablePlugin',
-      'default'
+      'default',
+      'defineFormTableColumns'
     ])
   })
 
@@ -25,5 +30,11 @@ describe('public package entry', () => {
     } as unknown as VueConstructor)
 
     expect(component).toHaveBeenCalledWith('FormTable', FormTable)
+  })
+
+  it('returns typed column definitions without changing their runtime identity', () => {
+    const columns = [{ label: '姓名', children: [] }]
+
+    expect(defineFormTableColumns(columns)).toBe(columns)
   })
 })

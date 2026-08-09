@@ -15,8 +15,8 @@ describe('useControlledTableUpdate row identity', () => {
     const emitUpdate = vi.fn((nextTableData: TableRow[]) => {
       tableData = nextTableData
     })
-    const emitFieldChange = vi.fn((_payload: FormTableFieldChangePayload) => {})
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const emitFieldChange = vi.fn((_payload: FormTableFieldChangePayload) => undefined)
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
     const updateApi = useControlledTableUpdate({
       getTableData: () => tableData,
       getRowKey: () => rowKey,

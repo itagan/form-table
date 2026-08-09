@@ -47,7 +47,7 @@ function normalizePath(path: string): readonly string[] {
  *
  * 支持点路径和数组下标写法，如 `profile.city`、`items[0].name`。
  */
-export function getValueByPath(source: FormTableRecord, path: string): FormTableValue | undefined {
+export function getValueByPath(source: Readonly<FormTableRecord>, path: string): FormTableValue | undefined {
   const segments = normalizePath(path)
   let current: FormTableValue = source
 

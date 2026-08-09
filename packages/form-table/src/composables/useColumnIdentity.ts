@@ -1,11 +1,11 @@
 import { computed, ref, watch } from 'vue'
-import type { ColumnConfig, FormTableTableContext } from '../types'
+import type { ColumnConfig, FormTableTableContext, TableRow } from '../types'
 import { createColumnContext, resolveVisible } from '../utils/dynamic'
 
 /** 管理 Element Table 动态列的稳定身份、顺序版本和可见集合。 */
-export function useColumnIdentity(
-  getColumns: () => ColumnConfig[],
-  tableContext: FormTableTableContext
+export function useColumnIdentity<TRow extends TableRow = TableRow>(
+  getColumns: () => ColumnConfig<TRow>[],
+  tableContext: FormTableTableContext<TRow>
 ) {
   const columnIdentities = computed(() => {
     const columns = getColumns()
@@ -41,7 +41,7 @@ export function useColumnIdentity(
   }, { immediate: true })
 
   const visibleColumns = computed(() => getColumns().reduce<Array<{
-    column: ColumnConfig
+    column: ColumnConfig<TRow>
     renderKey: string
   }>>((result, column, sourceIndex) => {
     if (resolveVisible(column.visible, createColumnContext(tableContext, column))) {

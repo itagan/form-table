@@ -12,7 +12,34 @@
 - `FormTableFieldChangePayload`、`FormTableHeaderSlotContext`
 - `FormTableExpose`、`FormTableElementFormRef`、`FormTableElementTableRef`
 
-运行时入口只导出默认组件、`FormTable` 和 `FormTablePlugin`。上下文注入 key、内部更新 API、动态解析和渲染模式工具都不属于公共入口。
+运行时入口导出默认组件、`FormTable`、`FormTablePlugin` 和泛型配置助手 `defineFormTableColumns`。上下文注入 key、内部更新 API、动态解析和渲染模式工具都不属于公共入口。
+
+需要让动态配置回调获得业务行类型时，使用运行时原样返回数组的泛型助手：
+
+```ts
+import { defineFormTableColumns, type TableRow } from '@itagan/form-table'
+
+interface PurchaseRow extends TableRow {
+  name: string
+  amount: number
+}
+
+const columns = defineFormTableColumns<PurchaseRow>([{
+  label: '采购信息',
+  visible: ({ tableData }) => tableData.some(row => row.amount > 0),
+  children: [{
+    children: [{
+      fieldKey: 'amount',
+      type: 'number',
+      component: {
+        props: ({ row }) => ({ disabled: row.amount <= 0 })
+      }
+    }]
+  }]
+}])
+```
+
+`ColumnConfig`、Row/Item 配置、上下文、listener、事件载荷与 `FormTableProps` 都接受默认行泛型；省略泛型时继续使用原有 `TableRow`。`fieldKey` 仍是字符串，不执行类型级嵌套路径推导。
 
 根组件 Vue 2 `v-model` 映射到 `FormTableProps.tableData` 与 `update:tableData`，因此不会新增 `value` prop 或 `input` 事件。Item 的 `FieldComponentConfig.model` 只负责字段组件协议，与根组件 model 无关。
 
