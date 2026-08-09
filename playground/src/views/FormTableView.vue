@@ -60,7 +60,13 @@ const columns: ColumnConfig[] = [
           type: 'input',
           colProps: { span: 12 },
           formItemProps: { rules: required('请输入姓名') },
-          component: { props: { placeholder: '请输入姓名', clearable: true } }
+          component: {
+            props: {
+              placeholder: '请输入姓名',
+              clearable: true,
+              title: '请输入人员真实姓名'
+            }
+          }
         },
         {
           fieldKey: 'age',
