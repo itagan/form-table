@@ -2,13 +2,15 @@
 
 ## 属性路径
 
-| 配置路径 | 类型 | 必填 / 默认值 | 目标 / 作用 |
-| --- | --- | --- | --- |
-| `tableData` | `TableRow[]` | `[]` | 根组件 `v-model` 对应 prop；也是 `el-table.data` 的唯一数据源 |
-| `columns` | `ColumnConfig[]` | `[]` | 表格列、布局和字段渲染配置 |
-| `formProps` | `ComponentProps` | `{}` | 透传给 `el-form` |
-| `tableProps` | `ComponentProps` | `{}` | 透传给 `el-table` |
-| `loading` | `boolean` | `false` | `el-table` 的 `v-loading` |
+| 配置路径 | 类型 | TypeScript | 运行时默认值 | 目标 / 作用 |
+| --- | --- | --- | --- | --- |
+| `tableData` | `TableRow[]` | 必填 | `[]` | 根组件 `v-model` 对应 prop；也是 `el-table.data` 的唯一数据源 |
+| `columns` | `ColumnConfig[]` | 必填 | `[]` | 表格列、布局和字段渲染配置 |
+| `formProps` | `ComponentProps` | 可选 | `{}` | 透传给 `el-form` |
+| `tableProps` | `ComponentProps` | 可选 | `{}` | 透传给 `el-table` |
+| `loading` | `boolean` | 可选 | `false` | `el-table` 的 `v-loading` |
+
+`tableData` 和 `columns` 在公开 `FormTableProps` 类型中是必填项；组件仍提供空数组作为运行时容错默认值。TypeScript 项目应显式传入两者，不依赖运行时默认值。
 
 ## 受控数据
 

@@ -49,4 +49,30 @@ columns[].children[].children[].component
 | `component` | 必须提供 `renderer` 或 `resolveRenderer` | 默认 Vue 2 v-model，可自定义 |
 | `slot` | `renderer` 必须是静态 Slot 名称 | FormTable 不为 Slot 内组件自动绑定 |
 
+## 内置类型映射
+
+内置 `type` 只映射 Element UI 已提供的组件，不包含 Tree Select 等业务或第三方组件：
+
+| `type` | 实际组件 | 自动补充属性 |
+| --- | --- | --- |
+| `input` | `el-input` | — |
+| `select` | `el-select` | — |
+| `date` | `el-date-picker` | `{ type: 'date' }` |
+| `datetime` | `el-date-picker` | `{ type: 'datetime' }` |
+| `time` | `el-time-picker` | — |
+| `textarea` | `el-input` | `{ type: 'textarea' }` |
+| `number` | `el-input-number` | — |
+| `switch` | `el-switch` | — |
+| `radio` | `el-radio-group` | — |
+| `checkbox` | `el-checkbox-group` | — |
+| `text` | `span` | — |
+| `rate` | `el-rate` | — |
+| `slider` | `el-slider` | — |
+| `color` | `el-color-picker` | — |
+| `upload` | `el-upload` | — |
+| `cascader` | `el-cascader` | — |
+| `autocomplete` | `el-autocomplete` | — |
+
+`component.props` 会在自动补充属性之后合并，因此可以覆盖或扩展这些最小默认值。需要其他组件时使用 `type: 'component'`。
+
 从最小配置到页面使用的独立示例见[自定义字段组件](../features/custom-component.md)。Render Function 和更多组合方式见[完整配置指南](../guide/configuration-guide.md)，完整企业组件 Mock 与 columns 工厂见[企业复杂组件接入示例](../examples/enterprise-components.md)。

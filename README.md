@@ -16,7 +16,7 @@ docs/                # 仓库级文档入口
 - 组件包源码：`packages/form-table/src`
 - npm 包入口：`packages/form-table/src/index.ts`
 - 调试应用：`playground/src`
-- 完整能力文档：`CURRENT_FORMTABLE_DOC.md`
+- 文档总站：[docs/index.md](./docs/index.md)
 
 ## 常用命令
 
@@ -55,25 +55,11 @@ import FormTable from '@itagan/form-table'
 import type { ColumnConfig, TableRow } from '@itagan/form-table'
 ```
 
-FormTable 将 Vue 和 Element UI 声明为 peer dependencies，不会重复安装或注册它们。接入前请确认项目已安装并注册 Element UI，且依赖版本满足：
-
-- `vue@^2.7.1`
-- `element-ui@^2.4.9`
-
-即 Vue `>=2.7.1 <3.0.0`、Element UI `>=2.4.9 <3.0.0`。最佳建议组合是 Vue `2.7.16` + Element UI `2.15.14`：两者分别是 Vue 2 和 Element UI 2 的最终发布版本，也是 FormTable 的完整回归测试版本。Vue `2.7.0`、Vue 2.6 及更早版本不受支持，Vue 3 暂不支持。处理方式详见[快速开始的版本兼容说明](./docs/guide/quick-start.md#版本不满足时)。
+FormTable 将 Vue 和 Element UI 声明为 peer dependencies，不会重复安装或注册它们。支持范围、推荐版本与最小使用示例见[快速开始](./docs/guide/quick-start.md)。
 
 ## 调试页面
 
-本地启动后主要路由：
-
-| 路由 | 用途 |
-| ------ | ------ |
-| `/form-table` | 基础编辑场景，验证 children、type、字段校验和同步。 |
-| `/form-table-advanced` | 综合示例，覆盖多行栅格、自定义组件、动态 options、嵌套路径和 slot。 |
-| `/remote-schema` | 远程纯 JSON 配置与页面本地组件、事件增强。 |
-| `/dynamic-slot-test` | 动态显隐与 slot 上下文专项页面。 |
-| `/debug` | 自定义组件对象直传、事件和原生 Ref 调试。 |
-| `/form-table-docs` | playground 内置能力文档页，快速查 props、事件、ref 和配置约定。 |
+完整路由和用途统一维护在[示例索引](./docs/examples/index.md)。本地运行 `pnpm site:dev` 可同时启动 Playground 和 VitePress 文档站。
 
 `playground` 通过 workspace alias 直接引用 `packages/form-table/src/index.ts`，开发时无需先构建组件包。
 
@@ -87,9 +73,12 @@ FormTable 将 Vue 和 Element UI 声明为 peer dependencies，不会重复安�
 ## 文档
 
 - [完整能力文档](./CURRENT_FORMTABLE_DOC.md)
+- [VitePress 文档总站](./docs/index.md)
+- [功能专题](./docs/features/index.md)
+- [示例索引](./docs/examples/index.md)
 - [更新记录](./CHANGELOG.md)
 - [组件包说明](./packages/form-table/README.md)
-- [文档站准备目录](./docs/README.md)
+- [维护与发布](./docs/migration/npm-package.md)
 
 ## 发布前检查
 
