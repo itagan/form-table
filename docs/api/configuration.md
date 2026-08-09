@@ -69,6 +69,16 @@ tableData.value = tableData.value.filter((_, index) => index !== deleteIndex)
 
 Element UI 的表体单元格按位置渲染；删除或插入中间列时，即使右侧 Column 包装实例得到复用，发生位置移动的单元格内容仍可能重新创建。不要把未提交业务状态只保存在字段组件内部，应及时同步到 `tableData`。
 
+动态 Item 同理：显式且唯一的 `item.key` 用于保持字段渲染身份。未提供时会按 `fieldKey + 当前可见下标` 降级；前方字段显隐或增删导致下标变化时，后续 Item 可能重新挂载。`fieldKey` 仍只负责数据路径，不能在复杂动态布局中替代稳定 `item.key`。
+
+| 配置 | 标识对象 | 主要作用 |
+| --- | --- | --- |
+| `tableProps.rowKey` | 业务数据行 | 异步后在最新 `tableData` 中重新定位原行，也供 Element Table 使用 |
+| `column.key` | Column 配置 | 稳定动态列包装身份，并在真实重排时触发正确的列注册 |
+| `item.key` | Item 配置 | 稳定动态字段身份，避免同一布局行内前方字段变化导致无关字段换代 |
+
+三种 key 相互独立，均要求在各自作用域内唯一、稳定，不应使用当前数组下标。
+
 ## 校验规则
 
 字段校验直接使用 Element UI `el-form-item` 的 `rules`。FormTable 只负责根据当前行下标和 `fieldKey` 生成完整 `prop`，不重新定义 required、pattern 或 validator 协议：

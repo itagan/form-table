@@ -5,6 +5,7 @@
 ### Improved
 
 - 优化动态 Column 渲染身份：唯一 `column.key` 在增删、显隐和同顺序配置替换时保持稳定，仅在已有列相对顺序变化时整体换代以同步 Element UI 列顺序。
+- 补充动态行列优化说明，明确 `rowKey`、`column.key`、`item.key` 的职责，以及受控数据立即回写、后端保存可延迟的边界。
 
 ### Fixed
 

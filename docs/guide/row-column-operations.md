@@ -4,6 +4,19 @@
 
 FormTable 负责渲染、字段校验路径和当前行字段更新；`tableData` 与 `columns` 始终由调用方维护。因此，行增删、列调整和需要业务确认的变更都应在页面层完成。
 
+## 优化后的行为与边界
+
+| 场景 | 当前行为 | 推荐配置 |
+| --- | --- | --- |
+| 同步新增、删除、移动行 | 其他行保留对象引用时可继续复用；校验路径会随下标变化 | 更新后 `nextTick`，再调用 `clearValidate()` |
+| 异步期间重排、刷新或重建行对象 | 更新助手可在最新数据中重新定位原行；原行已删除则忽略更新 | 提供唯一稳定的 `tableProps.rowKey` |
+| 增删、显隐列，或以相同顺序替换配置 | 唯一 key 相同的已有列会复用 Column 包装实例 | 为动态列提供唯一稳定的 `column.key` |
+| 调整已有列的相对顺序 | 可见列会有意重新挂载，让 Element UI 按新顺序注册 | 继续使用稳定 `column.key`，业务值存入 `tableData` |
+| 动态显隐同一布局行内的字段 | 显式 key 相同的其他 Item 可保持渲染身份 | 为动态字段提供唯一稳定的 `item.key` |
+| 延迟保存到后端 | 可以防抖、批量或等待确认后保存 | 本地 `tableData` 仍须立即接收组件更新 |
+
+这里的复用主要针对 FormTable 的 Column/Item 包装实例。Element UI 的表体单元格按可见位置渲染；插入或删除中间列后，右侧发生位移的单元格内容仍可能重新创建。因此，输入值、选中值等业务状态必须以 `tableData` 为准，不能只保存在字段组件内部。
+
 ## 常见行操作
 
 ### 新增空行
@@ -175,6 +188,10 @@ const moveColumn = (from: number, to: number) => {
 
 动态列应提供唯一稳定的 `column.key`，不要依赖可能变化的 `label` 或数组下标。同 key、同相对顺序的列在增删、显隐和配置对象替换时会尽量复用列包装实例；真正移动已有列时会重新挂载可见列，让 Element UI 按新顺序注册。
 
+例如列从 `a, b, c` 变为 `a, c` 时，`a`、`c` 的 Column 包装身份保持稳定；但 `c` 在表体中的可见位置发生变化，其单元格内容仍可能由 Element UI 重新创建。如果列从 `a, b, c` 变为 `c, a, b`，已有列的相对顺序发生变化，FormTable 会主动重新挂载全部可见列以保证最终顺序正确。
+
+缺失或重复的 `column.key` 会降级为包含原始下标的内部身份；结构变化后不保证复用。`column.key` 只负责渲染身份，不会写入业务数据，也不要求与 `tableProps.rowKey` 相同。
+
 ### 修改某个字段配置
 
 配置上下文是只读引用。需要修改字段配置时，按稳定 `item.key` 在外部不可变替换：
@@ -208,6 +225,18 @@ updateItemConfig('city-field', item => ({
 ## 先处理逻辑，再变更字段
 
 内置类型和 `type: 'component'` 默认使用 `v-model`，组件发出输入事件后会立即更新 `tableData`。如果字段必须经过确认、校验或接口处理后才能提交，不应直接使用即时 `v-model` 写入。
+
+“延迟提交”指延迟产生最终业务变更或延迟保存到后端，不是延迟接收 FormTable 已发出的受控数据。只要收到了 `update:tableData`，父组件就应同步更新本地状态：
+
+```vue
+<FormTable
+  :table-data="tableData"
+  :columns="columns"
+  @update:tableData="tableData = $event"
+/>
+```
+
+不要对这个回写处理做防抖或等待接口成功。FormTable 只在同一同步调用链内保留连续更新的临时基线；进入下一微任务后会重新以父组件传回的 `tableData` 为准。延迟回写可能让连续输入或跨字段更新基于旧数据计算，覆盖前一次结果。需要减少接口请求时，应立即更新本地 `tableData`，再单独防抖或批量保存其快照。
 
 推荐使用 Slot 或只发出 `commit` 事件的自定义组件：
 
@@ -401,3 +430,4 @@ async function commit({ row, fieldKey, setValue }, draftValue) {
 | 增删、排序、隐藏列 | 调用方替换或派生 `columns` |
 | 修改字段配置 | 根据稳定配置 key 不可变更新 `columns` |
 | 异步期间可能重建行对象 | 配置稳定 `tableProps.rowKey` |
+| 降低后端保存频率 | 立即回写本地 `tableData`，单独防抖或批量调用接口 |
