@@ -40,7 +40,12 @@ export default defineConfig({
       {
         text: '功能专题',
         items: [
-          { text: 'cellSlot 列级单元格', link: '/features/cell-slot' }
+          { text: '专题索引', link: '/features/' },
+          { text: '原生 title 提示', link: '/features/native-title' },
+          { text: '自定义表头', link: '/features/custom-header' },
+          { text: 'cellSlot 列级单元格', link: '/features/cell-slot' },
+          { text: '自定义字段组件', link: '/features/custom-component' },
+          { text: '远程 Schema', link: '/features/remote-schema' }
         ]
       },
       {

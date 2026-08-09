@@ -112,6 +112,8 @@ export const refRows = [
 ]
 
 export const featureCards = [
+  { title: '原生 title 提示', path: '/form-table', description: '字段内容提示、动态字符串和空值行为。', tags: ['hint', 'headerHint', 'title'] },
+  { title: '自定义表头', path: '/form-table-advanced', description: '表头文本、图标、Tooltip 与解析后 header 上下文。', tags: ['headerSlot', 'header.props'] },
   { title: 'cellSlot 列级单元格', path: '/cell-slot', description: '组合展示、状态、派生值、操作列，以及与字段 Slot 的边界。', tags: ['cellSlot', 'updateRow', 'rowKey'] },
   { title: '企业复杂组件接入', path: '/enterprise-components', description: '自定义 model、动态组件和复杂事件联动。', tags: ['component', 'model', 'listeners'] },
   { title: '行列操作', path: '/row-column-operations', description: '动态列、行增删复制移动和延迟提交。', tags: ['columns', 'controlled data'] },
