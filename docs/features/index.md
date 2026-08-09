@@ -12,6 +12,7 @@
 | [校验、清理与重置](./validation-reset.md) | Item `formItemProps.rules` | `validate/clearValidate/resetFields` | Element Form 校验状态 |
 | [动态显隐与配置更新](./dynamic-configuration.md) | 各层 `visible`、动态 props | 替换 `columns` | 响应式布局与组件配置 |
 | [稳定身份与异步安全](./stable-identity.md) | `rowKey`、Column/Row/Item `key` | 异步 `setValue/updateRow` | 正确定位数据与渲染节点 |
+| [性能与大数据量](./performance.md) | 行数、Item 数、渲染模式 | Performance Lab 可调实验 | 渲染、更新、DOM 与回调指标 |
 | [原生 title 提示](./native-title.md) | `columns[].headerHint`、Item `hint` | 默认表头与字段外层自动应用 | 浏览器原生提示 |
 
 ## 渲染扩展

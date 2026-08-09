@@ -35,6 +35,7 @@ pnpm docs:dev
 | [多日议程编排 ↗](http://localhost:5173/itinerary-simple) | `/itinerary-simple` | 日期与主题纵向合并、SortableJS 组内拖拽、行操作与分组提交 |
 | [组件调试 ↗](http://localhost:5173/debug) | `/debug` | 自定义组件事件和原生 Ref |
 | [FormTable 精简 API ↗](http://localhost:5173/form-table-docs) | `/form-table-docs` | 精简 API 速查 |
+| [大数据量性能实验 ↗](http://localhost:5173/performance) | `/performance` | 可调行列规模、三类渲染场景、更新耗时、DOM 和动态回调计数 |
 
 Playground 直接引用包源码，修改组件后无需先构建 npm 包。
 
