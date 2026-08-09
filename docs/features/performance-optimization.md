@@ -54,7 +54,7 @@ const columns = [
       children: [{
         key: 'amount-item',
         fieldKey: 'amount',
-        type: 'input-number'
+        type: 'number'
       }]
     }]
   }
