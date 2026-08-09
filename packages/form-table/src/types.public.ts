@@ -28,6 +28,7 @@ export type {
   FormTableValue,
   OptionPropsConfig,
   ResolvedComponentConfig,
+  ResolvedHeaderConfig,
   RowConfig,
   SlotFormItemConfig,
   TableRow

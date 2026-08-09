@@ -235,18 +235,29 @@ describe('FormTable core behavior', () => {
   })
 
   it('exposes columnConfig to the header slot without a column alias', async () => {
+    const headerProps = vi.fn(({ tableData }: FormTableColumnContext) => ({
+      class: `resolved-header-${tableData.length}`,
+      'aria-label': '学校说明'
+    }))
+    const headerHint = vi.fn(({ columnConfig }: FormTableColumnContext) => (
+      `${columnConfig.label}完整说明`
+    ))
     const wrapper = mountFormTable({
       columns: [{
         key: 'school-column',
         label: '学校',
         headerSlot: 'school-header',
-        headerHint: '不会应用到自定义表头',
-        headerProps: { title: '不会应用到自定义表头' },
+        headerHint,
+        headerProps,
         children: [{ children: [{ fieldKey: 'name', type: 'input' }] }]
       }],
       scopedSlots: {
         'school-header': `
-          <span class="school-header">
+          <span
+            class="school-header"
+            v-bind="props.header.props"
+            :title="props.header.hint"
+          >
             {{ props.columnConfig.key }}|{{ props.column === undefined }}
           </span>
         `
@@ -255,7 +266,12 @@ describe('FormTable core behavior', () => {
     await wrapper.vm.$nextTick()
 
     expect(wrapper.find('.school-header').text()).toBe('school-column|true')
+    expect(wrapper.find('.school-header').classes()).toContain('resolved-header-1')
+    expect(wrapper.find('.school-header').attributes('aria-label')).toBe('学校说明')
+    expect(wrapper.find('.school-header').attributes('title')).toBe('学校完整说明')
     expect(wrapper.find('.form-table-column-header').exists()).toBe(false)
+    expect(headerProps).toHaveBeenCalledTimes(1)
+    expect(headerHint).toHaveBeenCalledTimes(1)
     wrapper.destroy()
   })
 
