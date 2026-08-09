@@ -46,9 +46,8 @@ const columns: ColumnConfig[] = [{
 
 ```vue
 <FormTable
-  :table-data="tableData"
+  v-model="tableData"
   :columns="columns"
-  @update:tableData="tableData = $event"
 />
 ```
 

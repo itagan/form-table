@@ -160,7 +160,7 @@ const displayColumns = computed(() => {
 
 ```vue
 <FormTable
-  :table-data="tableData"
+  v-model="tableData"
   :columns="displayColumns"
 />
 ```
@@ -233,7 +233,7 @@ updateItemConfig('city-field', item => ({
 
 ```vue
 <FormTable
-  :table-data="tableData"
+  v-model="tableData"
   :columns="columns"
   @update:tableData="tableData = $event"
 />

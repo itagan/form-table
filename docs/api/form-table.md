@@ -4,7 +4,7 @@
 
 | 配置路径 | 类型 | 必填 / 默认值 | 目标 / 作用 |
 | --- | --- | --- | --- |
-| `tableData` | `TableRow[]` | `[]` | `el-table.data`，唯一受控数据源 |
+| `tableData` | `TableRow[]` | `[]` | 根组件 `v-model` 对应 prop；也是 `el-table.data` 的唯一数据源 |
 | `columns` | `ColumnConfig[]` | `[]` | 表格列、布局和字段渲染配置 |
 | `formProps` | `ComponentProps` | `{}` | 透传给 `el-form` |
 | `tableProps` | `ComponentProps` | `{}` | 透传给 `el-table` |
@@ -12,15 +12,24 @@
 
 ## 受控数据
 
-FormTable 不直接修改 `tableData`。字段输入、`setValue` 或 `updateRow` 会发出新数组：
+FormTable 根组件的 `v-model` 映射到 `tableData/update:tableData`。组件不直接修改 `tableData`；字段输入、`setValue` 或 `updateRow` 会发出新数组：
 
 ```vue
 <FormTable
-  :table-data="tableData"
+  v-model="tableData"
   :columns="columns"
-  @update:tableData="tableData = $event"
 />
 ```
+
+三种写法使用同一协议：
+
+| 场景 | 写法 |
+| --- | --- |
+| 日常双向绑定（推荐） | `v-model="tableData"` |
+| Vue 2 具名兼容写法 | `:table-data.sync="tableData"` |
+| 保存、审计等自定义回写 | `:table-data="tableData" @update:tableData="handleUpdate"` |
+
+根组件 `v-model` 不发出额外的 `input` 事件；它通过 Vue 2 `model` 配置直接复用 `update:tableData`。这与 Item 的 `component.model` 不同：前者绑定整张表，后者适配某个字段组件的值协议。
 
 本地回写必须立即执行；后端保存可在独立流程中防抖。各种更新入口、事件结果和异步行为见[数据更新与受控回写](../features/data-updates.md)。
 

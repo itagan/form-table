@@ -35,7 +35,7 @@ tableData.0.profile.phone
 ## 校验整表
 
 ```vue
-<FormTable ref="formTableRef" :table-data="tableData" :columns="columns" />
+<FormTable ref="formTableRef" v-model="tableData" :columns="columns" />
 ```
 
 ```ts

@@ -8,11 +8,13 @@
 
 | 属性 | 说明 |
 | --- | --- |
-| `tableData` | 表格行数据，唯一编辑数据源 |
+| `tableData` | 表格行数据，根组件 `v-model` 对应 prop，也是唯一编辑数据源 |
 | `columns` | Column → Row → Item 布局配置 |
 | `formProps` | 直接传给 `el-form` |
 | `tableProps` | 直接传给 `el-table` |
 | `loading` | 表格 loading 状态 |
+
+Vue 2 根组件 `v-model` 直接映射到 `tableData/update:tableData`。`:table-data.sync="tableData"` 与显式 `@update:tableData` 写法继续兼容；根组件绑定与 Item 的 `component.model` 是两个不同层级的概念。
 
 `rowKey` 是可选能力。普通同步编辑、增删和排序只要保留行对象引用，不需要额外生成唯一 key：
 
@@ -26,7 +28,7 @@ tableData.value = tableData.value.filter((_, index) => index !== deleteIndex)
 
 ```vue
 <FormTable
-  :table-data="tableData"
+  v-model="tableData"
   :columns="columns"
   :table-props="{ rowKey: 'id', border: true }"
 />
@@ -474,7 +476,7 @@ Slot 适合需要完全控制模板结构，或需要组合多个组件的字段
 ```
 
 ```vue
-<FormTable :table-data="tableData" :columns="columns">
+<FormTable v-model="tableData" :columns="columns">
   <template
     #score-editor="{
       row,

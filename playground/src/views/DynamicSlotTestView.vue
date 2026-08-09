@@ -6,10 +6,9 @@
 
     <section class="demo-card">
       <FormTable
-        :table-data="tableData"
+        v-model="tableData"
         :columns="columns"
         :table-props="{ border: true }"
-        @update:tableData="tableData = $event"
       >
         <template #score="{ value, setValue, component }">
           <el-rate

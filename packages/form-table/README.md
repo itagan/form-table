@@ -68,11 +68,10 @@ Slot 内容直接渲染，不附加内部 `div/span` 包装；需要根节点样
 
 ```vue
 <FormTable
-  :table-data="tableData"
+  v-model="tableData"
   :columns="columns"
   :form-props="{ size: 'small' }"
   :table-props="{ border: true }"
-  @update:tableData="tableData = $event"
   @field-change="handleFieldChange"
   @selection-change="handleSelectionChange"
 >
@@ -82,6 +81,8 @@ Slot 内容直接渲染，不附加内部 `div/span` 包装；需要根节点样
   </template>
 </FormTable>
 ```
+
+根组件 `v-model` 映射到 `tableData/update:tableData`。原有 `:table-data.sync="tableData"` 完全兼容；需要在回写时保存、记录日志或执行其他副作用时，可改用 `:table-data="tableData"` 与 `@update:tableData="handleUpdate"`。
 
 Table 原生事件直接透传。通过 ref 可调用 `validate()`、`resetFields()`、`clearValidate()`、`getFormRef()` 和 `getTableRef()`。
 

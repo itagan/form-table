@@ -9,11 +9,10 @@
     <section class="demo-card">
       <FormTable
         ref="formTableRef"
-        :table-data="tableData"
+        v-model="tableData"
         :columns="columns"
         :form-props="{ size: 'small' }"
         :table-props="{ border: true, rowKey: 'id' }"
-        @update:tableData="tableData = $event"
         @field-change="handleFieldChange"
         @selection-change="selection = $event"
       >
