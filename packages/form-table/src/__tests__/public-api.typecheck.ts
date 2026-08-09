@@ -7,6 +7,7 @@ import FormTable, {
   type FieldModelConfig,
   type FormTableExpose,
   type FormTableHeaderSlotContext,
+  type FormTableHint,
   type FormTableProps,
   type TableRow
 } from '../index'
@@ -23,19 +24,19 @@ void redundantBuiltinAlias
 
 const CustomInput: Component = { name: 'CustomInput' }
 const AlternativeInput: Component = { name: 'AlternativeInput' }
+const completeValueHint: FormTableHint = '完整字段值'
 const rows: TableRow[] = [{ name: 'Alice', profile: { city: '杭州' } }]
 const columns: ColumnConfig[] = [{
   label: '基本信息',
-  headerProps: ({ tableData, columnConfig }) => ({
-    title: `${columnConfig.label}：${tableData.length} 条`,
-    'aria-label': columnConfig.label
-  }),
+  headerHint: ({ tableData, columnConfig }) => `${columnConfig.label}：${tableData.length} 条`,
+  headerProps: ({ columnConfig }) => ({ 'aria-label': columnConfig.label }),
   children: [{
     props: { gutter: 8 },
     children: [
       {
         fieldKey: 'name',
         type: 'input',
+        hint: ({ value }) => value ? String(value) : completeValueHint,
         colProps: { span: 8 },
         formItemProps: { label: '姓名', rules: [{ required: true }] },
         component: { props: ({ value }) => ({ clearable: true, title: String(value ?? '') }) }

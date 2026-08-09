@@ -19,6 +19,7 @@ export type {
   FormTableFieldContext,
   FormTableFieldRenderContext,
   FormTableHeaderSlotContext,
+  FormTableHint,
   FormTableProps,
   FormTableRecord,
   FormTableRowContext,

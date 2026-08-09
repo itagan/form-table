@@ -65,11 +65,25 @@ const runtimeContext = computed(() => createFieldRenderContext(
   props.config
 ))
 
-/** 合并用户 formItemProps，并强制使用与表单模型一致的 prop。 */
-const resolvedFormItemProps = computed(() => ({
-  ...(resolveDynamicValue(props.config.formItemProps, runtimeContext.value) || {}),
-  prop: propPath.value
-}))
+/**
+ * 合并用户 formItemProps，并强制使用与表单模型一致的 prop。
+ * hint 只控制 el-form-item 的原生 title；未配置时保留底层 props 透传结果。
+ */
+const resolvedFormItemProps = computed(() => {
+  const formItemProps = resolveDynamicValue(props.config.formItemProps, runtimeContext.value) || {}
+  if (!Object.prototype.hasOwnProperty.call(props.config, 'hint')) {
+    return { ...formItemProps, prop: propPath.value }
+  }
+
+  const otherFormItemProps = { ...formItemProps }
+  delete otherFormItemProps.title
+  const hint = resolveDynamicValue(props.config.hint, runtimeContext.value)
+  return {
+    ...otherFormItemProps,
+    ...(hint === undefined || hint === null ? {} : { title: hint }),
+    prop: propPath.value
+  }
+})
 
 /** 仅 slot 模式按 renderer 名称查找插槽；未找到时返回 null。 */
 const slotFn = computed(() => props.config.type === 'slot'
