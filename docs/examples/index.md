@@ -8,8 +8,8 @@ pnpm site:dev
 
 命令会同时启动以下两个固定端口的站点：
 
-- Playground 调试台：<http://localhost:5173/>
-- VitePress 文档总站：<http://localhost:5174/>
+- Playground 调试台：主机 `localhost`，端口 `5173`
+- VitePress 文档总站：主机 `localhost`，端口 `5174`
 
 需要单独调试某个站点时，也可以分别启动：
 
