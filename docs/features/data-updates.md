@@ -2,31 +2,35 @@
 
 > 可运行 Demo：[`cellSlot` 更新助手 ↗](http://localhost:5173/cell-slot) · [行列操作与延迟提交 ↗](http://localhost:5173/row-column-operations)
 
-`tableData` 是 FormTable 唯一的数据源。组件内部不会直接修改传入数组；字段输入、`setValue` 和 `updateRow` 都会生成新数组并通过 `update:tableData` 交给父组件。
+`tableData` 是 FormTable 唯一的数据源。根组件 `v-model` 映射到 `tableData/update:tableData`；组件内部不会直接修改传入数组，字段输入、`setValue` 和 `updateRow` 都会生成新数组交给父组件。
 
 ## 基础配置
+
+```vue
+<FormTable
+  v-model="tableData"
+  :columns="columns"
+  @field-change="handleFieldChange"
+/>
+```
+
+```ts
+function handleFieldChange(event) {
+  console.log(event.fieldKey, event.previousValue, event.value)
+}
+```
+
+`v-model="tableData"` 与 `:table-data.sync="tableData"` 等价。需要在回写时附加后端保存等逻辑时，改用显式事件；本地状态仍必须先同步：
 
 ```vue
 <FormTable
   :table-data="tableData"
   :columns="columns"
   @update:tableData="handleTableDataUpdate"
-  @field-change="handleFieldChange"
 />
 ```
 
-```ts
-function handleTableDataUpdate(nextTableData) {
-  // 必须立即回写，不能等待接口或做防抖。
-  tableData.value = nextTableData
-}
-
-function handleFieldChange(event) {
-  console.log(event.fieldKey, event.previousValue, event.value)
-}
-```
-
-后端保存可以独立防抖，但本地状态必须先同步：
+后端保存可以独立防抖：
 
 ```ts
 function handleTableDataUpdate(nextTableData) {
@@ -136,10 +140,9 @@ function updateFromServer(nextRows) {
 
 ```vue
 <FormTable
-  :table-data="tableData"
+  v-model="tableData"
   :columns="columns"
   :table-props="{ rowKey: 'id' }"
-  @update:tableData="tableData = $event"
 />
 ```
 

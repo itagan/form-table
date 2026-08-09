@@ -8,7 +8,7 @@ FormTable 中有三类独立身份：业务数据行、Column 配置和 Item 配
 
 ```vue
 <FormTable
-  :table-data="tableData"
+  v-model="tableData"
   :columns="columns"
   :table-props="{ rowKey: 'id' }"
 />

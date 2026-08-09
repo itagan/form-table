@@ -7,10 +7,9 @@
     <section class="demo-card">
       <FormTable
         ref="formTableRef"
-        :table-data="tableData"
+        v-model="tableData"
         :columns="columns"
         :table-props="{ border: true }"
-        @update:tableData="tableData = $event"
       />
 
       <div class="actions">

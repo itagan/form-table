@@ -29,7 +29,7 @@ function handleFieldChange({ row, index, fieldKey, value, previousValue }) {
 
 ### 受控数据回写协议
 
-`tableData` 是受控数据。父组件收到 `update:tableData` 后应立即把新数组传回 FormTable，例如直接使用 `@update:tableData="tableData = $event"`。同一同步调用链中的连续 `setValue/updateRow` 会基于前一次结果合并；微任务结束后，组件重新以父组件传入的 `tableData` 为准。
+`tableData` 是受控数据。日常用法推荐 `v-model="tableData"`，它通过 Vue 2 model 配置复用 `tableData/update:tableData`；`:table-data.sync="tableData"` 仍完全兼容。显式监听事件时，父组件收到新数组后应立即传回 FormTable。同一同步调用链中的连续 `setValue/updateRow` 会基于前一次结果合并；微任务结束后，组件重新以父组件传入的 `tableData` 为准。
 
 因此，不要防抖或异步等待 `update:tableData` 的本地回写，否则后续编辑可能读取旧 props 并覆盖先前结果。接口持久化可以独立防抖：先立即更新本地 `tableData`，再将最新快照交给保存任务。
 

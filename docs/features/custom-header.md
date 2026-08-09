@@ -24,7 +24,7 @@ const columns: ColumnConfig[] = [{
 ## 使用示例
 
 ```vue
-<FormTable :table-data="tableData" :columns="columns">
+<FormTable v-model="tableData" :columns="columns">
   <template #contact-header="{ label, columnConfig, header }">
     <span v-bind="header.props" class="header-content">
       <span class="required-mark">*</span>

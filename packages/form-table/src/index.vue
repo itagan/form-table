@@ -23,6 +23,19 @@
   </div>
 </template>
 
+<script lang="ts">
+import { defineComponent } from 'vue'
+
+/** Vue 2 根组件 v-model 复用现有 tableData/update:tableData 受控协议。 */
+export default defineComponent({
+  name: 'FormTable',
+  model: {
+    prop: 'tableData',
+    event: 'update:tableData'
+  }
+})
+</script>
+
 <script lang="ts" setup>
 import { computed, getCurrentInstance, provide, ref, useSlots, watch } from 'vue'
 import FormTableColumn from './FormTableColumn.vue'
@@ -48,6 +61,7 @@ import { getValueByPath, setValueByPath } from './utils/path'
 
 /** FormTable 对外接收的受控数据、列配置以及 Element UI 透传属性。 */
 const props = withDefaults(defineProps<{
+  /** 根组件 v-model 对应 prop；更新统一发出 update:tableData。 */
   tableData: TableRow[]
   columns: ColumnConfig[]
   formProps?: ComponentProps

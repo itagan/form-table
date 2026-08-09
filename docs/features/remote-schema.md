@@ -102,10 +102,9 @@ function enhanceFormTableColumns(columns, enhancements) {
 
 ```vue
 <FormTable
-  :table-data="tableData"
+  v-model="tableData"
   :columns="columns"
   :table-props="{ border: true }"
-  @update:tableData="tableData = $event"
 >
   <template #actions="{ row, updateRow }">
     <el-button @click="updateRow({ enabled: !row.enabled })">

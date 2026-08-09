@@ -57,6 +57,43 @@ function mountFormTable(options: {
 }
 
 describe('FormTable core behavior', () => {
+  it('supports Vue 2 v-model through the tableData update contract', async () => {
+    const wrapper = mount({
+      components: { FormTable },
+      data: () => ({
+        tableData: [{ name: 'Alice' }],
+        columns: inputColumns
+      }),
+      template: '<FormTable v-model="tableData" :columns="columns" />'
+    }, { localVue, attachTo: document.body })
+    await wrapper.vm.$nextTick()
+
+    await wrapper.find('input').setValue('Bob')
+
+    expect((wrapper.vm as any).tableData).toEqual([{ name: 'Bob' }])
+    const formTable = wrapper.findComponent(FormTable as any)
+    expect(formTable.emitted('update:tableData')?.[0]?.[0]).toEqual([{ name: 'Bob' }])
+    expect(formTable.emitted('input')).toBeUndefined()
+    wrapper.destroy()
+  })
+
+  it('keeps tableData.sync as a compatible binding syntax', async () => {
+    const wrapper = mount({
+      components: { FormTable },
+      data: () => ({
+        tableData: [{ name: 'Alice' }],
+        columns: inputColumns
+      }),
+      template: '<FormTable :table-data.sync="tableData" :columns="columns" />'
+    }, { localVue, attachTo: document.body })
+    await wrapper.vm.$nextTick()
+
+    await wrapper.find('input').setValue('Bob')
+
+    expect((wrapper.vm as any).tableData).toEqual([{ name: 'Bob' }])
+    wrapper.destroy()
+  })
+
   it('renders a type field and emits immutable field updates', async () => {
     const original = [{ name: 'Alice' }]
     const wrapper = mountFormTable({ tableData: original })

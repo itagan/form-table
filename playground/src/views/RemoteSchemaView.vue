@@ -5,7 +5,7 @@
     <p>服务端只返回可序列化的布局、type、props 和 options；组件对象、事件及 slot 实现在页面本地补充。</p>
 
     <FormTable
-      :table-data.sync="tableData"
+      v-model="tableData"
       :columns="columns"
       :form-props="{ size: 'small' }"
       :table-props="{ border: true }"

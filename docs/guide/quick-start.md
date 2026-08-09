@@ -7,10 +7,9 @@ pnpm add @itagan/form-table vue@^2.7.7 element-ui@^2.15.14
 ```vue
 <template>
   <FormTable
-    :table-data="tableData"
+    v-model="tableData"
     :columns="columns"
     :table-props="{ border: true }"
-    @update:tableData="tableData = $event"
   />
 </template>
 
@@ -37,6 +36,8 @@ const columns: ColumnConfig[] = [{
 }]
 </script>
 ```
+
+根组件 `v-model` 绑定整张表的 `tableData`，底层复用 `tableData/update:tableData`。已有的 `:table-data.sync="tableData"` 继续兼容；需要在回写时执行保存等逻辑，可显式监听 `@update:tableData`。
 
 复杂布局和字段 Slot 参考 Playground 的 `/form-table-advanced`。原生提示、自定义表头、列级单元格和自定义组件等独立能力可从[功能专题](../features/)选择配置与使用示例。
 

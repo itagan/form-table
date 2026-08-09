@@ -249,6 +249,7 @@ export type ColumnConfig = LayoutColumnConfig | CellSlotColumnConfig
 
 /** FormTable 组件的公开 props 类型。 */
 export interface FormTableProps {
+  /** 根组件 Vue 2 v-model 对应 prop，通过 update:tableData 回写。 */
   tableData: TableRow[]
   columns: ColumnConfig[]
   formProps?: ComponentProps

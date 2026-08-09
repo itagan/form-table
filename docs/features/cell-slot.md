@@ -96,11 +96,15 @@ rowConfig / itemConfig / propPath / component
 
 一次 `updateRow` 最多发出一个 `update:tableData`，并为每个实际变化的 patch key 发出 `field-change`。相同值会跳过；所有值都未变时不发出事件。
 
-父组件收到新数组后必须立即回写：
+使用根组件 `v-model` 会自动立即回写：
 
 ```vue
-@update:tableData="tableData = $event"
+<FormTable v-model="tableData" :columns="columns">
+  <!-- cellSlot 模板 -->
+</FormTable>
 ```
+
+需要显式监听 `update:tableData` 时，处理器也必须先同步父组件状态。
 
 ## 异步操作与 rowKey
 

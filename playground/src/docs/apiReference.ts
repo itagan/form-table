@@ -20,7 +20,7 @@ export const apiGroups: ApiGroup[] = [
     title: 'FormTable',
     description: '组件入口、受控数据和 Element UI 根级透传。',
     entries: [
-      { path: 'tableData', type: 'TableRow[]', defaultValue: '必填', target: 'el-table.data / el-form.model', description: '受控数据源，通过 update:tableData 回写。' },
+      { path: 'tableData', type: 'TableRow[]', defaultValue: '必填', target: '根 v-model / el-table.data', description: 'v-model 对应 prop，通过 update:tableData 回写。' },
       { path: 'columns', type: 'ColumnConfig[]', defaultValue: '必填', target: '布局与渲染配置', description: 'Column → Row → Item 配置树。' },
       { path: 'formProps', type: 'Record<string, unknown>', defaultValue: '{}', target: 'el-form', description: '透传 Element Form 属性。' },
       { path: 'tableProps', type: 'Record<string, unknown>', defaultValue: '{}', target: 'el-table', description: '透传 Element Table 属性；异步更新建议配置 rowKey。' },

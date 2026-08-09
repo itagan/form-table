@@ -37,6 +37,8 @@ FormTable
 
 `columns[].cellSlot` 与 `columns[].children[]` 是两条互斥的单元格渲染路径。前者直接渲染列级 Slot，后者进入 Row → Item → Component 的字段链路。
 
+根组件 `v-model` 对应 `tableData/update:tableData`，不改变配置树结构。基础用法见 [FormTable Props](./form-table.md)。
+
 ## 参考页
 
 | 参考页 | 主要路径 | 内容 |
