@@ -51,7 +51,7 @@ import FormTable from '@itagan/form-table'
 import type { ColumnConfig, TableRow } from '@itagan/form-table'
 ```
 
-使用方需要同时安装并注册 peer dependencies：
+FormTable 将 Vue 和 Element UI 声明为 peer dependencies，不会重复安装或注册它们。接入前请确认项目已安装并注册 Element UI，且依赖版本满足：
 
 - `vue@^2.7.7`
 - `element-ui@^2.15.14`

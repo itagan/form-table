@@ -1,8 +1,17 @@
 # 快速开始
 
+## 安装
+
 ```bash
-pnpm add @itagan/form-table vue@^2.7.7 element-ui@^2.15.14
+pnpm add @itagan/form-table
 ```
+
+FormTable 将 Vue 和 Element UI 声明为 peer dependencies，不会重复安装或注册它们。接入前请确认项目已安装并注册 Element UI，且依赖版本满足：
+
+- `vue@^2.7.7`
+- `element-ui@^2.15.14`
+
+## 基础使用
 
 ```vue
 <template>
