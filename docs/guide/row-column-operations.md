@@ -173,7 +173,7 @@ const moveColumn = (from: number, to: number) => {
 }
 ```
 
-动态列应提供稳定 `column.key`，不要依赖可能变化的 `label` 或数组下标。
+动态列应提供唯一稳定的 `column.key`，不要依赖可能变化的 `label` 或数组下标。同 key、同相对顺序的列在增删、显隐和配置对象替换时会尽量复用列包装实例；真正移动已有列时会重新挂载可见列，让 Element UI 按新顺序注册。
 
 ### 修改某个字段配置
 

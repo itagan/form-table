@@ -13,9 +13,9 @@
         v-loading="props.loading"
       >
         <FormTableColumn
-          v-for="(column, columnIndex) in visibleColumns"
-          :key="`${column.key || column.label || 'column'}:${columnIndex}`"
-          :column="column"
+          v-for="(entry, columnIndex) in visibleColumns"
+          :key="entry.renderKey"
+          :column="entry.column"
           :column-index="columnIndex"
         />
       </el-table>
@@ -24,7 +24,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, getCurrentInstance, provide, ref, useSlots } from 'vue'
+import { computed, getCurrentInstance, provide, ref, useSlots, watch } from 'vue'
 import FormTableColumn from './FormTableColumn.vue'
 import type {
   ColumnConfig,
@@ -92,13 +92,52 @@ const formModel = computed(() => ({ tableData: props.tableData }))
 /** 向列、行、字段组件提供的响应式表级上下文。 */
 const formTableContext = computed<FormTableTableContext>(() => createTableContext(props.tableData))
 
-// 列显隐回调共享同一个表级上下文，避免为每列重复创建 tableContext。
-const visibleColumns = computed(() => {
-  return props.columns.filter((column) => resolveVisible(
-    column.visible,
-    createColumnContext(formTableContext.value, column)
+/** 为唯一显式 key 建立稳定身份；缺失或重复 key 时继续按结构位置安全降级。 */
+const columnIdentities = computed(() => {
+  const keyCounts = props.columns.reduce<Map<string, number>>((counts, column) => {
+    if (column.key) counts.set(column.key, (counts.get(column.key) || 0) + 1)
+    return counts
+  }, new Map())
+
+  return props.columns.map((column, sourceIndex) => (
+    column.key && keyCounts.get(column.key) === 1
+      ? `key:${column.key}`
+      : `fallback:${column.key || column.label || 'column'}:${sourceIndex}`
   ))
 })
+
+/** 只在新旧配置中共同存在的列改变相对顺序时重建列，促使 Element UI 重新注册顺序。 */
+const columnOrderVersion = ref(0)
+let previousColumnIdentities: string[] | null = null
+const columnIdentitySignature = computed(() => JSON.stringify(columnIdentities.value))
+watch(columnIdentitySignature, () => {
+  const nextIdentities = columnIdentities.value
+  if (previousColumnIdentities) {
+    const previousSet = new Set(previousColumnIdentities)
+    const nextSet = new Set(nextIdentities)
+    const previousShared = previousColumnIdentities.filter(identity => nextSet.has(identity))
+    const nextShared = nextIdentities.filter(identity => previousSet.has(identity))
+    const orderChanged = previousShared.length > 1
+      && previousShared.some((identity, index) => identity !== nextShared[index])
+
+    if (orderChanged) columnOrderVersion.value += 1
+  }
+  previousColumnIdentities = [...nextIdentities]
+}, { immediate: true })
+
+// 列显隐回调共享同一个表级上下文；显隐变化不会改变其他列的稳定 renderKey。
+const visibleColumns = computed(() => props.columns.reduce<Array<{
+  column: ColumnConfig
+  renderKey: string
+}>>((result, column, sourceIndex) => {
+  if (resolveVisible(column.visible, createColumnContext(formTableContext.value, column))) {
+    result.push({
+      column,
+      renderKey: `${columnIdentities.value[sourceIndex]}:order:${columnOrderVersion.value}`
+    })
+  }
+  return result
+}, []))
 
 // 同一同步调用链中的多次更新必须基于上一次已发出的结果继续计算。
 // 微任务结束后重新以受控 props 为准，避免父组件未接收更新时长期保留内部状态。

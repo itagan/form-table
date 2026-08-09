@@ -198,7 +198,7 @@ export interface RowConfig {
 
 /** 单个 el-table-column 配置，可包含多个布局行。 */
 export interface ColumnConfig {
-  /** 列的稳定渲染身份。 */
+  /** 列的稳定渲染身份；动态增删、显隐或替换配置时应保持唯一。 */
   key?: string
   /** el-table-column 的表头文本。 */
   label: string
