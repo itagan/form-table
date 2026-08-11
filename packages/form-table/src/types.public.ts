@@ -20,6 +20,7 @@ export type {
   FormTableFieldChangePayload,
   FormTableFieldContext,
   FormTableFieldRenderContext,
+  FormTableResolvedFieldContext,
   FormTableHeaderSlotContext,
   FormTableHint,
   FormTableHintConfig,

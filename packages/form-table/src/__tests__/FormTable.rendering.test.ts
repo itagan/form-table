@@ -5,6 +5,7 @@ import type {
   FormItemConfig,
   FormTableColumnContext,
   FormTableFieldRenderContext,
+  FormTableResolvedFieldContext,
   FormTableRowContext
 } from '../types.public'
 import { mountFormTable } from './test-utils'
@@ -218,7 +219,10 @@ describe('FormTable rendering and configuration', () => {
 
   it('renders a directly supplied component and wraps its listeners', async () => {
     const listener = vi.fn((context) => context.setValue('disabled'))
-    const componentProps = vi.fn(() => ({ marker: 'status' }))
+    const componentProps = vi.fn((context: FormTableResolvedFieldContext) => ({
+      marker: 'status',
+      hintOwnership: context.hint?.ownership
+    }))
     const StatusInput = {
       props: ['value'],
       render(this: any, h: any) {
@@ -237,6 +241,7 @@ describe('FormTable rendering and configuration', () => {
           children: [{
             fieldKey: 'status',
             type: 'component',
+            hint: { content: '状态字段说明' },
             component: {
               renderer: StatusInput,
               props: componentProps,
@@ -248,6 +253,10 @@ describe('FormTable rendering and configuration', () => {
     })
     await wrapper.vm.$nextTick()
     expect(componentProps).toHaveBeenCalledTimes(1)
+    expect(componentProps.mock.calls[0][0].hint).toEqual({
+      content: '状态字段说明',
+      ownership: 'table'
+    })
     await wrapper.find('.status-input').trigger('click')
 
     expect(listener).toHaveBeenCalledTimes(1)
@@ -257,11 +266,13 @@ describe('FormTable rendering and configuration', () => {
       fieldKey: 'status',
       value: 'enabled',
       columnConfig: { label: '状态' },
-      itemConfig: { fieldKey: 'status', type: 'component' }
+      itemConfig: { fieldKey: 'status', type: 'component' },
+      hint: { content: '状态字段说明', ownership: 'table' }
     })
     expect(Object.keys(listener.mock.calls[0][0]).sort()).toEqual([
       'columnConfig',
       'fieldKey',
+      'hint',
       'index',
       'itemConfig',
       'row',
@@ -895,6 +906,7 @@ describe('FormTable rendering and configuration', () => {
     expect(Object.keys(fieldOptions.mock.calls[0][0]).sort()).toEqual([
       'columnConfig',
       'fieldKey',
+      'hint',
       'index',
       'itemConfig',
       'row',

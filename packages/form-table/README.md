@@ -86,7 +86,7 @@ Item 的 `key` 是可选渲染身份，`fieldKey` 是必填数据路径。动态
 
 `component.props/listeners/options/optionProps` 是三种模式共用的渲染配置。自定义组件省略 `component.model` 或将其设为 `true` 时保留 Vue 2 原生 `v-model`；也可指定 `{ prop, event, valueFromEvent }`，或设为 `false` 禁用模型注入。slot 模式会把解析后的 `component` 通过上下文返回，由模板自行绑定。
 
-外层悬浮提示使用 `column.headerHint` 和 Item 的 `hint`。字符串与 `{ content, auto: true }` 默认由 FormTable 托管；`hintOptions` 在整张表内统一选择 `{ mode: 'title' }`（默认）或 `{ mode: 'tooltip', props }`，后者让默认表头、`headerSlot` 表头和所有 `el-form-item` 通过事件委托共享一个 `el-tooltip`。自动 Hint 会覆盖同层 `headerProps.title/formItemProps.title`。配置 `{ content, auto: false }` 时，无论字段是内置、component 还是 slot 模式，FormTable 都不产生自动 DOM、ARIA 或 singleton 行为，并保留底层 title；配置内容的用途由调用方决定。字段 Slot 的 `hint` 和表头 Slot 的 `header.hint` 额外提供标准化结果，普通 `component.renderer` 不自动接收 Hint prop。纯文本 `cellSlot` 的内容溢出提示可直接使用 `column.props.showOverflowTooltip`。
+外层悬浮提示使用 `column.headerHint` 和 Item 的 `hint`。字符串与 `{ content, ownership: 'table' }` 默认由 FormTable 托管；`hintOptions` 在整张表内统一选择 `{ mode: 'title' }`（默认）或 `{ mode: 'tooltip', props }`，后者让默认表头、`headerSlot` 表头和所有 `el-form-item` 通过事件委托共享一个 `el-tooltip`。自动 Hint 会覆盖同层 `headerProps.title/formItemProps.title`。配置 `{ content, ownership: 'custom' }` 时，FormTable 不产生自动 DOM、ARIA 或 singleton 行为，并保留底层 title。component 动态配置、listener、字段 Slot 和表头 Slot 都能读取标准化结果；业务组件不会被隐式注入 Hint prop。纯文本 `cellSlot` 的内容溢出提示可直接使用 `column.props.showOverflowTooltip`。
 
 字段 Slot 和列级 `cellSlot` 内容直接渲染，不附加内部 `div/span` 包装；需要根节点样式时由 Slot 模板自行提供。表头 Slot 例外：FormTable 会提供统一的提示包装节点。
 
@@ -129,9 +129,9 @@ Table 原生事件直接透传。通过 ref 可调用 `validate()`、`resetField
 
 字段规则直接配置在 `formItemProps.rules`。`resetFields()` 保持 Element UI 原生语义；受控场景由调用方恢复 `tableData` 后调用 `clearValidate()`。单字段校验等底层能力可通过 `getFormRef()` 使用。
 
-表头必填标记等展示使用 `headerSlot` 明确渲染；FormTable 自动把 `headerProps` 和 `auto: true` 的 `headerHint` 应用到 Slot 外层包装节点。Slot scope 包含已解析的 `header.props` 与标准化 `header.hint`；仅在 `auto: false` 时由模板自行消费提示。字段是否必填只由 `formItemProps.rules` 决定。
+表头必填标记等展示使用 `headerSlot` 明确渲染；FormTable 自动把 `headerProps` 和 `ownership: 'table'` 的 `headerHint` 应用到 Slot 外层包装节点。Slot scope 包含已解析的 `header.props` 与标准化 `header.hint`；仅在 `ownership: 'custom'` 时由模板自行消费提示。字段是否必填只由 `formItemProps.rules` 决定。
 
-动态配置只获得当前层级有意义的上下文：Column 为 `tableData/columnConfig`，Row 增加 `row/index/rowConfig`，Field 增加 `fieldKey/value/itemConfig`。组件 listener 额外获得 `setValue/updateRow`；字段 Slot 再提供 `propPath/component/hint`；列级 cellSlot 只提供 `row/index/columnConfig/updateRow`。数据和配置引用采用类型层面的浅只读约束，运行时不冻结对象。
+动态配置只获得当前层级有意义的上下文：Column 为 `tableData/columnConfig`，Row 增加 `row/index/rowConfig`，Field 增加 `fieldKey/value/itemConfig`。Hint 求值后，component 动态配置获得标准化 `hint`，组件 listener 再获得 `setValue/updateRow`，字段 Slot 再提供 `propPath/component`；列级 cellSlot 只提供 `row/index/columnConfig/updateRow`。数据和配置引用采用类型层面的浅只读约束，运行时不冻结对象。
 
 命名边界：`row` 是当前业务数据行，`rowConfig` 是布局配置；`itemConfig` 是原始字段配置，字段 Slot 的 `component` 是当前行解析后的组件配置，表头 Slot 的 `header` 是已解析的表头展示配置。
 

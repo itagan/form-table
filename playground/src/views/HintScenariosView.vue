@@ -64,7 +64,7 @@
         <code>{ mode: 'tooltip' }</code>
       </div>
       <p>
-        字符串 hint 默认仍由 FormTable 自动提示；配置 <code>{ content, auto: false }</code> 后，提示内容
+        字符串 hint 默认仍由 FormTable 自动提示；配置 <code>{ content, ownership: 'custom' }</code> 后，提示内容
         保留在 Schema 中，FormTable 对任何字段类型都不再展示它；字段或表头 Slot 可以选择自行创建
         <code>el-tooltip</code>。<code>renderHeader</code> 与 <code>cellSlot</code> 则展示其他调用方边界。
       </p>
@@ -117,7 +117,7 @@
             <el-input
               :value="value"
               size="small"
-              placeholder="该字段的 hint.auto 为 false"
+              placeholder="该字段的 hint.ownership 为 custom"
               @input="setValue"
             />
             <el-tooltip
@@ -152,11 +152,11 @@
         </div>
         <div>
           <strong>字段级自定义 Tooltip</strong>
-          <span>hint 配置 auto: false，Slot 读取 hint.content 后自行展示。</span>
+          <span>hint 配置 ownership: 'custom'，Slot 读取 hint.content 后自行展示。</span>
         </div>
         <div>
           <strong>表头自定义 Tooltip</strong>
-          <span>headerHint 同样支持 auto: false，并通过 header.hint 暴露标准化结果。</span>
+          <span>headerHint 同样支持 ownership: 'custom'，并通过 header.hint 暴露标准化结果。</span>
         </div>
         <div>
           <strong>renderHeader</strong>
@@ -173,9 +173,9 @@
       <div class="scenario-heading">
         <div>
           <el-tag size="mini" type="danger">所有权矩阵</el-tag>
-          <h2><code>auto: false</code> 对所有字段类型生效</h2>
+          <h2><code>ownership: 'custom'</code> 对所有字段类型生效</h2>
         </div>
-        <code>{ content, auto: false }</code>
+        <code>{ content, ownership: 'custom' }</code>
       </div>
       <p>
         下列内置字段、component 和字段 Slot 都配置了相同的关闭开关。FormTable 不展示这些 Hint；
@@ -229,17 +229,17 @@
       <div class="ownership-grid">
         <div>
           <strong>内置 input</strong>
-          <code>hint: { content, auto: false }</code>
+          <code>hint: { content, ownership: 'custom' }</code>
           <span>不显示 FormTable Hint；保留 formItemProps.title。</span>
         </div>
         <div>
           <strong>component.renderer</strong>
-          <code>hint: { content, auto: false }</code>
-          <span>不注入 hint prop；示例通过 component.props 主动读取 itemConfig.hint。</span>
+          <code>hint: { content, ownership: 'custom' }</code>
+          <span>不隐式注入 hint prop；component.props 可读取标准化 hint 后主动映射。</span>
         </div>
         <div>
           <strong>字段 Slot</strong>
-          <code>hint: { content, auto: false }</code>
+          <code>hint: { content, ownership: 'custom' }</code>
           <span>scope.hint 提供标准化结果，问号 Tooltip 由 Slot 创建。</span>
         </div>
         <div>
@@ -249,9 +249,40 @@
         </div>
       </div>
 
-      <DemoCollapsiblePanel title="查看 auto 所有权矩阵配置">
+      <DemoCollapsiblePanel title="查看 Hint 所有权矩阵配置">
         <pre>{{ ownershipConfigurationExample }}</pre>
       </DemoCollapsiblePanel>
+    </section>
+
+    <section class="scenario-card wide-card">
+      <div class="scenario-heading">
+        <div>
+          <el-tag size="mini" type="info">实例隔离</el-tag>
+          <h2>嵌套 FormTable</h2>
+        </div>
+        <code>nearest hint root</code>
+      </div>
+      <p>
+        内外表格各自维护一个单例 Tooltip。悬停或聚焦内层字段时，事件只交给最近的 FormTable，
+        不会同时打开外层 Tooltip。
+      </p>
+      <FormTable
+        :table-data="nestedOuterRows"
+        :columns="nestedOuterColumns"
+        :form-props="formProps"
+        :table-props="tableProps"
+        :hint-options="{ mode: 'tooltip' }"
+      >
+        <template #nested-table="{ row }">
+          <FormTable
+            :table-data="row.nestedRows"
+            :columns="nestedInnerColumns"
+            :form-props="formProps"
+            :table-props="tableProps"
+            :hint-options="{ mode: 'tooltip' }"
+          />
+        </template>
+      </FormTable>
     </section>
 
     <DemoCollapsiblePanel class="scenario-card wide-card" title="关键配置">
@@ -389,8 +420,9 @@ const customColumns: ColumnConfig[] = [{
   headerSlot: 'manual-tooltip-header',
   headerHint: {
     content: '此表头 Tooltip 由 headerSlot 自行创建',
-    auto: false
+    ownership: 'custom'
   },
+  headerProps: { tabindex: -1 },
   props: { minWidth: 230 },
   children: [{
     children: [{
@@ -398,7 +430,7 @@ const customColumns: ColumnConfig[] = [{
       type: 'slot',
       hint: ({ row }) => ({
         content: `当前行 ${row.id}：此 Tooltip 完全由字段 Slot 管理`,
-        auto: false
+        ownership: 'custom'
       }),
       component: { renderer: 'manual-tooltip-field' }
     }]
@@ -440,43 +472,38 @@ const ownershipRows = ref<TableRow[]>([{
 
 const ownershipColumns: ColumnConfig[] = [{
   key: 'builtin-owned-column',
-  label: '内置字段 · auto false',
+  label: '内置字段 · custom ownership',
   props: { minWidth: 260 },
   children: [{ children: [{
     fieldKey: 'builtinOwned',
     type: 'input',
-    hint: { content: '这段配置内容不会由 FormTable 展示', auto: false },
-    formItemProps: { title: 'auto: false 会保留这个原生 title' },
+    hint: { content: '这段配置内容不会由 FormTable 展示', ownership: 'custom' },
+    formItemProps: { title: 'custom ownership 会保留这个原生 title' },
     component: { props: { placeholder: '悬停表单项查看原生 title' } }
   }] }]
 }, {
   key: 'component-owned-column',
-  label: '自定义组件 · auto false',
+  label: '自定义组件 · custom ownership',
   props: { minWidth: 330 },
   children: [{ children: [{
     fieldKey: 'componentOwned',
     type: 'component',
-    hint: { content: '业务组件选择使用的配置内容', auto: false },
+    hint: { content: '业务组件选择使用的配置内容', ownership: 'custom' },
     component: {
       renderer: HintCustomEditor,
-      props: ({ itemConfig }) => {
-        const hint = itemConfig.hint
-        return {
-          hintUsage: typeof hint === 'object' && hint !== null
-            ? `业务读取：${hint.content}`
-            : undefined
-        }
-      }
+      props: ({ hint }) => ({
+        hintUsage: hint ? `业务读取：${hint.content}（${hint.ownership}）` : undefined
+      })
     }
   }] }]
 }, {
   key: 'slot-owned-column',
-  label: '字段 Slot · auto false',
+  label: '字段 Slot · custom ownership',
   props: { minWidth: 270 },
   children: [{ children: [{
     fieldKey: 'slotOwned',
     type: 'slot',
-    hint: { content: 'Slot 从 scope.hint.content 读取此内容', auto: false },
+    hint: { content: 'Slot 从 scope.hint.content 读取此内容', ownership: 'custom' },
     component: { renderer: 'owned-slot-field' }
   }] }]
 }, {
@@ -490,12 +517,35 @@ const ownershipColumns: ColumnConfig[] = [{
   }] }]
 }]
 
+const nestedOuterRows: TableRow[] = [{
+  id: 1,
+  nestedRows: [{ note: '内层字段拥有自己的 Hint' }]
+}]
+
+const nestedOuterColumns: ColumnConfig[] = [{
+  label: '外层表格（表头可聚焦）',
+  headerHint: '这是外层 FormTable 的提示',
+  cellSlot: 'nested-table',
+  props: { minWidth: 520 }
+}]
+
+const nestedInnerColumns: ColumnConfig[] = [{
+  label: '内层字段',
+  headerHint: '这是内层 FormTable 的表头提示',
+  children: [{ children: [{
+    fieldKey: 'note',
+    type: 'input',
+    hint: '只有内层单例 Tooltip 会响应',
+    component: { props: { readonly: true, placeholder: '悬停或键盘聚焦' } }
+  }] }]
+}]
+
 const ownershipConfigurationExample = `const columns = [{
   label: '内置字段',
   children: [{ children: [{
     fieldKey: 'name',
     type: 'input',
-    hint: { content: '业务元数据', auto: false },
+    hint: { content: '业务元数据', ownership: 'custom' },
     formItemProps: { title: '仍保留的原生 title' }
   }] }]
 }, {
@@ -503,11 +553,11 @@ const ownershipConfigurationExample = `const columns = [{
   children: [{ children: [{
     fieldKey: 'amount',
     type: 'component',
-    hint: { content: '组件可选择使用', auto: false },
+    hint: { content: '组件可选择使用', ownership: 'custom' },
     component: {
       renderer: BusinessEditor,
-      props: ({ itemConfig }) => ({
-        hintUsage: itemConfig.hint.content
+      props: ({ hint }) => ({
+        hintUsage: hint.content
       })
     }
   }] }]
@@ -516,7 +566,7 @@ const ownershipConfigurationExample = `const columns = [{
   children: [{ children: [{
     fieldKey: 'remark',
     type: 'slot',
-    hint: { content: 'Slot 自行展示', auto: false },
+    hint: { content: 'Slot 自行展示', ownership: 'custom' },
     component: { renderer: 'remark-editor' }
   }] }]
 }]
@@ -541,7 +591,7 @@ const configurationExample = `<FormTable
     }
   }"
 >
-  <!-- auto: false 时，Slot 从配置解析结果自行渲染 Tooltip -->
+  <!-- ownership: 'custom' 时，Slot 从配置解析结果自行渲染 Tooltip -->
   <template #manual-tooltip-field="{ value, setValue, hint }">
     <el-input :value="value" @input="setValue" />
     <el-tooltip :content="hint.content">
@@ -551,11 +601,11 @@ const configurationExample = `<FormTable
 </FormTable>
 
 const columns = [{
-  headerHint: { content: '表头自定义提示', auto: false },
+  headerHint: { content: '表头自定义提示', ownership: 'custom' },
   children: [{ children: [{
     hint: ({ row }) => ({
       content: \`最大可填写 \${row.availableAmount} 元\`,
-      auto: false
+      ownership: 'custom'
     })
   }] }]
 }]
