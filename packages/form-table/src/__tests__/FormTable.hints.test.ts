@@ -93,7 +93,7 @@ describe('FormTable hint modes', () => {
       relatedTarget: header.element
     }))
     await wrapper.vm.$nextTick()
-    expect(tooltip.content).toBe('')
+    expect(tooltip.content).toBe('姓名字段说明')
     expect(formItem.attributes('aria-describedby')).toBeUndefined()
 
     await header.trigger('mouseover')
@@ -149,7 +149,7 @@ describe('FormTable hint modes', () => {
 
     dispatchFocusEvent(input.element, 'focusout')
     await wrapper.vm.$nextTick()
-    expect(tooltip.content).toBe('')
+    expect(tooltip.content).toBe('姓名字段说明')
     expect(input.attributes('aria-describedby')).toBeUndefined()
     wrapper.destroy()
   })
@@ -185,7 +185,7 @@ describe('FormTable hint modes', () => {
     await wrapper.setProps({ tableData: [] })
     await wrapper.vm.$nextTick()
     expect(wrapper.find('.el-form-item').exists()).toBe(false)
-    expect(tooltip.content).toBe('')
+    expect(tooltip.content).toBe('完整内容：Bob')
     expect(close).toHaveBeenCalled()
 
     await wrapper.setProps({ tableData: [{ name: 'Alice' }] })
@@ -193,7 +193,7 @@ describe('FormTable hint modes', () => {
     await wrapper.setProps({ tableData: [{ name: '' }] })
     await wrapper.vm.$nextTick()
     expect(wrapper.find('.el-form-item').attributes('data-form-table-hint')).toBeUndefined()
-    expect(tooltip.content).toBe('')
+    expect(tooltip.content).toBe('完整内容：Alice')
     expect(close).toHaveBeenCalled()
     wrapper.destroy()
   })

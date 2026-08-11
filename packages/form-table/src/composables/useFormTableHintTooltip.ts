@@ -88,7 +88,6 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
     tooltip?.setExpectedState(false)
     tooltip?.handleClosePopper()
     activeTarget = null
-    options.content.value = ''
     clearDescription()
   }
 
@@ -96,8 +95,10 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
     const previousTarget = activeTarget
     if (previousTarget !== target) {
       clearActivationTimer()
+      const previousTooltip = options.tooltipRef.value
+      // 先隐藏仍在淡出的旧 Popper，再替换内容，避免空内容或新内容闪现。
+      if (previousTooltip?.$refs?.popper) previousTooltip.$refs.popper.style.display = 'none'
       if (previousTarget) {
-        const previousTooltip = options.tooltipRef.value
         previousTooltip?.setExpectedState(false)
         previousTooltip?.handleClosePopper()
       }
@@ -113,7 +114,6 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
 
       if (previousTarget !== target) {
         tooltip.referenceElm = target
-        if (tooltip.$refs?.popper) tooltip.$refs.popper.style.display = 'none'
         tooltip.doDestroy()
         tooltip.setExpectedState(true)
         activationTimer = setTimeout(() => {
