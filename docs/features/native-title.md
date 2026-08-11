@@ -9,7 +9,6 @@
   v-model="tableData"
   :columns="columns"
   hint-mode="tooltip"
-  :hint-tooltip-props="{ placement: 'top', openDelay: 150 }"
 />
 ```
 
@@ -64,7 +63,7 @@ const columns: ColumnConfig[] = [{
 />
 ```
 
-配置 `hint-mode="tooltip"` 后，语义提示不再输出 title。根容器通过悬停和焦点事件委托识别当前表头或 `el-form-item`，动态更新唯一 Tooltip 的内容和锚点。字段获得键盘焦点时也会显示提示，并维护 `aria-describedby`。
+配置 `hint-mode="tooltip"` 后，语义提示不再输出 title。根容器通过悬停和焦点事件委托识别当前表头或 `el-form-item`，动态更新唯一 Tooltip 的内容和锚点。悬停目标优先，约 50ms 后显示；没有悬停目标时，字段键盘焦点作为兜底并维护 `aria-describedby`。
 
 `hintTooltipProps` 可配置 Element UI Tooltip 的 `placement`、`effect`、`openDelay`、`popperClass` 等属性。`content/reference/popper/manual/value/enterable` 由 FormTable 管理，传入值不会覆盖内部行为。
 
