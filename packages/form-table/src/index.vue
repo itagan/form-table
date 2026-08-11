@@ -2,10 +2,12 @@
   <div
     ref="containerRef"
     class="form-table-container"
+    data-form-table-hint-root
     @mouseover="handleMouseOver"
     @mouseout="handleMouseOut"
     @focusin="handleFocusIn"
     @focusout="handleFocusOut"
+    @keydown="handleKeyDown"
   >
     <el-form
       ref="formRef"
@@ -142,7 +144,8 @@ const {
   handleMouseOver,
   handleMouseOut,
   handleFocusIn,
-  handleFocusOut
+  handleFocusOut,
+  handleKeyDown
 } = useFormTableHintTooltip({
   enabled: isTooltipHintMode,
   containerRef,

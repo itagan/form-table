@@ -3,6 +3,7 @@ import type {
   FormItemConfig,
   FormTableFieldContext,
   FormTableHintModeContext,
+  FormTableResolvedFieldContext,
   FormTableRowContext,
   FormTableUpdateApi,
   FormTableValue,
@@ -56,6 +57,16 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
     return resolveFormTableHint(resolveDynamicValue(config.hint, runtimeContext.value))
   })
 
+  /** 组件配置、监听器和 Slot 共享 Hint 求值后的稳定上下文。 */
+  const resolvedContext = computed<FormTableResolvedFieldContext<TRow>>(() => extendLazyContext(
+    runtimeContext.value,
+    {
+      get hint() {
+        return resolvedHint.value
+      }
+    }
+  ))
+
   /**
    * FormTable 始终掌控 form-item 的 prop；自动 Hint 覆盖透传 title，
    * 自定义托管或未声明 Hint 时保留调用方的原始 formItemProps。
@@ -78,7 +89,7 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
    * 业务代码保存旧 context 后再调用 setValue，仍只会尝试更新原行和原字段。
    */
   const fieldContext = computed<FormTableFieldContext<TRow>>(() => {
-    const context = runtimeContext.value
+    const context = resolvedContext.value
     const targetRow = context.row as TRow
     const targetFieldKey = context.fieldKey
     return extendLazyContext(context, {
@@ -94,6 +105,7 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
   return {
     propPath,
     runtimeContext,
+    resolvedContext,
     resolvedFormItemProps,
     resolvedHint,
     fieldContext

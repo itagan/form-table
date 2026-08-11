@@ -120,7 +120,8 @@ const resolvedHeaderTargetProps = computed(() => {
   return applyHintTargetProps(
     resolvedHeader.value.props,
     resolvedHeader.value.hint,
-    hintMode.value
+    hintMode.value,
+    { focusable: true }
   )
 })
 
