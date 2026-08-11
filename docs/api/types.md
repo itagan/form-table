@@ -9,7 +9,7 @@
 - `FormTableHint`、`FormTableHintConfig`、`ResolvedFormTableHint`、`FormTableHintOptions`
 - `TableRow`、`FormTableRecord`、`FormTableProps`
 - `FormTableTableContext`、`FormTableColumnContext`、`FormTableRowContext`、`FormTableFieldRenderContext`
-- `FormTableFieldContext`、`FormTableSlotContext`、`FormTableCellSlotContext`
+- `FormTableResolvedFieldContext`、`FormTableFieldContext`、`FormTableSlotContext`、`FormTableCellSlotContext`
 - `FormTableFieldChangePayload`、`FormTableHeaderSlotContext`
 - `FormTableExpose`、`FormTableElementFormRef`、`FormTableElementTableRef`
 
@@ -100,7 +100,7 @@ interface SlotFormItemConfig {
 
 ```ts
 type FieldRendererResolver = (
-  context: FormTableFieldRenderContext
+  context: FormTableResolvedFieldContext
 ) => string | Component | undefined
 ```
 
@@ -111,8 +111,9 @@ type FieldRendererResolver = (
 ```text
 Column visible/props/headerProps/headerHint → tableData, columnConfig
 Row visible/props        → Column 信息 + row, index, rowConfig
-Field 动态配置           → Row 信息 + fieldKey, value, itemConfig
-component.listeners      → Field 信息 + setValue, updateRow
+Field 布局与 Hint 求值   → Row 信息 + fieldKey, value, itemConfig
+component 动态配置       → Field 信息 + 标准化 hint
+component.listeners      → Resolved Field 信息 + setValue, updateRow
 字段 slot                → Listener 信息 + propPath, component
 列级 cellSlot            → row, index, columnConfig, updateRow
 ```
@@ -133,8 +134,8 @@ interface FieldModelConfig {
 
 `row/tableData` 与 `columnConfig/rowConfig/itemConfig` 在回调类型中采用浅层只读约束；运行时不会冻结原对象。字段更新使用 `setValue` 或 `updateRow`，配置调整由调用方替换 `columns`。
 
-表头 slot 接收 `tableData/label/columnIndex/columnConfig/header`。`columnIndex` 是动态显隐过滤后的可见列下标，不保证等于原始 `columns` 数组下标；`header.props` 是已解析属性，`header.hint` 是 `ResolvedFormTableHint | null`。只有 `auto: true` 的 Hint 会由统一包装节点自动应用。
+表头 slot 接收 `tableData/label/columnIndex/columnConfig/header`。`columnIndex` 是动态显隐过滤后的可见列下标，不保证等于原始 `columns` 数组下标；`header.props` 是已解析属性，`header.hint` 是 `ResolvedFormTableHint | null`。只有 `ownership: 'table'` 的 Hint 会由统一包装节点自动应用。
 
 `ColumnConfig.headerProps` 传给默认或 Slot 表头的 `.form-table-column-header`，可配置原生 `title`、class、style 和 aria 属性。存在 `column.props.renderHeader` 时由 Element UI 完全接管，FormTable 不包装也不应用 `headerProps/headerHint`。
 
-`ColumnConfig.headerHint` 和 Item 的 `hint` 接受 `FormTableHint` 或动态返回值。字符串会标准化为 `{ content, auto: true }`，对象缺省 `auto` 时也默认 `true`；`auto: false` 表示 FormTable 完全不处理该 Hint，不写入 title、内部标记或 ARIA，也与字段的 `type` 无关。配置内容仍保留在原始 Schema 中，字段或表头 Slot 还可读取标准化结果，具体用途由调用方决定。`FormTableHintOptions` 仅在整张表内统一选择自动 Hint 的原生 `title` 或单实例 `tooltip`；空字符串、`null/undefined` 不产生自动提示。
+`ColumnConfig.headerHint` 和 Item 的 `hint` 接受 `FormTableHint` 或动态返回值。字符串会标准化为 `{ content, ownership: 'table' }`，对象缺省 `ownership` 时也由 FormTable 托管；`ownership: 'custom'` 表示 FormTable 完全不处理该 Hint，不写入 title、内部标记或 ARIA，也与字段的 `type` 无关。字段 component 动态配置、listener、字段 Slot 与表头 Slot 均可读取标准化结果。`FormTableHintOptions` 仅在整张表内统一选择自动 Hint 的原生 `title` 或单实例 `tooltip`；空字符串、`null/undefined` 不产生自动提示。

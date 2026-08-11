@@ -13,7 +13,7 @@
 
 `tableData` 和 `columns` 在公开 `FormTableProps` 类型中是必填项；组件仍提供空数组作为运行时容错默认值。TypeScript 项目应显式传入两者，不依赖运行时默认值。
 
-`hintOptions` 是可辨识联合：title 模式使用 `{ mode?: 'title' }`，Tooltip 模式使用 `{ mode: 'tooltip', props?: ComponentProps }`。同一个 FormTable 的自动 Hint 只能选择一种展示方式；`props` 可配置 `placement/effect/openDelay/popperClass` 等 Element UI Tooltip 属性，`content/reference/popper/manual/value/enterable` 由内部单实例管理，不接受覆盖。配置 `auto: false` 的字段或表头 Hint 不受该策略影响，FormTable 不再处理其展示。完整行为见 [Hint 提示模式](../features/native-title.md)。
+`hintOptions` 是可辨识联合：title 模式使用 `{ mode?: 'title' }`，Tooltip 模式使用 `{ mode: 'tooltip', props?: ComponentProps }`。同一个 FormTable 的自动 Hint 只能选择一种展示方式；`props` 可配置 `placement/effect/openDelay/popperClass` 等 Element UI Tooltip 属性，`content/reference/popper/manual/value/enterable` 由内部单实例管理，不接受覆盖。配置 `ownership: 'custom'` 的字段或表头 Hint 不受该策略影响，FormTable 不再处理其展示。完整行为见 [Hint 提示模式](../features/native-title.md)。
 
 ## 受控数据
 

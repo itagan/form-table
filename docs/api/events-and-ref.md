@@ -74,9 +74,9 @@ function handleTableDataUpdate(nextTableData) {
 | 数据定位 | `tableData`、`row`、`index`、`fieldKey`、`value` |
 | 原始配置 | `columnConfig`、`rowConfig`、`itemConfig` |
 | 更新能力 | `setValue`、`updateRow` |
-| Slot 专属 | `propPath`、`component` |
+| 解析结果 / Slot 专属 | `hint`、`propPath`、`component` |
 
-其中 `itemConfig.component` 是原始配置，可能仍包含动态函数；`component` 是解析后的 `renderer/props/listeners/options/optionProps`。
+其中 `itemConfig.component` 是原始配置，可能仍包含动态函数；`hint` 是标准化结果；`component` 是解析后的 `renderer/props/listeners/options/optionProps`。
 
 因此两者不是替代关系：`itemConfig` 用于读取当前字段的原始配置来源，`component` 用于在 Slot 模板中直接绑定。不要把 `itemConfig.component.props` 直接传给组件，因为它可能仍是一个动态函数。
 
