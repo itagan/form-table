@@ -13,17 +13,14 @@
         :columns="columns"
         :form-props="{ size: 'small' }"
         :table-props="{ border: true, rowKey: 'id' }"
+        :hint-options="{ mode: 'tooltip' }"
         @field-change="handleFieldChange"
         @selection-change="selection = $event"
       >
-        <template #contact-header="{ label, header }">
-          <span v-bind="header.props">
-            <span class="required-mark">*</span>
-            <span>{{ label }}</span>
-            <el-tooltip :content="header.hint">
-              <i class="el-icon-question" />
-            </el-tooltip>
-          </span>
+        <template #contact-header="{ label }">
+          <span class="required-mark">*</span>
+          <span>{{ label }}</span>
+          <i class="el-icon-question" aria-hidden="true" />
         </template>
 
         <template #status="{ value, component }">

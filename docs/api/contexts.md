@@ -58,8 +58,8 @@
 | `columnConfig` | 当前列原始配置 |
 | `columnIndex` | 当前可见列下标 |
 | `label` | 表头文本 |
-| `header.props` | 已解析表头属性 |
-| `header.hint` | 已解析表头提示 |
+| `header.props` | 已解析表头属性，已由 FormTable 包装节点应用 |
+| `header.hint` | 已解析表头提示，已由 FormTable 包装节点应用 |
 
 ## 快照与异步更新
 
