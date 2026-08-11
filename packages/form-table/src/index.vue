@@ -120,7 +120,7 @@ const isTooltipHintMode = computed(() => hintMode.value === 'tooltip')
 /** Tooltip 的内容、引用和显隐由内部统一控制，不允许透传属性改变。 */
 const resolvedHintTooltipProps = computed(() => {
   const tooltipProps = props.hintOptions.mode === 'tooltip'
-    ? props.hintOptions.tooltipProps || {}
+    ? props.hintOptions.props || {}
     : {}
   const managedProps = new Set(['content', 'reference', 'popper', 'manual', 'value', 'enterable'])
   const passthrough = Object.keys(tooltipProps).reduce<ComponentProps>((result, key) => {

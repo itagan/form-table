@@ -10,7 +10,7 @@
   :columns="columns"
   :hint-options="{
     mode: 'tooltip',
-    tooltipProps: { placement: 'top' }
+    props: { placement: 'top' }
   }"
 />
 ```
@@ -21,8 +21,8 @@
 
 | 需求 | 完整配置路径 | 应用节点 / 作用 |
 | --- | --- | --- |
-| 表级展示策略 | `hintOptions` | `{ mode: 'title' }`（默认）或 `{ mode: 'tooltip', tooltipProps }` |
-| Tooltip 属性 | `hintOptions.tooltipProps` | 透传给表格唯一的 `el-tooltip` |
+| 表级展示策略 | `hintOptions` | `{ mode: 'title' }`（默认）或 `{ mode: 'tooltip', props }` |
+| Tooltip 属性 | `hintOptions.props` | 透传给表格唯一的 `el-tooltip` |
 | 表头提示 | `columns[].headerHint` | 默认表头或 `headerSlot` 的统一包装节点 |
 | 字段外层提示 | `columns[].children[].children[].hint` | `el-form-item` |
 | 表头原生属性 | `columns[].headerProps.title` | 默认表头或 `headerSlot` 的统一包装节点 |
@@ -68,7 +68,7 @@ const columns: ColumnConfig[] = [{
 
 配置 `:hint-options="{ mode: 'tooltip' }"` 后，语义提示不再输出 title。根容器通过悬停和焦点事件委托识别当前表头或 `el-form-item`，动态更新唯一 Tooltip 的内容和锚点。悬停目标优先，约 50ms 后显示；没有悬停目标时，字段键盘焦点作为兜底并维护 `aria-describedby`。
 
-`hintOptions.tooltipProps` 可配置 Element UI Tooltip 的 `placement`、`effect`、`openDelay`、`popperClass` 等属性。`content/reference/popper/manual/value/enterable` 由 FormTable 管理，传入值不会覆盖内部行为。
+`hintOptions.props` 可配置 Element UI Tooltip 的 `placement`、`effect`、`openDelay`、`popperClass` 等属性。`content/reference/popper/manual/value/enterable` 由 FormTable 管理，传入值不会覆盖内部行为。
 
 ## 空值行为
 

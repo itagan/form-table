@@ -51,7 +51,7 @@ describe('FormTable hint modes', () => {
     const wrapper = mountFormTable({
       hintOptions: {
         mode: 'tooltip',
-        tooltipProps: {
+        props: {
           placement: 'bottom',
           popperClass: 'custom-hint-popper',
           content: '不能覆盖内容',
