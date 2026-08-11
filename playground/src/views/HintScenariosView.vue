@@ -169,6 +169,91 @@
       </div>
     </section>
 
+    <section class="scenario-card wide-card">
+      <div class="scenario-heading">
+        <div>
+          <el-tag size="mini" type="danger">所有权矩阵</el-tag>
+          <h2><code>auto: false</code> 对所有字段类型生效</h2>
+        </div>
+        <code>{ content, auto: false }</code>
+      </div>
+      <p>
+        下列内置字段、component 和字段 Slot 都配置了相同的关闭开关。FormTable 不展示这些 Hint；
+        配置内容既可以只作为业务元数据，也可以由组件配置或 Slot 主动消费。最后一列演示完全不配置 hint。
+      </p>
+
+      <FormTable
+        v-model="ownershipRows"
+        :columns="ownershipColumns"
+        :form-props="formProps"
+        :table-props="{ ...tableProps, rowKey: 'id' }"
+        :hint-options="{ mode: 'tooltip' }"
+      >
+        <template #owned-slot-field="{ value, setValue, hint }">
+          <div class="manual-tooltip-field">
+            <el-input
+              :value="value"
+              size="small"
+              placeholder="Slot 读取标准化 hint"
+              @input="setValue"
+            />
+            <el-tooltip :content="hint.content" placement="top">
+              <el-button
+                type="text"
+                icon="el-icon-question"
+                aria-label="查看 Slot 消费的配置 Hint"
+              />
+            </el-tooltip>
+          </div>
+        </template>
+
+        <template #no-hint-field="{ value, setValue }">
+          <div class="manual-tooltip-field">
+            <el-input
+              :value="value"
+              size="small"
+              placeholder="Schema 未配置 hint"
+              @input="setValue"
+            />
+            <el-tooltip content="内容完全由 Slot 自己维护" placement="top">
+              <el-button
+                type="text"
+                icon="el-icon-info"
+                aria-label="查看 Slot 自有提示"
+              />
+            </el-tooltip>
+          </div>
+        </template>
+      </FormTable>
+
+      <div class="ownership-grid">
+        <div>
+          <strong>内置 input</strong>
+          <code>hint: { content, auto: false }</code>
+          <span>不显示 FormTable Hint；保留 formItemProps.title。</span>
+        </div>
+        <div>
+          <strong>component.renderer</strong>
+          <code>hint: { content, auto: false }</code>
+          <span>不注入 hint prop；示例通过 component.props 主动读取 itemConfig.hint。</span>
+        </div>
+        <div>
+          <strong>字段 Slot</strong>
+          <code>hint: { content, auto: false }</code>
+          <span>scope.hint 提供标准化结果，问号 Tooltip 由 Slot 创建。</span>
+        </div>
+        <div>
+          <strong>未配置 hint</strong>
+          <code>hint: undefined</code>
+          <span>FormTable 完全不参与，内容和 Tooltip 都由 Slot 自己维护。</span>
+        </div>
+      </div>
+
+      <DemoCollapsiblePanel title="查看 auto 所有权矩阵配置">
+        <pre>{{ ownershipConfigurationExample }}</pre>
+      </DemoCollapsiblePanel>
+    </section>
+
     <DemoCollapsiblePanel class="scenario-card wide-card" title="关键配置">
       <pre>{{ configurationExample }}</pre>
     </DemoCollapsiblePanel>
@@ -344,6 +429,106 @@ const customColumns: ColumnConfig[] = [{
   cellSlot: 'overflow-cell',
   props: { width: 170, showOverflowTooltip: true }
 }]
+
+const ownershipRows = ref<TableRow[]>([{
+  id: 1,
+  builtinOwned: '内置字段：仅保留原生 title',
+  componentOwned: '组件主动读取配置内容',
+  slotOwned: 'Slot 自己展示 Tooltip',
+  noHintOwned: 'Slot 维护自己的固定文案'
+}])
+
+const ownershipColumns: ColumnConfig[] = [{
+  key: 'builtin-owned-column',
+  label: '内置字段 · auto false',
+  props: { minWidth: 260 },
+  children: [{ children: [{
+    fieldKey: 'builtinOwned',
+    type: 'input',
+    hint: { content: '这段配置内容不会由 FormTable 展示', auto: false },
+    formItemProps: { title: 'auto: false 会保留这个原生 title' },
+    component: { props: { placeholder: '悬停表单项查看原生 title' } }
+  }] }]
+}, {
+  key: 'component-owned-column',
+  label: '自定义组件 · auto false',
+  props: { minWidth: 330 },
+  children: [{ children: [{
+    fieldKey: 'componentOwned',
+    type: 'component',
+    hint: { content: '业务组件选择使用的配置内容', auto: false },
+    component: {
+      renderer: HintCustomEditor,
+      props: ({ itemConfig }) => {
+        const hint = itemConfig.hint
+        return {
+          hintUsage: typeof hint === 'object' && hint !== null
+            ? `业务读取：${hint.content}`
+            : undefined
+        }
+      }
+    }
+  }] }]
+}, {
+  key: 'slot-owned-column',
+  label: '字段 Slot · auto false',
+  props: { minWidth: 270 },
+  children: [{ children: [{
+    fieldKey: 'slotOwned',
+    type: 'slot',
+    hint: { content: 'Slot 从 scope.hint.content 读取此内容', auto: false },
+    component: { renderer: 'owned-slot-field' }
+  }] }]
+}, {
+  key: 'no-hint-column',
+  label: '字段 Slot · 不配置 hint',
+  props: { minWidth: 270 },
+  children: [{ children: [{
+    fieldKey: 'noHintOwned',
+    type: 'slot',
+    component: { renderer: 'no-hint-field' }
+  }] }]
+}]
+
+const ownershipConfigurationExample = `const columns = [{
+  label: '内置字段',
+  children: [{ children: [{
+    fieldKey: 'name',
+    type: 'input',
+    hint: { content: '业务元数据', auto: false },
+    formItemProps: { title: '仍保留的原生 title' }
+  }] }]
+}, {
+  label: '自定义组件',
+  children: [{ children: [{
+    fieldKey: 'amount',
+    type: 'component',
+    hint: { content: '组件可选择使用', auto: false },
+    component: {
+      renderer: BusinessEditor,
+      props: ({ itemConfig }) => ({
+        hintUsage: itemConfig.hint.content
+      })
+    }
+  }] }]
+}, {
+  label: '字段 Slot',
+  children: [{ children: [{
+    fieldKey: 'remark',
+    type: 'slot',
+    hint: { content: 'Slot 自行展示', auto: false },
+    component: { renderer: 'remark-editor' }
+  }] }]
+}]
+
+<template #remark-editor="{ value, setValue, hint }">
+  <el-input :value="value" @input="setValue" />
+  <el-tooltip :content="hint.content">
+    <i class="el-icon-question" />
+  </el-tooltip>
+</template>
+
+<!-- 不配置 hint 时，Slot 也可以完全维护自己的提示内容。 -->`
 
 const configurationExample = `<FormTable
   :hint-options="{
@@ -534,6 +719,34 @@ const columns = [{
   display: block;
 }
 
+.ownership-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.ownership-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 14px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+}
+
+.ownership-grid code {
+  color: #c2410c;
+  font-size: 12px;
+}
+
+.ownership-grid span {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
 .boundary-grid strong {
   margin-bottom: 5px;
   color: #334155;
@@ -555,7 +768,8 @@ pre {
 
 @media (max-width: 980px) {
   .scenario-grid,
-  .boundary-grid {
+  .boundary-grid,
+  .ownership-grid {
     grid-template-columns: 1fr;
   }
 }

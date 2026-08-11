@@ -133,7 +133,7 @@ hint: ({ value }) => schoolLabelMap[value] || ''
 
 `auto: false` 对所有字段类型行为一致：内置字段、自定义组件和字段 Slot 都不会写入 title、内部标记或 ARIA，也不会占用表级 singleton。配置内容仍保留在 `itemConfig.hint` 中，具体用途由调用方决定；字段 Slot 还会获得标准化后的 `{ content, auto: false }`，因此可以直接用于自定义 Tooltip。表头也可用相同方式配置 `headerHint`，再从 `header.hint.content` 读取。
 
-这种方式会按行、按字段创建 Tooltip 实例，适合少量特殊交互；大量普通说明仍应使用 FormTable 的表级单实例 Hint。如果提示内容完全不属于 Schema，也可以不配置 `hint`，直接在 Slot 内独立处理。完整对照可查看 [`/hint-scenarios`](http://localhost:5173/hint-scenarios)。
+这种方式会按行、按字段创建 Tooltip 实例，适合少量特殊交互；大量普通说明仍应使用 FormTable 的表级单实例 Hint。如果提示内容完全不属于 Schema，也可以不配置 `hint`，直接在 Slot 内独立处理。完整对照可查看 [`/hint-scenarios`](http://localhost:5173/hint-scenarios)，其中包含内置字段、component、字段 Slot 与未配置 Hint 的所有权矩阵及完整配置。
 
 ## 边界
 
