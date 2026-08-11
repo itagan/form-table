@@ -165,7 +165,7 @@ interface BaseFormItemConfig<TRow extends TableRow = TableRow> {
   colProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext<TRow>>
   /** 直接传给 el-form-item。 */
   formItemProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext<TRow>>
-  /** 字段提示；auto=true 按表级 hintOptions 应用，false 时交给字段 Slot。 */
+  /** 字段提示；auto=true 按表级 hintOptions 应用，false 时 FormTable 不处理。 */
   hint?: DynamicValue<FormTableHint | null | undefined, FormTableFieldRenderContext<TRow>>
 }
 
@@ -232,7 +232,7 @@ interface BaseColumnConfig<TRow extends TableRow = TableRow> {
   headerSlot?: string
   /** 传给默认或 Slot 表头包装节点；可配置原生 title、class、style 和 aria 属性。 */
   headerProps?: DynamicValue<ComponentProps, FormTableColumnContext<TRow>>
-  /** 表头提示；auto=true 按表级 hintOptions 应用，false 时交给表头 Slot。 */
+  /** 表头提示；auto=true 按表级 hintOptions 应用，false 时 FormTable 不处理。 */
   headerHint?: DynamicValue<FormTableHint | null | undefined, FormTableColumnContext<TRow>>
   /** 静态或动态显隐配置。 */
   visible?: DynamicValue<boolean, FormTableColumnContext<TRow>>
@@ -310,7 +310,7 @@ export interface ResolvedHeaderConfig {
 export interface FormTableSlotContext<TRow extends TableRow = TableRow> extends FormTableFieldContext<TRow> {
   propPath: string
   component: ResolvedComponentConfig
-  /** 标准化后的字段 Hint；auto=false 时由 Slot 自行决定展示方式。 */
+  /** 标准化后的字段 Hint；字段 Slot 可自行决定如何使用。 */
   hint: ResolvedFormTableHint | null
 }
 
@@ -318,7 +318,7 @@ export interface FormTableSlotContext<TRow extends TableRow = TableRow> extends 
 export interface FormTableHeaderSlotContext<TRow extends TableRow = TableRow> extends FormTableColumnContext<TRow> {
   columnIndex: number
   label: string
-  /** 已解析的表头属性与提示；auto=false 的提示由自定义表头自行展示。 */
+  /** 已解析的表头属性与提示；表头 Slot 可自行决定如何使用。 */
   header: ResolvedHeaderConfig
 }
 

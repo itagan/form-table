@@ -65,8 +65,8 @@
       </div>
       <p>
         字符串 hint 默认仍由 FormTable 自动提示；配置 <code>{ content, auto: false }</code> 后，提示内容
-        保留在 Schema 中，但字段或表头 Slot 可以自行创建 <code>el-tooltip</code>。<code>renderHeader</code>
-        与 <code>cellSlot</code> 则展示其他调用方边界。
+        保留在 Schema 中，FormTable 对任何字段类型都不再展示它；字段或表头 Slot 可以选择自行创建
+        <code>el-tooltip</code>。<code>renderHeader</code> 与 <code>cellSlot</code> 则展示其他调用方边界。
       </p>
 
       <FormTable

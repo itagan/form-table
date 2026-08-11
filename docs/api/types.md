@@ -137,4 +137,4 @@ interface FieldModelConfig {
 
 `ColumnConfig.headerProps` 传给默认或 Slot 表头的 `.form-table-column-header`，可配置原生 `title`、class、style 和 aria 属性。存在 `column.props.renderHeader` 时由 Element UI 完全接管，FormTable 不包装也不应用 `headerProps/headerHint`。
 
-`ColumnConfig.headerHint` 和 Item 的 `hint` 接受 `FormTableHint` 或动态返回值。字符串会标准化为 `{ content, auto: true }`，对象缺省 `auto` 时也默认 `true`；`auto: false` 只把结果提供给对应 Slot，不写入 title、内部标记或 ARIA。`FormTableHintOptions` 仅在整张表内统一选择自动 Hint 的原生 `title` 或单实例 `tooltip`；空字符串、`null/undefined` 不产生自动提示。
+`ColumnConfig.headerHint` 和 Item 的 `hint` 接受 `FormTableHint` 或动态返回值。字符串会标准化为 `{ content, auto: true }`，对象缺省 `auto` 时也默认 `true`；`auto: false` 表示 FormTable 完全不处理该 Hint，不写入 title、内部标记或 ARIA，也与字段的 `type` 无关。配置内容仍保留在原始 Schema 中，字段或表头 Slot 还可读取标准化结果，具体用途由调用方决定。`FormTableHintOptions` 仅在整张表内统一选择自动 Hint 的原生 `title` 或单实例 `tooltip`；空字符串、`null/undefined` 不产生自动提示。
