@@ -41,6 +41,7 @@ describe('FormTable hint modes', () => {
     await wrapper.vm.$nextTick()
 
     expect(wrapper.find('.form-table-column-header').attributes('title')).toBe('姓名表头说明')
+    expect(wrapper.find('.form-table-column-header').attributes('tabindex')).toBeUndefined()
     expect(wrapper.find('.el-form-item').attributes('title')).toBe('姓名字段说明')
     expect(wrapper.find('[data-form-table-hint]').exists()).toBe(false)
     expect((wrapper.vm.$refs as Record<string, unknown>).hintTooltipRef).toBeUndefined()
@@ -84,8 +85,7 @@ describe('FormTable hint modes', () => {
 
     await wrapper.find('.el-input__inner').trigger('mouseover')
     await wrapper.vm.$nextTick()
-    expect(show).not.toHaveBeenCalled()
-    await waitForTooltipActivation(wrapper)
+    expect(show).toHaveBeenCalledTimes(1)
     expect(tooltip.content).toBe('姓名字段说明')
     expect(tooltip.referenceElm).toBe(formItem.element)
     expect(formItem.attributes('aria-describedby')).toContain(tooltip.tooltipId)
@@ -120,7 +120,7 @@ describe('FormTable hint modes', () => {
     await wrapper.vm.$nextTick()
 
     const tooltip = getHintTooltip(wrapper)
-    vi.spyOn(tooltip, 'handleShowPopper').mockImplementation(() => undefined)
+    const show = vi.spyOn(tooltip, 'handleShowPopper').mockImplementation(() => undefined)
     vi.spyOn(tooltip, 'doDestroy').mockImplementation(() => undefined)
     const close = vi.spyOn(tooltip, 'handleClosePopper').mockImplementation(() => undefined)
     const formItem = wrapper.find('.el-form-item')
@@ -128,6 +128,9 @@ describe('FormTable hint modes', () => {
     const header = wrapper.find('.form-table-column-header')
 
     await input.trigger('mouseover')
+    await formItem.trigger('mouseover')
+    await wrapper.vm.$nextTick()
+    expect(show).toHaveBeenCalledTimes(1)
     input.element.dispatchEvent(new MouseEvent('mouseout', {
       bubbles: true,
       relatedTarget: formItem.element
@@ -153,6 +156,120 @@ describe('FormTable hint modes', () => {
     await wrapper.vm.$nextTick()
     expect(tooltip.content).toBe('姓名字段说明')
     expect(input.attributes('aria-describedby')).toBeUndefined()
+    wrapper.destroy()
+  })
+
+  it('makes managed tooltip headers keyboard reachable while respecting explicit tabindex', async () => {
+    const wrapper = mountFormTable({
+      hintOptions: { mode: 'tooltip' },
+      columns: [{
+        label: '默认表头',
+        headerHint: '默认说明',
+        children: [{ children: [{ fieldKey: 'name', type: 'input' }] }]
+      }, {
+        label: '自定义表头',
+        headerHint: '自定义说明',
+        headerProps: { tabindex: -1 },
+        children: [{ children: [{ fieldKey: 'name', type: 'input' }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    const headers = wrapper.findAll('.form-table-column-header')
+    expect(headers.at(0).attributes('tabindex')).toBe('0')
+    expect(headers.at(1).attributes('tabindex')).toBe('-1')
+
+    const tooltip = getHintTooltip(wrapper)
+    const show = vi.spyOn(tooltip, 'handleShowPopper').mockImplementation(() => undefined)
+    dispatchFocusEvent(headers.at(0).element, 'focusin')
+    await wrapper.vm.$nextTick()
+    expect(show).toHaveBeenCalledTimes(1)
+    expect(headers.at(0).attributes('aria-describedby')).toContain(tooltip.tooltipId)
+    wrapper.destroy()
+  })
+
+  it('closes on Escape and reopens only after a new pointer or focus transition', async () => {
+    const wrapper = mountFormTable({
+      hintOptions: { mode: 'tooltip' },
+      columns: [{
+        label: '姓名',
+        children: [{ children: [{ fieldKey: 'name', type: 'input', hint: '字段说明' }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    const tooltip = getHintTooltip(wrapper)
+    const show = vi.spyOn(tooltip, 'handleShowPopper').mockImplementation(() => undefined)
+    const close = vi.spyOn(tooltip, 'handleClosePopper').mockImplementation(() => undefined)
+    const input = wrapper.find('.el-input__inner')
+    dispatchFocusEvent(input.element, 'focusin')
+    await wrapper.vm.$nextTick()
+    expect(show).toHaveBeenCalledTimes(1)
+
+    input.element.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await wrapper.vm.$nextTick()
+    expect(close).toHaveBeenCalled()
+    expect(input.attributes('aria-describedby')).toBeUndefined()
+
+    await wrapper.setProps({ tableData: [{ name: 'Bob' }] })
+    expect(show).toHaveBeenCalledTimes(1)
+    await input.trigger('mouseover')
+    await wrapper.vm.$nextTick()
+    expect(show).toHaveBeenCalledTimes(2)
+    wrapper.destroy()
+  })
+
+  it('removes only its own aria-describedby token after concurrent updates', async () => {
+    const wrapper = mountFormTable({
+      hintOptions: { mode: 'tooltip' },
+      columns: [{
+        label: '姓名',
+        children: [{ children: [{ fieldKey: 'name', type: 'input', hint: '字段说明' }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    const tooltip = getHintTooltip(wrapper)
+    vi.spyOn(tooltip, 'handleShowPopper').mockImplementation(() => undefined)
+    const input = wrapper.find('.el-input__inner')
+    input.element.setAttribute('aria-describedby', 'existing-description')
+    dispatchFocusEvent(input.element, 'focusin')
+    await wrapper.vm.$nextTick()
+    input.element.setAttribute(
+      'aria-describedby',
+      `${input.attributes('aria-describedby')} validation-error`
+    )
+    dispatchFocusEvent(input.element, 'focusout')
+    await wrapper.vm.$nextTick()
+    expect(input.attributes('aria-describedby')).toBe('existing-description validation-error')
+    wrapper.destroy()
+  })
+
+  it('ignores hint targets owned by a nested FormTable root', async () => {
+    const wrapper = mountFormTable({
+      hintOptions: { mode: 'tooltip' },
+      columns: [{
+        label: '嵌套内容',
+        children: [{ children: [{
+          fieldKey: 'name',
+          type: 'slot',
+          component: { renderer: 'nested-content' }
+        }] }]
+      }],
+      scopedSlots: {
+        'nested-content': `<div data-form-table-hint-root :data-field="props.fieldKey">
+          <button class="nested-hint" data-form-table-hint="内层说明">内层</button>
+        </div>`
+      }
+    })
+    await wrapper.vm.$nextTick()
+
+    const tooltip = getHintTooltip(wrapper)
+    const show = vi.spyOn(tooltip, 'handleShowPopper').mockImplementation(() => undefined)
+    await wrapper.find('.nested-hint').trigger('mouseover')
+    await wrapper.vm.$nextTick()
+    expect(show).not.toHaveBeenCalled()
+    expect(tooltip.content).toBe('')
     wrapper.destroy()
   })
 
@@ -262,7 +379,7 @@ describe('FormTable hint modes', () => {
       scopedSlots: {
         'school-header': `
           <span class="school-header">
-            {{ props.label }}|{{ props.header.hint.content }}|{{ props.header.hint.auto }}
+            {{ props.label }}|{{ props.header.hint.content }}|{{ props.header.hint.ownership }}
           </span>
         `
       }
@@ -274,7 +391,7 @@ describe('FormTable hint modes', () => {
     expect(header.attributes('data-form-table-hint')).toBe('学校完整说明（1）')
     expect(header.attributes('aria-label')).toBe('学校表头')
     expect(header.attributes('title')).toBeUndefined()
-    expect(slotContent.text()).toBe('学校|学校完整说明（1）|true')
+    expect(slotContent.text()).toBe('学校|学校完整说明（1）|table')
     expect(slotContent.attributes('data-form-table-hint')).toBeUndefined()
     expect(slotContent.attributes('title')).toBeUndefined()
 
@@ -307,7 +424,7 @@ describe('FormTable hint modes', () => {
       }],
       scopedSlots: {
         'name-field': `<button class="slot-field">
-          {{ props.value }}|{{ props.hint.content }}|{{ props.hint.auto }}
+          {{ props.value }}|{{ props.hint.content }}|{{ props.hint.ownership }}
         </button>`
       }
     })
@@ -316,7 +433,7 @@ describe('FormTable hint modes', () => {
     const formItem = wrapper.find('.el-form-item')
     const slotField = wrapper.find('.slot-field')
     expect(formItem.attributes('data-form-table-hint')).toBe('字段 Slot 说明')
-    expect(slotField.text()).toBe('Alice|字段 Slot 说明|true')
+    expect(slotField.text()).toBe('Alice|字段 Slot 说明|table')
     expect(slotField.attributes('data-form-table-hint')).toBeUndefined()
 
     const tooltip = getHintTooltip(wrapper)
@@ -329,28 +446,28 @@ describe('FormTable hint modes', () => {
     wrapper.destroy()
   })
 
-  it('exposes auto=false hints to slots without changing target props or triggering singleton', async () => {
+  it('exposes ownership=custom hints to slots without changing target props or triggering singleton', async () => {
     const wrapper = mountFormTable({
       hintOptions: { mode: 'tooltip' },
       columns: [{
         label: '自定义提示',
         headerSlot: 'custom-header',
-        headerHint: { content: '表头自行展示', auto: false },
+        headerHint: { content: '表头自行展示', ownership: 'custom' },
         headerProps: { title: '底层表头 title' },
         children: [{ children: [{
           fieldKey: 'name',
           type: 'slot',
-          hint: { content: '字段自行展示', auto: false },
+          hint: { content: '字段自行展示', ownership: 'custom' },
           formItemProps: { title: '底层字段 title' },
           component: { renderer: 'custom-field' }
         }] }]
       }],
       scopedSlots: {
         'custom-header': `<span class="custom-hint-header">
-          {{ props.header.hint.content }}|{{ props.header.hint.auto }}
+          {{ props.header.hint.content }}|{{ props.header.hint.ownership }}
         </span>`,
         'custom-field': `<button class="custom-hint-field">
-          {{ props.hint.content }}|{{ props.hint.auto }}
+          {{ props.hint.content }}|{{ props.hint.ownership }}
         </button>`
       }
     })
@@ -361,8 +478,8 @@ describe('FormTable hint modes', () => {
     expect(header.attributes('title')).toBe('底层表头 title')
     expect(formItem.attributes('title')).toBe('底层字段 title')
     expect(wrapper.find('[data-form-table-hint]').exists()).toBe(false)
-    expect(wrapper.find('.custom-hint-header').text()).toBe('表头自行展示|false')
-    expect(wrapper.find('.custom-hint-field').text()).toBe('字段自行展示|false')
+    expect(wrapper.find('.custom-hint-header').text()).toBe('表头自行展示|custom')
+    expect(wrapper.find('.custom-hint-field').text()).toBe('字段自行展示|custom')
 
     const tooltip = getHintTooltip(wrapper)
     const show = vi.spyOn(tooltip, 'handleShowPopper').mockImplementation(() => undefined)
@@ -373,7 +490,7 @@ describe('FormTable hint modes', () => {
     wrapper.destroy()
   })
 
-  it('disables managed hints for builtin and component fields when auto=false', async () => {
+  it('disables managed hints for builtin and component fields when ownership=custom', async () => {
     const wrapper = mountFormTable({
       hintOptions: { mode: 'tooltip' },
       tableData: [{ name: 'Alice', age: '18' }],
@@ -382,12 +499,12 @@ describe('FormTable hint modes', () => {
         children: [{ children: [{
           fieldKey: 'name',
           type: 'input',
-          hint: { content: '内置字段配置内容', auto: false },
+          hint: { content: '内置字段配置内容', ownership: 'custom' },
           formItemProps: { title: '内置字段原生 title' }
         }, {
           fieldKey: 'age',
           type: 'component',
-          hint: { content: '自定义组件配置内容', auto: false },
+          hint: { content: '自定义组件配置内容', ownership: 'custom' },
           formItemProps: { title: '组件字段原生 title' },
           component: { renderer: 'el-input' }
         }] }]
@@ -414,7 +531,7 @@ describe('FormTable hint modes', () => {
   it('closes an active managed tooltip when a dynamic hint switches to custom ownership', async () => {
     const hint = ({ row, value }: FormTableFieldRenderContext) => ({
       content: `当前内容：${String(value)}`,
-      auto: !row.customHint
+      ownership: row.customHint ? 'custom' as const : 'table' as const
     })
     const wrapper = mountFormTable({
       hintOptions: { mode: 'tooltip' },
@@ -458,20 +575,20 @@ describe('FormTable hint modes', () => {
         children: [{ children: [{
           fieldKey: 'name',
           type: 'slot',
-          hint: { content: '', auto: false },
+          hint: { content: '', ownership: 'custom' },
           formItemProps: { title: '底层字段 title' },
           component: { renderer: 'empty-hint-field' }
         }] }]
       }],
       scopedSlots: {
         'empty-hint-field': `<span class="empty-custom-hint">
-          {{ props.hint.content === '' }}|{{ props.hint.auto }}
+          {{ props.hint.content === '' }}|{{ props.hint.ownership }}
         </span>`
       }
     })
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.find('.empty-custom-hint').text()).toBe('true|false')
+    expect(wrapper.find('.empty-custom-hint').text()).toBe('true|custom')
     expect(wrapper.find('.el-form-item').attributes('title')).toBe('底层字段 title')
     wrapper.destroy()
   })
