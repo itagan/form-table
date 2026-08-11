@@ -64,8 +64,9 @@
         <code>{ mode: 'tooltip' }</code>
       </div>
       <p>
-        前两列的语义 Hint 仍由 FormTable 自动应用；Slot 和自定义组件只负责视觉内容。
-        <code>renderHeader</code> 与 <code>cellSlot</code> 则展示明确的调用方边界。
+        配置了 hint 的 Slot 和自定义组件仍由 FormTable 自动提示；需要字段级完全控制时，可以不配置 hint，
+        直接在 Slot 内创建 <code>el-tooltip</code>。<code>renderHeader</code> 与 <code>cellSlot</code>
+        则展示其他调用方边界。
       </p>
 
       <FormTable
@@ -93,6 +94,30 @@
           </div>
         </template>
 
+        <template #manual-tooltip-field="{ value, setValue, row }">
+          <div class="manual-tooltip-field">
+            <el-input
+              :value="value"
+              size="small"
+              placeholder="该字段未配置 hint"
+              @input="setValue"
+            />
+            <el-tooltip
+              :content="`当前行 ${row.id}：此 Tooltip 完全由字段 Slot 管理`"
+              placement="top"
+              effect="light"
+              popper-class="manual-field-tooltip"
+            >
+              <el-button
+                class="manual-help-button"
+                type="text"
+                icon="el-icon-question"
+                aria-label="查看字段级自定义提示"
+              />
+            </el-tooltip>
+          </div>
+        </template>
+
         <template #overflow-cell="{ row }">
           <span class="overflow-copy">{{ row.longText }}</span>
         </template>
@@ -106,6 +131,10 @@
         <div>
           <strong>字段 Slot / 自定义组件</strong>
           <span>外层 el-form-item 自动承接 hint，内部不创建 Tooltip。</span>
+        </div>
+        <div>
+          <strong>字段级自定义 Tooltip</strong>
+          <span>不配置 hint，由 Slot 内问号图标单独触发 el-tooltip。</span>
         </div>
         <div>
           <strong>renderHeader</strong>
@@ -214,6 +243,7 @@ const customRows = ref<TableRow[]>([{
   id: 1,
   slotValue: '字段 Slot 内容',
   componentValue: '自定义组件内容',
+  manualValue: '字段自行提示',
   ownedValue: '表头由 renderHeader 接管',
   longText: '这是由 cellSlot 渲染的很长展示文本，它使用 Element UI 的 showOverflowTooltip，而不是字段 Hint。'
 }])
@@ -224,7 +254,7 @@ const customColumns: ColumnConfig[] = [{
   headerSlot: 'custom-header',
   headerHint: ({ tableData }) => `自定义表头仍由 FormTable 提示，当前 ${tableData.length} 行`,
   headerProps: { 'aria-label': '自定义 Slot 表头说明' },
-  props: { minWidth: 300 },
+  props: { minWidth: 250 },
   children: [{
     children: [{
       fieldKey: 'slotValue',
@@ -237,7 +267,7 @@ const customColumns: ColumnConfig[] = [{
   key: 'component-column',
   label: '自定义组件',
   headerHint: '自定义组件列的表头说明',
-  props: { minWidth: 360 },
+  props: { minWidth: 280 },
   children: [{
     children: [{
       fieldKey: 'componentValue',
@@ -247,10 +277,22 @@ const customColumns: ColumnConfig[] = [{
     }]
   }]
 }, {
+  key: 'manual-tooltip-column',
+  label: '字段自主管理 Tooltip',
+  props: { minWidth: 230 },
+  children: [{
+    children: [{
+      fieldKey: 'manualValue',
+      type: 'slot',
+      // 此字段刻意不配置 hint，避免与 Slot 内的独立 el-tooltip 重复。
+      component: { renderer: 'manual-tooltip-field' }
+    }]
+  }]
+}, {
   key: 'render-header-column',
   label: 'renderHeader 接管',
   props: {
-    minWidth: 240,
+    minWidth: 190,
     renderHeader: (h: CreateElement) => h('span', {
       class: 'owned-render-header',
       attrs: { title: '这个 title 由 renderHeader 自己设置' }
@@ -270,7 +312,7 @@ const customColumns: ColumnConfig[] = [{
   key: 'overflow-column',
   label: 'cellSlot 长文本',
   cellSlot: 'overflow-cell',
-  props: { width: 220, showOverflowTooltip: true }
+  props: { width: 170, showOverflowTooltip: true }
 }]
 
 const configurationExample = `<FormTable
@@ -284,7 +326,13 @@ const configurationExample = `<FormTable
     }
   }"
 >
-  <!-- headerSlot 和字段 Slot 只渲染视觉内容，不创建 Tooltip -->
+  <!-- 配置 hint 的 Slot 只渲染视觉内容，不创建 Tooltip -->
+  <template #manual-tooltip-field="{ value, setValue, row }">
+    <el-input :value="value" @input="setValue" />
+    <el-tooltip :content="\`当前行 \${row.id}：字段自行管理\`">
+      <i class="el-icon-question" />
+    </el-tooltip>
+  </template>
 </FormTable>`
 </script>
 
@@ -397,6 +445,23 @@ const configurationExample = `<FormTable
   flex: 1;
 }
 
+.manual-tooltip-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.manual-tooltip-field .el-input {
+  flex: 1;
+}
+
+.manual-help-button {
+  flex: none;
+  padding: 6px;
+  font-size: 17px;
+}
+
 .overflow-copy {
   display: block;
   overflow: hidden;
@@ -406,7 +471,7 @@ const configurationExample = `<FormTable
 
 .boundary-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 12px;
   margin-top: 18px;
 }
@@ -465,5 +530,9 @@ pre {
   max-width: 360px;
   border-color: #93c5fd !important;
   box-shadow: 0 10px 24px rgba(37, 99, 235, 0.16);
+}
+
+.manual-field-tooltip {
+  max-width: 320px;
 }
 </style>
