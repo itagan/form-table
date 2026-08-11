@@ -24,6 +24,7 @@ export const apiGroups: ApiGroup[] = [
       { path: 'columns', type: 'ColumnConfig[]', defaultValue: '必填', target: '布局与渲染配置', description: 'Column → Row → Item 配置树。' },
       { path: 'formProps', type: 'Record<string, unknown>', defaultValue: '{}', target: 'el-form', description: '透传 Element Form 属性。' },
       { path: 'tableProps', type: 'Record<string, unknown>', defaultValue: '{}', target: 'el-table', description: '透传 Element Table 属性；异步更新建议配置 rowKey。' },
+      { path: 'hintOptions', type: 'FormTableHintOptions', defaultValue: "{ mode: 'title' }", target: '表头与字段 Hint', description: '整表统一选择原生 title 或单实例 Tooltip；tooltip 模式通过 props 配置 el-tooltip。' },
       { path: 'loading', type: 'boolean', defaultValue: 'false', target: 'el-table v-loading', description: '表格加载状态。' }
     ]
   },
@@ -35,8 +36,8 @@ export const apiGroups: ApiGroup[] = [
       { path: 'columns[].key', type: 'string', defaultValue: '—', target: '列渲染身份', description: '动态增删、替换列时建议使用稳定唯一值。' },
       { path: 'columns[].label', type: 'string', defaultValue: "''", target: 'el-table-column.label', description: '默认表头文本。' },
       { path: 'columns[].props', type: 'Object | (context) => Object', defaultValue: '{}', target: 'el-table-column', description: '宽度、对齐、fixed、type 等原生列属性。', context: 'ColumnContext' },
-      { path: 'columns[].headerProps', type: 'Object | (context) => Object', defaultValue: '{}', target: '默认表头文本节点', description: 'title、class、style、aria-*；headerSlot 不自动应用。', context: 'ColumnContext' },
-      { path: 'columns[].headerHint', type: 'string | (context) => string', defaultValue: '—', target: '默认表头 title', description: '原生提示文本；空字符串不显示。', context: 'ColumnContext' },
+      { path: 'columns[].headerProps', type: 'Object | (context) => Object', defaultValue: '{}', target: '默认/Slot 表头包装节点', description: 'title、class、style、aria-*；renderHeader 接管时不自动应用。', context: 'ColumnContext' },
+      { path: 'columns[].headerHint', type: 'string | (context) => string', defaultValue: '—', target: '默认/Slot 表头包装节点', description: '按 hintOptions 展示；空字符串不显示。', context: 'ColumnContext' },
       { path: 'columns[].headerSlot', type: 'string', defaultValue: '—', target: '表头 scoped Slot', description: '复杂表头、图标和交互内容。' },
       { path: 'columns[].visible', type: 'boolean | (context) => boolean', defaultValue: 'true', target: '列显隐', description: '控制当前列是否渲染。', context: 'ColumnContext' },
       { path: 'columns[].cellSlot', type: 'string', defaultValue: '—', target: '整格 scoped Slot', description: '直接渲染当前单元格，与 children 互斥且不要求 fieldKey。' },
@@ -58,7 +59,7 @@ export const apiGroups: ApiGroup[] = [
       { path: 'columns[].children[].children[].visible', type: 'boolean | (context) => boolean', defaultValue: 'true', target: '字段显隐', description: '按字段上下文控制渲染。', context: 'ItemContext' },
       { path: 'columns[].children[].children[].colProps', type: 'Object | (context) => Object', defaultValue: '{}', target: 'el-col', description: 'span、offset 等栅格属性。', context: 'ItemContext' },
       { path: 'columns[].children[].children[].formItemProps', type: 'Object | (context) => Object', defaultValue: '{}', target: 'el-form-item', description: 'label、rules 等；校验 prop 自动生成。', context: 'ItemContext' },
-      { path: 'columns[].children[].children[].hint', type: 'string | (context) => string', defaultValue: '—', target: 'el-form-item title', description: '字段外层原生 title；空字符串不显示。', context: 'ItemContext' },
+      { path: 'columns[].children[].children[].hint', type: 'string | (context) => string', defaultValue: '—', target: 'el-form-item', description: '按 hintOptions 展示；字段 Slot 与自定义组件同样自动应用。', context: 'ItemContext' },
       { path: 'columns[].children[].children[].component', type: 'ComponentConfig', defaultValue: '{}', target: '实际字段组件', description: '组件、绑定协议、属性、事件和选项。' }
     ]
   },
@@ -117,8 +118,8 @@ export const featureCards = [
   { title: '校验、清理与重置', path: '/form-table', description: '字段 rules、整表校验、清理状态和受控数据重置。', tags: ['rules', 'validate', 'clearValidate'] },
   { title: '动态显隐与配置', path: '/dynamic-slot-test', description: 'Column、Row、Item visible 与动态组件属性。', tags: ['visible', 'dynamic props'] },
   { title: '稳定身份与异步安全', path: '/row-column-operations', description: 'rowKey 与 Column、Row、Item key 的不同职责。', tags: ['rowKey', 'key', 'async'] },
-  { title: 'Hint 提示模式', path: '/form-table', description: '原生 title、单实例 Tooltip、动态字符串和空值行为。', tags: ['hint', 'headerHint', 'title', 'tooltip'] },
-  { title: '自定义表头', path: '/form-table-advanced', description: '表头文本、图标与 FormTable 自动 Hint 包装。', tags: ['headerSlot', 'headerHint'] },
+  { title: 'Hint 提示模式', path: '/hint-scenarios', description: '原生 title、单实例 Tooltip、动态字符串、底层 title 和自定义渲染边界。', tags: ['hint', 'headerHint', 'hintOptions', 'tooltip'] },
+  { title: '自定义表头', path: '/hint-scenarios', description: '表头文本、图标与 FormTable 自动 Hint 包装。', tags: ['headerSlot', 'headerHint'] },
   { title: 'cellSlot 列级单元格', path: '/cell-slot', description: '组合展示、状态、派生值、操作列，以及与字段 Slot 的边界。', tags: ['cellSlot', 'updateRow', 'rowKey'] },
   { title: '企业复杂组件接入', path: '/enterprise-components', description: '自定义 model、动态组件和复杂事件联动。', tags: ['component', 'model', 'listeners'] },
   { title: '行列操作', path: '/row-column-operations', description: '动态列、行增删复制移动和延迟提交。', tags: ['columns', 'controlled data'] },
