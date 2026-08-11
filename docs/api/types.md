@@ -6,6 +6,7 @@
 - `BuiltinFormItemConfig`、`ComponentFormItemConfig`、`SlotFormItemConfig`
 - `FieldComponentConfig`、`FieldModelConfig`、`FieldRendererResolver`、`BuiltinFormItemType`、`FormItemType`
 - `FormItemOption`、`OptionPropsConfig`、`ResolvedComponentConfig`、`ResolvedHeaderConfig`
+- `FormTableHint`、`FormTableHintConfig`、`ResolvedFormTableHint`、`FormTableHintOptions`
 - `TableRow`、`FormTableRecord`、`FormTableProps`
 - `FormTableTableContext`、`FormTableColumnContext`、`FormTableRowContext`、`FormTableFieldRenderContext`
 - `FormTableFieldContext`、`FormTableSlotContext`、`FormTableCellSlotContext`
@@ -116,7 +117,7 @@ component.listeners      → Field 信息 + setValue, updateRow
 列级 cellSlot            → row, index, columnConfig, updateRow
 ```
 
-`FormTableSlotContext.itemConfig.component` 保留调用方传入的原始配置；`FormTableSlotContext.component` 的类型是 `ResolvedComponentConfig`，包含针对当前数据行解析并归一化后的 `props/listeners/options/optionProps/model`，用于直接绑定 Slot 内组件。
+`FormTableSlotContext.itemConfig.component` 保留调用方传入的原始配置；`FormTableSlotContext.component` 的类型是 `ResolvedComponentConfig`，包含针对当前数据行解析并归一化后的 `props/listeners/options/optionProps/model`，用于直接绑定 Slot 内组件。`FormTableSlotContext.hint` 是标准化后的 `ResolvedFormTableHint | null`。
 
 自定义组件绑定协议类型：
 
@@ -132,8 +133,8 @@ interface FieldModelConfig {
 
 `row/tableData` 与 `columnConfig/rowConfig/itemConfig` 在回调类型中采用浅层只读约束；运行时不会冻结原对象。字段更新使用 `setValue` 或 `updateRow`，配置调整由调用方替换 `columns`。
 
-表头 slot 接收 `tableData/label/columnIndex/columnConfig/header`。`columnIndex` 是动态显隐过滤后的可见列下标，不保证等于原始 `columns` 数组下标；`header` 保留已解析的 `props/hint` 供读取兼容，属性与提示已由 FormTable 的统一包装节点应用，不应在 Slot 内重复绑定。
+表头 slot 接收 `tableData/label/columnIndex/columnConfig/header`。`columnIndex` 是动态显隐过滤后的可见列下标，不保证等于原始 `columns` 数组下标；`header.props` 是已解析属性，`header.hint` 是 `ResolvedFormTableHint | null`。只有 `auto: true` 的 Hint 会由统一包装节点自动应用。
 
 `ColumnConfig.headerProps` 传给默认或 Slot 表头的 `.form-table-column-header`，可配置原生 `title`、class、style 和 aria 属性。存在 `column.props.renderHeader` 时由 Element UI 完全接管，FormTable 不包装也不应用 `headerProps/headerHint`。
 
-`ColumnConfig.headerHint` 和 Item 的 `hint` 接受字符串或动态返回字符串，分别应用于表头包装节点与 `el-form-item`。`FormTableHintOptions` 在整张表内统一选择原生 `title` 或单实例 `tooltip`；空字符串、`null/undefined` 均不显示提示。
+`ColumnConfig.headerHint` 和 Item 的 `hint` 接受 `FormTableHint` 或动态返回值。字符串会标准化为 `{ content, auto: true }`，对象缺省 `auto` 时也默认 `true`；`auto: false` 只把结果提供给对应 Slot，不写入 title、内部标记或 ARIA。`FormTableHintOptions` 仅在整张表内统一选择自动 Hint 的原生 `title` 或单实例 `tooltip`；空字符串、`null/undefined` 不产生自动提示。

@@ -37,7 +37,7 @@ const columns: ColumnConfig[] = [{
 </FormTable>
 ```
 
-FormTable 会在 Slot 外创建 `.form-table-column-header`，自动应用解析后的 `headerProps/headerHint`，并作为 title 或表级单实例 Tooltip 的锚点。Slot 不要再次绑定 `header.props/header.hint`，也不要为语义 Hint 创建自己的 Tooltip。
+FormTable 会在 Slot 外创建 `.form-table-column-header`。默认的 `headerHint` 自动应用于该节点，并作为 title 或表级单实例 Tooltip 的锚点。Slot 不要重复绑定 `header.props`；需要自行展示时可配置 `headerHint: { content, auto: false }`，并读取 `header.hint.content`。
 
 ## Slot scope
 
@@ -49,7 +49,7 @@ interface FormTableHeaderSlotContext {
   label: string
   header: {
     props: Record<string, unknown>
-    hint?: string | null
+    hint: ResolvedFormTableHint | null
   }
 }
 ```
@@ -61,7 +61,7 @@ interface FormTableHeaderSlotContext {
 | `columnIndex` | 当前可见列下标，不保证等于原始数组下标 |
 | `tableData` | 显示行数、汇总状态等只读信息 |
 | `header.props` | 当前列已解析的 `headerProps`，供读取兼容，已由包装节点应用 |
-| `header.hint` | 当前列已解析的 `headerHint`，供读取兼容，已由包装节点应用 |
+| `header.hint` | 标准化后的 `{ content, auto }` 或 `null`；仅 `auto: true` 由包装节点自动应用 |
 
 ## 动态配置
 
@@ -77,7 +77,22 @@ headerProps: ({ columnConfig }) => ({
 })
 ```
 
-Slot 中获得的是当前渲染已经解析好的 `header`，用于兼容已有 scope 读取；不要再次执行原始配置函数，也不要把这些属性重复绑定到 Slot 内容。
+Slot 中获得的是当前渲染已经解析好的 `header`；不要再次执行原始配置函数，也不要把 `header.props` 重复绑定到 Slot 内容。`header.hint` 始终是标准对象或 `null`。
+
+需要表头 Slot 自行控制 Tooltip 时：
+
+```ts
+headerHint: { content: '自定义表头说明', auto: false }
+```
+
+```vue
+<template #contact-header="{ label, header }">
+  <span>{{ label }}</span>
+  <el-tooltip :content="header.hint.content">
+    <i class="el-icon-question" aria-label="查看表头说明" />
+  </el-tooltip>
+</template>
+```
 
 ## 选择方式
 
