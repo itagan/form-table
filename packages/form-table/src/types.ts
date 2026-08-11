@@ -1,4 +1,4 @@
-import type { Component } from 'vue'
+import type { Component, Ref } from 'vue'
 
 /** 表格字段允许承载的任意业务值。 */
 export type FormTableValue = any
@@ -47,8 +47,10 @@ export interface FormTableFieldContext<TRow extends TableRow = TableRow> extends
 
 /** 支持直接值或根据运行时上下文计算的动态值。 */
 export type DynamicValue<T, Context> = T | ((context: Context) => T)
-/** FormTable 外层提示内容；当前使用原生 title，未来可扩展其他提示渲染方式。 */
+/** FormTable 外层提示内容。 */
 export type FormTableHint = string
+/** 整个 FormTable 统一采用的提示展示方式。 */
+export type FormTableHintMode = 'title' | 'tooltip'
 /** 字段组件事件监听器签名，第一个参数固定为字段上下文。 */
 export type FormTableFieldListener<TRow extends TableRow = TableRow> = (
   context: FormTableFieldContext<TRow>,
@@ -143,7 +145,7 @@ interface BaseFormItemConfig<TRow extends TableRow = TableRow> {
   colProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext<TRow>>
   /** 直接传给 el-form-item。 */
   formItemProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext<TRow>>
-  /** 字段外层提示；当前作为原生 title 应用于 el-form-item。 */
+  /** 字段外层提示；按表级 hintMode 应用于 el-form-item。 */
   hint?: DynamicValue<FormTableHint | null | undefined, FormTableFieldRenderContext<TRow>>
 }
 
@@ -210,7 +212,7 @@ interface BaseColumnConfig<TRow extends TableRow = TableRow> {
   headerSlot?: string
   /** 传给默认表头文本节点；可用于配置原生 title、class、style 和 aria 属性。 */
   headerProps?: DynamicValue<ComponentProps, FormTableColumnContext<TRow>>
-  /** 默认表头提示；当前作为原生 title 应用于表头文本节点。 */
+  /** 默认表头提示；按表级 hintMode 应用于表头文本节点。 */
   headerHint?: DynamicValue<FormTableHint | null | undefined, FormTableColumnContext<TRow>>
   /** 静态或动态显隐配置。 */
   visible?: DynamicValue<boolean, FormTableColumnContext<TRow>>
@@ -254,6 +256,10 @@ export interface FormTableProps<TRow extends TableRow = TableRow> {
   columns: ColumnConfig<TRow>[]
   formProps?: ComponentProps
   tableProps?: ComponentProps
+  /** headerHint/hint 的表级统一展示方式，默认使用原生 title。 */
+  hintMode?: FormTableHintMode
+  /** tooltip 模式下传给唯一 el-tooltip 实例的属性。 */
+  hintTooltipProps?: ComponentProps
   loading?: boolean
 }
 
@@ -333,3 +339,7 @@ export interface FormTableUpdateApi<TRow extends TableRow = TableRow> {
 export const FORM_TABLE_CONTEXT_KEY: unique symbol = Symbol('formTableContext')
 export const FORM_TABLE_UPDATE_KEY: unique symbol = Symbol('formTableUpdate')
 export const FORM_TABLE_SLOTS_KEY: unique symbol = Symbol('formTableSlots')
+export const FORM_TABLE_HINT_MODE_KEY: unique symbol = Symbol('formTableHintMode')
+
+/** 响应式提示模式仅供 FormTable 内部渲染链使用。 */
+export type FormTableHintModeContext = Readonly<Ref<FormTableHintMode>>

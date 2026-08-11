@@ -44,7 +44,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject } from 'vue'
+import { computed, inject, ref } from 'vue'
 import FormTableRow from './FormTableRow.vue'
 import SlotRenderer from './SlotRenderer'
 import type {
@@ -54,18 +54,25 @@ import type {
   FormTableColumnContext,
   FormTableTableContext,
   FormTableHeaderSlotContext,
+  FormTableHintModeContext,
   FormTableSlots,
   FormTableUpdateApi,
   ResolvedHeaderConfig,
   TableRow
 } from './types'
-import { FORM_TABLE_CONTEXT_KEY, FORM_TABLE_SLOTS_KEY, FORM_TABLE_UPDATE_KEY } from './types'
+import {
+  FORM_TABLE_CONTEXT_KEY,
+  FORM_TABLE_HINT_MODE_KEY,
+  FORM_TABLE_SLOTS_KEY,
+  FORM_TABLE_UPDATE_KEY
+} from './types'
 import {
   createColumnContext,
   createTableContext,
   extendLazyContext,
   resolveDynamicValue
 } from './utils/dynamic'
+import { applyHintTargetProps } from './utils/hint'
 
 /** 当前列配置及其在可见列集合中的下标。 */
 const props = defineProps<{
@@ -81,6 +88,9 @@ const formTableContext = inject<FormTableTableContext>(
 
 /** 父组件具名插槽集合，用于解析表头和列级单元格 Slot。 */
 const parentSlots = inject<FormTableSlots>(FORM_TABLE_SLOTS_KEY, {})
+
+/** 根组件未提供模式时保持原生 title，便于列组件独立挂载测试。 */
+const hintMode = inject<FormTableHintModeContext>(FORM_TABLE_HINT_MODE_KEY, ref<'title'>('title'))
 
 /** 根组件下发的行更新入口，供列级单元格 Slot 执行业务操作。 */
 const updateApi = inject<FormTableUpdateApi>(FORM_TABLE_UPDATE_KEY)
@@ -106,13 +116,11 @@ const defaultHeaderProps = computed(() => {
     return resolvedHeader.value.props
   }
 
-  const otherHeaderProps = { ...resolvedHeader.value.props }
-  delete otherHeaderProps.title
-  const headerHint = resolvedHeader.value.hint
-  return {
-    ...otherHeaderProps,
-    ...(headerHint === undefined || headerHint === null ? {} : { title: headerHint })
-  }
+  return applyHintTargetProps(
+    resolvedHeader.value.props,
+    resolvedHeader.value.hint,
+    hintMode.value
+  )
 })
 
 // Element UI 的功能列由 type 驱动，不应挂载普通字段的 scoped slot。

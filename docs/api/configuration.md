@@ -13,6 +13,7 @@ FormTable
 ├─ tableData
 ├─ formProps
 ├─ tableProps
+├─ hintMode / hintTooltipProps
 ├─ loading
 └─ columns[]
    ├─ key / label / visible / props
@@ -43,7 +44,7 @@ FormTable
 
 | 参考页 | 主要路径 | 内容 |
 | --- | --- | --- |
-| [FormTable Props](./form-table.md) | `tableData`、`columns`、`formProps`、`tableProps` | 顶层 props、受控数据和 Element UI 透传 |
+| [FormTable Props](./form-table.md) | `tableData`、`columns`、`formProps`、`tableProps`、`hintMode` | 顶层 props、受控数据和 Element UI 透传 |
 | [Column / Row / Item](./columns.md) | `columns[]...` | 列、布局行、字段路径、校验和提示 |
 | [Component 配置](./component.md) | `columns[].children[].children[].component...` | 渲染器、model、props、listeners 和 options |
 | [Slot 与上下文](./contexts.md) | 动态回调和 scoped Slot | 上下文矩阵、快照语义和更新能力 |
@@ -58,7 +59,7 @@ FormTable
 
 | 功能 | 文档 | 可运行演示 |
 | --- | --- | --- |
-| 原生 title 提示 | [配置与使用](../features/native-title.md) | [`/form-table`](http://localhost:5173/form-table) |
+| Hint 提示模式 | [配置与使用](../features/native-title.md) | [`/form-table`](http://localhost:5173/form-table) |
 | 自定义表头 | [配置与使用](../features/custom-header.md) | [`/form-table-advanced`](http://localhost:5173/form-table-advanced) |
 | 列级单元格 Slot | [`cellSlot` 专题](../features/cell-slot.md) | [`/cell-slot`](http://localhost:5173/cell-slot) |
 | 自定义字段组件 | [配置与使用](../features/custom-component.md) | [`/enterprise-components`](http://localhost:5173/enterprise-components) |
