@@ -61,6 +61,7 @@ import type {
   FormTableFieldChangePayload,
   FormTableHintMode,
   FormTableHintModeContext,
+  FormTableHintOptions,
   FormTableSlots,
   FormTableTableContext,
   FormTableUpdateApi,
@@ -88,16 +89,14 @@ const props = withDefaults(defineProps<{
   columns: ColumnConfig[]
   formProps?: ComponentProps
   tableProps?: ComponentProps
-  hintMode?: FormTableHintMode
-  hintTooltipProps?: ComponentProps
+  hintOptions?: FormTableHintOptions
   loading?: boolean
 }>(), {
   tableData: () => [],
   columns: () => [],
   formProps: () => ({}),
   tableProps: () => ({}),
-  hintMode: 'title',
-  hintTooltipProps: () => ({}),
+  hintOptions: () => ({ mode: 'title' }),
   loading: false
 })
 
@@ -114,15 +113,18 @@ const containerRef = ref<HTMLElement | null>(null)
 const hintTooltipRef = ref<FormTableHintTooltipRef | null>(null)
 const hintTooltipContent = ref('')
 
-/** hintMode 是整个表格唯一的提示展示策略。 */
-const hintMode = computed<FormTableHintMode>(() => props.hintMode)
+/** hintOptions 是整个表格唯一的提示展示策略。 */
+const hintMode = computed<FormTableHintMode>(() => props.hintOptions.mode || 'title')
 const isTooltipHintMode = computed(() => hintMode.value === 'tooltip')
 
 /** Tooltip 的内容、引用和显隐由内部统一控制，不允许透传属性改变。 */
 const resolvedHintTooltipProps = computed(() => {
+  const tooltipProps = props.hintOptions.mode === 'tooltip'
+    ? props.hintOptions.tooltipProps || {}
+    : {}
   const managedProps = new Set(['content', 'reference', 'popper', 'manual', 'value', 'enterable'])
-  const passthrough = Object.keys(props.hintTooltipProps).reduce<ComponentProps>((result, key) => {
-    if (!managedProps.has(key)) result[key] = props.hintTooltipProps[key]
+  const passthrough = Object.keys(tooltipProps).reduce<ComponentProps>((result, key) => {
+    if (!managedProps.has(key)) result[key] = tooltipProps[key]
     return result
   }, {})
   const customPopperClass = typeof passthrough.popperClass === 'string'

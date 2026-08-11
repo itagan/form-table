@@ -42,6 +42,26 @@ describe('FormTable rendering and configuration', () => {
     wrapper.destroy()
   })
 
+  it('leaves renderHeader fully controlled by Element UI', async () => {
+    const wrapper = mountFormTable({
+      columns: [{
+        label: '姓名',
+        headerHint: '不应自动应用',
+        headerProps: { title: '也不应自动应用' },
+        props: {
+          renderHeader: (h: any) => h('strong', { class: 'native-render-header' }, ['自定义表头'])
+        },
+        children: [{ children: [{ fieldKey: 'name', type: 'input' }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.native-render-header').text()).toBe('自定义表头')
+    expect(wrapper.find('.form-table-column-header').exists()).toBe(false)
+    expect(wrapper.find('.native-render-header').attributes('title')).toBeUndefined()
+    wrapper.destroy()
+  })
+
   it('renders the field value when an untyped config has no renderer', async () => {
     const wrapper = mountFormTable({
       tableData: [{ summary: '只读内容' }],
@@ -885,4 +905,3 @@ describe('FormTable rendering and configuration', () => {
     wrapper.destroy()
   })
 })
-

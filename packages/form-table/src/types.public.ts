@@ -22,7 +22,7 @@ export type {
   FormTableFieldRenderContext,
   FormTableHeaderSlotContext,
   FormTableHint,
-  FormTableHintMode,
+  FormTableHintOptions,
   FormTableProps,
   FormTableRecord,
   FormTableRowContext,
