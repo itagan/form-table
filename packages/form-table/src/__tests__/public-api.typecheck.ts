@@ -11,9 +11,11 @@ import FormTable, {
   type FormTableExpose,
   type FormTableHeaderSlotContext,
   type FormTableHint,
+  type FormTableHintConfig,
   type FormTableHintOptions,
   type FormTableProps,
   type LayoutColumnConfig,
+  type ResolvedFormTableHint,
   type ResolvedHeaderConfig,
   type TableRow
 } from '../index'
@@ -31,6 +33,13 @@ void redundantBuiltinAlias
 const CustomInput: Component = { name: 'CustomInput' }
 const AlternativeInput: Component = { name: 'AlternativeInput' }
 const completeValueHint: FormTableHint = '完整字段值'
+const customValueHint: FormTableHintConfig = { content: '自行展示', auto: false }
+const resolvedValueHint: ResolvedFormTableHint = { content: '自行展示', auto: false }
+const objectValueHint: FormTableHint = { content: '自动展示' }
+// @ts-expect-error Hint content 必须是字符串。
+const invalidHintContent: FormTableHint = { content: 123 }
+// @ts-expect-error Hint auto 必须是 boolean。
+const invalidHintAuto: FormTableHint = { content: '错误配置', auto: 'false' }
 const rows: TableRow[] = [{ name: 'Alice', profile: { city: '杭州' } }]
 
 interface PurchaseRow extends TableRow {
@@ -86,6 +95,7 @@ const columns: ColumnConfig[] = [{
       {
         fieldKey: 'actions',
         type: 'slot',
+        hint: ({ row }) => ({ content: String(row.name || ''), auto: false }),
         component: {
           renderer: 'actions',
           props: ({ row }) => ({ disabled: Boolean(row.locked) })
@@ -94,6 +104,11 @@ const columns: ColumnConfig[] = [{
     ]
   }]
 }]
+void customValueHint
+void resolvedValueHint
+void objectValueHint
+void invalidHintContent
+void invalidHintAuto
 
 const cellSlotColumn: CellSlotColumnConfig = {
   key: 'actions-column',

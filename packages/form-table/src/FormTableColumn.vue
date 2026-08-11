@@ -73,7 +73,7 @@ import {
   extendLazyContext,
   resolveDynamicValue
 } from './utils/dynamic'
-import { applyHintTargetProps } from './utils/hint'
+import { applyHintTargetProps, resolveFormTableHint } from './utils/hint'
 
 /** 当前列配置及其在可见列集合中的下标。 */
 const props = defineProps<{
@@ -108,7 +108,7 @@ const columnProps = computed(() => resolveDynamicValue(props.column.props, colum
 /** 表头属性和提示只求值一次，默认表头与自定义 Slot 共享同一解析结果。 */
 const resolvedHeader = computed<ResolvedHeaderConfig>(() => ({
   props: resolveDynamicValue(props.column.headerProps, columnContext.value) || {},
-  hint: resolveDynamicValue(props.column.headerHint, columnContext.value)
+  hint: resolveFormTableHint(resolveDynamicValue(props.column.headerHint, columnContext.value))
 }))
 
 /** 默认和 Slot 表头共用同一个 FormTable 管理的属性与提示锚点。 */
