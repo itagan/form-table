@@ -4,7 +4,7 @@
 
 ## FormTable Props
 
-FormTable 只有五个顶层输入：
+FormTable 的顶层输入包括：
 
 | 属性 | 职责 |
 | --- | --- |
@@ -12,6 +12,8 @@ FormTable 只有五个顶层输入：
 | `columns` | Column → Row → Item 布局与渲染配置 |
 | `formProps` | 透传给 `el-form` |
 | `tableProps` | 透传给 `el-table` |
+| `hintMode` | 整张表统一采用的 `title` 或 `tooltip` 提示模式 |
+| `hintTooltipProps` | 单实例 Tooltip 的表级透传属性 |
 | `loading` | 表格 loading 状态 |
 
 根组件 `v-model` 映射到 `tableData/update:tableData`。父组件收到更新后必须立即回写本地状态；后端保存可以独立防抖或批量处理。完整协议见 [FormTable Props](../api/form-table.md) 和[数据更新与受控回写](../features/data-updates.md)。
@@ -91,9 +93,9 @@ component: {
 
 返回 `undefined` 时回退到静态 `renderer`。完整页面模式见[自定义字段组件](../features/custom-component.md)。
 
-### 外层提示与原生 title
+### 外层提示模式
 
-默认表头提示使用 `column.headerHint`，字段外层提示使用 Item `hint`。它们当前都使用浏览器原生 title；自定义浮层应通过 Slot 和 Tooltip 实现。详见[原生 title 提示](../features/native-title.md)和[自定义表头](../features/custom-header.md)。
+默认表头提示使用 `column.headerHint`，字段外层提示使用 Item `hint`。整张表通过 `hintMode` 在原生 `title`（默认）和表格级单实例 `tooltip` 之间二选一；不支持字段级混用。自定义表头仍由 Slot 自行处理提示。详见 [Hint 提示模式](../features/native-title.md)和[自定义表头](../features/custom-header.md)。
 
 ### 自定义组件绑定协议
 

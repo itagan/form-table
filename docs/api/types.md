@@ -136,4 +136,4 @@ interface FieldModelConfig {
 
 `ColumnConfig.headerProps` 传给默认表头文本节点，可配置原生 `title`、class、style 和 aria 属性。存在 `headerSlot` 或 `column.props.renderHeader` 时，自定义表头优先；具名 Slot 可从解析后的 `header.props/header.hint` 选择性绑定，原生 `renderHeader` 自行负责展示属性。
 
-`ColumnConfig.headerHint` 和 Item 的 `hint` 当前接受字符串或动态返回字符串，分别作为默认表头文本节点与 `el-form-item` 的原生 title。空字符串不显示浏览器提示，`null/undefined` 移除提示；字符串语义为未来扩展 Tooltip 保持稳定。
+`ColumnConfig.headerHint` 和 Item 的 `hint` 接受字符串或动态返回字符串，分别应用于默认表头文本节点与 `el-form-item`。`FormTableHintMode` 在整张表内统一选择原生 `title` 或单实例 `tooltip`；空字符串、`null/undefined` 均不显示提示。

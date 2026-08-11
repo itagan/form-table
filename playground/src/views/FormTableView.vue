@@ -3,7 +3,7 @@
     <header>
       <router-link to="/">← 返回</router-link>
       <h1>基础表格表单</h1>
-      <p>统一使用 children 布局，字段通过 type 映射 Element UI 组件。</p>
+      <p>统一使用 children 布局，并以表格级单例 Tooltip 展示表头和字段 hint。</p>
     </header>
 
     <section class="demo-card">
@@ -13,6 +13,8 @@
         :columns="columns"
         :form-props="{ size: 'small' }"
         :table-props="{ border: true, stripe: true }"
+        hint-mode="tooltip"
+        :hint-tooltip-props="{ openDelay: 150 }"
       />
 
       <div class="actions">
@@ -49,6 +51,7 @@ const required = (message: string, trigger = 'blur') => [{ required: true, messa
 const columns: ColumnConfig[] = [
   {
     label: '姓名和年龄',
+    headerHint: '姓名为必填项，年龄范围为 0 至 150',
     props: { minWidth: 320 },
     children: [{
       props: { gutter: 10 },

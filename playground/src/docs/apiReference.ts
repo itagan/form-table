@@ -117,7 +117,7 @@ export const featureCards = [
   { title: '校验、清理与重置', path: '/form-table', description: '字段 rules、整表校验、清理状态和受控数据重置。', tags: ['rules', 'validate', 'clearValidate'] },
   { title: '动态显隐与配置', path: '/dynamic-slot-test', description: 'Column、Row、Item visible 与动态组件属性。', tags: ['visible', 'dynamic props'] },
   { title: '稳定身份与异步安全', path: '/row-column-operations', description: 'rowKey 与 Column、Row、Item key 的不同职责。', tags: ['rowKey', 'key', 'async'] },
-  { title: '原生 title 提示', path: '/form-table', description: '字段内容提示、动态字符串和空值行为。', tags: ['hint', 'headerHint', 'title'] },
+  { title: 'Hint 提示模式', path: '/form-table', description: '原生 title、单实例 Tooltip、动态字符串和空值行为。', tags: ['hint', 'headerHint', 'title', 'tooltip'] },
   { title: '自定义表头', path: '/form-table-advanced', description: '表头文本、图标、Tooltip 与解析后 header 上下文。', tags: ['headerSlot', 'header.props'] },
   { title: 'cellSlot 列级单元格', path: '/cell-slot', description: '组合展示、状态、派生值、操作列，以及与字段 Slot 的边界。', tags: ['cellSlot', 'updateRow', 'rowKey'] },
   { title: '企业复杂组件接入', path: '/enterprise-components', description: '自定义 model、动态组件和复杂事件联动。', tags: ['component', 'model', 'listeners'] },
