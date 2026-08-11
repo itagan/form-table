@@ -33,6 +33,7 @@ pnpm site:preview
 | --- | --- | --- |
 | [表格内表单组件调试台 ↗](http://localhost:5173/) | `/` | 调试台首页，集中提供全部可运行 Demo、API 速查和文档总站入口 |
 | [基础编辑 ↗](http://localhost:5173/form-table) | `/form-table` | 基础 children、type、校验与父级行操作 |
+| [Hint 多场景 ↗](http://localhost:5173/hint-scenarios) | `/hint-scenarios` | title、单实例 Tooltip、动态 Hint、Slot、自定义组件与接管边界 |
 | [高级示例 ↗](http://localhost:5173/form-table-advanced) | `/form-table-advanced` | 多行栅格、component.renderer、slot、动态 options、嵌套路径 |
 | [`cellSlot` 列级单元格 ↗](http://localhost:5173/cell-slot) | `/cell-slot` | 组合展示、派生值、updateRow、异步 rowKey、字段 Slot 对照和 scope 检视 |
 | [远程 Schema ↗](http://localhost:5173/remote-schema) | `/remote-schema` | 远程纯 JSON 配置与页面本地组件、事件增强 |

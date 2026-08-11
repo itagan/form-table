@@ -1,6 +1,6 @@
 # Hint 提示模式
 
-> 可运行 Demo：[基础表格表单 ↗](http://localhost:5173/form-table)。将鼠标移到“姓名和年龄”表头或姓名字段可查看 Tooltip。
+> 可运行 Demo：[Hint 展示策略与自定义渲染 ↗](http://localhost:5173/hint-scenarios)。页面并列展示 title、Tooltip、自定义 Slot/组件与完全接管入口。
 
 `headerHint/hint` 只表达提示内容，整张 FormTable 通过 `hintOptions` 统一选择展示策略。默认 `title` 模式保持浏览器原生提示；`tooltip` 模式让默认表头、自定义表头 Slot 和全部字段外层共享一个 `el-tooltip`，不会按行和字段创建 Tooltip 实例。
 

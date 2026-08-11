@@ -9,6 +9,15 @@
     "tags": ["children", "type", "formItemProps"]
   },
   {
+    "title": "Hint 多场景",
+    "description": "独立对照原生 title、单实例 Tooltip、动态提示、底层 title 与自定义渲染边界。",
+    "path": "/hint-scenarios",
+    "name": "hint-scenarios",
+    "view": "HintScenariosView",
+    "type": "success",
+    "tags": ["hintOptions", "headerSlot", "custom renderer"]
+  },
+  {
     "title": "高级示例",
     "description": "集中演示多行栅格、直接组件、动态 options、嵌套路径和 slot。",
     "path": "/form-table-advanced",

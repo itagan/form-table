@@ -1,6 +1,6 @@
 # 自定义表头
 
-> 可运行 Demo：[复杂布局与三种渲染模式 ↗](http://localhost:5173/form-table-advanced)
+> 可运行 Demo：[Hint 展示策略与自定义渲染 ↗](http://localhost:5173/hint-scenarios)
 
 `headerSlot` 适合表头文本后跟图标、必填标识、筛选入口或其他视觉内容。它复用 Vue scoped Slot，不为每种表头样式增加新的 Schema 字段；`headerHint` 的展示仍由 FormTable 统一处理。
 

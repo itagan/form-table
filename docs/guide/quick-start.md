@@ -94,6 +94,6 @@ const validateTable = () => formTableRef.value?.validate()
 
 根组件 `v-model` 绑定整张表的 `tableData`，底层复用 `tableData/update:tableData`。已有的 `:table-data.sync="tableData"` 继续兼容；需要在回写时执行保存等逻辑，可显式监听 `@update:tableData`。
 
-复杂布局和字段 Slot 参考 Playground 的 `/form-table-advanced`。原生提示、自定义表头、列级单元格和自定义组件等独立能力可从[功能专题](../features/)选择配置与使用示例。
+复杂布局和字段 Slot 参考 Playground 的 `/form-table-advanced`；原生 title、单实例 Tooltip 和自定义渲染下的 Hint 行为可直接打开 `/hint-scenarios`。其他独立能力可从[功能专题](../features/)选择配置与使用示例。
 
 操作列、末尾新增、当前行后插入、复制和删除参考[常见操作列与行增删](../features/common-row-actions.md)；动态列以及确认或接口成功后再修改表格，参考[行列操作与异步提交](../features/row-column-operations.md)。
