@@ -18,6 +18,15 @@ pnpm dev
 pnpm docs:dev
 ```
 
+源码层仍保留两个应用，以隔离 Playground 的 Vue 2.7 和 VitePress 的 Vue 3 运行时；生产构建会合并为一个站点：
+
+```bash
+pnpm site:build
+pnpm site:preview
+```
+
+统一产物位于 `docs/.vitepress/dist`：文档使用 `/`，以下所有 Demo 使用 `/playground/`。部署时只需发布这个目录，不需要分别启动两个服务。
+
 文档顶部的 **Playground** 可进入调试台；调试台右上角的 **← 返回文档总站** 可返回当前文档站。然后通过以下入口打开调试台或具体的可运行 Demo：
 
 | Demo 页面 | 本地路由 | 内容 |
@@ -37,7 +46,7 @@ pnpm docs:dev
 | [FormTable 精简 API ↗](http://localhost:5173/form-table-docs) | `/form-table-docs` | 精简 API 速查 |
 | [大数据量性能实验 ↗](http://localhost:5173/performance) | `/performance` | 可调行列规模、三类渲染场景、更新耗时、DOM 和动态回调计数 |
 
-Playground 直接引用包源码，修改组件后无需先构建 npm 包。
+Playground 直接引用包源码，修改组件后无需先构建 npm 包。示例名称、路由和页面入口统一维护在 `playground/examples.json`；Vue Router、调试台首页和生产静态直达页都读取这份清单。
 
 操作列、末尾新增、当前行后插入、复制和删除的入门代码参考[常见操作列与行增删](../features/common-row-actions.md)；确认、移动和异步提交等进阶模式参考[行列操作与异步提交](../features/row-column-operations.md)。
 

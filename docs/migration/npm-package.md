@@ -4,11 +4,13 @@
 
 ```text
 packages/form-table   # npm 包源码和构建配置
-playground            # 本地调试应用
-docs                  # VitePress 文档站，独立 pnpm lockfile
+playground            # Vue 2.7 本地调试应用
+docs                  # Vue 3 / VitePress 文档站，独立 pnpm lockfile
 ```
 
 根 workspace 保持 Vue2 依赖边界；`docs` 使用 VitePress/Vue3，并通过 `--ignore-workspace` 独立安装，避免污染组件包测试和构建。
+
+两个应用只在源码和开发运行时分开。`pnpm site:build` 会把它们合并到 `docs/.vitepress/dist`：文档位于 `/`，Playground 位于 `/playground/`，部署时只发布一个静态目录。
 
 ## 首次克隆
 
@@ -31,10 +33,21 @@ pnpm release:check
 - `pnpm test`
 - `pnpm type-check`
 - `pnpm build`
-- `pnpm docs:build`
+- `pnpm site:build`
+- `pnpm site:check`
 - `cd packages/form-table && npm pack --dry-run`
 
-其中 `docs:build` 会先执行 `docs:install`，确保换机器后也能构建文档。
+其中 `site:build` 会先执行 `docs:install`，再生成文档、Playground 和各示例路由的静态直达入口；`site:check` 会检查统一基址、全部示例路由和生产产物中的 localhost 残留。
+
+## 文档站部署
+
+```bash
+pnpm site:build
+pnpm site:check
+pnpm site:preview
+```
+
+部署目标固定为 `docs/.vitepress/dist`。静态服务器需要正常支持目录索引；构建会为每个 Playground 路由生成对应的 `index.html`，直接访问 `/playground/form-table` 等地址不依赖特定部署平台的 rewrite 配置。
 
 ## 发布包内容
 
