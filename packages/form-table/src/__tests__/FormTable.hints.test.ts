@@ -24,6 +24,11 @@ const dispatchFocusEvent = (
   element.dispatchEvent(new FocusEvent(type, { bubbles: true, relatedTarget }))
 }
 
+const waitForTooltipActivation = async (wrapper: Wrapper<Vue>) => {
+  await new Promise(resolve => setTimeout(resolve, 60))
+  await wrapper.vm.$nextTick()
+}
+
 describe('FormTable hint modes', () => {
   it('keeps title as the default mode without creating a hint tooltip', async () => {
     const wrapper = mountFormTable({
@@ -77,22 +82,31 @@ describe('FormTable hint modes', () => {
 
     await wrapper.find('.el-input__inner').trigger('mouseover')
     await wrapper.vm.$nextTick()
+    expect(show).not.toHaveBeenCalled()
+    await waitForTooltipActivation(wrapper)
     expect(tooltip.content).toBe('姓名字段说明')
     expect(tooltip.referenceElm).toBe(formItem.element)
     expect(formItem.attributes('aria-describedby')).toContain(tooltip.tooltipId)
 
-    await header.trigger('mouseover')
+    wrapper.find('.el-input__inner').element.dispatchEvent(new MouseEvent('mouseout', {
+      bubbles: true,
+      relatedTarget: header.element
+    }))
     await wrapper.vm.$nextTick()
+    expect(tooltip.content).toBe('')
+    expect(formItem.attributes('aria-describedby')).toBeUndefined()
+
+    await header.trigger('mouseover')
+    await waitForTooltipActivation(wrapper)
     expect(tooltip.content).toBe('姓名表头说明')
     expect(tooltip.referenceElm).toBe(header.element)
-    expect(formItem.attributes('aria-describedby')).toBeUndefined()
     expect(header.attributes('aria-describedby')).toContain(tooltip.tooltipId)
     expect(show).toHaveBeenCalledTimes(2)
-    expect(destroy).toHaveBeenCalledWith(true)
+    expect(destroy).toHaveBeenCalled()
     wrapper.destroy()
   })
 
-  it('keeps a field tooltip active across descendants and prioritizes keyboard focus', async () => {
+  it('keeps a field tooltip active across descendants and uses focus as a hover fallback', async () => {
     const wrapper = mountFormTable({
       hintMode: 'tooltip',
       columns: [{
@@ -122,13 +136,20 @@ describe('FormTable hint modes', () => {
     dispatchFocusEvent(input.element, 'focusin')
     await header.trigger('mouseover')
     await wrapper.vm.$nextTick()
+    expect(tooltip.content).toBe('姓名表头说明')
+    expect(tooltip.referenceElm).toBe(header.element)
+    expect(input.attributes('aria-describedby')).toBeUndefined()
+    expect(header.attributes('aria-describedby')).toContain(tooltip.tooltipId)
+
+    header.element.dispatchEvent(new MouseEvent('mouseout', { bubbles: true }))
+    await wrapper.vm.$nextTick()
     expect(tooltip.content).toBe('姓名字段说明')
     expect(tooltip.referenceElm).toBe(formItem.element)
     expect(input.attributes('aria-describedby')).toContain(tooltip.tooltipId)
 
     dispatchFocusEvent(input.element, 'focusout')
     await wrapper.vm.$nextTick()
-    expect(tooltip.content).toBe('姓名表头说明')
+    expect(tooltip.content).toBe('')
     expect(input.attributes('aria-describedby')).toBeUndefined()
     wrapper.destroy()
   })

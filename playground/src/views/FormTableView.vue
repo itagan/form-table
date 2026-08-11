@@ -14,7 +14,6 @@
         :form-props="{ size: 'small' }"
         :table-props="{ border: true, stripe: true }"
         hint-mode="tooltip"
-        :hint-tooltip-props="{ openDelay: 150 }"
       />
 
       <div class="actions">

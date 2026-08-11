@@ -4,9 +4,11 @@ import { FORM_TABLE_HINT_ATTRIBUTE } from '../utils/hint'
 
 /** Element UI 2 表格内部也使用这些方法复用唯一的 el-tooltip。 */
 export interface FormTableHintTooltipRef {
+  $refs?: {
+    popper?: HTMLElement
+  }
   referenceElm?: HTMLElement
   tooltipId?: string
-  showPopper?: boolean
   setExpectedState: (expectedState: boolean) => void
   handleShowPopper: () => void
   handleClosePopper: () => void
@@ -27,6 +29,7 @@ interface DescribedElementState {
 }
 
 const HINT_SELECTOR = `[${FORM_TABLE_HINT_ATTRIBUTE}]`
+const TOOLTIP_ACTIVATION_DELAY = 50
 
 /**
  * 在 FormTable 根节点委托全部提示事件，并集中隔离 Element UI 的内部 Tooltip API。
@@ -37,6 +40,13 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
   let focusAriaTarget: HTMLElement | null = null
   let activeTarget: HTMLElement | null = null
   let describedState: DescribedElementState | null = null
+  let activationTimer: ReturnType<typeof setTimeout> | null = null
+
+  const clearActivationTimer = () => {
+    if (activationTimer === null) return
+    clearTimeout(activationTimer)
+    activationTimer = null
+  }
 
   const isInsideContainer = (element: HTMLElement | null): element is HTMLElement => {
     const container = options.containerRef.value
@@ -73,6 +83,7 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
   }
 
   const hideActiveTooltip = () => {
+    clearActivationTimer()
     const tooltip = options.tooltipRef.value
     tooltip?.setExpectedState(false)
     tooltip?.handleClosePopper()
@@ -83,6 +94,14 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
 
   const showForTarget = (target: HTMLElement, content: string, ariaTarget: HTMLElement) => {
     const previousTarget = activeTarget
+    if (previousTarget !== target) {
+      clearActivationTimer()
+      if (previousTarget) {
+        const previousTooltip = options.tooltipRef.value
+        previousTooltip?.setExpectedState(false)
+        previousTooltip?.handleClosePopper()
+      }
+    }
     activeTarget = target
     options.content.value = content
     describeElement(ariaTarget)
@@ -93,12 +112,16 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
       if (!tooltip) return
 
       if (previousTarget !== target) {
-        tooltip.setExpectedState(false)
-        tooltip.showPopper = false
-        tooltip.doDestroy(true)
         tooltip.referenceElm = target
+        if (tooltip.$refs?.popper) tooltip.$refs.popper.style.display = 'none'
+        tooltip.doDestroy()
         tooltip.setExpectedState(true)
-        tooltip.handleShowPopper()
+        activationTimer = setTimeout(() => {
+          activationTimer = null
+          if (activeTarget === target && options.enabled.value) {
+            tooltip.handleShowPopper()
+          }
+        }, TOOLTIP_ACTIVATION_DELAY)
       } else {
         tooltip.updatePopper?.()
       }
@@ -117,14 +140,15 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
       focusAriaTarget = null
     }
 
-    const target = focusedTarget || hoveredTarget
+    // 与 el-table 单元格提示一致，鼠标当前指向的目标优先；焦点仅作键盘兜底。
+    const target = hoveredTarget || focusedTarget
     const content = target?.getAttribute(FORM_TABLE_HINT_ATTRIBUTE) || ''
     if (!target || !content) {
       hideActiveTooltip()
       return
     }
 
-    const ariaTarget = target === focusedTarget && isInsideContainer(focusAriaTarget)
+    const ariaTarget = !hoveredTarget && target === focusedTarget && isInsideContainer(focusAriaTarget)
       ? focusAriaTarget
       : target
     showForTarget(target, content, ariaTarget)
@@ -138,7 +162,15 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
   const handleMouseOut = (event: MouseEvent) => {
     const sourceTarget = findHintTarget(event.target)
     if (!sourceTarget || sourceTarget !== hoveredTarget) return
-    hoveredTarget = findHintTarget(event.relatedTarget)
+    const nextTarget = findHintTarget(event.relatedTarget)
+    if (nextTarget === sourceTarget) return
+
+    hoveredTarget = null
+    if (nextTarget) {
+      // 跨提示目标时先完成旧浮层离开，新目标由随后的 mouseover 激活。
+      hideActiveTooltip()
+      return
+    }
     syncActiveTarget()
   }
 
