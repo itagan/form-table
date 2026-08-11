@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 5173 --strictPort",
     "build": "run-p type-check build-only",
+    "build:site": "vite build --mode site",
     "preview": "vite preview --port 4173",
     "build-only": "vite build",
     "type-check": "vue-tsc -p tsconfig.json --noEmit"

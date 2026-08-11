@@ -7,8 +7,8 @@
 ```text
 packages/
   form-table/        # 可发布到 npm 的组件包
-playground/          # 本地调试和示例应用
-docs/                # 仓库级文档入口
+playground/          # Vue 2.7 调试和示例应用
+docs/                # Vue 3 / VitePress 文档站与统一站点产物
 ```
 
 核心入口：
@@ -23,6 +23,9 @@ docs/                # 仓库级文档入口
 ```bash
 pnpm install
 pnpm dev
+pnpm site:dev
+pnpm site:build
+pnpm site:preview
 pnpm lint
 pnpm type-check
 pnpm test
@@ -34,6 +37,9 @@ pnpm release:check
 命令说明：
 
 - `pnpm dev`：启动 `playground`，用于本地调试组件。
+- `pnpm site:dev`：同时启动 Playground 与文档站，保持两个 Vue 运行时隔离。
+- `pnpm site:build`：构建单个可部署目录，文档位于 `/`，Playground 位于 `/playground/`。
+- `pnpm site:preview`：预览 `pnpm site:build` 生成的统一站点。
 - `pnpm lint`：检查组件包和 playground 的 TypeScript/Vue 代码规范。
 - `pnpm type-check`：检查组件包和 playground。
 - `pnpm test`：运行组件包核心逻辑单测。
@@ -62,6 +68,8 @@ FormTable 将 Vue 和 Element UI 声明为 peer dependencies，不会重复安�
 完整路由和用途统一维护在[示例索引](./docs/examples/index.md)。本地运行 `pnpm site:dev` 可同时启动 Playground 和 VitePress 文档站。
 
 `playground` 通过 workspace alias 直接引用 `packages/form-table/src/index.ts`，开发时无需先构建组件包。
+
+文档和示例保留独立源码目录，避免 Vue 2.7 与 VitePress 的 Vue 3 依赖混用；发布时由 `pnpm site:build` 合并为 `docs/.vitepress/dist`，只需部署一个静态目录和一个域名。
 
 ## 测试覆盖
 

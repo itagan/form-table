@@ -5,6 +5,10 @@ import process from 'node:process'
 const repositoryRoot = process.cwd()
 const ignoredDirectories = new Set(['node_modules', 'dist', '.vitepress'])
 const markdownFiles = []
+const playgroundExamples = JSON.parse(
+  fs.readFileSync(path.join(repositoryRoot, 'playground/examples.json'), 'utf8')
+)
+const playgroundRoutes = new Set(['/', ...playgroundExamples.map(example => example.path)])
 
 function collectMarkdownFiles(directory) {
   for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
@@ -48,6 +52,8 @@ for (const file of uniqueMarkdownFiles) {
         const demoUrl = new URL(rawUrl)
         if (demoUrl.origin !== 'http://localhost:5173' || !demoUrl.pathname.startsWith('/')) {
           errors.push(`${relativeFile}: Demo 地址格式无效 ${rawUrl}`)
+        } else if (!playgroundRoutes.has(demoUrl.pathname.replace(/\/$/, '') || '/')) {
+          errors.push(`${relativeFile}: Demo 路由未在 playground/examples.json 中声明 ${rawUrl}`)
         }
       } catch {
         errors.push(`${relativeFile}: Demo 地址格式无效 ${rawUrl}`)
@@ -67,6 +73,25 @@ for (const file of uniqueMarkdownFiles) {
     if (!fs.existsSync(target)) {
       errors.push(`${relativeFile}: 相对链接不存在 ${rawUrl}`)
     }
+  }
+}
+
+const exampleIndexSource = fs.readFileSync(path.join(repositoryRoot, 'docs/examples/index.md'), 'utf8')
+const playgroundRouterSource = fs.readFileSync(
+  path.join(repositoryRoot, 'playground/src/router/index.ts'),
+  'utf8'
+)
+const exampleNames = new Set()
+for (const example of playgroundExamples) {
+  if (!exampleIndexSource.includes(`http://localhost:5173${example.path}`)) {
+    errors.push(`docs/examples/index.md: 缺少示例清单路由 ${example.path}`)
+  }
+  if (exampleNames.has(example.name)) {
+    errors.push(`playground/examples.json: 示例名称重复 ${example.name}`)
+  }
+  exampleNames.add(example.name)
+  if (!playgroundRouterSource.includes(`${example.view}: () =>`)) {
+    errors.push(`playground/examples.json: 页面加载器未在 Router 中声明 ${example.view}`)
   }
 }
 

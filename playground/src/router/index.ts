@@ -1,8 +1,25 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import examples from '../../examples.json'
 import HomeView from '../views/HomeView.vue'
 
 Vue.use(VueRouter)
+
+const viewLoaders: Record<string, () => Promise<unknown>> = {
+  FormTableView: () => import('../views/FormTableView.vue'),
+  FormTableAdvancedView: () => import('../views/FormTableAdvancedView.vue'),
+  CellSlotView: () => import('../views/CellSlotView.vue'),
+  FormTableDocsView: () => import('../views/FormTableDocsView.vue'),
+  PerformanceView: () => import('../views/PerformanceView.vue'),
+  RemoteSchemaView: () => import('../views/RemoteSchemaView.vue'),
+  DynamicSlotTestView: () => import('../views/DynamicSlotTestView.vue'),
+  RowColumnOperationsView: () => import('../views/RowColumnOperationsView.vue'),
+  CellMergeView: () => import('../views/CellMergeView.vue'),
+  HeterogeneousDemandView: () => import('../views/HeterogeneousDemandView.vue'),
+  ItinerarySimpleView: () => import('../views/ItinerarySimpleView.vue'),
+  EnterpriseComponentsView: () => import('../views/EnterpriseComponentsView.vue'),
+  DebugView: () => import('../views/DebugView.vue')
+}
 
 const router = new VueRouter({
   mode: 'history',
@@ -13,71 +30,11 @@ const router = new VueRouter({
       name: 'home',
       component: HomeView
     },
-    {
-      path: '/form-table',
-      name: 'form-table',
-      component: () => import('../views/FormTableView.vue')
-    },
-    {
-      path: '/form-table-advanced',
-      name: 'form-table-advanced',
-      component: () => import('../views/FormTableAdvancedView.vue')
-    },
-    {
-      path: '/cell-slot',
-      name: 'cell-slot',
-      component: () => import('../views/CellSlotView.vue')
-    },
-    {
-      path: '/form-table-docs',
-      name: 'form-table-docs',
-      component: () => import('../views/FormTableDocsView.vue')
-    },
-    {
-      path: '/performance',
-      name: 'performance',
-      component: () => import('../views/PerformanceView.vue')
-    },
-    {
-      path: '/remote-schema',
-      name: 'remote-schema',
-      component: () => import('../views/RemoteSchemaView.vue')
-    },
-    {
-      path: '/dynamic-slot-test',
-      name: 'dynamic-slot-test',
-      component: () => import('../views/DynamicSlotTestView.vue')
-    },
-    {
-      path: '/row-column-operations',
-      name: 'row-column-operations',
-      component: () => import('../views/RowColumnOperationsView.vue')
-    },
-    {
-      path: '/cell-merge',
-      name: 'cell-merge',
-      component: () => import('../views/CellMergeView.vue')
-    },
-    {
-      path: '/heterogeneous-demands',
-      name: 'heterogeneous-demands',
-      component: () => import('../views/HeterogeneousDemandView.vue')
-    },
-    {
-      path: '/itinerary-simple',
-      name: 'itinerary-simple',
-      component: () => import('../views/ItinerarySimpleView.vue')
-    },
-    {
-      path: '/enterprise-components',
-      name: 'enterprise-components',
-      component: () => import('../views/EnterpriseComponentsView.vue')
-    },
-    {
-      path: '/debug',
-      name: 'debug',
-      component: () => import('../views/DebugView.vue')
-    }
+    ...examples.map(example => ({
+      path: example.path,
+      name: example.name,
+      component: viewLoaders[example.view]
+    }))
   ]
 })
 
