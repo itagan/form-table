@@ -1,18 +1,20 @@
-import { computed, inject } from 'vue'
+import { computed, inject, ref } from 'vue'
 import type {
   FormItemConfig,
   FormTableFieldContext,
+  FormTableHintModeContext,
   FormTableRowContext,
   FormTableUpdateApi,
   FormTableValue,
   TableRow
 } from '../types'
-import { FORM_TABLE_UPDATE_KEY } from '../types'
+import { FORM_TABLE_HINT_MODE_KEY, FORM_TABLE_UPDATE_KEY } from '../types'
 import {
   createFieldRenderContext,
   extendLazyContext,
   resolveDynamicValue
 } from '../utils/dynamic'
+import { applyHintTargetProps } from '../utils/hint'
 
 interface FormTableFieldContextOptions<TRow extends TableRow> {
   getRowContext: () => FormTableRowContext<TRow>
@@ -30,6 +32,7 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
 ) {
   /** 注入缺失时字段仍可只读渲染，更新助手退化为空操作。 */
   const updateApi = inject<FormTableUpdateApi<TRow>>(FORM_TABLE_UPDATE_KEY)
+  const hintMode = inject<FormTableHintModeContext>(FORM_TABLE_HINT_MODE_KEY, ref<'title'>('title'))
 
   /**
    * Element UI 以数组下标组织表单校验路径；行排序后 computed 会生成新路径，
@@ -57,12 +60,9 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
       return { ...formItemProps, prop: propPath.value }
     }
 
-    const otherFormItemProps = { ...formItemProps }
-    delete otherFormItemProps.title
     const hint = resolveDynamicValue(config.hint, runtimeContext.value)
     return {
-      ...otherFormItemProps,
-      ...(hint === undefined || hint === null ? {} : { title: hint }),
+      ...applyHintTargetProps(formItemProps, hint, hintMode.value),
       prop: propPath.value
     }
   })

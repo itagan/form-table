@@ -171,7 +171,9 @@ const props: FormTableProps = {
   tableData: rows,
   columns,
   formProps: { size: 'small' },
-  tableProps: { border: true }
+  tableProps: { border: true },
+  hintMode: 'tooltip',
+  hintTooltipProps: { placement: 'top', openDelay: 200 }
 }
 const component: Component = FormTable
 const named: Component = NamedFormTable

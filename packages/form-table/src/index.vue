@@ -1,5 +1,12 @@
 <template>
-  <div class="form-table-container">
+  <div
+    ref="containerRef"
+    class="form-table-container"
+    @mouseover="handleMouseOver"
+    @mouseout="handleMouseOut"
+    @focusin="handleFocusIn"
+    @focusout="handleFocusOut"
+  >
     <el-form
       ref="formRef"
       v-bind="props.formProps"
@@ -20,6 +27,13 @@
         />
       </el-table>
     </el-form>
+    <el-tooltip
+      v-if="isTooltipHintMode"
+      ref="hintTooltipRef"
+      v-bind="resolvedHintTooltipProps"
+      :content="hintTooltipContent"
+      :enterable="false"
+    />
   </div>
 </template>
 
@@ -45,6 +59,8 @@ import type {
   FormTableElementFormRef,
   FormTableElementTableRef,
   FormTableFieldChangePayload,
+  FormTableHintMode,
+  FormTableHintModeContext,
   FormTableSlots,
   FormTableTableContext,
   FormTableUpdateApi,
@@ -53,11 +69,16 @@ import type {
 } from './types'
 import {
   FORM_TABLE_CONTEXT_KEY,
+  FORM_TABLE_HINT_MODE_KEY,
   FORM_TABLE_SLOTS_KEY,
   FORM_TABLE_UPDATE_KEY
 } from './types'
 import { useColumnIdentity } from './composables/useColumnIdentity'
 import { useControlledTableUpdate } from './composables/useControlledTableUpdate'
+import {
+  useFormTableHintTooltip
+} from './composables/useFormTableHintTooltip'
+import type { FormTableHintTooltipRef } from './composables/useFormTableHintTooltip'
 import { createTableContext } from './utils/dynamic'
 
 /** FormTable 对外接收的受控数据、列配置以及 Element UI 透传属性。 */
@@ -67,12 +88,16 @@ const props = withDefaults(defineProps<{
   columns: ColumnConfig[]
   formProps?: ComponentProps
   tableProps?: ComponentProps
+  hintMode?: FormTableHintMode
+  hintTooltipProps?: ComponentProps
   loading?: boolean
 }>(), {
   tableData: () => [],
   columns: () => [],
   formProps: () => ({}),
   tableProps: () => ({}),
+  hintMode: 'title',
+  hintTooltipProps: () => ({}),
   loading: false
 })
 
@@ -85,6 +110,43 @@ const emit = defineEmits<{
 /** 暴露给父组件的 Element UI 原始实例引用。 */
 const formRef = ref<FormTableElementFormRef | null>(null)
 const tableRef = ref<FormTableElementTableRef | null>(null)
+const containerRef = ref<HTMLElement | null>(null)
+const hintTooltipRef = ref<FormTableHintTooltipRef | null>(null)
+const hintTooltipContent = ref('')
+
+/** hintMode 是整个表格唯一的提示展示策略。 */
+const hintMode = computed<FormTableHintMode>(() => props.hintMode)
+const isTooltipHintMode = computed(() => hintMode.value === 'tooltip')
+
+/** Tooltip 的内容、引用和显隐由内部统一控制，不允许透传属性改变。 */
+const resolvedHintTooltipProps = computed(() => {
+  const managedProps = new Set(['content', 'reference', 'popper', 'manual', 'value', 'enterable'])
+  const passthrough = Object.keys(props.hintTooltipProps).reduce<ComponentProps>((result, key) => {
+    if (!managedProps.has(key)) result[key] = props.hintTooltipProps[key]
+    return result
+  }, {})
+  const customPopperClass = typeof passthrough.popperClass === 'string'
+    ? passthrough.popperClass
+    : ''
+  return {
+    placement: 'top',
+    effect: 'dark',
+    ...passthrough,
+    popperClass: ['form-table-hint-tooltip', customPopperClass].filter(Boolean).join(' ')
+  }
+})
+
+const {
+  handleMouseOver,
+  handleMouseOut,
+  handleFocusIn,
+  handleFocusOut
+} = useFormTableHintTooltip({
+  enabled: isTooltipHintMode,
+  containerRef,
+  tooltipRef: hintTooltipRef,
+  content: hintTooltipContent
+})
 
 /** 保存父组件插槽和 Vue 2 组件实例，供后代组件及事件透传使用。 */
 const slots = useSlots()
@@ -121,6 +183,7 @@ const updateApi: FormTableUpdateApi = useControlledTableUpdate({
 provide(FORM_TABLE_CONTEXT_KEY, formTableContext)
 provide(FORM_TABLE_UPDATE_KEY, updateApi)
 provide(FORM_TABLE_SLOTS_KEY, slots as FormTableSlots)
+provide(FORM_TABLE_HINT_MODE_KEY, hintMode as FormTableHintModeContext)
 
 /**
  * 将 Element UI 的 Promise/callback 两种校验方式统一为 Promise<boolean>，

@@ -1,7 +1,7 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import ElementUI from 'element-ui'
 import FormTable from '../index.vue'
-import type { ColumnConfig, TableRow } from '../types.public'
+import type { ColumnConfig, ComponentProps, FormTableHintMode, TableRow } from '../types.public'
 
 export const localVue = createLocalVue()
 localVue.use(ElementUI)
@@ -23,6 +23,8 @@ export function mountFormTable(options: {
   tableData?: TableRow[]
   columns?: ColumnConfig[]
   tableProps?: Record<string, any>
+  hintMode?: FormTableHintMode
+  hintTooltipProps?: ComponentProps
   scopedSlots?: Record<string, any>
   listeners?: Record<string, (...args: any[]) => void>
 } = {}) {
@@ -32,7 +34,9 @@ export function mountFormTable(options: {
       tableData: options.tableData || [{ name: 'Alice' }],
       columns: options.columns || inputColumns,
       formProps: { size: 'small' },
-      tableProps: { border: true, ...options.tableProps }
+      tableProps: { border: true, ...options.tableProps },
+      hintMode: options.hintMode,
+      hintTooltipProps: options.hintTooltipProps
     },
     scopedSlots: options.scopedSlots,
     listeners: options.listeners,
