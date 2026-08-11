@@ -46,6 +46,7 @@ const {
   propPath,
   runtimeContext,
   resolvedFormItemProps,
+  resolvedHint,
   fieldContext
 } = useFormTableFieldContext({
   getRowContext: () => props.rowContext,
@@ -73,6 +74,9 @@ const slotContext = computed<FormTableSlotContext>(() => {
     },
     get component() {
       return resolvedComponent.value
+    },
+    get hint() {
+      return resolvedHint.value
     }
   })
 })

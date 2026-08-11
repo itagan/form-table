@@ -47,8 +47,19 @@ export interface FormTableFieldContext<TRow extends TableRow = TableRow> extends
 
 /** 支持直接值或根据运行时上下文计算的动态值。 */
 export type DynamicValue<T, Context> = T | ((context: Context) => T)
-/** FormTable 外层提示内容。 */
-export type FormTableHint = string
+/** 由 FormTable 或自定义渲染消费的提示配置。 */
+export interface FormTableHintConfig {
+  content: string
+  /** 是否由 FormTable 自动应用 title 或 singleton Tooltip，默认 true。 */
+  auto?: boolean
+}
+/** FormTable 外层提示内容；字符串保持自动托管语义。 */
+export type FormTableHint = string | FormTableHintConfig
+/** 动态 Hint 求值后提供给内部渲染与 Slot 的标准结构。 */
+export interface ResolvedFormTableHint {
+  content: string
+  auto: boolean
+}
 /** 整个 FormTable 统一采用的提示展示方式。 */
 export type FormTableHintMode = 'title' | 'tooltip'
 /** FormTable 统一提示策略；Tooltip 属性仅在对应模式下有效。 */
@@ -154,7 +165,7 @@ interface BaseFormItemConfig<TRow extends TableRow = TableRow> {
   colProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext<TRow>>
   /** 直接传给 el-form-item。 */
   formItemProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext<TRow>>
-  /** 字段外层提示；按表级 hintOptions 应用于 el-form-item。 */
+  /** 字段提示；auto=true 按表级 hintOptions 应用，false 时交给字段 Slot。 */
   hint?: DynamicValue<FormTableHint | null | undefined, FormTableFieldRenderContext<TRow>>
 }
 
@@ -221,7 +232,7 @@ interface BaseColumnConfig<TRow extends TableRow = TableRow> {
   headerSlot?: string
   /** 传给默认或 Slot 表头包装节点；可配置原生 title、class、style 和 aria 属性。 */
   headerProps?: DynamicValue<ComponentProps, FormTableColumnContext<TRow>>
-  /** 表头提示；按表级 hintOptions 应用于 FormTable 管理的表头节点。 */
+  /** 表头提示；auto=true 按表级 hintOptions 应用，false 时交给表头 Slot。 */
   headerHint?: DynamicValue<FormTableHint | null | undefined, FormTableColumnContext<TRow>>
   /** 静态或动态显隐配置。 */
   visible?: DynamicValue<boolean, FormTableColumnContext<TRow>>
@@ -292,20 +303,22 @@ export interface ResolvedComponentConfig {
 /** 动态配置求值后交给默认表头和表头插槽使用的展示配置。 */
 export interface ResolvedHeaderConfig {
   props: ComponentProps
-  hint?: FormTableHint | null
+  hint: ResolvedFormTableHint | null
 }
 
 /** 字段插槽可使用的完整上下文。 */
 export interface FormTableSlotContext<TRow extends TableRow = TableRow> extends FormTableFieldContext<TRow> {
   propPath: string
   component: ResolvedComponentConfig
+  /** 标准化后的字段 Hint；auto=false 时由 Slot 自行决定展示方式。 */
+  hint: ResolvedFormTableHint | null
 }
 
 /** 自定义表头插槽可使用的列上下文。 */
 export interface FormTableHeaderSlotContext<TRow extends TableRow = TableRow> extends FormTableColumnContext<TRow> {
   columnIndex: number
   label: string
-  /** 已解析的表头属性与提示；自定义表头自行选择绑定节点。 */
+  /** 已解析的表头属性与提示；auto=false 的提示由自定义表头自行展示。 */
   header: ResolvedHeaderConfig
 }
 

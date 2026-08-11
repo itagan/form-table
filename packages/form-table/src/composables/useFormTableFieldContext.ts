@@ -14,7 +14,7 @@ import {
   extendLazyContext,
   resolveDynamicValue
 } from '../utils/dynamic'
-import { applyHintTargetProps } from '../utils/hint'
+import { applyHintTargetProps, resolveFormTableHint } from '../utils/hint'
 
 interface FormTableFieldContextOptions<TRow extends TableRow> {
   getRowContext: () => FormTableRowContext<TRow>
@@ -49,9 +49,16 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
     options.getConfig()
   ))
 
+  /** Hint 与其他动态字段配置共享上下文，并只在当前响应式周期求值一次。 */
+  const resolvedHint = computed(() => {
+    const config = options.getConfig()
+    if (!Object.prototype.hasOwnProperty.call(config, 'hint')) return null
+    return resolveFormTableHint(resolveDynamicValue(config.hint, runtimeContext.value))
+  })
+
   /**
-   * FormTable 始终掌控 form-item 的 prop；显式 hint 则覆盖透传 title，
-   * 未声明 hint 时完整保留调用方的原始 formItemProps。
+   * FormTable 始终掌控 form-item 的 prop；自动 Hint 覆盖透传 title，
+   * 自定义托管或未声明 Hint 时保留调用方的原始 formItemProps。
    */
   const resolvedFormItemProps = computed(() => {
     const config = options.getConfig()
@@ -60,9 +67,8 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
       return { ...formItemProps, prop: propPath.value }
     }
 
-    const hint = resolveDynamicValue(config.hint, runtimeContext.value)
     return {
-      ...applyHintTargetProps(formItemProps, hint, hintMode.value),
+      ...applyHintTargetProps(formItemProps, resolvedHint.value, hintMode.value),
       prop: propPath.value
     }
   })
@@ -89,6 +95,7 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
     propPath,
     runtimeContext,
     resolvedFormItemProps,
+    resolvedHint,
     fieldContext
   }
 }

@@ -64,9 +64,9 @@
         <code>{ mode: 'tooltip' }</code>
       </div>
       <p>
-        配置了 hint 的 Slot 和自定义组件仍由 FormTable 自动提示；需要字段级完全控制时，可以不配置 hint，
-        直接在 Slot 内创建 <code>el-tooltip</code>。<code>renderHeader</code> 与 <code>cellSlot</code>
-        则展示其他调用方边界。
+        字符串 hint 默认仍由 FormTable 自动提示；配置 <code>{ content, auto: false }</code> 后，提示内容
+        保留在 Schema 中，但字段或表头 Slot 可以自行创建 <code>el-tooltip</code>。<code>renderHeader</code>
+        与 <code>cellSlot</code> 则展示其他调用方边界。
       </p>
 
       <FormTable
@@ -94,16 +94,34 @@
           </div>
         </template>
 
-        <template #manual-tooltip-field="{ value, setValue, row }">
+        <template #manual-tooltip-header="{ label, header }">
+          <span class="manual-tooltip-header">
+            <span>{{ label }}</span>
+            <el-tooltip
+              :content="header.hint.content"
+              placement="top"
+              effect="light"
+            >
+              <i
+                class="el-icon-question hint-icon"
+                role="button"
+                tabindex="0"
+                aria-label="查看自定义表头提示"
+              />
+            </el-tooltip>
+          </span>
+        </template>
+
+        <template #manual-tooltip-field="{ value, setValue, hint }">
           <div class="manual-tooltip-field">
             <el-input
               :value="value"
               size="small"
-              placeholder="该字段未配置 hint"
+              placeholder="该字段的 hint.auto 为 false"
               @input="setValue"
             />
             <el-tooltip
-              :content="`当前行 ${row.id}：此 Tooltip 完全由字段 Slot 管理`"
+              :content="hint.content"
               placement="top"
               effect="light"
               popper-class="manual-field-tooltip"
@@ -134,7 +152,11 @@
         </div>
         <div>
           <strong>字段级自定义 Tooltip</strong>
-          <span>不配置 hint，由 Slot 内问号图标单独触发 el-tooltip。</span>
+          <span>hint 配置 auto: false，Slot 读取 hint.content 后自行展示。</span>
+        </div>
+        <div>
+          <strong>表头自定义 Tooltip</strong>
+          <span>headerHint 同样支持 auto: false，并通过 header.hint 暴露标准化结果。</span>
         </div>
         <div>
           <strong>renderHeader</strong>
@@ -279,12 +301,20 @@ const customColumns: ColumnConfig[] = [{
 }, {
   key: 'manual-tooltip-column',
   label: '字段自主管理 Tooltip',
+  headerSlot: 'manual-tooltip-header',
+  headerHint: {
+    content: '此表头 Tooltip 由 headerSlot 自行创建',
+    auto: false
+  },
   props: { minWidth: 230 },
   children: [{
     children: [{
       fieldKey: 'manualValue',
       type: 'slot',
-      // 此字段刻意不配置 hint，避免与 Slot 内的独立 el-tooltip 重复。
+      hint: ({ row }) => ({
+        content: `当前行 ${row.id}：此 Tooltip 完全由字段 Slot 管理`,
+        auto: false
+      }),
       component: { renderer: 'manual-tooltip-field' }
     }]
   }]
@@ -326,14 +356,26 @@ const configurationExample = `<FormTable
     }
   }"
 >
-  <!-- 配置 hint 的 Slot 只渲染视觉内容，不创建 Tooltip -->
-  <template #manual-tooltip-field="{ value, setValue, row }">
+  <!-- auto: false 时，Slot 从配置解析结果自行渲染 Tooltip -->
+  <template #manual-tooltip-field="{ value, setValue, hint }">
     <el-input :value="value" @input="setValue" />
-    <el-tooltip :content="\`当前行 \${row.id}：字段自行管理\`">
+    <el-tooltip :content="hint.content">
       <i class="el-icon-question" />
     </el-tooltip>
   </template>
-</FormTable>`
+</FormTable>
+
+const columns = [{
+  headerHint: { content: '表头自定义提示', auto: false },
+  children: [{ children: [{
+    hint: ({ row }) => ({
+      content: \`最大可填写 \${row.availableAmount} 元\`,
+      auto: false
+    })
+  }] }]
+}]
+
+// 内容完全不属于 Schema 时，也可以省略 hint，在 Slot 内独立处理。`
 </script>
 
 <style scoped>
@@ -454,6 +496,11 @@ const configurationExample = `<FormTable
 
 .manual-tooltip-field .el-input {
   flex: 1;
+}
+
+.manual-tooltip-header {
+  display: inline-flex;
+  align-items: center;
 }
 
 .manual-help-button {

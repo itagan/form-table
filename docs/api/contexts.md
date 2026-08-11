@@ -10,7 +10,7 @@
 | Row 动态配置 | `tableData, row, index` | `columnConfig, rowConfig` | — | — |
 | Item 动态配置 | 增加 `fieldKey, value` | 增加 `itemConfig` | — | — |
 | `component.listeners[event]` | Item 数据 | Item 配置 | `setValue, updateRow` | — |
-| 字段 Slot | Item 数据 | Item 配置 | `setValue, updateRow` | `propPath, component` |
+| 字段 Slot | Item 数据 | Item 配置 | `setValue, updateRow` | `propPath, component, hint` |
 | `cellSlot` | `row, index` | `columnConfig` | `updateRow` | — |
 | 表头 Slot | `tableData, label, columnIndex` | `columnConfig` | — | `header` |
 
@@ -46,9 +46,9 @@
 | 数据 | `tableData, row, index, fieldKey, value` |
 | 配置 | `columnConfig, rowConfig, itemConfig` |
 | 更新 | `setValue, updateRow` |
-| 校验 / 解析 | `propPath, component` |
+| 校验 / 解析 | `propPath, component, hint` |
 
-`itemConfig.component` 是未解析的原始配置；`component` 是当前行已解析的 `props/listeners/options/optionProps/model`。
+`itemConfig.component` 是未解析的原始配置；`component` 是当前行已解析的 `props/listeners/options/optionProps/model`。`hint` 是标准化后的 `{ content, auto }` 或 `null`；`auto: false` 时 FormTable 不应用提示，Slot 可自行消费内容。
 
 ## FormTableHeaderSlotContext
 
@@ -59,7 +59,7 @@
 | `columnIndex` | 当前可见列下标 |
 | `label` | 表头文本 |
 | `header.props` | 已解析表头属性，已由 FormTable 包装节点应用 |
-| `header.hint` | 已解析表头提示，已由 FormTable 包装节点应用 |
+| `header.hint` | 标准化后的 `{ content, auto }` 或 `null`；仅 `auto: true` 自动应用 |
 
 ## 快照与异步更新
 
