@@ -83,7 +83,7 @@ hint: { content: '字段说明', auto: true }
 | 返回值 | 行为 |
 | --- | --- |
 | 非空字符串或 `{ content, auto: true }` | 按当前 `hintOptions.mode` 自动显示提示 |
-| `{ content, auto: false }` | 不产生自动提示，仅将标准化结果提供给 Slot |
+| `{ content, auto: false }` | FormTable 不处理提示；配置内容的用途由调用方决定 |
 | `''` 或 `{ content: '', auto: true }` | 不显示提示 |
 | `null` / `undefined` | 移除自动提示，Slot 获得 `null` |
 
@@ -131,7 +131,7 @@ hint: ({ value }) => schoolLabelMap[value] || ''
 </template>
 ```
 
-字段 Slot 获得标准化后的 `{ content, auto: false }`。FormTable 不写入 title、内部标记或 ARIA，也不会占用表级 singleton；触发节点和可访问性完全由 Slot 负责。表头也可用相同方式配置 `headerHint`，再从 `header.hint.content` 读取。
+`auto: false` 对所有字段类型行为一致：内置字段、自定义组件和字段 Slot 都不会写入 title、内部标记或 ARIA，也不会占用表级 singleton。配置内容仍保留在 `itemConfig.hint` 中，具体用途由调用方决定；字段 Slot 还会获得标准化后的 `{ content, auto: false }`，因此可以直接用于自定义 Tooltip。表头也可用相同方式配置 `headerHint`，再从 `header.hint.content` 读取。
 
 这种方式会按行、按字段创建 Tooltip 实例，适合少量特殊交互；大量普通说明仍应使用 FormTable 的表级单实例 Hint。如果提示内容完全不属于 Schema，也可以不配置 `hint`，直接在 Slot 内独立处理。完整对照可查看 [`/hint-scenarios`](http://localhost:5173/hint-scenarios)。
 
@@ -141,8 +141,8 @@ hint: ({ value }) => schoolLabelMap[value] || ''
 - `tooltip` 模式只要 hint 非空就显示，不检查目标内容是否溢出。
 - `tooltip` 模式每个 FormTable 只有一个实例，表头与字段不能分别选择模式。
 - `component.props.title` 是否落在内部 input，取决于实际组件是否透传 `$attrs`。
-- `auto: true` 时表头和字段 Slot 的外层提示由 FormTable 自动应用，Slot 内部不应重复创建 Tooltip；`auto: false` 时只向对应 Slot 暴露解析结果。
-- 普通 `component.renderer` 不接收解析后的 `hint`；业务组件需要自行展示配置 Hint 时，应通过字段 Slot 包装。
+- `auto: true` 时表头和字段 Slot 的外层提示由 FormTable 自动应用，Slot 内部不应重复创建 Tooltip；`auto: false` 时 FormTable 不处理提示，与字段渲染类型无关。
+- 普通 `component.renderer` 不接收解析后的 `hint` prop；需要消费内容时，可从动态组件配置上下文的 `itemConfig.hint` 读取原始配置，或通过字段 Slot 使用标准化 `hint`。
 - `column.props.renderHeader` 是 Element UI 完全接管入口，FormTable 不包装也不应用 `headerHint/headerProps`。
 - 纯文本 `cellSlot` 的截断提示应使用 `column.props.showOverflowTooltip`；它读取单元格展示文本，不替代业务 hint。
 

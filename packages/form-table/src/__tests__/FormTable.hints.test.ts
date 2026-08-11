@@ -373,6 +373,44 @@ describe('FormTable hint modes', () => {
     wrapper.destroy()
   })
 
+  it('disables managed hints for builtin and component fields when auto=false', async () => {
+    const wrapper = mountFormTable({
+      hintOptions: { mode: 'tooltip' },
+      tableData: [{ name: 'Alice', age: '18' }],
+      columns: [{
+        label: '非 Slot 字段',
+        children: [{ children: [{
+          fieldKey: 'name',
+          type: 'input',
+          hint: { content: '内置字段配置内容', auto: false },
+          formItemProps: { title: '内置字段原生 title' }
+        }, {
+          fieldKey: 'age',
+          type: 'component',
+          hint: { content: '自定义组件配置内容', auto: false },
+          formItemProps: { title: '组件字段原生 title' },
+          component: { renderer: 'el-input' }
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    const formItems = wrapper.findAll('.el-form-item')
+    expect(formItems).toHaveLength(2)
+    expect(formItems.at(0).attributes('title')).toBe('内置字段原生 title')
+    expect(formItems.at(1).attributes('title')).toBe('组件字段原生 title')
+    expect(wrapper.find('[data-form-table-hint]').exists()).toBe(false)
+
+    const tooltip = getHintTooltip(wrapper)
+    const show = vi.spyOn(tooltip, 'handleShowPopper').mockImplementation(() => undefined)
+    await formItems.at(0).trigger('mouseover')
+    await formItems.at(1).trigger('mouseover')
+    await waitForTooltipActivation(wrapper)
+    expect(show).not.toHaveBeenCalled()
+    expect(tooltip.content).toBe('')
+    wrapper.destroy()
+  })
+
   it('closes an active managed tooltip when a dynamic hint switches to custom ownership', async () => {
     const hint = ({ row, value }: FormTableFieldRenderContext) => ({
       content: `当前内容：${String(value)}`,
