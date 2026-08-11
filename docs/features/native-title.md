@@ -2,13 +2,16 @@
 
 > 可运行 Demo：[基础表格表单 ↗](http://localhost:5173/form-table)。将鼠标移到“姓名和年龄”表头或姓名字段可查看 Tooltip。
 
-`headerHint/hint` 只表达提示内容，整张 FormTable 通过 `hintMode` 统一选择展示方式。默认 `title` 模式保持浏览器原生提示；`tooltip` 模式让默认表头和全部字段外层共享一个 `el-tooltip`，不会按行和字段创建 Tooltip 实例。
+`headerHint/hint` 只表达提示内容，整张 FormTable 通过 `hintOptions` 统一选择展示策略。默认 `title` 模式保持浏览器原生提示；`tooltip` 模式让默认表头、自定义表头 Slot 和全部字段外层共享一个 `el-tooltip`，不会按行和字段创建 Tooltip 实例。
 
 ```vue
 <FormTable
   v-model="tableData"
   :columns="columns"
-  hint-mode="tooltip"
+  :hint-options="{
+    mode: 'tooltip',
+    tooltipProps: { placement: 'top' }
+  }"
 />
 ```
 
@@ -18,11 +21,11 @@
 
 | 需求 | 完整配置路径 | 应用节点 / 作用 |
 | --- | --- | --- |
-| 表级展示模式 | `hintMode` | `'title'`（默认）或 `'tooltip'` |
-| Tooltip 属性 | `hintTooltipProps` | 透传给表格唯一的 `el-tooltip` |
-| 默认表头提示 | `columns[].headerHint` | 默认表头文本节点 |
+| 表级展示策略 | `hintOptions` | `{ mode: 'title' }`（默认）或 `{ mode: 'tooltip', tooltipProps }` |
+| Tooltip 属性 | `hintOptions.tooltipProps` | 透传给表格唯一的 `el-tooltip` |
+| 表头提示 | `columns[].headerHint` | 默认表头或 `headerSlot` 的统一包装节点 |
 | 字段外层提示 | `columns[].children[].children[].hint` | `el-form-item` |
-| 默认表头原生属性 | `columns[].headerProps.title` | 默认表头文本节点 |
+| 表头原生属性 | `columns[].headerProps.title` | 默认表头或 `headerSlot` 的统一包装节点 |
 | 字段外层原生属性 | `columns[].children[].children[].formItemProps.title` | `el-form-item` |
 | 实际组件 title | `columns[].children[].children[].component.props.title` | 由实际组件的 attrs 行为决定 |
 
@@ -54,7 +57,7 @@ const columns: ColumnConfig[] = [{
 
 ## 两种模式
 
-不配置 `hintMode` 时继续输出原生 title，不渲染 FormTable 的 Hint Tooltip：
+不配置 `hintOptions` 时继续输出原生 title，不渲染 FormTable 的 Hint Tooltip：
 
 ```vue
 <FormTable
@@ -63,15 +66,15 @@ const columns: ColumnConfig[] = [{
 />
 ```
 
-配置 `hint-mode="tooltip"` 后，语义提示不再输出 title。根容器通过悬停和焦点事件委托识别当前表头或 `el-form-item`，动态更新唯一 Tooltip 的内容和锚点。悬停目标优先，约 50ms 后显示；没有悬停目标时，字段键盘焦点作为兜底并维护 `aria-describedby`。
+配置 `:hint-options="{ mode: 'tooltip' }"` 后，语义提示不再输出 title。根容器通过悬停和焦点事件委托识别当前表头或 `el-form-item`，动态更新唯一 Tooltip 的内容和锚点。悬停目标优先，约 50ms 后显示；没有悬停目标时，字段键盘焦点作为兜底并维护 `aria-describedby`。
 
-`hintTooltipProps` 可配置 Element UI Tooltip 的 `placement`、`effect`、`openDelay`、`popperClass` 等属性。`content/reference/popper/manual/value/enterable` 由 FormTable 管理，传入值不会覆盖内部行为。
+`hintOptions.tooltipProps` 可配置 Element UI Tooltip 的 `placement`、`effect`、`openDelay`、`popperClass` 等属性。`content/reference/popper/manual/value/enterable` 由 FormTable 管理，传入值不会覆盖内部行为。
 
 ## 空值行为
 
 | 返回值 | 行为 |
 | --- | --- |
-| 非空字符串 | 按当前 `hintMode` 显示提示 |
+| 非空字符串 | 按当前 `hintOptions.mode` 显示提示 |
 | `''` | 不显示提示 |
 | `null` / `undefined` | 移除提示 |
 
@@ -83,13 +86,12 @@ hint: ({ value }) => schoolLabelMap[value] || ''
 
 ## 自定义表头中的提示
 
-配置 `headerSlot` 后，表头 DOM 由调用方完全控制，表级 `hintMode` 不接管 Slot 内部节点。Slot 会返回已解析的 `header`，由模板自行绑定原生 title 或创建 Tooltip：
+配置 `headerSlot` 后，FormTable 仍会创建 `.form-table-column-header` 包装节点，并自动把 `headerProps/headerHint` 应用到该节点。Slot 只负责内部视觉内容，不需要绑定属性或创建 Tooltip：
 
 ```vue
-<template #amount-header="{ label, header }">
-  <span v-bind="header.props" :title="header.hint">
-    {{ label }}
-  </span>
+<template #amount-header="{ label }">
+  <span class="required-mark">*</span>
+  <span>{{ label }}</span>
 </template>
 ```
 
@@ -101,7 +103,8 @@ hint: ({ value }) => schoolLabelMap[value] || ''
 - `tooltip` 模式只要 hint 非空就显示，不检查目标内容是否溢出。
 - `tooltip` 模式每个 FormTable 只有一个实例，表头与字段不能分别选择模式。
 - `component.props.title` 是否落在内部 input，取决于实际组件是否透传 `$attrs`。
-- 自定义表头、字段 Slot 内部节点和 Element UI 功能列表头由调用方自行绑定提示。
+- `headerSlot` 和字段 Slot 的外层提示由 FormTable 自动应用；Slot 内部不应重复创建 Tooltip。
+- `column.props.renderHeader` 是 Element UI 完全接管入口，FormTable 不包装也不应用 `headerHint/headerProps`。
 - 纯文本 `cellSlot` 的截断提示应使用 `column.props.showOverflowTooltip`；它读取单元格展示文本，不替代业务 hint。
 
 ## 相关 API

@@ -8,13 +8,12 @@
 | `columns` | `ColumnConfig[]` | 必填 | `[]` | 表格列、布局和字段渲染配置 |
 | `formProps` | `ComponentProps` | 可选 | `{}` | 透传给 `el-form` |
 | `tableProps` | `ComponentProps` | 可选 | `{}` | 透传给 `el-table` |
-| `hintMode` | `'title' \| 'tooltip'` | 可选 | `'title'` | 整张表统一使用的 hint 展示模式 |
-| `hintTooltipProps` | `ComponentProps` | 可选 | `{}` | tooltip 模式下唯一 `el-tooltip` 的透传属性 |
+| `hintOptions` | `FormTableHintOptions` | 可选 | `{ mode: 'title' }` | 整张表统一使用的 hint 展示策略 |
 | `loading` | `boolean` | 可选 | `false` | `el-table` 的 `v-loading` |
 
 `tableData` 和 `columns` 在公开 `FormTableProps` 类型中是必填项；组件仍提供空数组作为运行时容错默认值。TypeScript 项目应显式传入两者，不依赖运行时默认值。
 
-`hintMode` 在同一个 FormTable 内只能选择一种展示方式。`hintTooltipProps` 可配置 `placement/effect/openDelay/popperClass` 等 Element UI Tooltip 属性；`content/reference/popper/manual/value/enterable` 由内部单实例管理，不接受覆盖。完整行为见 [Hint 提示模式](../features/native-title.md)。
+`hintOptions` 是可辨识联合：title 模式使用 `{ mode?: 'title' }`，Tooltip 模式使用 `{ mode: 'tooltip', tooltipProps?: ComponentProps }`。同一个 FormTable 只能选择一种展示方式；`tooltipProps` 可配置 `placement/effect/openDelay/popperClass` 等 Element UI Tooltip 属性，`content/reference/popper/manual/value/enterable` 由内部单实例管理，不接受覆盖。完整行为见 [Hint 提示模式](../features/native-title.md)。
 
 ## 受控数据
 

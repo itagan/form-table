@@ -11,16 +11,17 @@
     v-bind="columnProps"
   >
     <template v-if="shouldRenderHeader" v-slot:header>
-      <SlotRenderer
-        v-if="headerSlotFn"
-        :slot-fn="headerSlotFn"
-        :slot-props="headerSlotProps"
-      />
       <span
-        v-else
         class="form-table-column-header"
-        v-bind="defaultHeaderProps"
-      >{{ column.label }}</span>
+        v-bind="resolvedHeaderTargetProps"
+      >
+        <SlotRenderer
+          v-if="headerSlotFn"
+          :slot-fn="headerSlotFn"
+          :slot-props="headerSlotProps"
+        />
+        <template v-else>{{ column.label }}</template>
+      </span>
     </template>
 
     <template v-slot="scope">
@@ -110,8 +111,8 @@ const resolvedHeader = computed<ResolvedHeaderConfig>(() => ({
   hint: resolveDynamicValue(props.column.headerHint, columnContext.value)
 }))
 
-/** 默认表头把 hint 映射为原生 title；自定义 Slot 则自行决定如何绑定。 */
-const defaultHeaderProps = computed(() => {
+/** 默认和 Slot 表头共用同一个 FormTable 管理的属性与提示锚点。 */
+const resolvedHeaderTargetProps = computed(() => {
   if (!Object.prototype.hasOwnProperty.call(props.column, 'headerHint')) {
     return resolvedHeader.value.props
   }
@@ -154,7 +155,7 @@ const headerSlotFn = computed(() => props.column.headerSlot
 const shouldRenderHeader = computed(() => {
   // 原生 renderHeader 的优先级高于 FormTable 的具名表头插槽。
   return typeof columnProps.value.renderHeader !== 'function'
-    && (Boolean(headerSlotFn.value) || Object.keys(defaultHeaderProps.value).length > 0)
+    && (Boolean(headerSlotFn.value) || Object.keys(resolvedHeaderTargetProps.value).length > 0)
 })
 
 /** 传给自定义表头插槽的完整列上下文。 */

@@ -11,6 +11,7 @@ import FormTable, {
   type FormTableExpose,
   type FormTableHeaderSlotContext,
   type FormTableHint,
+  type FormTableHintOptions,
   type FormTableProps,
   type LayoutColumnConfig,
   type ResolvedHeaderConfig,
@@ -172,9 +173,35 @@ const props: FormTableProps = {
   columns,
   formProps: { size: 'small' },
   tableProps: { border: true },
-  hintMode: 'tooltip',
-  hintTooltipProps: { placement: 'top', openDelay: 200 }
+  hintOptions: {
+    mode: 'tooltip',
+    tooltipProps: { placement: 'top', openDelay: 200 }
+  }
 }
+const titleHintOptions: FormTableHintOptions = { mode: 'title' }
+const tooltipHintOptions: FormTableHintOptions = {
+  mode: 'tooltip',
+  tooltipProps: { placement: 'bottom' }
+}
+// @ts-expect-error title 模式不接受 Tooltip 属性。
+const invalidTitleHintOptions: FormTableHintOptions = { mode: 'title', tooltipProps: {} }
+const legacyHintModeProps: FormTableProps = {
+  tableData: rows,
+  columns,
+  // @ts-expect-error hintMode 已由 hintOptions 替代。
+  hintMode: 'tooltip'
+}
+const legacyHintTooltipProps: FormTableProps = {
+  tableData: rows,
+  columns,
+  // @ts-expect-error hintTooltipProps 已收敛到 hintOptions.tooltipProps。
+  hintTooltipProps: { placement: 'top' }
+}
+void titleHintOptions
+void tooltipHintOptions
+void invalidTitleHintOptions
+void legacyHintModeProps
+void legacyHintTooltipProps
 const component: Component = FormTable
 const named: Component = NamedFormTable
 const plugin: PluginObject<undefined> = FormTablePlugin

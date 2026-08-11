@@ -49,13 +49,15 @@ describe('FormTable hint modes', () => {
 
   it('shares one managed tooltip between default headers and form items', async () => {
     const wrapper = mountFormTable({
-      hintMode: 'tooltip',
-      hintTooltipProps: {
-        placement: 'bottom',
-        popperClass: 'custom-hint-popper',
-        content: '不能覆盖内容',
-        manual: true,
-        enterable: true
+      hintOptions: {
+        mode: 'tooltip',
+        tooltipProps: {
+          placement: 'bottom',
+          popperClass: 'custom-hint-popper',
+          content: '不能覆盖内容',
+          manual: true,
+          enterable: true
+        }
       },
       columns: [{
         label: '姓名',
@@ -108,7 +110,7 @@ describe('FormTable hint modes', () => {
 
   it('keeps a field tooltip active across descendants and uses focus as a hover fallback', async () => {
     const wrapper = mountFormTable({
-      hintMode: 'tooltip',
+      hintOptions: { mode: 'tooltip' },
       columns: [{
         label: '姓名',
         headerHint: '姓名表头说明',
@@ -159,7 +161,7 @@ describe('FormTable hint modes', () => {
       value ? `完整内容：${value}` : ''
     )
     const wrapper = mountFormTable({
-      hintMode: 'tooltip',
+      hintOptions: { mode: 'tooltip' },
       tableData: [{ name: 'Alice' }],
       columns: [{
         label: '姓名',
@@ -214,12 +216,12 @@ describe('FormTable hint modes', () => {
     await wrapper.vm.$nextTick()
     expect(wrapper.find('.el-form-item').attributes('title')).toBe('姓名字段说明')
 
-    await wrapper.setProps({ hintMode: 'tooltip' })
+    await wrapper.setProps({ hintOptions: { mode: 'tooltip' } })
     expect(wrapper.find('.el-form-item').attributes('title')).toBeUndefined()
     expect(wrapper.find('.el-form-item').attributes('data-form-table-hint')).toBe('姓名字段说明')
     expect(getHintTooltip(wrapper)).toBeTruthy()
 
-    await wrapper.setProps({ hintMode: 'title' })
+    await wrapper.setProps({ hintOptions: { mode: 'title' } })
     expect(wrapper.find('.el-form-item').attributes('title')).toBe('姓名字段说明')
     expect(wrapper.find('[data-form-table-hint]').exists()).toBe(false)
     expect((wrapper.vm.$refs as Record<string, unknown>).hintTooltipRef).toBeUndefined()
@@ -228,7 +230,7 @@ describe('FormTable hint modes', () => {
 
   it('preserves passthrough titles when no semantic hint is declared', async () => {
     const wrapper = mountFormTable({
-      hintMode: 'tooltip',
+      hintOptions: { mode: 'tooltip' },
       columns: [{
         label: '姓名',
         headerProps: { title: '底层表头 title' },
@@ -247,27 +249,80 @@ describe('FormTable hint modes', () => {
     wrapper.destroy()
   })
 
-  it('leaves custom header slot hint rendering under caller control', async () => {
+  it('automatically applies a custom header slot hint to the shared wrapper', async () => {
     const wrapper = mountFormTable({
-      hintMode: 'tooltip',
+      hintOptions: { mode: 'tooltip' },
       columns: [{
         label: '学校',
         headerSlot: 'school-header',
-        headerHint: '学校完整说明',
+        headerHint: ({ tableData }) => `学校完整说明（${tableData.length}）`,
+        headerProps: { 'aria-label': '学校表头' },
         children: [{ children: [{ fieldKey: 'name', type: 'input' }] }]
       }],
       scopedSlots: {
         'school-header': `
-          <span class="school-header" :title="props.header.hint">
-            {{ props.label }}
+          <span class="school-header">
+            {{ props.label }}|{{ props.header.hint }}
           </span>
         `
       }
     })
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.find('.school-header').attributes('title')).toBe('学校完整说明')
-    expect(wrapper.find('.school-header').attributes('data-form-table-hint')).toBeUndefined()
+    const header = wrapper.find('.form-table-column-header')
+    const slotContent = wrapper.find('.school-header')
+    expect(header.attributes('data-form-table-hint')).toBe('学校完整说明（1）')
+    expect(header.attributes('aria-label')).toBe('学校表头')
+    expect(header.attributes('title')).toBeUndefined()
+    expect(slotContent.text()).toBe('学校|学校完整说明（1）')
+    expect(slotContent.attributes('data-form-table-hint')).toBeUndefined()
+    expect(slotContent.attributes('title')).toBeUndefined()
+
+    const tooltip = getHintTooltip(wrapper)
+    vi.spyOn(tooltip, 'handleShowPopper').mockImplementation(() => undefined)
+    vi.spyOn(tooltip, 'doDestroy').mockImplementation(() => undefined)
+    await slotContent.trigger('mouseover')
+    await waitForTooltipActivation(wrapper)
+    expect(tooltip.content).toBe('学校完整说明（1）')
+    expect(tooltip.referenceElm).toBe(header.element)
+
+    await wrapper.setProps({ tableData: [{ name: 'Alice' }, { name: 'Bob' }] })
+    await wrapper.vm.$nextTick()
+    expect(header.attributes('data-form-table-hint')).toBe('学校完整说明（2）')
+    expect(tooltip.content).toBe('学校完整说明（2）')
+    wrapper.destroy()
+  })
+
+  it('automatically applies a field slot hint to its form item', async () => {
+    const wrapper = mountFormTable({
+      hintOptions: { mode: 'tooltip' },
+      columns: [{
+        label: '操作',
+        children: [{ children: [{
+          fieldKey: 'name',
+          type: 'slot',
+          hint: '字段 Slot 说明',
+          component: { renderer: 'name-field' }
+        }] }]
+      }],
+      scopedSlots: {
+        'name-field': '<button class="slot-field">{{ props.value }}</button>'
+      }
+    })
+    await wrapper.vm.$nextTick()
+
+    const formItem = wrapper.find('.el-form-item')
+    const slotField = wrapper.find('.slot-field')
+    expect(formItem.attributes('data-form-table-hint')).toBe('字段 Slot 说明')
+    expect(slotField.attributes('data-form-table-hint')).toBeUndefined()
+
+    const tooltip = getHintTooltip(wrapper)
+    vi.spyOn(tooltip, 'handleShowPopper').mockImplementation(() => undefined)
+    vi.spyOn(tooltip, 'doDestroy').mockImplementation(() => undefined)
+    await slotField.trigger('mouseover')
+    await waitForTooltipActivation(wrapper)
+    expect(tooltip.content).toBe('字段 Slot 说明')
+    expect(tooltip.referenceElm).toBe(formItem.element)
     wrapper.destroy()
   })
 })

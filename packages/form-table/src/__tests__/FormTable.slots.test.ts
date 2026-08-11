@@ -207,8 +207,8 @@ describe('FormTable slot rendering', () => {
       class: `resolved-header-${tableData.length}`,
       'aria-label': '学校说明'
     }))
-    const headerHint = vi.fn(({ columnConfig }: FormTableColumnContext) => (
-      `${columnConfig.label}完整说明`
+    const headerHint = vi.fn(({ columnConfig, tableData }: FormTableColumnContext) => (
+      `${columnConfig.label}完整说明（${tableData.length}）`
     ))
     const wrapper = mountFormTable({
       columns: [{
@@ -221,26 +221,29 @@ describe('FormTable slot rendering', () => {
       }],
       scopedSlots: {
         'school-header': `
-          <span
-            class="school-header"
-            v-bind="props.header.props"
-            :title="props.header.hint"
-          >
-            {{ props.columnConfig.key }}|{{ props.column === undefined }}
+          <span class="school-header">
+            {{ props.columnConfig.key }}|{{ props.column === undefined }}|{{ props.header.hint }}
           </span>
         `
       }
     })
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.find('.school-header').text()).toBe('school-column|true')
-    expect(wrapper.find('.school-header').classes()).toContain('resolved-header-1')
-    expect(wrapper.find('.school-header').attributes('aria-label')).toBe('学校说明')
-    expect(wrapper.find('.school-header').attributes('title')).toBe('学校完整说明')
-    expect(wrapper.find('.form-table-column-header').exists()).toBe(false)
+    const header = wrapper.find('.form-table-column-header')
+    expect(wrapper.find('.school-header').text()).toBe('school-column|true|学校完整说明（1）')
+    expect(wrapper.find('.school-header').classes()).not.toContain('resolved-header-1')
+    expect(wrapper.find('.school-header').attributes('aria-label')).toBeUndefined()
+    expect(wrapper.find('.school-header').attributes('title')).toBeUndefined()
+    expect(header.classes()).toContain('resolved-header-1')
+    expect(header.attributes('aria-label')).toBe('学校说明')
+    expect(header.attributes('title')).toBe('学校完整说明（1）')
     expect(headerProps).toHaveBeenCalledTimes(1)
     expect(headerHint).toHaveBeenCalledTimes(1)
+
+    await wrapper.setProps({ tableData: [{ name: 'Alice' }, { name: 'Bob' }] })
+    await wrapper.vm.$nextTick()
+    expect(header.attributes('title')).toBe('学校完整说明（2）')
+    expect(headerHint).toHaveBeenCalledTimes(2)
     wrapper.destroy()
   })
 })
-

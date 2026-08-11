@@ -27,9 +27,11 @@ FormTable
 - `type: 'slot'` 绕过组件渲染器，但保留 `el-col` 和 `el-form-item`；解析后的 component 配置通过同名上下文返回模板。
 - 列级 `cellSlot` 不创建 Row/Item，不需要 `fieldKey`，只提供 `row/index/columnConfig/updateRow`。
 - 表头必填标记等自定义展示由 `headerSlot` 显式渲染，字段校验只由 `formItemProps.rules` 决定。
-- 表头 Slot 同时获得原始 `columnConfig` 和已解析的 `header.props/header.hint`，不会自行执行动态配置函数。
+- 默认表头与表头 Slot 共用 `.form-table-column-header` 包装节点，FormTable 自动应用 `headerProps/headerHint`；Slot 只负责内部视觉内容。
+- 表头 Slot 仍获得原始 `columnConfig` 和已解析的 `header.props/header.hint` 供读取兼容，不应重复绑定提示属性。
 - `colProps`、`formItemProps`、`component.props` 分别透传到对应 Element UI 层。
-- `column.headerHint` 和 Item 的 `hint` 是外层提示入口，当前作为原生 title 应用于默认表头文本节点和已有 `el-form-item`，不增加包装节点；各层 props 中的 title 继续原样透传。
+- `column.headerHint` 和 Item 的 `hint` 是语义提示入口；`hintOptions` 在整张表内统一选择原生 title 或表级单实例 Tooltip，各层 props 中的 title 继续按目标节点透传。
+- `column.props.renderHeader` 是 Element UI 完全接管入口，FormTable 不自动包装或应用 `headerProps/headerHint`。
 - 动态上下文按层级提供：Column 只有 `tableData`，Row 增加 `row/index`，Field 再增加 `fieldKey`；不会回传空 row 或 `index = -1` 等占位值。
 - 组件 listener 在 Field 上下文后继续接收组件原始事件参数；字段 slot 再增加 `propPath/component`。
 - `fieldKey` 支持 `profile.city` 和 `items[0].name` 路径。

@@ -13,7 +13,7 @@ FormTable
 ├─ tableData
 ├─ formProps
 ├─ tableProps
-├─ hintMode / hintTooltipProps
+├─ hintOptions
 ├─ loading
 └─ columns[]
    ├─ key / label / visible / props
@@ -44,7 +44,7 @@ FormTable
 
 | 参考页 | 主要路径 | 内容 |
 | --- | --- | --- |
-| [FormTable Props](./form-table.md) | `tableData`、`columns`、`formProps`、`tableProps`、`hintMode` | 顶层 props、受控数据和 Element UI 透传 |
+| [FormTable Props](./form-table.md) | `tableData`、`columns`、`formProps`、`tableProps`、`hintOptions` | 顶层 props、受控数据和 Element UI 透传 |
 | [Column / Row / Item](./columns.md) | `columns[]...` | 列、布局行、字段路径、校验和提示 |
 | [Component 配置](./component.md) | `columns[].children[].children[].component...` | 渲染器、model、props、listeners 和 options |
 | [Slot 与上下文](./contexts.md) | 动态回调和 scoped Slot | 上下文矩阵、快照语义和更新能力 |

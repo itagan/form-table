@@ -51,6 +51,15 @@ export type DynamicValue<T, Context> = T | ((context: Context) => T)
 export type FormTableHint = string
 /** 整个 FormTable 统一采用的提示展示方式。 */
 export type FormTableHintMode = 'title' | 'tooltip'
+/** FormTable 统一提示策略；Tooltip 属性仅在对应模式下有效。 */
+export type FormTableHintOptions =
+  | {
+      mode?: 'title'
+    }
+  | {
+      mode: 'tooltip'
+      tooltipProps?: ComponentProps
+    }
 /** 字段组件事件监听器签名，第一个参数固定为字段上下文。 */
 export type FormTableFieldListener<TRow extends TableRow = TableRow> = (
   context: FormTableFieldContext<TRow>,
@@ -145,7 +154,7 @@ interface BaseFormItemConfig<TRow extends TableRow = TableRow> {
   colProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext<TRow>>
   /** 直接传给 el-form-item。 */
   formItemProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext<TRow>>
-  /** 字段外层提示；按表级 hintMode 应用于 el-form-item。 */
+  /** 字段外层提示；按表级 hintOptions 应用于 el-form-item。 */
   hint?: DynamicValue<FormTableHint | null | undefined, FormTableFieldRenderContext<TRow>>
 }
 
@@ -210,9 +219,9 @@ interface BaseColumnConfig<TRow extends TableRow = TableRow> {
   label: string
   /** 自定义表头使用的父组件具名插槽。 */
   headerSlot?: string
-  /** 传给默认表头文本节点；可用于配置原生 title、class、style 和 aria 属性。 */
+  /** 传给默认或 Slot 表头包装节点；可配置原生 title、class、style 和 aria 属性。 */
   headerProps?: DynamicValue<ComponentProps, FormTableColumnContext<TRow>>
-  /** 默认表头提示；按表级 hintMode 应用于表头文本节点。 */
+  /** 表头提示；按表级 hintOptions 应用于 FormTable 管理的表头节点。 */
   headerHint?: DynamicValue<FormTableHint | null | undefined, FormTableColumnContext<TRow>>
   /** 静态或动态显隐配置。 */
   visible?: DynamicValue<boolean, FormTableColumnContext<TRow>>
@@ -256,10 +265,8 @@ export interface FormTableProps<TRow extends TableRow = TableRow> {
   columns: ColumnConfig<TRow>[]
   formProps?: ComponentProps
   tableProps?: ComponentProps
-  /** headerHint/hint 的表级统一展示方式，默认使用原生 title。 */
-  hintMode?: FormTableHintMode
-  /** tooltip 模式下传给唯一 el-tooltip 实例的属性。 */
-  hintTooltipProps?: ComponentProps
+  /** headerHint/hint 的表级统一展示策略，默认使用原生 title。 */
+  hintOptions?: FormTableHintOptions
   loading?: boolean
 }
 
