@@ -8,8 +8,11 @@ export default defineConfig({
   description: 'Vue 2.7 + Element UI editable form table component.',
   lang: 'zh-CN',
   cleanUrls: true,
-  // 本地 Playground 与文档开发服务不属于静态构建产物，构建阶段无法解析这些地址。
-  ignoreDeadLinks: [/^http:\/\/localhost:517[34](?:\/|$)/],
+  // Playground 在 VitePress 完成后写入同一 dist，交由 site:check 校验全部实际路由。
+  ignoreDeadLinks: [
+    /^http:\/\/localhost:517[34](?:\/|$)/,
+    /^\/playground(?:\/|$)/
+  ],
   markdown: {
     config(md) {
       const defaultLinkOpen = md.renderer.rules.link_open

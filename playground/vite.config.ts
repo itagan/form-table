@@ -5,31 +5,42 @@ import legacy from '@vitejs/plugin-legacy'
 import vue2 from '@vitejs/plugin-vue2'
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [
-    vue2(),
-    legacy({
-      targets: ['ie >= 11'],
-      additionalLegacyPolyfills: ['regenerator-runtime/runtime']
-    })
-  ],
-  resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
-      '@itagan/form-table': fileURLToPath(new URL('../packages/form-table/src/index.ts', import.meta.url))
-    }
-  },
-  build: {
-    chunkSizeWarningLimit: 1200,
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes('/node_modules/vue/') || id.includes('/node_modules/vue-router/')) {
-            return 'vue-vendor'
-          }
+export default defineConfig(({ mode }) => {
+  const isSiteBuild = mode === 'site'
 
-          if (id.includes('/node_modules/element-ui/')) {
-            return 'element-ui'
+  return {
+    base: isSiteBuild ? '/playground/' : '/',
+    plugins: [
+      vue2(),
+      legacy({
+        targets: ['ie >= 11'],
+        additionalLegacyPolyfills: ['regenerator-runtime/runtime']
+      })
+    ],
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+        '@itagan/form-table': fileURLToPath(new URL('../packages/form-table/src/index.ts', import.meta.url))
+      }
+    },
+    build: {
+      ...(isSiteBuild
+        ? {
+            outDir: fileURLToPath(new URL('../docs/.vitepress/dist/playground', import.meta.url)),
+            emptyOutDir: true
+          }
+        : {}),
+      chunkSizeWarningLimit: 1200,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('/node_modules/vue/') || id.includes('/node_modules/vue-router/')) {
+              return 'vue-vendor'
+            }
+
+            if (id.includes('/node_modules/element-ui/')) {
+              return 'element-ui'
+            }
           }
         }
       }
