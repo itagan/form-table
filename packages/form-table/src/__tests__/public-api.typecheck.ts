@@ -175,16 +175,16 @@ const props: FormTableProps = {
   tableProps: { border: true },
   hintOptions: {
     mode: 'tooltip',
-    tooltipProps: { placement: 'top', openDelay: 200 }
+    props: { placement: 'top', openDelay: 200 }
   }
 }
 const titleHintOptions: FormTableHintOptions = { mode: 'title' }
 const tooltipHintOptions: FormTableHintOptions = {
   mode: 'tooltip',
-  tooltipProps: { placement: 'bottom' }
+  props: { placement: 'bottom' }
 }
 // @ts-expect-error title 模式不接受 Tooltip 属性。
-const invalidTitleHintOptions: FormTableHintOptions = { mode: 'title', tooltipProps: {} }
+const invalidTitleHintOptions: FormTableHintOptions = { mode: 'title', props: {} }
 const legacyHintModeProps: FormTableProps = {
   tableData: rows,
   columns,
@@ -194,7 +194,7 @@ const legacyHintModeProps: FormTableProps = {
 const legacyHintTooltipProps: FormTableProps = {
   tableData: rows,
   columns,
-  // @ts-expect-error hintTooltipProps 已收敛到 hintOptions.tooltipProps。
+  // @ts-expect-error hintTooltipProps 已收敛到 hintOptions.props。
   hintTooltipProps: { placement: 'top' }
 }
 void titleHintOptions

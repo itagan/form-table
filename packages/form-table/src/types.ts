@@ -58,7 +58,7 @@ export type FormTableHintOptions =
     }
   | {
       mode: 'tooltip'
-      tooltipProps?: ComponentProps
+      props?: ComponentProps
     }
 /** 字段组件事件监听器签名，第一个参数固定为字段上下文。 */
 export type FormTableFieldListener<TRow extends TableRow = TableRow> = (

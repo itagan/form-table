@@ -86,7 +86,7 @@ Item 的 `key` 是可选渲染身份，`fieldKey` 是必填数据路径。动态
 
 `component.props/listeners/options/optionProps` 是三种模式共用的渲染配置。自定义组件省略 `component.model` 或将其设为 `true` 时保留 Vue 2 原生 `v-model`；也可指定 `{ prop, event, valueFromEvent }`，或设为 `false` 禁用模型注入。slot 模式会把解析后的 `component` 通过上下文返回，由模板自行绑定。
 
-外层悬浮提示使用 `column.headerHint` 和 Item 的 `hint`，内容语义与展示策略分离。`hintOptions` 在整张表内统一选择 `{ mode: 'title' }`（默认）或 `{ mode: 'tooltip', tooltipProps }`；后者让默认表头、`headerSlot` 表头和所有 `el-form-item` 通过事件委托共享一个 `el-tooltip`。`headerProps.title`、`formItemProps.title` 和 `component.props.title` 仍按各自目标透传；显式 hint 会覆盖同层 title。空字符串、`null` 和 `undefined` 均不显示提示。字段 Slot 由外层 `el-form-item` 自动承接提示，表头 Slot 由 FormTable 包装节点自动承接；纯文本 `cellSlot` 的内容溢出提示可直接使用 `column.props.showOverflowTooltip`。
+外层悬浮提示使用 `column.headerHint` 和 Item 的 `hint`，内容语义与展示策略分离。`hintOptions` 在整张表内统一选择 `{ mode: 'title' }`（默认）或 `{ mode: 'tooltip', props }`；后者让默认表头、`headerSlot` 表头和所有 `el-form-item` 通过事件委托共享一个 `el-tooltip`。`headerProps.title`、`formItemProps.title` 和 `component.props.title` 仍按各自目标透传；显式 hint 会覆盖同层 title。空字符串、`null` 和 `undefined` 均不显示提示。字段 Slot 由外层 `el-form-item` 自动承接提示，表头 Slot 由 FormTable 包装节点自动承接；纯文本 `cellSlot` 的内容溢出提示可直接使用 `column.props.showOverflowTooltip`。
 
 字段 Slot 和列级 `cellSlot` 内容直接渲染，不附加内部 `div/span` 包装；需要根节点样式时由 Slot 模板自行提供。表头 Slot 例外：FormTable 会提供统一的提示包装节点。
 
