@@ -65,4 +65,4 @@ input/slot setValue
 - Table 原生事件通过组件监听器直接下传。
 - `getFormRef()` / `getTableRef()` 返回原生实例。
 
-基础、自定义与 slot 示例位于 `FormTableView.vue`、`FormTableAdvancedView.vue`；远程 JSON 与本地增强示例位于 `RemoteSchemaView.vue`。
+基础、自定义与 slot 示例位于 `FormTableView.vue`、`FormTableAdvancedView.vue`；Hint 的 title/Tooltip 策略及自定义渲染边界集中在 `HintScenariosView.vue`；远程 JSON 与本地增强示例位于 `RemoteSchemaView.vue`。
