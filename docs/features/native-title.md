@@ -97,13 +97,37 @@ hint: ({ value }) => schoolLabelMap[value] || ''
 
 需要图标、富文本或可控制出现位置的提示时，参考[自定义表头](./custom-header.md)。
 
+## 字段 Slot 自主管理 Tooltip
+
+少量字段需要独立触发节点、内容或样式时，可以不配置 Item `hint`，直接在字段 Slot 内创建 `el-tooltip`：
+
+```ts
+{
+  fieldKey: 'amount',
+  type: 'slot',
+  // 不配置 hint，避免与 Slot Tooltip 重复。
+  component: { renderer: 'amount-editor' }
+}
+```
+
+```vue
+<template #amount-editor="{ value, setValue, row }">
+  <el-input :value="value" @input="setValue" />
+  <el-tooltip :content="`最大可填写 ${row.availableAmount} 元`">
+    <i class="el-icon-question" aria-label="查看金额填写说明" />
+  </el-tooltip>
+</template>
+```
+
+这种方式会按行、按字段创建 Tooltip 实例，适合少量特殊交互；大量普通说明仍应使用 FormTable 的表级单实例 Hint。完整对照可查看 [`/hint-scenarios`](http://localhost:5173/hint-scenarios)。
+
 ## 边界
 
 - `title` 模式的出现时间、样式和位置由浏览器决定。
 - `tooltip` 模式只要 hint 非空就显示，不检查目标内容是否溢出。
 - `tooltip` 模式每个 FormTable 只有一个实例，表头与字段不能分别选择模式。
 - `component.props.title` 是否落在内部 input，取决于实际组件是否透传 `$attrs`。
-- `headerSlot` 和字段 Slot 的外层提示由 FormTable 自动应用；Slot 内部不应重复创建 Tooltip。
+- 配置了 `headerHint/hint` 时，表头和字段 Slot 的外层提示由 FormTable 自动应用，Slot 内部不应重复创建 Tooltip；若需要字段级自主管理，应省略该字段的 `hint`。
 - `column.props.renderHeader` 是 Element UI 完全接管入口，FormTable 不包装也不应用 `headerHint/headerProps`。
 - 纯文本 `cellSlot` 的截断提示应使用 `column.props.showOverflowTooltip`；它读取单元格展示文本，不替代业务 hint。
 
