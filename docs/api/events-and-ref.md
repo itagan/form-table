@@ -9,7 +9,30 @@
 | `update:tableData` | 更新后的新数组 |
 | `field-change` | `{ row, index, fieldKey, value, previousValue }` |
 
-Element Table 的 `row-click`、`selection-change`、`sort-change` 等事件直接透传，参数与 Element UI 一致。
+Element Table 事件直接透传，参数顺序与引用保持不变。FormTable 为跨兼容版本保持稳定的列、单元格和选择事件提供公开类型；存在版本差异的行事件和 `expand-change` 仍可监听，但不加入精确的 `FormTableEmits` 声明。
+
+| 已类型化的原生事件 | 参数 |
+| --- | --- |
+| `sort-change` | `{ column, prop, order }` |
+| `filter-change` | `Record<columnKey, value[]>` |
+| `header-click` / `header-contextmenu` | `column, event` |
+| `header-dragend` | `newWidth, oldWidth, column, event` |
+| `cell-click` / `cell-dblclick` / `cell-contextmenu` | `row, column, cell, event` |
+| `cell-mouse-enter` / `cell-mouse-leave` | `row, column, cell, event` |
+| `select` | `selection, row` |
+| `select-all` / `selection-change` | `selection` |
+
+```vue
+<FormTable
+  v-model="tableData"
+  :columns="columns"
+  @sort-change="handleSortChange"
+  @header-click="handleHeaderClick"
+  @selection-change="selection = $event"
+/>
+```
+
+这些事件由 `el-table` 发出，不配置在 `columns[].listeners` 中。`FormTableElementColumn` 只描述跨版本稳定的列字段并允许 Element UI 扩展字段；排序和筛选载荷可分别使用 `FormTableSortChangePayload`、`FormTableFilterChangePayload`。
 
 事件回调与配置回调的参数边界：
 
@@ -41,6 +64,23 @@ function handleTableDataUpdate(nextTableData) {
 ```
 
 ## Slot 上下文
+
+### Element Table 根级 Slot
+
+`#empty` 和 `#append` 原样交给 `el-table`，不增加包装节点或 FormTable 上下文。只有调用方实际提供对应 Slot 时才会注册，因此未提供 `#empty` 时仍保留 Element UI 的 `empty-text` 默认行为，未提供 `#append` 时也不会产生表尾区域。
+
+```vue
+<FormTable v-model="tableData" :columns="columns">
+  <template #empty>
+    <span>暂无可编辑数据</span>
+  </template>
+  <template #append>
+    <el-button type="text" @click="loadMore">加载更多</el-button>
+  </template>
+</FormTable>
+```
+
+两者是无 scope 的原生 Table Slot。字段、表头和单元格自定义继续使用下述 FormTable Slot。
 
 ### 列级 cellSlot
 
