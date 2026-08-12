@@ -87,7 +87,24 @@ const columns = defineFormTableColumns<TableRow>([{
 />
 ```
 
-事件参数遵循 Element UI 原生顺序；`columnKey` 用于识别 `filter-change` 返回的筛选列。公开载荷类型见[事件与 Ref](../api/events-and-ref.md)。
+事件参数遵循 Element UI 原生顺序；`columnKey` 用于识别 `filter-change` 返回的筛选列。公开载荷类型见[事件与 Ref](../api/events-and-ref.md)。[可运行 Demo ↗](http://localhost:5173/element-columns) 会实时显示排序、筛选和表头点击结果。
+
+## 空状态与表尾
+
+Element Table 的两个根级 Slot 可直接写在 FormTable 下：
+
+```vue
+<FormTable v-model="tableData" :columns="columns">
+  <template #empty>
+    <span>暂无可编辑数据</span>
+  </template>
+  <template #append>
+    <el-button type="text" @click="loadMore">加载更多</el-button>
+  </template>
+</FormTable>
+```
+
+`empty` 只在无数据时展示；`append` 在有无数据时都遵循 Element UI 原生渲染行为。未声明相应 Slot 时不会覆盖 Element UI 默认空状态，也不会创建 append 区域。
 
 ## 序号列
 

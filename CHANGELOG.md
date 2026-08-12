@@ -6,6 +6,7 @@
 
 ### Improved
 
+- 原样透传 Element Table 的 `empty/append` 根级 Slot，并为排序、筛选、表头、单元格及选择事件补充公开类型、可运行示例和回归测试。
 - 新增 `createFormTable<TRow>()` 泛型组件工厂，使 `tableData`、列配置、rowKey、动态上下文和组件事件共享业务行类型，且不创建额外运行时组件。
 - 开发环境增加身份与列模式诊断，覆盖缺失或重复 rowKey、同级 Column/Row/Item 重复 key，以及互斥列配置混用；持续存在的问题会自动去重。
 - `headerHint/hint` 使用 `{ content, behavior }` 表达自动或自定义处理方式；标准化 Hint 统一提供给 component 动态配置、listener、表头和字段 Slot。
