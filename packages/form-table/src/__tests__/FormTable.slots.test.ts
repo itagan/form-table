@@ -223,7 +223,7 @@ describe('FormTable slot rendering', () => {
       scopedSlots: {
         'school-header': `
           <span class="school-header">
-            {{ props.columnConfig.key }}|{{ props.column === undefined }}|{{ props.header.hint.content }}|{{ props.header.hint.ownership }}
+            {{ props.columnConfig.key }}|{{ props.column === undefined }}|{{ props.header.hint.content }}|{{ props.header.hint.behavior }}
           </span>
         `
       }
@@ -231,7 +231,7 @@ describe('FormTable slot rendering', () => {
     await wrapper.vm.$nextTick()
 
     const header = wrapper.find('.form-table-column-header')
-    expect(wrapper.find('.school-header').text()).toBe('school-column|true|学校完整说明（1）|table')
+    expect(wrapper.find('.school-header').text()).toBe('school-column|true|学校完整说明（1）|auto')
     expect(wrapper.find('.school-header').classes()).not.toContain('resolved-header-1')
     expect(wrapper.find('.school-header').attributes('aria-label')).toBeUndefined()
     expect(wrapper.find('.school-header').attributes('title')).toBeUndefined()

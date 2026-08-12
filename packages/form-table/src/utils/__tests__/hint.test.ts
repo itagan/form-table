@@ -19,29 +19,26 @@ const createFieldContext = (value: unknown) => ({
 }) as FormTableFieldRenderContext
 
 describe('FormTable hint utilities', () => {
-  it('normalizes strings, ownership defaults, custom ownership, and empty values', () => {
-    expect(resolveFormTableHint('说明')).toEqual({ content: '说明', ownership: 'table' })
-    expect(resolveFormTableHint({ content: '说明' })).toEqual({ content: '说明', ownership: 'table' })
-    expect(resolveFormTableHint({ content: '说明', ownership: 'custom' })).toEqual({
+  it('normalizes strings, behavior defaults, custom behavior, and empty values', () => {
+    expect(resolveFormTableHint('说明')).toEqual({ content: '说明', behavior: 'auto' })
+    expect(resolveFormTableHint({ content: '说明' })).toEqual({ content: '说明', behavior: 'auto' })
+    expect(resolveFormTableHint({ content: '说明', behavior: 'custom' })).toEqual({
       content: '说明',
-      ownership: 'custom'
+      behavior: 'custom'
     })
-    expect(resolveFormTableHint('')).toEqual({ content: '', ownership: 'table' })
+    expect(resolveFormTableHint('')).toBeNull()
+    expect(resolveFormTableHint({ content: '' })).toBeNull()
     expect(resolveFormTableHint(null)).toBeNull()
     expect(resolveFormTableHint(undefined)).toBeNull()
   })
 
   it('applies the shared target precedence and optional focusability', () => {
     const source = { title: '底层说明', tabindex: -1, class: 'target' }
-    expect(applyHintTargetProps(source, null, 'tooltip')).toEqual({ tabindex: -1, class: 'target' })
-    expect(applyHintTargetProps(source, { content: '自定义', ownership: 'custom' }, 'tooltip')).toBe(source)
-    expect(applyHintTargetProps(source, { content: '', ownership: 'table' }, 'tooltip')).toEqual({
-      tabindex: -1,
-      class: 'target'
-    })
+    expect(applyHintTargetProps(source, null, 'tooltip')).toBe(source)
+    expect(applyHintTargetProps(source, { content: '自定义', behavior: 'custom' }, 'tooltip')).toBe(source)
     expect(applyHintTargetProps(
       { class: 'header' },
-      { content: '托管说明', ownership: 'table' },
+      { content: '托管说明', behavior: 'auto' },
       'tooltip',
       { focusable: true }
     )).toEqual({
@@ -49,34 +46,35 @@ describe('FormTable hint utilities', () => {
       [FORM_TABLE_HINT_ATTRIBUTE]: '托管说明',
       tabindex: 0
     })
+    expect(source).toEqual({ title: '底层说明', tabindex: -1, class: 'target' })
   })
 
-  it('formats hint=true with the default value formatter', () => {
-    expect(resolveFormTableFieldHint(true, createFieldContext('完整内容'))).toEqual({
+  it('formats inherited fields with the default value formatter', () => {
+    expect(resolveFormTableFieldHint(undefined, createFieldContext('完整内容'), true)).toEqual({
       content: '完整内容',
-      ownership: 'table'
+      behavior: 'auto'
     })
-    expect(resolveFormTableFieldHint(true, createFieldContext(0))?.content).toBe('0')
-    expect(resolveFormTableFieldHint(true, createFieldContext(false))?.content).toBe('false')
-    expect(resolveFormTableFieldHint(true, createFieldContext(null))).toBeNull()
-    expect(resolveFormTableFieldHint(true, createFieldContext(''))).toBeNull()
-    expect(resolveFormTableFieldHint(false, createFieldContext('隐藏'))).toBeNull()
+    expect(resolveFormTableFieldHint(undefined, createFieldContext(0), true)?.content).toBe('0')
+    expect(resolveFormTableFieldHint(undefined, createFieldContext(false), true)?.content).toBe('false')
+    expect(resolveFormTableFieldHint(undefined, createFieldContext(null), true)).toBeNull()
+    expect(resolveFormTableFieldHint('', createFieldContext('回退'), true)?.content).toBe('回退')
+    expect(resolveFormTableFieldHint(false, createFieldContext('隐藏'), true)).toBeNull()
   })
 
-  it('uses the table formatter only for hint=true and preserves empty formatter results', () => {
+  it('uses the table formatter only as fallback and keeps explicit contents authoritative', () => {
     const formatter = vi.fn(({ fieldKey, value }) => `${fieldKey}:${String(value)}`)
     const context = createFieldContext('Alice')
-    expect(resolveFormTableFieldHint(true, context, formatter)).toEqual({
+    expect(resolveFormTableFieldHint(undefined, context, formatter)).toEqual({
       content: 'value:Alice',
-      ownership: 'table'
+      behavior: 'auto'
     })
     expect(formatter).toHaveBeenCalledWith(context)
 
     formatter.mockClear()
     expect(resolveFormTableFieldHint('显式说明', context, formatter)?.content).toBe('显式说明')
     expect(formatter).not.toHaveBeenCalled()
-    expect(resolveFormTableFieldHint(true, context, () => null)).toBeNull()
-    expect(resolveFormTableFieldHint(true, context, () => undefined)).toBeNull()
-    expect(resolveFormTableFieldHint(true, context, () => '')?.content).toBe('')
+    expect(resolveFormTableFieldHint(undefined, context, () => null)).toBeNull()
+    expect(resolveFormTableFieldHint(undefined, context, () => undefined)).toBeNull()
+    expect(resolveFormTableFieldHint(undefined, context, () => '')).toBeNull()
   })
 })

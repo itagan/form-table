@@ -11,7 +11,7 @@ import FormTable, {
   type FormTableExpose,
   type FormTableFieldHint,
   type FormTableFieldHintFormatter,
-  type FormTableFieldHintOptions,
+  type FormTableDefaultFieldHint,
   type FormTableHeaderSlotContext,
   type FormTableHint,
   type FormTableHintConfig,
@@ -37,20 +37,22 @@ void redundantBuiltinAlias
 const CustomInput: Component = { name: 'CustomInput' }
 const AlternativeInput: Component = { name: 'AlternativeInput' }
 const completeValueHint: FormTableHint = '完整字段值'
-const formattedFieldHint: FormTableFieldHint = true
 const disabledFieldHint: FormTableFieldHint = false
-void formattedFieldHint
 void disabledFieldHint
+// @ts-expect-error 字段不再使用 true 强制 formatter。
+const invalidFormattedFieldHint: FormTableFieldHint = true
 // @ts-expect-error 表头使用的显式 FormTableHint 不接受 true。
 const invalidExplicitHint: FormTableHint = true
-const customValueHint: FormTableHintConfig = { content: '自行展示', ownership: 'custom' }
-const resolvedValueHint: ResolvedFormTableHint = { content: '自行展示', ownership: 'custom' }
+const customValueHint: FormTableHintConfig = { content: '自行展示', behavior: 'custom' }
+const resolvedValueHint: ResolvedFormTableHint = { content: '自行展示', behavior: 'custom' }
 const resolvedContextHint: FormTableResolvedFieldContext['hint'] = resolvedValueHint
 const objectValueHint: FormTableHint = { content: '自动展示' }
 // @ts-expect-error Hint content 必须是字符串。
 const invalidHintContent: FormTableHint = { content: 123 }
-// @ts-expect-error Hint ownership 只接受 table 或 custom。
-const invalidHintOwnership: FormTableHint = { content: '错误配置', ownership: 'invalid' }
+// @ts-expect-error Hint behavior 只接受 auto 或 custom。
+const invalidHintBehavior: FormTableHint = { content: '错误配置', behavior: 'invalid' }
+// @ts-expect-error 旧 ownership API 不再接受。
+const legacyHintOwnership: FormTableHint = { content: '旧配置', ownership: 'custom' }
 const rows: TableRow[] = [{ name: 'Alice', profile: { city: '杭州' } }]
 
 interface PurchaseRow extends TableRow {
@@ -106,7 +108,7 @@ const columns: ColumnConfig[] = [{
       {
         fieldKey: 'actions',
         type: 'slot',
-        hint: ({ row }) => ({ content: String(row.name || ''), ownership: 'custom' }),
+        hint: ({ row }) => ({ content: String(row.name || ''), behavior: 'custom' }),
         component: {
           renderer: 'actions',
           props: ({ row }) => ({ disabled: Boolean(row.locked) })
@@ -116,13 +118,14 @@ const columns: ColumnConfig[] = [{
   }]
 }]
 void customValueHint
-void formattedFieldHint
+void invalidFormattedFieldHint
 void invalidExplicitHint
 void resolvedValueHint
 void resolvedContextHint
 void objectValueHint
 void invalidHintContent
-void invalidHintOwnership
+void invalidHintBehavior
+void legacyHintOwnership
 
 const cellSlotColumn: CellSlotColumnConfig = {
   key: 'actions-column',
@@ -215,14 +218,18 @@ const tooltipHintOptions: FormTableHintOptions = {
 const typedFieldFormatter: FormTableFieldHintFormatter<PurchaseRow> = ({ value, row }) => (
   `${row.name}:${String(value)}`
 )
-const typedFieldHintOptions: FormTableFieldHintOptions<PurchaseRow> = {
-  enabled: true,
-  formatter: typedFieldFormatter
-}
+const typedDefaultFieldHint: FormTableDefaultFieldHint<PurchaseRow> = typedFieldFormatter
 const typedHintOptions: FormTableHintOptions<PurchaseRow> = {
   mode: 'tooltip',
-  field: typedFieldHintOptions
+  field: typedDefaultFieldHint
 }
+const defaultStringHintOptions: FormTableHintOptions<PurchaseRow> = { field: true }
+void defaultStringHintOptions
+const legacyFieldHintOptions: FormTableHintOptions<PurchaseRow> = {
+  // @ts-expect-error 旧 field.enabled/formatter 对象不再接受。
+  field: { enabled: true, formatter: typedFieldFormatter }
+}
+void legacyFieldHintOptions
 void typedHintOptions
 // @ts-expect-error title 模式不接受 Tooltip 属性。
 const invalidTitleHintOptions: FormTableHintOptions = { mode: 'title', props: {} }
