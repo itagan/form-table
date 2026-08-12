@@ -61,7 +61,7 @@ FormTable
 
 | 功能 | 文档 | 可运行演示 |
 | --- | --- | --- |
-| Hint 提示模式 | [配置与使用](../features/native-title.md) | [`/hint-scenarios`](http://localhost:5173/hint-scenarios) |
+| Hint 提示体系 | [配置与使用](../features/hint.md) | [`/hint-scenarios`](http://localhost:5173/hint-scenarios) |
 | 自定义表头 | [配置与使用](../features/custom-header.md) | [`/hint-scenarios`](http://localhost:5173/hint-scenarios) |
 | 列级单元格 Slot | [`cellSlot` 专题](../features/cell-slot.md) | [`/cell-slot`](http://localhost:5173/cell-slot) |
 | 自定义字段组件 | [配置与使用](../features/custom-component.md) | [`/enterprise-components`](http://localhost:5173/enterprise-components) |

@@ -7,7 +7,7 @@
 - `headerHint/hint` 使用 `{ content, behavior }` 表达自动或自定义处理方式；标准化 Hint 统一提供给 component 动态配置、listener、表头和字段 Slot。
 - `hintOptions.field` 未配置或为 `false` 时无全局字段处理，`true` 默认字符串化，函数统一格式化；Item 不写或返回空值时继承、`false` 关闭、非空内容覆盖。
 - 单实例 Tooltip 增加嵌套 FormTable 隔离、表头键盘入口、Escape 关闭和 token 安全的 `aria-describedby` 管理，并将 Element UI 私有能力收口到版本适配层。
-- 新增独立 Hint 多场景 Demo 和选型速查，并列展示默认 title、单实例 Tooltip 透传、统一字段格式化、动态 Hint、键盘操作、底层原生 title、表头/字段 Slot、自定义组件、字段 Slot 自主管理 `el-tooltip`、嵌套表格、`renderHeader` 与 `cellSlot/showOverflowTooltip` 的职责边界；专题文档补充三层决策模型、属性优先级和常见业务配方。
+- 新增独立 Hint 多场景 Demo，并将专题文档收敛为 `/features/hint`：按记忆规则、解析矩阵、全局格式化、title/Tooltip、自定义展示、键盘 ARIA 和能力边界组织，可直接查阅默认值、字段覆盖及原始 title 恢复规则。
 - 新增可直接复制的常见操作列文档，覆盖末尾新增、当前行后插入、复制、删除、稳定行标识和校验清理；行列操作 Demo 同步改用 `cellSlot` 并增加后插按钮。
 - 安装文档仅保留 FormTable 的安装命令，并单独说明项目需要预先安装、注册及满足的 Vue 和 Element UI peer dependency 版本，以及低版本升级建议和 Vue 3 暂不支持的兼容边界；经版本矩阵验证后，最低版本调整为 Vue `2.7.1` 和 Element UI `2.4.9`，最佳建议版本明确为 Vue 2 生态最终版本 Vue `2.7.16` + Element UI `2.15.14`。
 - 新增与 `children` 互斥的列级 `cellSlot`，用于操作列和纯展示组合单元格；不需要虚拟 `fieldKey`，也不创建 Row/Item 表单包装节点，高级、议程和费用明细示例已同步迁移。

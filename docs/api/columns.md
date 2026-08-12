@@ -66,7 +66,7 @@ propPath: tableData.0.profile.city
 
 | 配置路径 | 配置与使用示例 |
 | --- | --- |
-| `columns[].headerHint`、Item `hint` | [Hint 提示模式](../features/native-title.md) |
+| `columns[].headerHint`、Item `hint` | [Hint 提示体系](../features/hint.md) |
 | `columns[].headerSlot` | [自定义表头](../features/custom-header.md) |
 | `columns[].cellSlot` | [`cellSlot` 列级单元格](../features/cell-slot.md) |
 | 各层 `visible` 与动态 props | [动态显隐与配置更新](../features/dynamic-configuration.md) |
