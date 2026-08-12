@@ -2,7 +2,10 @@ import { describe, expect, it, vi } from 'vitest'
 import type { Wrapper } from '@vue/test-utils'
 import type Vue from 'vue'
 import type { FormTableHintTooltipRef } from '../composables/useFormTableHintTooltip'
-import type { FormTableFieldRenderContext } from '../types.public'
+import type {
+  FormTableFieldRenderContext,
+  FormTableResolvedFieldContext
+} from '../types.public'
 import { mountFormTable } from './test-utils'
 
 const getHintTooltip = (wrapper: Wrapper<Vue>) => (
@@ -45,6 +48,63 @@ describe('FormTable hint modes', () => {
     expect(wrapper.find('.el-form-item').attributes('title')).toBe('姓名字段说明')
     expect(wrapper.find('[data-form-table-hint]').exists()).toBe(false)
     expect((wrapper.vm.$refs as Record<string, unknown>).hintTooltipRef).toBeUndefined()
+    wrapper.destroy()
+  })
+
+  it('formats hint=true through the table fieldFormatter and keeps explicit hints authoritative', async () => {
+    const formatter = vi.fn(({ fieldKey, value }: FormTableFieldRenderContext) => (
+      fieldKey === 'empty' ? null : `${fieldKey}：${String(value)}`
+    ))
+    const componentProps = vi.fn(({ hint }: FormTableResolvedFieldContext) => ({
+      'data-resolved-hint': hint?.content
+    }))
+    const wrapper = mountFormTable({
+      hintOptions: { mode: 'tooltip', fieldFormatter: formatter },
+      tableData: [{ name: 'Alice', dynamic: 'A', explicit: 'raw', empty: '' }],
+      columns: [{
+        label: '格式化字段',
+        children: [{ children: [{
+          fieldKey: 'name',
+          type: 'input',
+          hint: true,
+          component: { props: componentProps }
+        }, {
+          fieldKey: 'dynamic',
+          type: 'input',
+          hint: () => true as const
+        }, {
+          fieldKey: 'explicit',
+          type: 'input',
+          hint: '显式说明'
+        }, {
+          fieldKey: 'empty',
+          type: 'input',
+          hint: true,
+          formItemProps: { title: '应由空格式化结果清除' }
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    const formItems = wrapper.findAll('.el-form-item')
+    expect(formItems.at(0).attributes('data-form-table-hint')).toBe('name：Alice')
+    expect(formItems.at(1).attributes('data-form-table-hint')).toBe('dynamic：A')
+    expect(formItems.at(2).attributes('data-form-table-hint')).toBe('显式说明')
+    expect(formItems.at(3).attributes('data-form-table-hint')).toBeUndefined()
+    expect(formItems.at(3).attributes('title')).toBeUndefined()
+    expect(componentProps.mock.calls[0][0].hint).toEqual({
+      content: 'name：Alice',
+      ownership: 'table'
+    })
+    expect(formatter).toHaveBeenCalledTimes(3)
+
+    await wrapper.setProps({
+      tableData: [{ name: 'Bob', dynamic: 'B', explicit: 'changed', empty: '' }]
+    })
+    expect(formItems.at(0).attributes('data-form-table-hint')).toBe('name：Bob')
+    expect(formItems.at(1).attributes('data-form-table-hint')).toBe('dynamic：B')
+    expect(formItems.at(2).attributes('data-form-table-hint')).toBe('显式说明')
+    expect(formatter).toHaveBeenCalledTimes(6)
     wrapper.destroy()
   })
 
