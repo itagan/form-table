@@ -68,7 +68,7 @@ const columns = defineFormTableColumns<PurchaseRow>([{
 }])
 ```
 
-`createFormTable` 返回同一个运行时组件的强类型视图，`defineFormTableColumns` 原样返回列数组并约束配置回调。Vue 2 的模板类型检查器对类型转换组件的自定义 `v-model` 识别有限，泛型组件推荐使用等价的 `:table-data.sync="tableData"`；默认 FormTable 继续支持 `v-model`。`fieldKey` 仍为支持嵌套路径的字符串。
+`createFormTable` 返回同一个运行时组件的强类型视图，`defineFormTableColumns` 原样返回列数组并约束配置回调。泛型组件和默认 FormTable 都推荐使用 `v-model="tableData"`；显式受控场景仍可使用 `:table-data.sync` 或监听 `update:tableData`。`fieldKey` 仍为支持嵌套路径的字符串。
 
 Item 的 `key` 是可选渲染身份，`fieldKey` 是必填数据路径。动态增删、排序或重复使用同一 `fieldKey` 时建议提供稳定 `key`。
 

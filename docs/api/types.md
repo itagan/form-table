@@ -45,15 +45,15 @@ const columns = defineFormTableColumns<PurchaseRow>([{
 
 ```vue
 <FormTable
-  :table-data.sync="tableData"
+  v-model="tableData"
   :columns="columns"
   :row-key="row => row.id"
 />
 ```
 
-`createFormTable<TRow>()` 只把同一个 FormTable 运行时对象转换为 `FormTableComponent<TRow>`，不会创建包装组件或额外实例；它负责约束 `tableData/columns/rowKey` 以及 `update:tableData/field-change`。`defineFormTableColumns<TRow>()` 原样返回数组，负责让 Column、Row、Item 及其动态上下文获得 `TRow`。
+`createFormTable<TRow>()` 只把同一个 FormTable 运行时对象转换为 `FormTableComponent<TRow>`，不会创建包装组件或额外实例；它负责约束 `v-model/tableData/columns/rowKey` 以及 `update:tableData/field-change`。`defineFormTableColumns<TRow>()` 原样返回数组，负责让 Column、Row、Item 及其动态上下文获得 `TRow`。
 
-Vue 2.7 当前的模板类型检查器无法从类型转换后的组件读取自定义 `model` 声明，可能把 `v-model` 误判为 `modelValue`。泛型组件在模板中推荐使用语义完全相同且可正确检查的 `:table-data.sync`；默认导出的通用 FormTable 仍可使用 `v-model`。
+泛型组件与默认 FormTable 都推荐使用 `v-model="tableData"`。类型入口内部适配了 Vue 2 Volar 对无参数 `v-model` 的模板映射；这只是声明层适配，运行时仍由组件的 `model: { prop: 'tableData', event: 'update:tableData' }` 驱动。需要显式处理回写时仍可使用 `:table-data.sync` 或 `@update:tableData`。
 
 `ColumnConfig`、Row/Item 配置、上下文、listener、事件载荷与 `FormTableProps` 都接受默认行泛型；省略泛型时继续使用原有 `TableRow`。`fieldKey` 仍是字符串，不执行类型级嵌套路径推导。
 
