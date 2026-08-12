@@ -12,7 +12,8 @@
         v-model="tableData"
         :columns="columns"
         :form-props="{ size: 'small' }"
-        :table-props="{ border: true, rowKey: 'id' }"
+        row-key="id"
+        :table-props="{ border: true }"
         :hint-options="{ mode: 'tooltip' }"
         @field-change="handleFieldChange"
         @selection-change="selection = $event"
@@ -100,8 +101,8 @@ const selection = ref<TableRow[]>([])
 const formTableRef = ref<FormTableExpose>()
 
 const columns: ColumnConfig[] = [
-  { label: '', props: { type: 'selection', width: 48 }, children: [] },
-  { label: '序号', props: { type: 'index', width: 64, align: 'center' }, children: [] },
+  { type: 'selection', props: { width: 48 } },
+  { type: 'index', label: '序号', props: { width: 64, align: 'center' } },
   {
     label: '联系人信息',
     headerSlot: 'contact-header',

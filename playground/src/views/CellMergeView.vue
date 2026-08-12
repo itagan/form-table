@@ -26,6 +26,7 @@
       <FormTable
         :table-data="tableData"
         :columns="columns"
+        row-key="id"
         :table-props="tableProps"
         :form-props="{ size: 'small' }"
         @update:tableData="handleTableDataUpdate"
@@ -137,7 +138,6 @@ const spanMethod = ({ row, column, rowIndex }: SpanMethodContext): CellSpan | un
 
 const tableProps = computed(() => ({
   border: true,
-  rowKey: 'id',
   showHeader: showHeader.value,
   spanMethod
 }))

@@ -4,13 +4,14 @@
 
 ```text
 columns[]                                  ColumnConfig
+├─ type: selection | index              NativeColumnConfig
 ├─ children[]                            RowConfig
 │  └─ children[]                     FormItemConfig
 │     └─ component                   FieldComponentConfig
 └─ cellSlot                              列级单元格 Slot
 ```
 
-`columns[].children[]` 和 `columns[].cellSlot` 互斥。字段列使用 `children[]`；不需要字段路径和校验的单元格可使用 [`cellSlot`](../features/cell-slot.md)。
+`NativeColumnConfig`、`children[]` 和 `cellSlot` 是三条互斥路径。字段列使用 `children[]`；不需要字段路径和校验的单元格可使用 [`cellSlot`](../features/cell-slot.md)。
 
 ## ColumnConfig
 
@@ -26,7 +27,14 @@ columns[]                                  ColumnConfig
 | `columns[].children` | `RowConfig[]` | 与 `cellSlot` 互斥 | — | 进入 Row / Item 字段链路 |
 | `columns[].cellSlot` | `string` | 与 `children` 互斥 | `row, index, columnConfig, updateRow` | 直接渲染单元格 |
 
-`columns[].props` 可传入 `width/minWidth/fixed/align/type` 等 Element UI 原生属性。`selection/index/expand` 功能列使用 `columns[].props.type`，不与 `cellSlot` 混用。
+`columns[].props` 可传入 `width/minWidth/fixed/align` 等 Element UI 原生属性，但不能传 `type`。无需字段渲染链路的功能列使用顶层判别字段：
+
+```ts
+{ type: 'selection', props: { width: 48 } }
+{ type: 'index', label: '序号', props: { width: 64 } }
+```
+
+原生列的 `label` 可选，且不接受 `children/cellSlot/headerSlot/headerProps/headerHint`。`expand` 尚未开放，后续需配合专用展开内容 API 设计。
 
 ## RowConfig
 

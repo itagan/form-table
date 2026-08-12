@@ -23,7 +23,8 @@
       ref="formTableRef"
       v-model="tableData"
       :columns="columns"
-      :table-props="{ border: true, rowKey: '_rowKey' }"
+      row-key="_rowKey"
+      :table-props="{ border: true }"
     >
       <template #row-actions="{ row, index }">
         <el-button type="text" @click="insertAfter(index)">后插一行</el-button>

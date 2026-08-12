@@ -46,7 +46,7 @@ input/slot setValue
 → field-change
 ```
 
-`tableData` 是受控数据。调用方收到 `update:tableData` 后必须立即回写；后端保存可以独立防抖或等待确认，但不能延迟父组件接收新数组。异步 listener 期间可能重建行对象时，可通过稳定 `tableProps.rowKey` 在最新数据中重新定位原行。
+`tableData` 是受控数据。调用方收到 `update:tableData` 后必须立即回写；后端保存可以独立防抖或等待确认，但不能延迟父组件接收新数组。异步 listener 期间可能重建行对象时，可通过稳定 `rowKey` 在最新数据中重新定位原行。
 
 组件不再维护 `formData.tableData`、默认行、行增删复制移动或递归字段联动。调用方监听 `field-change` 并直接维护自己的数组。
 

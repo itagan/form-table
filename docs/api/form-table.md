@@ -6,6 +6,7 @@
 | --- | --- | --- | --- | --- |
 | `tableData` | `TableRow[]` | 必填 | `[]` | 根组件 `v-model` 对应 prop；也是 `el-table.data` 的唯一数据源 |
 | `columns` | `ColumnConfig[]` | 必填 | `[]` | 表格列、布局和字段渲染配置 |
+| `rowKey` | `string \| ((row: TRow) => FormTableValue)` | 可选 | — | FormTable 与 Element Table 共用的稳定行身份 |
 | `formProps` | `ComponentProps` | 可选 | `{}` | 透传给 `el-form` |
 | `tableProps` | `ComponentProps` | 可选 | `{}` | 透传给 `el-table` |
 | `hintOptions` | `FormTableHintOptions<TRow>` | 可选 | `{ mode: 'title' }` | 整表 Hint 展示策略及字段统一格式化 |
@@ -50,9 +51,8 @@ const formProps = {
 
 const tableProps = {
   border: true,
-  rowKey: 'id',
   spanMethod
 }
 ```
 
-`tableProps.rowKey` 在异步字段回调或 `cellSlot.updateRow` 中用于重新定位原数据行。rowKey 必须唯一、稳定，不应使用数组下标。不同 key 的职责和配置时机见[稳定身份与异步安全](../features/stable-identity.md)。
+`rowKey` 是 FormTable 顶层 Prop，不属于 `tableProps`。它同时传给 Element Table，并在异步字段回调或 `cellSlot.updateRow` 中用于重新定位原数据行。rowKey 必须唯一、稳定，不应使用数组下标。不同 key 的职责和配置时机见[稳定身份与异步安全](../features/stable-identity.md)。

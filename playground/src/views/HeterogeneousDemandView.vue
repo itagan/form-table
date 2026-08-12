@@ -24,6 +24,7 @@
         ref="formTableRef"
         :table-data="tableData"
         :columns="columns"
+        row-key="_rowKey"
         :form-props="{ size: 'small' }"
         :table-props="tableProps"
         @update:tableData="replaceTableData"
@@ -157,7 +158,6 @@ const spanMethod = ({ column, rowIndex }: SpanMethodContext): CellSpan | undefin
 
 const tableProps = computed(() => ({
   border: true,
-  rowKey: '_rowKey',
   spanMethod
 }))
 

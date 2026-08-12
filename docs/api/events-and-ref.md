@@ -61,7 +61,7 @@ function handleTableDataUpdate(nextTableData) {
 </template>
 ```
 
-`index` 是渲染快照，适合立即执行的页面操作；异步数据更新应使用已绑定当前行的 `updateRow`，并为表格配置唯一稳定的 `tableProps.rowKey`。`updateRow` 发出 `update:tableData`，并为每个实际变化的 patch 字段发出 `field-change`。
+`index` 是渲染快照，适合立即执行的页面操作；异步数据更新应使用已绑定当前行的 `updateRow`，并为表格配置唯一稳定的 `rowKey`。`updateRow` 发出 `update:tableData`，并为每个实际变化的 patch 字段发出 `field-change`。
 
 `cellSlot` 不提供 `tableData/columnIndex/fieldKey/value/setValue/rowConfig/itemConfig/propPath/component`。需要字段值、字段校验或已解析组件配置时，应改用 `type: 'slot'` 字段 Slot。
 
@@ -112,7 +112,7 @@ component: {
 }
 ```
 
-`setValue` 与 `updateRow` 可以在同一同步回调中连续调用，后一次更新会基于前一次结果继续合并。跨异步边界后始终以父组件最新传回的 `tableData` 为准；配置 `tableProps.rowKey` 后会重新定位触发事件的原数据行。目标行已删除或无法可靠定位时不会发出更新。
+`setValue` 与 `updateRow` 可以在同一同步回调中连续调用，后一次更新会基于前一次结果继续合并。跨异步边界后始终以父组件最新传回的 `tableData` 为准；配置 `rowKey` 后会重新定位触发事件的原数据行。目标行已删除或无法可靠定位时不会发出更新。
 
 ```vue
 <template #score-editor="{ value, setValue, updateRow, component }">
@@ -136,7 +136,6 @@ component: {
 
 ```ts
 await formTableRef.value?.validate()
-formTableRef.value?.resetFields()
 formTableRef.value?.clearValidate()
 formTableRef.value?.getFormRef()
 formTableRef.value?.getTableRef()
@@ -144,9 +143,7 @@ formTableRef.value?.getTableRef()
 
 `validate()` 使用 Element UI 完整规则并统一返回 `Promise<boolean>`；校验失败时返回 `false`，不会要求调用方捕获 rejected Promise。
 
-`resetFields()` 保持 Element UI 原生语义，直接调用 `el-form.resetFields()`。由于 Form model 引用了传入的 `tableData`，原生重置会直接修改对应字段，不会触发 `update:tableData` 或 `field-change`。
-
-受控场景推荐由调用方明确保存和恢复业务初始数据，再清除校验状态：
+FormTable 不公开数据重置方法。受控场景由调用方明确保存和恢复业务初始数据，再清除校验状态：
 
 ```ts
 const initialTableData = cloneDeep(tableData.value)
@@ -158,7 +155,7 @@ const resetTable = async () => {
 }
 ```
 
-这样可以由新增、编辑等业务场景自行决定是否删除新增行、恢复已删除行或只重置部分字段。单字段校验、滚动等未封装能力仍可通过原生 Form Ref 使用：
+这样可以由新增、编辑等业务场景自行决定是否删除新增行、恢复已删除行或只重置部分字段。原生 `getFormRef().resetFields()` 仍可作为底层逃生口，但它会直接修改 `tableData` 且不触发受控更新事件。单字段校验、滚动等未封装能力也可通过原生 Form Ref 使用：
 
 ```ts
 formTableRef.value

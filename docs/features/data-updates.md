@@ -144,7 +144,7 @@ function updateFromServer(nextRows) {
 <FormTable
   v-model="tableData"
   :columns="columns"
-  :table-props="{ rowKey: 'id' }"
+  row-key="id"
 />
 ```
 

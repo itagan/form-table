@@ -100,7 +100,8 @@
         v-model="customRows"
         :columns="customColumns"
         :form-props="formProps"
-        :table-props="{ ...tableProps, rowKey: 'id' }"
+        row-key="id"
+        :table-props="tableProps"
         :hint-options="{ mode: 'tooltip', props: { placement: 'top' } }"
       >
         <template #custom-header="{ label }">
@@ -213,7 +214,8 @@
         v-model="behaviorRows"
         :columns="behaviorColumns"
         :form-props="formProps"
-        :table-props="{ ...tableProps, rowKey: 'id' }"
+        row-key="id"
+        :table-props="tableProps"
         :hint-options="{ mode: 'tooltip' }"
       >
         <template #owned-slot-field="{ value, setValue, hint }">

@@ -33,6 +33,7 @@
         ref="formTableRef"
         :table-data="tableData"
         :columns="columns"
+        row-key="_rowKey"
         :form-props="{ size: 'small' }"
         :table-props="tableProps"
         @update:tableData="replaceTableData"
@@ -179,7 +180,7 @@ const spanMethod = ({ column, rowIndex }: SpanMethodContext) => {
   return rowspan > 0 ? { rowspan, colspan: 1 } : { rowspan: 0, colspan: 0 }
 }
 
-const tableProps = computed(() => ({ border: true, rowKey: '_rowKey', spanMethod }))
+const tableProps = computed(() => ({ border: true, spanMethod }))
 
 const columns: ColumnConfig[] = [
   {

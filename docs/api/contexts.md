@@ -68,6 +68,6 @@ Item 未声明 Hint 或返回空值，且 `hintOptions.field` 是函数时，该
 
 ## 快照与异步更新
 
-`row/index/value` 表示触发或渲染当时的快照。`setValue/updateRow` 会绑定当时的数据行。配置唯一稳定的 `tableProps.rowKey` 后，异步调用会在最新 `tableData` 中重新定位原行；目标行已删除、rowKey 缺失或重复时忽略更新。
+`row/index/value` 表示触发或渲染当时的快照。`setValue/updateRow` 会绑定当时的数据行。配置唯一稳定的 `rowKey` 后，异步调用会在最新 `tableData` 中重新定位原行；目标行已删除、rowKey 缺失或重复时忽略更新。
 
 具体更新方式和事件结果见[数据更新与受控回写](../features/data-updates.md)，各类 key 的职责见[稳定身份与异步安全](../features/stable-identity.md)。

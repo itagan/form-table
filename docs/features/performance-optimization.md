@@ -88,7 +88,8 @@ const columns = [
 <FormTable
   v-model="tableData"
   :columns="columns"
-  :table-props="{ rowKey: 'id', height: 520 }"
+  row-key="id"
+  :table-props="{ height: 520 }"
 />
 ```
 
@@ -264,7 +265,7 @@ const columns = [{
 
 ## 上线前检查清单
 
-- [ ] `tableProps.rowKey` 唯一且稳定。
+- [ ] `rowKey` 唯一且稳定。
 - [ ] Column、Row、Item 的 `key` 不随排序或显隐变化。
 - [ ] 纯展示列没有创建无意义的 FormItem。
 - [ ] `columns` 和大型 options 没有在每次渲染时重建。

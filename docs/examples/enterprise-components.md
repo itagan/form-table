@@ -462,9 +462,9 @@ export function createPurchaseColumns(
       :table-data="tableData"
       :columns="columns"
       :form-props="{ size: 'small', labelPosition: 'top' }"
+      row-key="id"
       :table-props="{
         border: true,
-        rowKey: 'id',
         class: 'purchase-detail-table'
       }"
       @update:tableData="handleTableDataUpdate"
@@ -709,7 +709,7 @@ Adapter 负责技术协议归一化，columns listener 负责当前采购页面�
 ## 性能与维护建议
 
 - `columns` 使用工厂创建一次，不要直接写在模板表达式中。
-- 为表格配置唯一稳定的 `tableProps.rowKey`；异步组件回调后仍可正确定位原行。
+- 为表格配置唯一稳定的 `rowKey`；异步组件回调后仍可正确定位原行。
 - 动态 `visible/props/options` 保持纯函数，不在求值过程中修改行数据。
 - 全局组件使用字符串 renderer；局部组件直接传组件对象，避免为了 FormTable 扩大全局注册范围。
 - `component.model` 只描述稳定的技术协议，业务字段联动放在 `component.listeners`。

@@ -28,7 +28,7 @@
 | --- | --- | --- | --- |
 | [远程 Schema 与本地增强](./remote-schema.md) | 可序列化 `ColumnConfig[]` | 页面增强组件、事件和 Slot | [`/remote-schema`](http://localhost:5173/remote-schema) |
 | [常见操作列与行增删](./common-row-actions.md) | `cellSlot`、`tableData`、`rowKey` | 末尾新增、后插、复制、删除 | [`/row-column-operations`](http://localhost:5173/row-column-operations) |
-| [行列操作与异步提交](./row-column-operations.md) | `tableData`、`columns`、`tableProps.rowKey` | 页面业务函数 | [`/row-column-operations`](http://localhost:5173/row-column-operations) |
+| [行列操作与异步提交](./row-column-operations.md) | `tableData`、`columns`、`rowKey` | 页面业务函数 | [`/row-column-operations`](http://localhost:5173/row-column-operations) |
 
 ## 性能
 

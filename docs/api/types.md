@@ -2,12 +2,12 @@
 
 包入口导出：
 
-- `ColumnConfig`、`LayoutColumnConfig`、`CellSlotColumnConfig`、`RowConfig`、`FormItemConfig`
+- `ColumnConfig`、`LayoutColumnConfig`、`CellSlotColumnConfig`、`NativeColumnConfig`、`RowConfig`、`FormItemConfig`
 - `BuiltinFormItemConfig`、`ComponentFormItemConfig`、`SlotFormItemConfig`
 - `FieldComponentConfig`、`FieldModelConfig`、`FieldRendererResolver`、`BuiltinFormItemType`、`FormItemType`
 - `FormItemOption`、`OptionPropsConfig`、`ResolvedComponentConfig`、`ResolvedHeaderConfig`
 - `FormTableHint`、`FormTableFieldHint`、`FormTableHintConfig`、`FormTableFieldHintFormatter`、`FormTableDefaultFieldHint`、`ResolvedFormTableHint`、`FormTableHintOptions`
-- `TableRow`、`FormTableRecord`、`FormTableProps`
+- `TableRow`、`FormTableRecord`、`FormTableProps`、`FormTableRowKey`、`FormTableTableProps`、`FormTableColumnProps`
 - `FormTableTableContext`、`FormTableColumnContext`、`FormTableRowContext`、`FormTableFieldRenderContext`
 - `FormTableResolvedFieldContext`、`FormTableFieldContext`、`FormTableSlotContext`、`FormTableCellSlotContext`
 - `FormTableFieldChangePayload`、`FormTableHeaderSlotContext`
@@ -47,10 +47,10 @@ const columns = defineFormTableColumns<PurchaseRow>([{
 列配置通过联合类型互斥：
 
 ```ts
-type ColumnConfig = LayoutColumnConfig | CellSlotColumnConfig
+type ColumnConfig = LayoutColumnConfig | CellSlotColumnConfig | NativeColumnConfig
 ```
 
-`LayoutColumnConfig` 使用 `children` 进入 Row/Item 字段渲染链路；`CellSlotColumnConfig` 使用 `cellSlot` 直接渲染单元格，不接受 `children`，也不需要 `fieldKey`。
+`LayoutColumnConfig` 使用 `children` 进入 Row/Item 字段渲染链路；`CellSlotColumnConfig` 使用 `cellSlot` 直接渲染单元格；`NativeColumnConfig` 使用顶层 `type: 'selection' | 'index'`。三种列模式互斥。
 
 ```ts
 interface CellSlotColumnConfig extends BaseColumnConfig {
