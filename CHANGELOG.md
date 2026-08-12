@@ -5,6 +5,7 @@
 ### Improved
 
 - `headerHint/hint` 使用 `{ content, ownership }` 表达展示所有权；标准化 Hint 统一提供给 component 动态配置、listener、表头和字段 Slot。
+- Item 支持 `hint: true`，通过表级 `hintOptions.fieldFormatter` 复用字段内容格式化逻辑；显式 Hint 继续保持最高优先级。
 - 单实例 Tooltip 增加嵌套 FormTable 隔离、表头键盘入口、Escape 关闭和 token 安全的 `aria-describedby` 管理，并将 Element UI 私有能力收口到版本适配层。
 - 新增独立 Hint 多场景 Demo，并列展示默认 title、单实例 Tooltip 透传、动态 Hint、底层原生 title、表头/字段 Slot、自定义组件、字段 Slot 自主管理 `el-tooltip`、`renderHeader` 与 `cellSlot/showOverflowTooltip` 的职责边界；补充 `ownership: 'custom'` 在内置字段、component、Slot 及无 Hint 场景下的所有权矩阵和可复制配置。
 - 新增可直接复制的常见操作列文档，覆盖末尾新增、当前行后插入、复制、删除、稳定行标识和校验清理；行列操作 Demo 同步改用 `cellSlot` 并增加后插按钮。

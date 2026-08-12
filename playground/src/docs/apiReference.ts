@@ -24,7 +24,8 @@ export const apiGroups: ApiGroup[] = [
       { path: 'columns', type: 'ColumnConfig[]', defaultValue: '必填', target: '布局与渲染配置', description: 'Column → Row → Item 配置树。' },
       { path: 'formProps', type: 'Record<string, unknown>', defaultValue: '{}', target: 'el-form', description: '透传 Element Form 属性。' },
       { path: 'tableProps', type: 'Record<string, unknown>', defaultValue: '{}', target: 'el-table', description: '透传 Element Table 属性；异步更新建议配置 rowKey。' },
-      { path: 'hintOptions', type: 'FormTableHintOptions', defaultValue: "{ mode: 'title' }", target: '表头与字段 Hint', description: '整表统一选择原生 title 或单实例 Tooltip；tooltip 模式通过 props 配置 el-tooltip。' },
+      { path: 'hintOptions', type: 'FormTableHintOptions', defaultValue: "{ mode: 'title' }", target: '表头与字段 Hint', description: '整表统一选择展示模式；fieldFormatter 为 hint: true 的字段生成内容。' },
+      { path: 'hintOptions.fieldFormatter', type: '(context: FormTableFieldRenderContext) => string | null | undefined', defaultValue: 'String(value)', target: 'hint: true 的字段', description: '统一格式化字段 Hint；显式字符串、对象和表头 Hint 不经过此回调。', context: 'FieldContext' },
       { path: 'loading', type: 'boolean', defaultValue: 'false', target: 'el-table v-loading', description: '表格加载状态。' }
     ]
   },
@@ -59,7 +60,7 @@ export const apiGroups: ApiGroup[] = [
       { path: 'columns[].children[].children[].visible', type: 'boolean | (context) => boolean', defaultValue: 'true', target: '字段显隐', description: '按字段上下文控制渲染。', context: 'ItemContext' },
       { path: 'columns[].children[].children[].colProps', type: 'Object | (context) => Object', defaultValue: '{}', target: 'el-col', description: 'span、offset 等栅格属性。', context: 'ItemContext' },
       { path: 'columns[].children[].children[].formItemProps', type: 'Object | (context) => Object', defaultValue: '{}', target: 'el-form-item', description: 'label、rules 等；校验 prop 自动生成。', context: 'ItemContext' },
-      { path: 'columns[].children[].children[].hint', type: 'FormTableHint | (context) => FormTableHint', defaultValue: '—', target: 'el-form-item / 字段配置', description: "字符串默认由表格托管；ownership: 'custom' 对所有字段类型关闭 FormTable 提示。", context: 'ItemContext' },
+      { path: 'columns[].children[].children[].hint', type: 'FormTableFieldHint | (context) => FormTableFieldHint', defaultValue: '—', target: 'el-form-item / 字段配置', description: "true 使用 fieldFormatter；显式内容按 ownership 处理且不再格式化。", context: 'ItemContext' },
       { path: 'columns[].children[].children[].component', type: 'ComponentConfig', defaultValue: '{}', target: '实际字段组件', description: '组件、绑定协议、属性、事件和选项。' }
     ]
   },

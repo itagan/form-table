@@ -40,7 +40,7 @@
           </div>
           <code>hintOptions.props</code>
         </div>
-        <p>表头与全部字段共享一个 Tooltip；修改输入值可以观察动态 hint 同步更新。</p>
+        <p>表头与全部字段共享一个 Tooltip；两个字段通过 <code>hint: true</code> 复用表级 formatter。</p>
         <FormTable
           v-model="tooltipRows"
           :columns="tooltipColumns"
@@ -50,7 +50,7 @@
         />
         <ul class="scenario-notes">
           <li><code>placement: 'bottom-start'</code>、浅色主题、自定义 popper class。</li>
-          <li>清空“动态内容”后 hint 返回空字符串，浮层不会显示。</li>
+          <li>修改输入值可以观察统一格式化后的动态 Hint；清空后浮层不会显示。</li>
         </ul>
       </article>
     </section>
@@ -342,7 +342,7 @@ const titleColumns: ColumnConfig[] = [{
 
 const tooltipRows = ref<TableRow[]>([{
   dynamicText: '提示会随字段值变化',
-  fixedText: '固定说明'
+  secondaryText: '第二个字段复用相同 formatter'
 }])
 
 const tooltipHintOptions: FormTableHintOptions = {
@@ -352,7 +352,8 @@ const tooltipHintOptions: FormTableHintOptions = {
     effect: 'light',
     openDelay: 80,
     popperClass: 'hint-scenarios-popper'
-  }
+  },
+  fieldFormatter: ({ value }) => value ? `当前完整内容：${String(value)}` : ''
 }
 
 const tooltipColumns: ColumnConfig[] = [{
@@ -365,14 +366,14 @@ const tooltipColumns: ColumnConfig[] = [{
       fieldKey: 'dynamicText',
       type: 'input',
       colProps: { span: 12 },
-      hint: ({ value }) => value ? `当前完整内容：${String(value)}` : '',
+      hint: true,
       component: { props: { clearable: true, placeholder: '输入或清空内容' } }
     }, {
-      fieldKey: 'fixedText',
+      fieldKey: 'secondaryText',
       type: 'input',
       colProps: { span: 12 },
-      hint: '固定字段说明：无需为每个字段创建 el-tooltip',
-      component: { props: { placeholder: '悬停查看固定提示' } }
+      hint: true,
+      component: { props: { placeholder: '同样由 fieldFormatter 格式化' } }
     }]
   }]
 }]
@@ -588,7 +589,8 @@ const configurationExample = `<FormTable
       effect: 'light',
       openDelay: 80,
       popperClass: 'hint-scenarios-popper'
-    }
+    },
+    fieldFormatter: ({ value }) => value ? \`当前完整内容：\${String(value)}\` : ''
   }"
 >
   <!-- ownership: 'custom' 时，Slot 从配置解析结果自行渲染 Tooltip -->
@@ -609,6 +611,9 @@ const columns = [{
     })
   }] }]
 }]
+
+// 多个普通字段只需配置 hint: true，共用表级 fieldFormatter。
+const formattedItem = { fieldKey: 'remark', type: 'input', hint: true }
 
 // 内容完全不属于 Schema 时，也可以省略 hint，在 Slot 内独立处理。`
 </script>

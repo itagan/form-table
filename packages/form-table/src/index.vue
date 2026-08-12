@@ -63,6 +63,7 @@ import type {
   FormTableFieldChangePayload,
   FormTableHintMode,
   FormTableHintModeContext,
+  FormTableHintFormatterContext,
   FormTableHintOptions,
   FormTableSlots,
   FormTableTableContext,
@@ -72,6 +73,7 @@ import type {
 } from './types'
 import {
   FORM_TABLE_CONTEXT_KEY,
+  FORM_TABLE_HINT_FORMATTER_KEY,
   FORM_TABLE_HINT_MODE_KEY,
   FORM_TABLE_SLOTS_KEY,
   FORM_TABLE_UPDATE_KEY
@@ -118,6 +120,7 @@ const hintTooltipContent = ref('')
 /** hintOptions 是整个表格唯一的提示展示策略。 */
 const hintMode = computed<FormTableHintMode>(() => props.hintOptions.mode || 'title')
 const isTooltipHintMode = computed(() => hintMode.value === 'tooltip')
+const hintFormatter = computed(() => props.hintOptions.fieldFormatter)
 
 /** Tooltip 的内容、引用和显隐由内部统一控制，不允许透传属性改变。 */
 const resolvedHintTooltipProps = computed(() => {
@@ -189,6 +192,7 @@ provide(FORM_TABLE_CONTEXT_KEY, formTableContext)
 provide(FORM_TABLE_UPDATE_KEY, updateApi)
 provide(FORM_TABLE_SLOTS_KEY, slots as FormTableSlots)
 provide(FORM_TABLE_HINT_MODE_KEY, hintMode as FormTableHintModeContext)
+provide(FORM_TABLE_HINT_FORMATTER_KEY, hintFormatter as FormTableHintFormatterContext)
 
 /**
  * 将 Element UI 的 Promise/callback 两种校验方式统一为 Promise<boolean>，
