@@ -4,6 +4,8 @@ Vue 2.7 + Element UI 的表格内表单组件。组件只负责布局、字段�
 
 ## 安装与版本要求
 
+> 包尚未发布到 npm。以下命令是首次发布后的安装方式；发布前请通过仓库 workspace 或 `npm pack` 生成的本地 tarball 验证。
+
 ```bash
 pnpm add @itagan/form-table
 ```
@@ -40,16 +42,17 @@ const columns = [{
 }]
 ```
 
-需要让动态配置回调获得具体业务行类型时，可使用零运行时开销的泛型助手：
+需要让组件 Props、事件和动态配置回调共享业务行类型时，组合使用两个零运行时开销的泛型助手：
 
 ```ts
-import { defineFormTableColumns, type TableRow } from '@itagan/form-table'
+import { createFormTable, defineFormTableColumns, type TableRow } from '@itagan/form-table'
 
 interface PurchaseRow extends TableRow {
   name: string
   amount: number
 }
 
+const FormTable = createFormTable<PurchaseRow>()
 const columns = defineFormTableColumns<PurchaseRow>([{
   label: '采购信息',
   visible: ({ tableData }) => tableData.some(row => row.amount > 0),
@@ -65,7 +68,7 @@ const columns = defineFormTableColumns<PurchaseRow>([{
 }])
 ```
 
-不使用该助手的现有 `ColumnConfig[]` 写法保持兼容；`fieldKey` 仍为支持嵌套路径的字符串。
+`createFormTable` 返回同一个运行时组件的强类型视图，`defineFormTableColumns` 原样返回列数组并约束配置回调。Vue 2 的模板类型检查器对类型转换组件的自定义 `v-model` 识别有限，泛型组件推荐使用等价的 `:table-data.sync="tableData"`；默认 FormTable 继续支持 `v-model`。`fieldKey` 仍为支持嵌套路径的字符串。
 
 Item 的 `key` 是可选渲染身份，`fieldKey` 是必填数据路径。动态增删、排序或重复使用同一 `fieldKey` 时建议提供稳定 `key`。
 

@@ -50,6 +50,8 @@ pnpm release:check
 
 ## npm 包使用
 
+> `@itagan/form-table` 尚未发布到 npm。以下安装命令在首次发布后生效；当前请通过本仓库 workspace 运行示例，或使用 `npm pack` 生成的本地 tarball 验证。
+
 ```bash
 pnpm add @itagan/form-table
 ```

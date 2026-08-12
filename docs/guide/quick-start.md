@@ -2,6 +2,8 @@
 
 ## 安装
 
+> `@itagan/form-table` 尚未发布到 npm。以下安装方式将在首次发布后生效。当前开发和验证请使用仓库 workspace，或在 `packages/form-table` 执行 `npm pack` 后安装生成的本地 tarball。
+
 ```bash
 pnpm add @itagan/form-table
 ```
