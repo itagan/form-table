@@ -6,7 +6,7 @@
 - `BuiltinFormItemConfig`、`ComponentFormItemConfig`、`SlotFormItemConfig`
 - `FieldComponentConfig`、`FieldModelConfig`、`FieldRendererResolver`、`BuiltinFormItemType`、`FormItemType`
 - `FormItemOption`、`OptionPropsConfig`、`ResolvedComponentConfig`、`ResolvedHeaderConfig`
-- `FormTableHint`、`FormTableFieldHint`、`FormTableHintConfig`、`FormTableFieldHintFormatter`、`FormTableFieldHintOptions`、`ResolvedFormTableHint`、`FormTableHintOptions`
+- `FormTableHint`、`FormTableFieldHint`、`FormTableHintConfig`、`FormTableFieldHintFormatter`、`FormTableDefaultFieldHint`、`ResolvedFormTableHint`、`FormTableHintOptions`
 - `TableRow`、`FormTableRecord`、`FormTableProps`
 - `FormTableTableContext`、`FormTableColumnContext`、`FormTableRowContext`、`FormTableFieldRenderContext`
 - `FormTableResolvedFieldContext`、`FormTableFieldContext`、`FormTableSlotContext`、`FormTableCellSlotContext`
@@ -134,8 +134,8 @@ interface FieldModelConfig {
 
 `row/tableData` 与 `columnConfig/rowConfig/itemConfig` 在回调类型中采用浅层只读约束；运行时不会冻结原对象。字段更新使用 `setValue` 或 `updateRow`，配置调整由调用方替换 `columns`。
 
-表头 slot 接收 `tableData/label/columnIndex/columnConfig/header`。`columnIndex` 是动态显隐过滤后的可见列下标，不保证等于原始 `columns` 数组下标；`header.props` 是已解析属性，`header.hint` 是 `ResolvedFormTableHint | null`。只有 `ownership: 'table'` 的 Hint 会由统一包装节点自动应用。
+表头 slot 接收 `tableData/label/columnIndex/columnConfig/header`。`columnIndex` 是动态显隐过滤后的可见列下标，不保证等于原始 `columns` 数组下标；`header.props` 是已解析属性，`header.hint` 是 `ResolvedFormTableHint | null`。只有 `behavior: 'auto'` 的 Hint 会由统一包装节点自动应用。
 
 `ColumnConfig.headerProps` 传给默认或 Slot 表头的 `.form-table-column-header`，可配置原生 `title`、class、style 和 aria 属性。存在 `column.props.renderHeader` 时由 Element UI 完全接管，FormTable 不包装也不应用 `headerProps/headerHint`。
 
-`ColumnConfig.headerHint` 接受显式 `FormTableHint`；Item 的 `hint` 使用 `FormTableFieldHint`，额外支持布尔值。字符串会标准化为 `{ content, ownership: 'table' }`，对象缺省 `ownership` 时也由 FormTable 托管。未声明 Hint 时可继承 `FormTableHintOptions.field`；`true` 强制使用 formatter，`false` 退出 Hint 系统并保留底层属性。显式内容不经过 formatter。字段 component 动态配置、listener、字段 Slot 与表头 Slot 均可读取标准化结果；空字符串、`null/undefined` 不产生自动提示。
+`ColumnConfig.headerHint` 接受显式 `FormTableHint`；Item 的 `hint` 使用 `FormTableFieldHint`，额外支持 `false`。字符串会标准化为 `{ content, behavior: 'auto' }`。未声明或空 Hint 继承 `FormTableHintOptions.field`，`false` 关闭，非空内容覆盖。字段 component 动态配置、listener、字段 Slot 与表头 Slot 均可读取标准化结果。

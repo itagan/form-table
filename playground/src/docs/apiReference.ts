@@ -25,8 +25,7 @@ export const apiGroups: ApiGroup[] = [
       { path: 'formProps', type: 'Record<string, unknown>', defaultValue: '{}', target: 'el-form', description: '透传 Element Form 属性。' },
       { path: 'tableProps', type: 'Record<string, unknown>', defaultValue: '{}', target: 'el-table', description: '透传 Element Table 属性；异步更新建议配置 rowKey。' },
       { path: 'hintOptions', type: 'FormTableHintOptions', defaultValue: "{ mode: 'title' }", target: '表头与字段 Hint', description: '整表统一选择展示模式，并可配置字段默认策略。' },
-      { path: 'hintOptions.field.enabled', type: 'boolean', defaultValue: 'false', target: '未声明 hint 的字段', description: '开启后普通字段自动使用统一 formatter；不影响表头。' },
-      { path: 'hintOptions.field.formatter', type: '(context: FormTableFieldRenderContext) => string | null | undefined', defaultValue: 'String(value)', target: '全局继承或 hint: true 的字段', description: '统一格式化字段 Hint；显式字符串、对象和表头 Hint 不经过此回调。', context: 'FieldContext' },
+      { path: 'hintOptions.field', type: 'true | FormTableFieldHintFormatter', defaultValue: '—', target: '未声明或空 hint 的字段', description: 'true 默认字符串化；函数统一格式化；不影响表头。', context: 'FieldContext' },
       { path: 'loading', type: 'boolean', defaultValue: 'false', target: 'el-table v-loading', description: '表格加载状态。' }
     ]
   },
@@ -39,7 +38,7 @@ export const apiGroups: ApiGroup[] = [
       { path: 'columns[].label', type: 'string', defaultValue: "''", target: 'el-table-column.label', description: '默认表头文本。' },
       { path: 'columns[].props', type: 'Object | (context) => Object', defaultValue: '{}', target: 'el-table-column', description: '宽度、对齐、fixed、type 等原生列属性。', context: 'ColumnContext' },
       { path: 'columns[].headerProps', type: 'Object | (context) => Object', defaultValue: '{}', target: '默认/Slot 表头包装节点', description: 'title、class、style、aria-*；renderHeader 接管时不自动应用。', context: 'ColumnContext' },
-      { path: 'columns[].headerHint', type: 'FormTableHint | (context) => FormTableHint', defaultValue: '—', target: '默认/Slot 表头包装节点', description: "字符串默认由表格托管；ownership: 'custom' 时 FormTable 不处理展示。", context: 'ColumnContext' },
+      { path: 'columns[].headerHint', type: 'FormTableHint | (context) => FormTableHint', defaultValue: '—', target: '默认/Slot 表头包装节点', description: "字符串默认由表格托管；behavior: 'custom' 时 FormTable 不处理展示。", context: 'ColumnContext' },
       { path: 'columns[].headerSlot', type: 'string', defaultValue: '—', target: '表头 scoped Slot', description: '复杂表头、图标和交互内容。' },
       { path: 'columns[].visible', type: 'boolean | (context) => boolean', defaultValue: 'true', target: '列显隐', description: '控制当前列是否渲染。', context: 'ColumnContext' },
       { path: 'columns[].cellSlot', type: 'string', defaultValue: '—', target: '整格 scoped Slot', description: '直接渲染当前单元格，与 children 互斥且不要求 fieldKey。' },
@@ -61,7 +60,7 @@ export const apiGroups: ApiGroup[] = [
       { path: 'columns[].children[].children[].visible', type: 'boolean | (context) => boolean', defaultValue: 'true', target: '字段显隐', description: '按字段上下文控制渲染。', context: 'ItemContext' },
       { path: 'columns[].children[].children[].colProps', type: 'Object | (context) => Object', defaultValue: '{}', target: 'el-col', description: 'span、offset 等栅格属性。', context: 'ItemContext' },
       { path: 'columns[].children[].children[].formItemProps', type: 'Object | (context) => Object', defaultValue: '{}', target: 'el-form-item', description: 'label、rules 等；校验 prop 自动生成。', context: 'ItemContext' },
-      { path: 'columns[].children[].children[].hint', type: 'FormTableFieldHint | (context) => FormTableFieldHint', defaultValue: '继承 field 策略', target: 'el-form-item / 字段配置', description: 'true 强制格式化；false 退出并保留底层属性；显式内容按 ownership 处理。', context: 'ItemContext' },
+      { path: 'columns[].children[].children[].hint', type: 'FormTableFieldHint | (context) => FormTableFieldHint', defaultValue: '继承 field', target: 'el-form-item / 字段配置', description: '空值继承、false 关闭、非空内容覆盖；对象可配置 behavior。', context: 'ItemContext' },
       { path: 'columns[].children[].children[].component', type: 'ComponentConfig', defaultValue: '{}', target: '实际字段组件', description: '组件、绑定协议、属性、事件和选项。' }
     ]
   },

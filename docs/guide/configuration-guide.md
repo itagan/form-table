@@ -94,7 +94,7 @@ component: {
 
 ### 外层提示模式
 
-默认或 Slot 表头提示使用 `column.headerHint`，字段外层提示使用 Item `hint`。大量字段需要相同的值格式化时开启 `hintOptions.field.enabled` 并配置 formatter；未声明 Hint 的字段自动继承，`true` 强制启用，`false` 退出。显式内容不经过 formatter。整张表通过 `hintOptions` 在原生 `title`（默认）和表格级单实例 `tooltip` 之间二选一。详见 [Hint 提示模式](../features/native-title.md)和[自定义表头](../features/custom-header.md)。
+默认或 Slot 表头提示使用 `column.headerHint`，字段外层提示使用 Item `hint`。大量字段需要相同默认内容时配置 `hintOptions.field: true | formatter`；Item 不写或返回空值时继承、`false` 关闭、非空内容覆盖。整张表通过 `hintOptions` 在原生 `title`（默认）和表格级单实例 `tooltip` 之间二选一。详见 [Hint 提示模式](../features/native-title.md)和[自定义表头](../features/custom-header.md)。
 
 ### 自定义组件绑定协议
 

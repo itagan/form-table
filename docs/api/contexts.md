@@ -49,11 +49,11 @@
 | 更新 | `setValue, updateRow` |
 | 校验 / 解析 | `propPath, component, hint` |
 
-`itemConfig.component` 是未解析的原始配置；`component` 是当前行已解析的 `props/listeners/options/optionProps/model`。`hint` 是标准化后的 `{ content, ownership }` 或 `null`；`ownership: 'custom'` 时 FormTable 不应用提示，Slot 可自行消费内容。
+`itemConfig.component` 是未解析的原始配置；`component` 是当前行已解析的 `props/listeners/options/optionProps/model`。`hint` 是标准化后的 `{ content, behavior }` 或 `null`；`behavior: 'custom'` 时 FormTable 不应用提示，Slot 可自行消费内容。
 
 `component.resolveRenderer/props/options/optionProps` 和组件 listener 同样获得标准化后的 `hint`。Hint 自身的动态函数使用不含 `hint` 的基础字段上下文，避免配置引用自身。
 
-未声明 Hint 且 `hintOptions.field.enabled` 开启，或 Item 配置 `hint: true` 时，`hintOptions.field.formatter` 获得同一份基础 `FormTableFieldRenderContext`。formatter 在 component 解析前执行，因此不包含标准化 `hint`、`setValue/updateRow` 或解析后的 component 配置。
+Item 未声明 Hint 或返回空值，且 `hintOptions.field` 是函数时，该函数获得基础 `FormTableFieldRenderContext`。formatter 在 component 解析前执行，因此不包含标准化 `hint`、`setValue/updateRow` 或解析后的 component 配置。
 
 ## FormTableHeaderSlotContext
 
@@ -64,7 +64,7 @@
 | `columnIndex` | 当前可见列下标 |
 | `label` | 表头文本 |
 | `header.props` | 已解析表头属性，已由 FormTable 包装节点应用 |
-| `header.hint` | 标准化后的 `{ content, ownership }` 或 `null`；仅 `ownership: 'table'` 自动应用 |
+| `header.hint` | 标准化后的 `{ content, behavior }` 或 `null`；仅 `behavior: 'auto'` 自动应用 |
 
 ## 快照与异步更新
 
