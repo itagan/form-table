@@ -51,7 +51,7 @@ describe('FormTable hint modes', () => {
     wrapper.destroy()
   })
 
-  it('formats hint=true through the table fieldFormatter and keeps explicit hints authoritative', async () => {
+  it('formats inherited and hint=true fields while keeping explicit hints authoritative', async () => {
     const formatter = vi.fn(({ fieldKey, value }: FormTableFieldRenderContext) => (
       fieldKey === 'empty' ? null : `${fieldKey}：${String(value)}`
     ))
@@ -59,11 +59,15 @@ describe('FormTable hint modes', () => {
       'data-resolved-hint': hint?.content
     }))
     const wrapper = mountFormTable({
-      hintOptions: { mode: 'tooltip', fieldFormatter: formatter },
-      tableData: [{ name: 'Alice', dynamic: 'A', explicit: 'raw', empty: '' }],
+      hintOptions: { mode: 'tooltip', field: { enabled: true, formatter } },
+      tableData: [{ inherited: 'global', name: 'Alice', dynamic: 'A', explicit: 'raw', disabled: 'secret', empty: '' }],
       columns: [{
         label: '格式化字段',
         children: [{ children: [{
+          fieldKey: 'inherited',
+          type: 'input',
+          formItemProps: { title: '全局 Hint 应覆盖此 title' }
+        }, {
           fieldKey: 'name',
           type: 'input',
           hint: true,
@@ -77,6 +81,11 @@ describe('FormTable hint modes', () => {
           type: 'input',
           hint: '显式说明'
         }, {
+          fieldKey: 'disabled',
+          type: 'input',
+          hint: false,
+          formItemProps: { title: 'false 保留底层 title' }
+        }, {
           fieldKey: 'empty',
           type: 'input',
           hint: true,
@@ -87,24 +96,65 @@ describe('FormTable hint modes', () => {
     await wrapper.vm.$nextTick()
 
     const formItems = wrapper.findAll('.el-form-item')
-    expect(formItems.at(0).attributes('data-form-table-hint')).toBe('name：Alice')
-    expect(formItems.at(1).attributes('data-form-table-hint')).toBe('dynamic：A')
-    expect(formItems.at(2).attributes('data-form-table-hint')).toBe('显式说明')
-    expect(formItems.at(3).attributes('data-form-table-hint')).toBeUndefined()
-    expect(formItems.at(3).attributes('title')).toBeUndefined()
+    expect(formItems.at(0).attributes('data-form-table-hint')).toBe('inherited：global')
+    expect(formItems.at(0).attributes('title')).toBeUndefined()
+    expect(formItems.at(1).attributes('data-form-table-hint')).toBe('name：Alice')
+    expect(formItems.at(2).attributes('data-form-table-hint')).toBe('dynamic：A')
+    expect(formItems.at(3).attributes('data-form-table-hint')).toBe('显式说明')
+    expect(formItems.at(4).attributes('data-form-table-hint')).toBeUndefined()
+    expect(formItems.at(4).attributes('title')).toBe('false 保留底层 title')
+    expect(formItems.at(5).attributes('data-form-table-hint')).toBeUndefined()
+    expect(formItems.at(5).attributes('title')).toBeUndefined()
     expect(componentProps.mock.calls[0][0].hint).toEqual({
       content: 'name：Alice',
       ownership: 'table'
     })
-    expect(formatter).toHaveBeenCalledTimes(3)
+    expect(formatter).toHaveBeenCalledTimes(4)
 
     await wrapper.setProps({
-      tableData: [{ name: 'Bob', dynamic: 'B', explicit: 'changed', empty: '' }]
+      tableData: [{ inherited: 'next', name: 'Bob', dynamic: 'B', explicit: 'changed', disabled: 'changed', empty: '' }]
     })
-    expect(formItems.at(0).attributes('data-form-table-hint')).toBe('name：Bob')
-    expect(formItems.at(1).attributes('data-form-table-hint')).toBe('dynamic：B')
-    expect(formItems.at(2).attributes('data-form-table-hint')).toBe('显式说明')
-    expect(formatter).toHaveBeenCalledTimes(6)
+    expect(formItems.at(0).attributes('data-form-table-hint')).toBe('inherited：next')
+    expect(formItems.at(1).attributes('data-form-table-hint')).toBe('name：Bob')
+    expect(formItems.at(2).attributes('data-form-table-hint')).toBe('dynamic：B')
+    expect(formItems.at(3).attributes('data-form-table-hint')).toBe('显式说明')
+    expect(formatter).toHaveBeenCalledTimes(8)
+    wrapper.destroy()
+  })
+
+  it('reacts to the global field enabled switch without changing explicit field overrides', async () => {
+    const wrapper = mountFormTable({
+      hintOptions: { mode: 'title', field: { enabled: true } },
+      tableData: [{ inherited: '全局值', forced: '强制值', disabled: '关闭值' }],
+      columns: [{
+        label: '全局开关',
+        children: [{ children: [{
+          fieldKey: 'inherited',
+          type: 'input',
+          formItemProps: { title: '继承字段底层 title' }
+        }, {
+          fieldKey: 'forced',
+          type: 'input',
+          hint: true
+        }, {
+          fieldKey: 'disabled',
+          type: 'input',
+          hint: false,
+          formItemProps: { title: '关闭字段底层 title' }
+        }] }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    const formItems = wrapper.findAll('.el-form-item')
+    expect(formItems.at(0).attributes('title')).toBe('全局值')
+    expect(formItems.at(1).attributes('title')).toBe('强制值')
+    expect(formItems.at(2).attributes('title')).toBe('关闭字段底层 title')
+
+    await wrapper.setProps({ hintOptions: { mode: 'title', field: { enabled: false } } })
+    expect(formItems.at(0).attributes('title')).toBe('继承字段底层 title')
+    expect(formItems.at(1).attributes('title')).toBe('强制值')
+    expect(formItems.at(2).attributes('title')).toBe('关闭字段底层 title')
     wrapper.destroy()
   })
 
