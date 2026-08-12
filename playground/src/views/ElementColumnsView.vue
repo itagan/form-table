@@ -16,7 +16,14 @@
         row-key="id"
         :table-props="{ border: true }"
         @selection-change="selection = $event"
+        @sort-change="handleSortChange"
       >
+        <template #empty>
+          <span class="custom-empty">暂无功能列数据</span>
+        </template>
+        <template #append>
+          <div class="table-append">Element Table append 插槽</div>
+        </template>
         <template #row-detail="{ row }">
           <div class="row-detail">
             <strong>{{ row.name }}</strong>
@@ -32,6 +39,7 @@
           {{ row.name }}
         </el-tag>
       </div>
+      <p class="event-summary">最近事件：{{ latestEvent }}</p>
     </section>
 
     <DemoCollapsiblePanel class="code-card" title="直接配置 columns">
@@ -71,6 +79,11 @@ const tableData = ref<DemoRow[]>([
 ])
 const selection = ref<DemoRow[]>([])
 const showIndex = ref(true)
+const latestEvent = ref('等待排序操作')
+
+const handleSortChange = ({ prop, order }: { prop: string | null, order: string | null }) => {
+  latestEvent.value = `sort-change：${prop || '未指定字段'} / ${order || '取消排序'}`
+}
 
 const columns = computed(() => defineFormTableColumns<DemoRow>([
   {
@@ -106,7 +119,7 @@ const columns = computed(() => defineFormTableColumns<DemoRow>([
   },
   {
     label: '部门',
-    props: { minWidth: 160 },
+    props: { prop: 'department', minWidth: 160, sortable: 'custom' },
     children: [{ children: [{ fieldKey: 'department', type: 'text' }] }]
   }
 ]))
@@ -136,7 +149,15 @@ const columns = defineFormTableColumns<DemoRow>([
     label: '姓名',
     children: [{ children: [{ fieldKey: 'name', type: 'input' }] }]
   }
-])`
+])
+
+<FormTable
+  @selection-change="selection = $event"
+  @sort-change="handleSortChange"
+>
+  <template #empty>暂无功能列数据</template>
+  <template #append>Element Table append 插槽</template>
+</FormTable>`
 </script>
 
 <style scoped>
@@ -147,6 +168,9 @@ const columns = defineFormTableColumns<DemoRow>([
 .eyebrow { color: #409eff !important; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; }
 .table-card, .code-card, .notes-card { margin-top: 20px; padding: 24px; background: #fff; border-radius: 12px; }
 .selection-summary { display: flex; align-items: center; gap: 8px; min-height: 32px; margin-top: 16px; }
+.event-summary { margin: 8px 0 0; color: #606266; }
+.custom-empty { color: #909399; }
+.table-append { padding: 10px 16px; color: #909399; text-align: center; border-top: 1px dashed #ebeef5; }
 .row-detail { display: flex; gap: 16px; padding: 16px 24px; background: #f5f7fa; }
 .row-detail span { color: #606266; }
 .notes-card h2 { margin-top: 0; }

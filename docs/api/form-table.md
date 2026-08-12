@@ -56,3 +56,21 @@ const tableProps = {
 ```
 
 `rowKey` 是 FormTable 顶层 Prop，不属于 `tableProps`。它同时传给 Element Table，并在异步字段回调或 `cellSlot.updateRow` 中用于重新定位原数据行。rowKey 必须唯一、稳定，不应使用数组下标。不同 key 的职责和配置时机见[稳定身份与异步安全](../features/stable-identity.md)。
+
+## Element Table 根级 Slot
+
+| Slot | Scope | 说明 |
+| --- | --- | --- |
+| `empty` | 无 | 数据为空时替换 Element Table 默认空状态 |
+| `append` | 无 | 在表格内容末尾追加内容 |
+
+两个 Slot 直接转发给 `el-table`，不增加 FormTable 包装节点。只有实际提供 Slot 时才注册，因此 `tableProps.emptyText` 和 Element UI 默认空状态在没有 `#empty` 时保持有效。
+
+```vue
+<FormTable v-model="tableData" :columns="columns">
+  <template #empty>暂无数据</template>
+  <template #append>表格末尾内容</template>
+</FormTable>
+```
+
+原生 Table 事件和 Slot 的完整边界见[事件与 Ref](./events-and-ref.md)。

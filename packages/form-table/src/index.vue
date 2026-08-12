@@ -28,6 +28,12 @@
           :column="entry.column"
           :column-index="columnIndex"
         />
+        <template v-if="slots.empty" v-slot:empty>
+          <slot name="empty" />
+        </template>
+        <template v-if="slots.append" v-slot:append>
+          <slot name="append" />
+        </template>
       </el-table>
     </el-form>
     <el-tooltip

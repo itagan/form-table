@@ -11,6 +11,7 @@
 - `FormTableTableContext`、`FormTableColumnContext`、`FormTableRowContext`、`FormTableFieldRenderContext`
 - `FormTableResolvedFieldContext`、`FormTableFieldContext`、`FormTableSlotContext`、`FormTableCellSlotContext`
 - `FormTableFieldChangePayload`、`FormTableHeaderSlotContext`
+- `FormTableElementColumn`、`FormTableSortChangePayload`、`FormTableFilterChangePayload`
 - `FormTableExpose`、`FormTableElementFormRef`、`FormTableElementTableRef`
 - `FormTableComponent`、`FormTableEmits`
 

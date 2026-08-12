@@ -58,6 +58,37 @@ const columns = defineFormTableColumns<TableRow>([
 }
 ```
 
+## 排序与筛选事件
+
+排序、筛选和表头交互由 Element Table 在根组件发出，不需要为列增加监听器配置：
+
+```ts
+const columns = defineFormTableColumns<TableRow>([{
+  label: '姓名',
+  props: {
+    prop: 'name',
+    sortable: 'custom',
+    columnKey: 'name-column',
+    filters: [
+      { text: 'A 开头', value: 'A' },
+      { text: 'B 开头', value: 'B' }
+    ]
+  }
+}])
+```
+
+```vue
+<FormTable
+  v-model="tableData"
+  :columns="columns"
+  @sort-change="handleSortChange"
+  @filter-change="handleFilterChange"
+  @header-click="handleHeaderClick"
+/>
+```
+
+事件参数遵循 Element UI 原生顺序；`columnKey` 用于识别 `filter-change` 返回的筛选列。公开载荷类型见[事件与 Ref](../api/events-and-ref.md)。
+
 ## 序号列
 
 不配置 `label` 时使用空表头。可通过 Element UI 原生 `index` Prop 自定义序号：
