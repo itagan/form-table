@@ -228,7 +228,7 @@ describe('FormTable hint modes', () => {
     wrapper.destroy()
   })
 
-  it('keeps a field tooltip active across descendants and uses focus as a hover fallback', async () => {
+  it('keeps a field tooltip active across descendants but closes after pointer leaves a focused field', async () => {
     const wrapper = mountFormTable({
       hintOptions: { mode: 'tooltip' },
       columns: [{
@@ -268,14 +268,27 @@ describe('FormTable hint modes', () => {
 
     header.element.dispatchEvent(new MouseEvent('mouseout', { bubbles: true }))
     await wrapper.vm.$nextTick()
+    expect(close).toHaveBeenCalled()
+    expect(input.attributes('aria-describedby')).toBeUndefined()
+
+    await input.trigger('mouseover')
+    await wrapper.vm.$nextTick()
     expect(tooltip.content).toBe('姓名字段说明')
     expect(tooltip.referenceElm).toBe(formItem.element)
-    expect(input.attributes('aria-describedby')).toContain(tooltip.tooltipId)
+
+    input.element.dispatchEvent(new MouseEvent('mouseout', { bubbles: true }))
+    await wrapper.vm.$nextTick()
+    expect(input.attributes('aria-describedby')).toBeUndefined()
 
     dispatchFocusEvent(input.element, 'focusout')
     await wrapper.vm.$nextTick()
     expect(tooltip.content).toBe('姓名字段说明')
     expect(input.attributes('aria-describedby')).toBeUndefined()
+
+    dispatchFocusEvent(header.element, 'focusin', input.element)
+    await wrapper.vm.$nextTick()
+    expect(tooltip.content).toBe('姓名表头说明')
+    expect(header.attributes('aria-describedby')).toContain(tooltip.tooltipId)
     wrapper.destroy()
   })
 

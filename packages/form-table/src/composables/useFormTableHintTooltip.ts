@@ -37,6 +37,7 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
   let activeContent = ''
   let describedState: DescribedElementState | null = null
   let escapeSuppressed = false
+  let focusSuppressedByPointer = false
 
   const isOwnedByContainer = (element: HTMLElement | null): element is HTMLElement => {
     const container = options.containerRef.value
@@ -142,8 +143,9 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
       focusAriaTarget = null
     }
 
-    // 鼠标当前指向的目标优先；焦点作为键盘兜底。
-    const target = hoveredTarget || focusedTarget
+    // 鼠标当前指向的目标优先；焦点只作为键盘兜底。
+    // 指针主动离开 Hint 区域后，不因输入框仍保有焦点而让 Tooltip 常驻。
+    const target = hoveredTarget || (focusSuppressedByPointer ? null : focusedTarget)
     const content = target?.getAttribute(FORM_TABLE_HINT_ATTRIBUTE) || ''
     if (!target || !content) {
       hideActiveTooltip()
@@ -174,12 +176,14 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
       hideActiveTooltip()
       return
     }
+    if (focusedTarget) focusSuppressedByPointer = true
     syncActiveTarget()
   }
 
   const handleFocusIn = (event: FocusEvent) => {
     const nextTarget = findHintTarget(event.target)
     if (nextTarget !== focusedTarget) escapeSuppressed = false
+    focusSuppressedByPointer = false
     focusedTarget = nextTarget
     focusAriaTarget = event.target instanceof HTMLElement ? event.target : focusedTarget
     syncActiveTarget()
@@ -209,6 +213,7 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
       focusedTarget = null
       focusAriaTarget = null
       escapeSuppressed = false
+      focusSuppressedByPointer = false
       hideActiveTooltip()
     }
   })
