@@ -24,6 +24,8 @@ export type {
   FormTableHeaderSlotContext,
   FormTableHint,
   FormTableHintConfig,
+  FormTableFieldHint,
+  FormTableFieldHintFormatter,
   FormTableHintOptions,
   FormTableProps,
   FormTableRecord,

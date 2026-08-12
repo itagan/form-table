@@ -61,6 +61,8 @@ export interface FormTableHintConfig {
 }
 /** FormTable 外层提示内容；字符串保持自动托管语义。 */
 export type FormTableHint = string | FormTableHintConfig
+/** 字段可使用 true 快捷启用表级 formatter；表头仍需提供明确内容。 */
+export type FormTableFieldHint = true | FormTableHint
 /** 动态 Hint 求值后提供给内部渲染与 Slot 的标准结构。 */
 export interface ResolvedFormTableHint {
   content: string
@@ -68,8 +70,15 @@ export interface ResolvedFormTableHint {
 }
 /** 整个 FormTable 统一采用的提示展示方式。 */
 export type FormTableHintMode = 'title' | 'tooltip'
+/** 根据基础字段上下文统一生成快捷 Hint 内容。 */
+export type FormTableFieldHintFormatter<TRow extends TableRow = TableRow> = (
+  context: FormTableFieldRenderContext<TRow>
+) => string | null | undefined
 /** FormTable 统一提示策略；Tooltip 属性仅在对应模式下有效。 */
-export type FormTableHintOptions =
+export type FormTableHintOptions<TRow extends TableRow = TableRow> = {
+  /** hint=true 时使用；未配置时空值返回空字符串，其余值使用 String(value)。 */
+  fieldFormatter?: FormTableFieldHintFormatter<TRow>
+} & (
   | {
       mode?: 'title'
     }
@@ -77,6 +86,7 @@ export type FormTableHintOptions =
       mode: 'tooltip'
       props?: ComponentProps
     }
+)
 /** 字段组件事件监听器签名，第一个参数固定为字段上下文。 */
 export type FormTableFieldListener<TRow extends TableRow = TableRow> = (
   context: FormTableFieldContext<TRow>,
@@ -172,7 +182,7 @@ interface BaseFormItemConfig<TRow extends TableRow = TableRow> {
   /** 直接传给 el-form-item。 */
   formItemProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext<TRow>>
   /** 字段提示；ownership=table 按表级 hintOptions 应用，custom 时由调用方处理。 */
-  hint?: DynamicValue<FormTableHint | null | undefined, FormTableFieldRenderContext<TRow>>
+  hint?: DynamicValue<FormTableFieldHint | null | undefined, FormTableFieldRenderContext<TRow>>
 }
 
 /** 使用内置 type 映射渲染的字段配置。 */
@@ -283,7 +293,7 @@ export interface FormTableProps<TRow extends TableRow = TableRow> {
   formProps?: ComponentProps
   tableProps?: ComponentProps
   /** headerHint/hint 的表级统一展示策略，默认使用原生 title。 */
-  hintOptions?: FormTableHintOptions
+  hintOptions?: FormTableHintOptions<TRow>
   loading?: boolean
 }
 
@@ -364,6 +374,11 @@ export const FORM_TABLE_CONTEXT_KEY: unique symbol = Symbol('formTableContext')
 export const FORM_TABLE_UPDATE_KEY: unique symbol = Symbol('formTableUpdate')
 export const FORM_TABLE_SLOTS_KEY: unique symbol = Symbol('formTableSlots')
 export const FORM_TABLE_HINT_MODE_KEY: unique symbol = Symbol('formTableHintMode')
+export const FORM_TABLE_HINT_FORMATTER_KEY: unique symbol = Symbol('formTableHintFormatter')
 
 /** 响应式提示模式仅供 FormTable 内部渲染链使用。 */
 export type FormTableHintModeContext = Readonly<Ref<FormTableHintMode>>
+/** 响应式字段 Hint formatter，仅供 FormTable 内部字段链使用。 */
+export type FormTableHintFormatterContext<TRow extends TableRow = TableRow> = Readonly<
+Ref<FormTableFieldHintFormatter<TRow> | undefined>
+>

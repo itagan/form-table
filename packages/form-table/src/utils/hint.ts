@@ -1,8 +1,12 @@
 import type {
   ComponentProps,
+  FormTableFieldHint,
+  FormTableFieldHintFormatter,
+  FormTableFieldRenderContext,
   FormTableHint,
   FormTableHintMode,
-  ResolvedFormTableHint
+  ResolvedFormTableHint,
+  TableRow
 } from '../types'
 
 /** 事件委托使用的内部提示标记，不作为调用方配置入口。 */
@@ -20,6 +24,19 @@ export function resolveFormTableHint(
     content: hint.content,
     ownership: hint.ownership || 'table'
   }
+}
+
+/** hint=true 时统一从字段上下文生成内容；显式 Hint 保持原有解析路径。 */
+export function resolveFormTableFieldHint<TRow extends TableRow = TableRow>(
+  hint: FormTableFieldHint | null | undefined,
+  context: FormTableFieldRenderContext<TRow>,
+  formatter?: FormTableFieldHintFormatter<TRow>
+): ResolvedFormTableHint | null {
+  if (hint !== true) return resolveFormTableHint(hint)
+  const content = formatter
+    ? formatter(context)
+    : context.value == null ? '' : String(context.value)
+  return resolveFormTableHint(content)
 }
 
 interface ApplyHintTargetOptions {

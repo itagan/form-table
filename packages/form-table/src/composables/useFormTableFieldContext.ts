@@ -3,19 +3,24 @@ import type {
   FormItemConfig,
   FormTableFieldContext,
   FormTableHintModeContext,
+  FormTableHintFormatterContext,
   FormTableResolvedFieldContext,
   FormTableRowContext,
   FormTableUpdateApi,
   FormTableValue,
   TableRow
 } from '../types'
-import { FORM_TABLE_HINT_MODE_KEY, FORM_TABLE_UPDATE_KEY } from '../types'
+import {
+  FORM_TABLE_HINT_FORMATTER_KEY,
+  FORM_TABLE_HINT_MODE_KEY,
+  FORM_TABLE_UPDATE_KEY
+} from '../types'
 import {
   createFieldRenderContext,
   extendLazyContext,
   resolveDynamicValue
 } from '../utils/dynamic'
-import { applyHintTargetProps, resolveFormTableHint } from '../utils/hint'
+import { applyHintTargetProps, resolveFormTableFieldHint } from '../utils/hint'
 
 interface FormTableFieldContextOptions<TRow extends TableRow> {
   getRowContext: () => FormTableRowContext<TRow>
@@ -34,6 +39,10 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
   /** 注入缺失时字段仍可只读渲染，更新助手退化为空操作。 */
   const updateApi = inject<FormTableUpdateApi<TRow>>(FORM_TABLE_UPDATE_KEY)
   const hintMode = inject<FormTableHintModeContext>(FORM_TABLE_HINT_MODE_KEY, ref<'title'>('title'))
+  const hintFormatter = inject<FormTableHintFormatterContext<TRow>>(
+    FORM_TABLE_HINT_FORMATTER_KEY,
+    ref(undefined)
+  )
 
   /**
    * Element UI 以数组下标组织表单校验路径；行排序后 computed 会生成新路径，
@@ -54,7 +63,11 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
   const resolvedHint = computed(() => {
     const config = options.getConfig()
     if (!Object.prototype.hasOwnProperty.call(config, 'hint')) return null
-    return resolveFormTableHint(resolveDynamicValue(config.hint, runtimeContext.value))
+    return resolveFormTableFieldHint(
+      resolveDynamicValue(config.hint, runtimeContext.value),
+      runtimeContext.value,
+      hintFormatter.value
+    )
   })
 
   /** 组件配置、监听器和 Slot 共享 Hint 求值后的稳定上下文。 */
