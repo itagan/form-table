@@ -9,8 +9,6 @@ export type ComponentProps = Record<string, FormTableValue>
 
 /** FormTable 自身管理 rowKey，Table 透传属性不再接受同名配置。 */
 export type FormTableTableProps = ComponentProps & { rowKey?: never }
-/** el-table-column 的 type 由 NativeColumnConfig 顶层字段管理。 */
-export type FormTableColumnProps = ComponentProps & { type?: never }
 
 /** 单条表格行数据。 */
 export interface TableRow extends FormTableRecord {}
@@ -262,7 +260,7 @@ interface BaseColumnConfig<TRow extends TableRow = TableRow> {
   /** 静态或动态显隐配置。 */
   visible?: DynamicValue<boolean, FormTableColumnContext<TRow>>
   /** 直接传给 el-table-column。 */
-  props?: DynamicValue<FormTableColumnProps, FormTableColumnContext<TRow>>
+  props?: DynamicValue<ComponentProps, FormTableColumnContext<TRow>>
 }
 
 /** 通过 Row/Item 布局渲染表单字段的列。 */
@@ -272,18 +270,16 @@ export interface LayoutColumnConfig<TRow extends TableRow = TableRow> extends Ba
   cellSlot?: never
 }
 
-/** Element UI 原生功能列；不进入单元格字段渲染链路。 */
-export interface NativeColumnConfig<TRow extends TableRow = TableRow> {
+/** 纯 Element Table Column 透传列；不进入 FormTable 单元格渲染链路。 */
+export interface PlainColumnConfig<TRow extends TableRow = TableRow> {
   /** 列的稳定渲染身份。 */
   key?: string
-  /** 当前仅开放无需展开内容的原生列类型。 */
-  type: 'selection' | 'index'
-  /** selection 通常无需标题，index 可按需提供。 */
+  /** 原生功能列通常可省略标题。 */
   label?: string
   /** 静态或动态显隐配置。 */
   visible?: DynamicValue<boolean, FormTableColumnContext<TRow>>
-  /** 直接传给 el-table-column；type 由顶层配置统一管理。 */
-  props?: DynamicValue<FormTableColumnProps, FormTableColumnContext<TRow>>
+  /** 直接传给 el-table-column；必填以明确选择纯透传列模式。 */
+  props: DynamicValue<ComponentProps, FormTableColumnContext<TRow>>
   children?: never
   cellSlot?: never
   headerSlot?: never
@@ -310,11 +306,11 @@ export interface FormTableCellSlotContext<TRow extends TableRow = TableRow> {
   updateRow: (patch: Partial<TRow>) => void
 }
 
-/** 布局列、列级 Slot 和原生功能列是三条互斥渲染路径。 */
+/** 布局列、列级 Slot 和纯 Element Column 是三条互斥渲染路径。 */
 export type ColumnConfig<TRow extends TableRow = TableRow> =
   | LayoutColumnConfig<TRow>
   | CellSlotColumnConfig<TRow>
-  | NativeColumnConfig<TRow>
+  | PlainColumnConfig<TRow>
 
 /** FormTable 与 Element Table 共用的稳定行身份配置。 */
 export type FormTableRowKey<TRow extends TableRow = TableRow> =

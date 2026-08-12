@@ -25,11 +25,11 @@ describe('FormTable rendering and configuration', () => {
     wrapper.destroy()
   })
 
-  it('renders native selection and index columns from the top-level discriminator', async () => {
+  it('renders plain Element selection and index columns from props', async () => {
     const wrapper = mountFormTable({
       columns: [
-        { type: 'selection', props: { width: 48 } },
-        { type: 'index', label: '序号', visible: ({ tableData }) => tableData.length > 0, props: { width: 64 } }
+        { props: { type: 'selection', width: 48 } },
+        { label: '序号', visible: ({ tableData }) => tableData.length > 0, props: { type: 'index', width: 64 } }
       ]
     })
     await wrapper.vm.$nextTick()
@@ -40,22 +40,6 @@ describe('FormTable rendering and configuration', () => {
     expect((columns.at(1).vm as any).type).toBe('index')
     expect((columns.at(1).vm as any).label).toBe('序号')
     expect(wrapper.find('.el-form-item').exists()).toBe(false)
-    wrapper.destroy()
-  })
-
-  it('filters column.props.type and warns about the legacy native-column shape', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-    const wrapper = mountFormTable({
-      columns: [{ label: '旧原生列', children: [], props: { type: 'selection', width: 48 } as any }]
-    })
-    await wrapper.vm.$nextTick()
-
-    const column = wrapper.findComponent({ name: 'ElTableColumn' })
-    expect((column.vm as any).type).toBe('default')
-    expect(warn).toHaveBeenCalledWith(
-      '[FormTable] column.props.type is no longer supported; use column.type for native columns.'
-    )
-    warn.mockRestore()
     wrapper.destroy()
   })
 

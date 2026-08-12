@@ -19,7 +19,7 @@ import FormTable, {
   type FormTableProps,
   type FormTableResolvedFieldContext,
   type LayoutColumnConfig,
-  type NativeColumnConfig,
+  type PlainColumnConfig,
   type ResolvedFormTableHint,
   type ResolvedHeaderConfig,
   type TableRow
@@ -138,22 +138,21 @@ const layoutColumn: LayoutColumnConfig = {
   label: '姓名',
   children: [{ children: [{ fieldKey: 'name', type: 'input' }] }]
 }
-const nativeColumns: NativeColumnConfig[] = [
-  { type: 'selection', props: { width: 48 } },
-  { type: 'index', label: '序号', props: { width: 64 } }
+const plainColumns: PlainColumnConfig[] = [
+  { props: { type: 'selection', width: 48 } },
+  { label: '序号', props: { type: 'index', width: 64 } }
 ]
-// @ts-expect-error expand requires a dedicated content API and is not supported yet.
-const unsupportedExpandColumn: NativeColumnConfig = { type: 'expand' }
-// @ts-expect-error native columns do not enter the Row/Item rendering chain.
-const nativeColumnWithChildren: NativeColumnConfig = { type: 'index', children: [] }
-const legacyNativeColumn: ColumnConfig = {
-  label: '旧原生列',
-  children: [],
-  props: {
-    // @ts-expect-error native column type moved to column.type.
-    type: 'selection'
-  }
+const expandSlotColumn: CellSlotColumnConfig = {
+  label: '详情',
+  props: { type: 'expand' },
+  cellSlot: 'row-detail'
 }
+// @ts-expect-error plain columns require props to explicitly select passthrough mode.
+const emptyPlainColumn: PlainColumnConfig = {}
+// @ts-expect-error plain columns do not enter the Row/Item rendering chain.
+const plainColumnWithChildren: PlainColumnConfig = { props: { type: 'index' }, children: [] }
+// @ts-expect-error native Element column props stay inside props.
+const topLevelNativeType: ColumnConfig = { type: 'selection', props: { width: 48 } }
 // @ts-expect-error cellSlot columns do not accept Row/Item children.
 const mixedColumnModes: ColumnConfig = {
   label: '错误列模式',
@@ -446,10 +445,11 @@ void legacyRowKeyProps
 void typedColumns
 void cellSlotColumn
 void layoutColumn
-void nativeColumns
-void unsupportedExpandColumn
-void nativeColumnWithChildren
-void legacyNativeColumn
+void plainColumns
+void expandSlotColumn
+void emptyPlainColumn
+void plainColumnWithChildren
+void topLevelNativeType
 void mixedColumnModes
 void modelVariants
 void dynamicRendererVariants

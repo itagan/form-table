@@ -75,12 +75,12 @@ Element UI 的选择列和序号列使用顶层原生列配置，不需要 `chil
 
 ```ts
 const columns = [
-  { type: 'selection', props: { width: 48 } },
-  { type: 'index', label: '序号', props: { width: 64 } }
+  { props: { type: 'selection', width: 48 } },
+  { label: '序号', props: { type: 'index', width: 64 } }
 ]
 ```
 
-选择结果通过 Table 原生 `selection-change` 事件获得；原生列支持 `key/label/visible/props`，但不支持字段、Slot 或表头配置。`expand` 暂未开放。
+选择结果通过 Table 原生 `selection-change` 事件获得。`PlainColumnConfig` 只表达“不进入字段渲染链路”，实际能力由透传的 Element Column props 决定。
 
 动态 Item 也建议提供唯一稳定的 `key`。未提供时使用 `fieldKey + 当前可见下标` 降级，前方字段显隐或增删后可能重新挂载后续字段。Element UI 表体单元格本身按可见位置渲染，中间列变化后发生位移的单元格内容仍可能重建，因此业务状态必须及时同步到 `tableData`。
 
