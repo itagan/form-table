@@ -1,10 +1,6 @@
-import type {
-  FormTableFieldChangePayload,
-  FormTableRowKey,
-  FormTableUpdateApi,
-  FormTableValue,
-  TableRow
-} from '../types'
+import type { FormTableValue, TableRow } from '../types/base'
+import type { FormTableFieldChangePayload, FormTableRowKey } from '../types/config'
+import type { FormTableUpdateApi } from '../types/context'
 import { getValueByPath, setValueByPath } from '../utils/path'
 
 type RowKey<TRow extends TableRow = TableRow> = FormTableRowKey<TRow> | undefined

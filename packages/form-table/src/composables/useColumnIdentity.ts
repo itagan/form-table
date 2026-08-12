@@ -1,5 +1,7 @@
 import { computed, ref, watch } from 'vue'
-import type { ColumnConfig, FormTableTableContext, TableRow } from '../types'
+import type { TableRow } from '../types/base'
+import type { ColumnConfig } from '../types/config'
+import type { FormTableTableContext } from '../types/context'
 import { createColumnContext, resolveVisible } from '../utils/dynamic'
 
 /** 管理 Element Table 动态列的稳定身份、顺序版本和可见集合。 */

@@ -1,4 +1,4 @@
-import type { FormTableRecord, FormTableValue } from '../types'
+import type { FormTableRecord, FormTableValue } from '../types/base'
 
 /**
  * 判断值是否可以继续按对象路径读取。

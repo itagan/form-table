@@ -1,5 +1,6 @@
 import { watchEffect } from 'vue'
-import type { ColumnConfig, FormTableRowKey, TableRow } from '../types'
+import type { TableRow } from '../types/base'
+import type { ColumnConfig, FormTableRowKey } from '../types/config'
 import { getValueByPath } from '../utils/path'
 
 interface FormTableDiagnosticsOptions<TRow extends TableRow = TableRow> {

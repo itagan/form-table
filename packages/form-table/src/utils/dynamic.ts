@@ -1,14 +1,11 @@
+import type { DynamicValue, TableRow } from '../types/base'
+import type { ColumnConfig, FormItemConfig, RowConfig } from '../types/config'
 import type {
-  ColumnConfig,
-  DynamicValue,
-  FormItemConfig,
   FormTableColumnContext,
   FormTableFieldRenderContext,
   FormTableRowContext,
-  FormTableTableContext,
-  RowConfig,
-  TableRow
-} from '../types'
+  FormTableTableContext
+} from '../types/context'
 import { getValueByPath } from './path'
 
 /**

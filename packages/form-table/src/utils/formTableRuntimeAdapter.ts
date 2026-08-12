@@ -1,4 +1,4 @@
-import type { ComponentProps } from '../types'
+import type { ComponentProps } from '../types/base'
 
 export type FormTableListenerMap = Record<string, (...args: unknown[]) => void>
 
