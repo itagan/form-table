@@ -51,7 +51,7 @@ columns[].children[].children[].component
 
 ## 内置类型映射
 
-内置 `type` 只映射 Element UI 已提供的组件，不包含 Tree Select 等业务或第三方组件：
+内置 `type` 只映射适合字段默认 v-model 协议的 Element UI 组件，不包含 Tree Select、Upload 等复杂组件：
 
 | `type` | 实际组件 | 自动补充属性 |
 | --- | --- | --- |
@@ -69,10 +69,32 @@ columns[].children[].children[].component
 | `rate` | `el-rate` | — |
 | `slider` | `el-slider` | — |
 | `color` | `el-color-picker` | — |
-| `upload` | `el-upload` | — |
 | `cascader` | `el-cascader` | — |
 | `autocomplete` | `el-autocomplete` | — |
 
 `component.props` 会在自动补充属性之后合并，因此可以覆盖或扩展这些最小默认值。需要其他组件时使用 `type: 'component'`。
+
+### Upload 接入
+
+`el-upload` 不采用普通字段的 `value/input` 协议，还需要上传触发内容、`file-list`、生命周期回调和请求策略，因此不作为内置 `type`。根据封装程度选择：
+
+- 已有业务上传组件：使用 `type: 'component'`，通过 `component.model` 声明值 prop 和变更事件。
+- 直接组合 `el-upload`：使用 `type: 'slot'`，从字段 Slot 获取 `value/setValue/propPath` 并自行绑定上传内容。
+
+```ts
+{
+  fieldKey: 'attachmentIds',
+  type: 'component',
+  component: {
+    renderer: BusinessAttachmentUploader,
+    model: {
+      prop: 'fileIds',
+      event: 'files-change'
+    }
+  }
+}
+```
+
+完整业务上传组件可参考[企业复杂组件接入示例](../examples/enterprise-components.md)。
 
 从最小配置到页面使用的独立示例见[自定义字段组件](../features/custom-component.md)。Render Function 和更多组合方式见[完整配置指南](../guide/configuration-guide.md)，完整企业组件 Mock 与 columns 工厂见[企业复杂组件接入示例](../examples/enterprise-components.md)。

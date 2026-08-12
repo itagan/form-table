@@ -40,6 +40,11 @@ void unsupportedBuiltinType
 const redundantBuiltinAlias: BuiltinFormItemType = 'tag-input'
 void redundantBuiltinAlias
 
+// el-upload 依赖 file-list、生命周期回调和触发内容，不使用字段默认 v-model 协议。
+// @ts-expect-error upload 应通过 type: 'component' 或 type: 'slot' 显式接入
+const unsupportedUploadBuiltin: BuiltinFormItemType = 'upload'
+void unsupportedUploadBuiltin
+
 const CustomInput: Component = { name: 'CustomInput' }
 const AlternativeInput: Component = { name: 'AlternativeInput' }
 const completeValueHint: FormTableHint = '完整字段值'
