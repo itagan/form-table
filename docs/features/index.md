@@ -9,7 +9,7 @@
 | 功能点 | 配置入口 | 调用入口 | 结果 / 事件 |
 | --- | --- | --- | --- |
 | [数据更新与受控回写](./data-updates.md) | 根 `v-model`、`tableData`、`rowKey` | 自动字段绑定、`setValue`、`updateRow` | `update:tableData`、`field-change` |
-| [校验、清理与重置](./validation-reset.md) | Item `formItemProps.rules` | `validate/clearValidate/resetFields` | Element Form 校验状态 |
+| [校验、清理与重置](./validation-reset.md) | Item `formItemProps.rules` | `validate/clearValidate/getFormRef` | Element Form 校验状态 |
 | [动态显隐与配置更新](./dynamic-configuration.md) | 各层 `visible`、动态 props | 替换 `columns` | 响应式布局与组件配置 |
 | [稳定身份与异步安全](./stable-identity.md) | `rowKey`、Column/Row/Item `key` | 异步 `setValue/updateRow` | 正确定位数据与渲染节点 |
 | [Hint 提示体系](./hint.md) | `hintOptions`、`columns[].headerHint`、Item `hint` | 全局默认、字段覆盖、title/Tooltip 与自定义展示 | [`/hint-scenarios`](http://localhost:5173/hint-scenarios) |
@@ -18,6 +18,7 @@
 
 | 功能 | 配置入口 | 使用入口 | 可运行演示 |
 | --- | --- | --- | --- |
+| [原生选择与序号列](./native-columns.md) | `columns[].type` | `selection-change`、原生列 props | [`/form-table-advanced`](http://localhost:5173/form-table-advanced) |
 | [自定义表头](./custom-header.md) | `columns[].headerSlot` | 父组件同名 scoped Slot | [`/hint-scenarios`](http://localhost:5173/hint-scenarios) |
 | [`cellSlot` 列级单元格](./cell-slot.md) | `columns[].cellSlot` | 父组件同名 scoped Slot | [`/cell-slot`](http://localhost:5173/cell-slot) |
 | [自定义字段组件](./custom-component.md) | Item `type: 'component'` | `component.renderer/model/props/listeners` | [`/enterprise-components`](http://localhost:5173/enterprise-components) |

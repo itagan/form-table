@@ -19,12 +19,12 @@
   },
   {
     "title": "高级示例",
-    "description": "集中演示多行栅格、直接组件、动态 options、嵌套路径和 slot。",
+    "description": "集中演示原生选择/序号列、多行栅格、直接组件、动态 options、嵌套路径和 slot。",
     "path": "/form-table-advanced",
     "name": "form-table-advanced",
     "view": "FormTableAdvancedView",
     "type": "success",
-    "tags": ["slot", "component.renderer", "dynamic"]
+    "tags": ["NativeColumnConfig", "selection", "index", "slot", "component.renderer"]
   },
   {
     "title": "cellSlot 列级单元格",

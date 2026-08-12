@@ -2,8 +2,8 @@
   <main class="demo-page">
     <header>
       <router-link to="/">← 返回</router-link>
-      <h1>复杂布局与三种渲染模式</h1>
-      <p>同一套 children 布局同时演示 type、自定义 component、Render Function 组件和 slot。</p>
+      <h1>原生功能列、复杂布局与三种渲染模式</h1>
+      <p>顶层 type 配置选择/序号列；children 布局演示内置字段、自定义 component、Render Function 组件和 slot。</p>
     </header>
 
     <section class="demo-card">
@@ -44,6 +44,14 @@
         <el-button @click="formTableRef?.getTableRef()?.doLayout()">重新布局</el-button>
         <span>已选择 {{ selection.length }} 行</span>
       </div>
+
+      <el-alert
+        class="native-column-note"
+        title="NativeColumnConfig 使用顶层 type: selection | index；选择结果通过 selection-change 获取，不需要 children 或 fieldKey。"
+        type="info"
+        :closable="false"
+        show-icon
+      />
     </section>
 
     <DemoCollapsiblePanel class="demo-card" title="组件配置">
@@ -232,6 +240,7 @@ const removeRow = (index: number) => {
 .demo-page { max-width: 1380px; margin: 0 auto; padding: 32px; }
 .demo-card { margin-top: 20px; padding: 24px; background: #fff; border-radius: 12px; }
 .actions { display: flex; align-items: center; gap: 12px; margin-top: 20px; }
+.native-column-note { margin-top: 16px; }
 .danger { color: #f56c6c; }
 .required-mark { color: #f56c6c; }
 pre { padding: 16px; overflow: auto; background: #f6f8fa; border-radius: 8px; }

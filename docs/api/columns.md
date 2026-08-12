@@ -34,7 +34,7 @@ columns[]                                  ColumnConfig
 { type: 'index', label: '序号', props: { width: 64 } }
 ```
 
-原生列的 `label` 可选，且不接受 `children/cellSlot/headerSlot/headerProps/headerHint`。`expand` 尚未开放，后续需配合专用展开内容 API 设计。
+原生列的 `label` 可选，且不接受 `children/cellSlot/headerSlot/headerProps/headerHint`。`expand` 尚未开放，后续需配合专用展开内容 API 设计。选择事件、序号函数和动态配置见[原生选择与序号列](../features/native-columns.md)。
 
 ## RowConfig
 
@@ -74,6 +74,7 @@ propPath: tableData.0.profile.city
 
 | 配置路径 | 配置与使用示例 |
 | --- | --- |
+| `columns[].type` | [原生选择与序号列](../features/native-columns.md) |
 | `columns[].headerHint`、Item `hint` | [Hint 提示体系](../features/hint.md) |
 | `columns[].headerSlot` | [自定义表头](../features/custom-header.md) |
 | `columns[].cellSlot` | [`cellSlot` 列级单元格](../features/cell-slot.md) |
