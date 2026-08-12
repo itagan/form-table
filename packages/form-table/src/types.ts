@@ -61,8 +61,8 @@ export interface FormTableHintConfig {
 }
 /** FormTable 外层提示内容；字符串保持自动托管语义。 */
 export type FormTableHint = string | FormTableHintConfig
-/** 字段可使用 true 快捷启用表级 formatter；表头仍需提供明确内容。 */
-export type FormTableFieldHint = true | FormTableHint
+/** 字段可用 true 强制启用统一 formatter，或用 false 退出 Hint 系统。 */
+export type FormTableFieldHint = boolean | FormTableHint
 /** 动态 Hint 求值后提供给内部渲染与 Slot 的标准结构。 */
 export interface ResolvedFormTableHint {
   content: string
@@ -74,10 +74,17 @@ export type FormTableHintMode = 'title' | 'tooltip'
 export type FormTableFieldHintFormatter<TRow extends TableRow = TableRow> = (
   context: FormTableFieldRenderContext<TRow>
 ) => string | null | undefined
+/** 未显式配置 hint 的字段所继承的表级默认策略。 */
+export interface FormTableFieldHintOptions<TRow extends TableRow = TableRow> {
+  /** 是否让未声明 hint 的字段自动使用 formatter；默认 false。 */
+  enabled?: boolean
+  /** 统一生成字段 Hint；缺省时空值不展示，其余值使用 String(value)。 */
+  formatter?: FormTableFieldHintFormatter<TRow>
+}
 /** FormTable 统一提示策略；Tooltip 属性仅在对应模式下有效。 */
 export type FormTableHintOptions<TRow extends TableRow = TableRow> = {
-  /** hint=true 时使用；未配置时空值返回空字符串，其余值使用 String(value)。 */
-  fieldFormatter?: FormTableFieldHintFormatter<TRow>
+  /** 字段默认启用与格式化策略；不影响 headerHint。 */
+  field?: FormTableFieldHintOptions<TRow>
 } & (
   | {
       mode?: 'title'
@@ -374,11 +381,11 @@ export const FORM_TABLE_CONTEXT_KEY: unique symbol = Symbol('formTableContext')
 export const FORM_TABLE_UPDATE_KEY: unique symbol = Symbol('formTableUpdate')
 export const FORM_TABLE_SLOTS_KEY: unique symbol = Symbol('formTableSlots')
 export const FORM_TABLE_HINT_MODE_KEY: unique symbol = Symbol('formTableHintMode')
-export const FORM_TABLE_HINT_FORMATTER_KEY: unique symbol = Symbol('formTableHintFormatter')
+export const FORM_TABLE_FIELD_HINT_OPTIONS_KEY: unique symbol = Symbol('formTableFieldHintOptions')
 
 /** 响应式提示模式仅供 FormTable 内部渲染链使用。 */
 export type FormTableHintModeContext = Readonly<Ref<FormTableHintMode>>
-/** 响应式字段 Hint formatter，仅供 FormTable 内部字段链使用。 */
-export type FormTableHintFormatterContext<TRow extends TableRow = TableRow> = Readonly<
-Ref<FormTableFieldHintFormatter<TRow> | undefined>
+/** 响应式字段 Hint 默认策略，仅供 FormTable 内部字段链使用。 */
+export type FormTableFieldHintOptionsContext<TRow extends TableRow = TableRow> = Readonly<
+Ref<FormTableFieldHintOptions<TRow>>
 >
