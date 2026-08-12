@@ -11,6 +11,54 @@ import type {
 import { mountFormTable } from './test-utils'
 
 describe('FormTable rendering and configuration', () => {
+  it('uses top-level rowKey for Element Table and filters the legacy passthrough key', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const wrapper = mountFormTable({ rowKey: 'id', tableProps: { rowKey: 'legacy-id' } })
+    await wrapper.vm.$nextTick()
+
+    const table = wrapper.findComponent({ name: 'ElTable' })
+    expect((table.vm as any).rowKey).toBe('id')
+    expect(warn).toHaveBeenCalledWith(
+      '[FormTable] tableProps.rowKey is no longer supported; use the top-level rowKey prop.'
+    )
+    warn.mockRestore()
+    wrapper.destroy()
+  })
+
+  it('renders native selection and index columns from the top-level discriminator', async () => {
+    const wrapper = mountFormTable({
+      columns: [
+        { type: 'selection', props: { width: 48 } },
+        { type: 'index', label: '序号', visible: ({ tableData }) => tableData.length > 0, props: { width: 64 } }
+      ]
+    })
+    await wrapper.vm.$nextTick()
+
+    const columns = wrapper.findAllComponents({ name: 'ElTableColumn' })
+    expect(columns).toHaveLength(2)
+    expect((columns.at(0).vm as any).type).toBe('selection')
+    expect((columns.at(1).vm as any).type).toBe('index')
+    expect((columns.at(1).vm as any).label).toBe('序号')
+    expect(wrapper.find('.el-form-item').exists()).toBe(false)
+    wrapper.destroy()
+  })
+
+  it('filters column.props.type and warns about the legacy native-column shape', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const wrapper = mountFormTable({
+      columns: [{ label: '旧原生列', children: [], props: { type: 'selection', width: 48 } as any }]
+    })
+    await wrapper.vm.$nextTick()
+
+    const column = wrapper.findComponent({ name: 'ElTableColumn' })
+    expect((column.vm as any).type).toBe('default')
+    expect(warn).toHaveBeenCalledWith(
+      '[FormTable] column.props.type is no longer supported; use column.type for native columns.'
+    )
+    warn.mockRestore()
+    wrapper.destroy()
+  })
+
   it('applies headerHint and other properties to the default header text node', async () => {
     const headerProps = vi.fn(({ tableData, columnConfig }: FormTableColumnContext) => ({
       class: `records-${tableData.length}`,

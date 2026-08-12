@@ -124,7 +124,7 @@ describe('FormTable data updates and row identity', () => {
           }]
         }] as ColumnConfig[]
       }),
-      template: '<FormTable v-model="tableData" :columns="columns" :table-props="{ rowKey: \'id\' }" />'
+      template: '<FormTable v-model="tableData" :columns="columns" row-key="id" />'
     }, { localVue, attachTo: document.body })
     await wrapper.vm.$nextTick()
 
@@ -248,7 +248,7 @@ describe('FormTable data updates and row identity', () => {
         name: `User ${index + 1}`,
         touched: false
       })),
-      tableProps: { rowKey },
+      rowKey,
       columns: [{
         label: '连续更新',
         children: [{ children: [{
@@ -341,7 +341,7 @@ describe('FormTable data updates and row identity', () => {
         { id: 1, name: 'First' },
         { id: 1, name: 'Second' }
       ],
-      tableProps: { rowKey: 'id' },
+      rowKey: 'id',
       columns: [{
         label: '姓名',
         children: [{ children: [{
@@ -386,7 +386,7 @@ describe('FormTable data updates and row identity', () => {
         { id: 1, name: 'Alice' },
         { id: 2, name: 'Bob' }
       ],
-      tableProps: { rowKey: 'id' },
+      rowKey: 'id',
       columns: [{
         label: '姓名',
         children: [{ children: [{
@@ -482,7 +482,7 @@ describe('FormTable data updates and row identity', () => {
     }
     const wrapper = mountFormTable({
       tableData: [{ meta: { identity: 'a' }, name: 'Alice' }],
-      tableProps: { rowKey },
+      rowKey,
       columns: [{
         label: '姓名',
         children: [{ children: [{
@@ -568,7 +568,7 @@ describe('FormTable data updates and row identity', () => {
         { id: 1, name: 'Alice' },
         { id: 2, name: 'Bob' }
       ],
-      tableProps: { rowKey: 'id' },
+      rowKey: 'id',
       columns: [{
         label: '姓名',
         children: [{ children: [{

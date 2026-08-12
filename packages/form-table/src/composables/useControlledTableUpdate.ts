@@ -1,12 +1,13 @@
 import type {
   FormTableFieldChangePayload,
+  FormTableRowKey,
   FormTableUpdateApi,
   FormTableValue,
   TableRow
 } from '../types'
 import { getValueByPath, setValueByPath } from '../utils/path'
 
-type RowKey<TRow extends TableRow = TableRow> = string | ((row: TRow) => FormTableValue) | undefined
+type RowKey<TRow extends TableRow = TableRow> = FormTableRowKey<TRow> | undefined
 
 interface ControlledTableUpdateOptions<TRow extends TableRow = TableRow> {
   getTableData: () => TRow[]
@@ -158,7 +159,7 @@ export function useControlledTableUpdate<TRow extends TableRow = TableRow>(
       && !Object.is(getRowIdentity(currentRow, rowKey), getRowIdentity(nextRow, rowKey))
     ) {
       if (import.meta.env.DEV) {
-        console.warn('[FormTable] tableProps.rowKey is an immutable row identity; updateRow rejected a patch that changes it.')
+        console.warn('[FormTable] rowKey is an immutable row identity; updateRow rejected a patch that changes it.')
       }
       return
     }

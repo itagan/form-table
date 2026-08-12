@@ -28,9 +28,7 @@ describe('FormTable validation and exposed API', () => {
     const expose = wrapper.vm as unknown as FormTableExpose
     expect(expose.getFormRef()).toBeTruthy()
     expect(expose.getTableRef()).toBeTruthy()
-    const resetFields = vi.spyOn(expose.getFormRef() as any, 'resetFields')
-    expose.resetFields()
-    expect(resetFields).toHaveBeenCalledTimes(1)
+    expect((expose as any).resetFields).toBeUndefined()
     expose.clearValidate()
     wrapper.destroy()
   })

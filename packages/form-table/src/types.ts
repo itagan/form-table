@@ -7,6 +7,11 @@ export type FormTableRecord = Record<string, FormTableValue>
 /** 透传给 Vue/Element UI 组件的属性集合。 */
 export type ComponentProps = Record<string, FormTableValue>
 
+/** FormTable 自身管理 rowKey，Table 透传属性不再接受同名配置。 */
+export type FormTableTableProps = ComponentProps & { rowKey?: never }
+/** el-table-column 的 type 由 NativeColumnConfig 顶层字段管理。 */
+export type FormTableColumnProps = ComponentProps & { type?: never }
+
 /** 单条表格行数据。 */
 export interface TableRow extends FormTableRecord {}
 
@@ -257,7 +262,7 @@ interface BaseColumnConfig<TRow extends TableRow = TableRow> {
   /** 静态或动态显隐配置。 */
   visible?: DynamicValue<boolean, FormTableColumnContext<TRow>>
   /** 直接传给 el-table-column。 */
-  props?: DynamicValue<ComponentProps, FormTableColumnContext<TRow>>
+  props?: DynamicValue<FormTableColumnProps, FormTableColumnContext<TRow>>
 }
 
 /** 通过 Row/Item 布局渲染表单字段的列。 */
@@ -265,6 +270,25 @@ export interface LayoutColumnConfig<TRow extends TableRow = TableRow> extends Ba
   /** 当前列内的布局行配置。 */
   children: RowConfig<TRow>[]
   cellSlot?: never
+}
+
+/** Element UI 原生功能列；不进入单元格字段渲染链路。 */
+export interface NativeColumnConfig<TRow extends TableRow = TableRow> {
+  /** 列的稳定渲染身份。 */
+  key?: string
+  /** 当前仅开放无需展开内容的原生列类型。 */
+  type: 'selection' | 'index'
+  /** selection 通常无需标题，index 可按需提供。 */
+  label?: string
+  /** 静态或动态显隐配置。 */
+  visible?: DynamicValue<boolean, FormTableColumnContext<TRow>>
+  /** 直接传给 el-table-column；type 由顶层配置统一管理。 */
+  props?: DynamicValue<FormTableColumnProps, FormTableColumnContext<TRow>>
+  children?: never
+  cellSlot?: never
+  headerSlot?: never
+  headerProps?: never
+  headerHint?: never
 }
 
 /** 直接使用父组件具名 Slot 渲染单元格的列。 */
@@ -286,16 +310,25 @@ export interface FormTableCellSlotContext<TRow extends TableRow = TableRow> {
   updateRow: (patch: Partial<TRow>) => void
 }
 
-/** 普通列使用 children，列级自定义单元格使用 cellSlot，两者互斥。 */
-export type ColumnConfig<TRow extends TableRow = TableRow> = LayoutColumnConfig<TRow> | CellSlotColumnConfig<TRow>
+/** 布局列、列级 Slot 和原生功能列是三条互斥渲染路径。 */
+export type ColumnConfig<TRow extends TableRow = TableRow> =
+  | LayoutColumnConfig<TRow>
+  | CellSlotColumnConfig<TRow>
+  | NativeColumnConfig<TRow>
+
+/** FormTable 与 Element Table 共用的稳定行身份配置。 */
+export type FormTableRowKey<TRow extends TableRow = TableRow> =
+  | string
+  | ((row: TRow) => FormTableValue)
 
 /** FormTable 组件的公开 props 类型。 */
 export interface FormTableProps<TRow extends TableRow = TableRow> {
   /** 根组件 Vue 2 v-model 对应 prop，通过 update:tableData 回写。 */
   tableData: TRow[]
   columns: ColumnConfig<TRow>[]
+  rowKey?: FormTableRowKey<TRow>
   formProps?: ComponentProps
-  tableProps?: ComponentProps
+  tableProps?: FormTableTableProps
   /** headerHint/hint 的表级统一展示策略，默认使用原生 title。 */
   hintOptions?: FormTableHintOptions<TRow>
   loading?: boolean
@@ -361,7 +394,6 @@ export interface FormTableElementTableRef {
 /** 通过组件 ref 对外暴露的稳定方法。 */
 export interface FormTableExpose {
   validate: (callback?: (valid: boolean, fields?: FormTableValue) => void) => Promise<boolean>
-  resetFields: () => void
   clearValidate: (fieldProps?: string | string[]) => void
   getFormRef: () => FormTableElementFormRef | null
   getTableRef: () => FormTableElementTableRef | null

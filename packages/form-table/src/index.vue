@@ -16,7 +16,8 @@
     >
       <el-table
         ref="tableRef"
-        v-bind="props.tableProps"
+        v-bind="resolvedTableProps"
+        :row-key="props.rowKey"
         v-on="tableListeners"
         :data="props.tableData"
         v-loading="props.loading"
@@ -65,6 +66,8 @@ import type {
   FormTableHintModeContext,
   FormTableDefaultFieldHintContext,
   FormTableHintOptions,
+  FormTableRowKey,
+  FormTableTableProps,
   FormTableSlots,
   FormTableTableContext,
   FormTableUpdateApi,
@@ -92,7 +95,8 @@ const props = withDefaults(defineProps<{
   tableData: TableRow[]
   columns: ColumnConfig[]
   formProps?: ComponentProps
-  tableProps?: ComponentProps
+  tableProps?: FormTableTableProps
+  rowKey?: FormTableRowKey
   hintOptions?: FormTableHintOptions
   loading?: boolean
 }>(), {
@@ -171,6 +175,15 @@ const tableListeners = computed(() => {
   }, {})
 })
 
+/** rowKey 是 FormTable 核心身份协议，不允许继续藏在 Element Table 透传属性中。 */
+const resolvedTableProps = computed(() => {
+  const { rowKey: legacyRowKey, ...tableProps } = props.tableProps as ComponentProps
+  if (import.meta.env.DEV && legacyRowKey !== undefined) {
+    console.warn('[FormTable] tableProps.rowKey is no longer supported; use the top-level rowKey prop.')
+  }
+  return tableProps
+})
+
 /** el-form 的校验模型；字段 prop 均以 tableData.{rowIndex}.{fieldKey} 开头。 */
 const formModel = computed(() => ({ tableData: props.tableData }))
 
@@ -182,7 +195,7 @@ const { visibleColumns } = useColumnIdentity(() => props.columns, formTableConte
 /** 通过独立受控更新模块统一不可变写回、稳定行定位和同步组合。 */
 const updateApi: FormTableUpdateApi = useControlledTableUpdate({
   getTableData: () => props.tableData,
-  getRowKey: () => props.tableProps?.rowKey,
+  getRowKey: () => props.rowKey,
   emitUpdate: data => emit('update:tableData', data),
   emitFieldChange: payload => emit('field-change', payload)
 })
@@ -212,7 +225,6 @@ const validate = async (callback?: (valid: boolean, fields?: FormTableValue) => 
 /** 对外只暴露稳定方法，避免父组件依赖 setup 内部状态。 */
 defineExpose({
   validate,
-  resetFields: () => formRef.value?.resetFields?.(),
   clearValidate: (fieldProps?: string | string[]) => formRef.value?.clearValidate?.(fieldProps),
   getFormRef: () => formRef.value,
   getTableRef: () => tableRef.value
