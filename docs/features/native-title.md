@@ -22,7 +22,7 @@
 | 场景 | 推荐配置 | 原因 |
 | --- | --- | --- |
 | 少量固定补充说明 | `hint: '说明文本'` | 最短配置，默认使用原生 title |
-| 大量字段展示自身完整值 | 表级 `fieldFormatter` + 字段 `hint: true` | 格式化只写一次，字段按需开启 |
+| 大量字段展示自身完整值 | `hintOptions.field.enabled: true` | 未声明 Hint 的字段自动继承统一格式化 |
 | 提示依赖当前行、选项或权限 | `hint: context => ...` | 每次响应式更新都基于当前上下文求值 |
 | 全表需要统一视觉和延迟 | `hintOptions.mode: 'tooltip'` | 表头和字段共享一个 Tooltip 实例 |
 | 单个位置需要图标、富文本或独立交互 | `{ content, ownership: 'custom' }` + Slot | 内容保留在 Schema，展示完全交给调用方 |
@@ -30,17 +30,17 @@
 | 纯展示单元格只需截断提示 | `column.props.showOverflowTooltip` | 这是展示文本溢出，不是字段说明语义 |
 | 必填、错误或关键操作说明 | 常驻文本、校验消息或可聚焦控件 | 关键信息不能只依赖悬停提示 |
 
-推荐从最简单的 `hint: '...'` 开始。只有大量字段需要同一种值格式化时才启用 `fieldFormatter`；只有需要统一视觉、键盘访问和延迟控制时才切换到 Tooltip；只有特殊交互才把所有权交给 Slot。
+推荐从最简单的 `hint: '...'` 开始。只有大量字段需要同一种值格式化时才启用 `field.enabled/formatter`；只有需要统一视觉、键盘访问和延迟控制时才切换到 Tooltip；只有特殊交互才把所有权交给 Slot。
 
 ## 核心模型
 
 Hint 分成三个相互独立的决定：
 
-1. **内容从哪里来**：固定字符串、动态回调，或 `hint: true` 触发表级 formatter。
+1. **内容从哪里来**：固定字符串、动态回调，或全局字段策略 / `hint: true` 触发统一 formatter。
 2. **谁负责展示**：`ownership: 'table'` 由 FormTable 展示；`ownership: 'custom'` 只保留标准化内容，由调用方展示。
 3. **FormTable 如何展示**：整表统一选择浏览器原生 `title` 或单实例 `tooltip`。
 
-因此 `fieldFormatter` 只负责生成字符串，不决定展示方式；`ownership` 只决定展示责任，不改变内容；`mode` 只影响 FormTable 托管的 Hint，不影响自定义 Hint。
+因此 `field.formatter` 只负责生成字符串，不决定展示方式；`ownership` 只决定展示责任，不改变内容；`mode` 只影响 FormTable 托管的 Hint，不影响自定义 Hint。
 
 ```text
 字段 hint / 表头 headerHint
@@ -55,12 +55,14 @@ custom → FormTable 不写 title、内部标记或 ARIA
 
 | 配置状态 | 同层 `headerProps.title/formItemProps.title` | FormTable 自动提示 |
 | --- | --- | --- |
-| 未声明 Hint | 保留 | 无 |
+| 未声明 Hint，全局字段策略关闭 | 保留 | 无 |
+| 未声明 Hint，全局字段策略开启 | 被格式化结果覆盖 | 按整表 mode 展示 |
+| `hint: false` | 保留 | 无 |
 | `ownership: 'custom'` | 保留 | 无 |
 | 托管且内容非空 | 被 Hint 覆盖 | 按整表 mode 展示 |
 | 显式 `''`、`null` 或 `undefined` | 移除 | 无 |
 
-“显式空值”适合动态关闭提示：它与完全不声明 Hint 不同，前者会同时清除同层透传 title，后者保留底层属性。
+“显式空值”适合动态清除提示：它会同时清除同层透传 title。`hint: false` 则表示退出 Hint 系统，保留底层属性；未声明 Hint 是否产生提示取决于全局 `field.enabled`。
 
 ## 配置入口
 
@@ -68,14 +70,15 @@ custom → FormTable 不写 title、内部标记或 ARIA
 | --- | --- | --- |
 | 表级展示策略 | `hintOptions` | `{ mode: 'title' }`（默认）或 `{ mode: 'tooltip', props }` |
 | Tooltip 属性 | `hintOptions.props` | 透传给表格唯一的 `el-tooltip` |
-| 字段统一格式化 | `hintOptions.fieldFormatter` | `hint: true` 时根据字段上下文生成内容 |
+| 字段默认策略 | `hintOptions.field.enabled` | 是否让未声明 `hint` 的字段自动产生提示，默认 `false` |
+| 字段统一格式化 | `hintOptions.field.formatter` | 全局继承或 `hint: true` 时根据字段上下文生成内容 |
 | 表头提示 | `columns[].headerHint` | 默认表头或 `headerSlot` 的统一包装节点 |
 | 字段外层提示 | `columns[].children[].children[].hint` | `el-form-item` |
 | 表头原生属性 | `columns[].headerProps.title` | 默认表头或 `headerSlot` 的统一包装节点 |
 | 字段外层原生属性 | `columns[].children[].children[].formItemProps.title` | `el-form-item` |
 | 实际组件 title | `columns[].children[].children[].component.props.title` | 由实际组件的 attrs 行为决定 |
 
-`headerHint/hint` 表达提示语义；各级 `props.title` 只传给对应目标节点。自动托管的显式 Hint 会覆盖同层 `headerProps.title/formItemProps.title`；`ownership: 'custom'` 或未声明 Hint 时，原始 title 保持透传。
+`headerHint/hint` 表达提示语义；各级 `props.title` 只传给对应目标节点。自动托管的 Hint 会覆盖同层 `headerProps.title/formItemProps.title`；`ownership: 'custom'`、`hint: false`，或全局字段策略关闭时未声明 Hint，原始 title 保持透传。
 
 ## 配置示例
 
@@ -111,15 +114,18 @@ hint: { content: '字段说明', ownership: 'table' }
 
 ## 字段统一格式化
 
-多数提示只是当前字段完整值时，可在表级配置一次 `fieldFormatter`，字段使用 `hint: true` 开启：
+多数提示只是当前字段完整值时，可在表级开启字段默认策略并配置一次 formatter。未声明 `hint` 的字段会自动继承：
 
 ```ts
 const hintOptions: FormTableHintOptions = {
   mode: 'tooltip',
-  fieldFormatter: ({ value, fieldKey, itemConfig }) => {
-    if (value == null || value === '') return ''
-    if (itemConfig.type === 'date') return formatDate(value)
-    return `${fieldKey}：${String(value)}`
+  field: {
+    enabled: true,
+    formatter: ({ value, fieldKey, itemConfig }) => {
+      if (value == null || value === '') return null
+      if (itemConfig.type === 'date') return formatDate(value)
+      return `${fieldKey}：${String(value)}`
+    }
   }
 }
 
@@ -127,15 +133,14 @@ const columns: ColumnConfig[] = [{
   label: '备注',
   children: [{ children: [{
     fieldKey: 'remark',
-    type: 'input',
-    hint: true
+    type: 'input'
   }] }]
 }]
 ```
 
-未配置 `fieldFormatter` 时，`hint: true` 默认把 `null/undefined` 格式化为空字符串，其余值使用 `String(value)`。formatter 返回 `null/undefined` 时标准化结果为 `null`，返回空字符串时保留空的表格托管 Hint；两者都不显示提示。
+未配置 formatter 时，全局继承和 `hint: true` 都使用内置格式化：`null/undefined/''` 不展示，其余值使用 `String(value)`。formatter 返回 `null/undefined` 时标准化结果为 `null`，返回空字符串时保留空的表格托管 Hint；两者都不显示提示。
 
-显式字符串、对象和动态 Hint 函数优先，不经过 `fieldFormatter`。动态函数也可以返回 `true`，按当前字段上下文调用统一 formatter。该 formatter 只接收基础 `FormTableFieldRenderContext`，不包含解析后的 component 配置。
+字段显式配置始终优先：`true` 强制使用 formatter，`false` 退出 Hint 系统并保留底层 props，字符串/对象直接作为内容且不经过 formatter。动态函数也可以返回这些值。formatter 只接收基础 `FormTableFieldRenderContext`，不包含解析后的 component 配置；表头不继承字段策略。
 
 ## 两种模式
 
@@ -158,7 +163,9 @@ const columns: ColumnConfig[] = [{
 
 | 返回值 | 行为 |
 | --- | --- |
-| `true` | 使用 `hintOptions.fieldFormatter`，未配置时格式化当前字段值 |
+| 未声明 | 全局 `field.enabled` 开启时继承 formatter，否则不参与 Hint 系统 |
+| `true` | 强制使用 `hintOptions.field.formatter`，未配置时格式化当前字段值 |
+| `false` | 退出 Hint 系统，保留 `formItemProps.title` 等底层属性 |
 | 非空字符串或 `{ content, ownership: 'table' }` | 按当前 `hintOptions.mode` 自动显示提示 |
 | `{ content, ownership: 'custom' }` | FormTable 不处理提示；配置内容的用途由调用方决定 |
 | `''` 或 `{ content: '', ownership: 'table' }` | 不显示提示 |
@@ -195,16 +202,19 @@ const hintOptions = {
 
 ### 2. 大量字段复用格式化
 
-金额、日期和枚举等字段可以按 `itemConfig` 或 `fieldKey` 集中处理。只在确实需要提示的 Item 上写 `hint: true`：
+金额、日期和枚举等字段可以按 `itemConfig` 或 `fieldKey` 集中处理。开启 `field.enabled` 后普通字段无需逐项配置：
 
 ```ts
 const hintOptions: FormTableHintOptions<OrderRow> = {
   mode: 'tooltip',
-  fieldFormatter: ({ value, fieldKey, itemConfig }) => {
-    if (value == null || value === '') return null
-    if (fieldKey === 'amount') return `当前金额：¥${Number(value).toFixed(2)}`
-    if (itemConfig.type === 'date') return formatDate(value)
-    return String(value)
+  field: {
+    enabled: true,
+    formatter: ({ value, fieldKey, itemConfig }) => {
+      if (value == null || value === '') return null
+      if (fieldKey === 'amount') return `当前金额：¥${Number(value).toFixed(2)}`
+      if (itemConfig.type === 'date') return formatDate(value)
+      return String(value)
+    }
   }
 }
 ```
@@ -212,7 +222,8 @@ const hintOptions: FormTableHintOptions<OrderRow> = {
 如果个别字段需要特殊文案，直接提供显式 Hint 即可覆盖通用规则：
 
 ```ts
-{ fieldKey: 'amount', type: 'input', hint: true }
+{ fieldKey: 'amount', type: 'input' } // 继承全局
+{ fieldKey: 'password', type: 'input', hint: false } // 退出并保留底层属性
 { fieldKey: 'status', type: 'select', hint: '状态由审批流程自动更新' }
 ```
 
@@ -354,7 +365,7 @@ component: {
 - `tooltip` 模式只要 hint 非空就显示，不检查目标内容是否溢出。
 - `tooltip` 模式每个 FormTable 只有一个实例，表头与字段不能分别选择模式。
 - `component.props.title` 是否落在内部 input，取决于实际组件是否透传 `$attrs`。
-- `fieldFormatter` 只处理 `hint: true`，不会改写任何显式 Hint 内容。
+- `field.formatter` 只处理全局继承或 `hint: true`，不会改写显式字符串或对象 Hint。
 - `ownership: 'table'` 时表头和字段 Slot 的外层提示由 FormTable 自动应用，Slot 内部不应重复创建 Tooltip；`ownership: 'custom'` 时 FormTable 不处理提示，与字段渲染类型无关。
 - 普通 `component.renderer` 不会自动收到 `hint` prop；可在 `component.props` 中读取标准化 `hint` 后显式映射为业务组件需要的属性。
 - Hint 只适合作为补充说明；必填状态、校验错误和关键操作信息必须有始终可见或可聚焦的表达，不能只依赖悬停。

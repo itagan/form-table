@@ -20,8 +20,8 @@
         </div>
         <div>
           <strong>批量显示完整值</strong>
-          <code>hint: true</code>
-          <span>通过 hintOptions.fieldFormatter 集中格式化。</span>
+          <code>field.enabled: true</code>
+          <span>未声明 hint 的字段自动继承统一 formatter。</span>
         </div>
         <div>
           <strong>特殊触发节点</strong>
@@ -66,7 +66,7 @@
           </div>
           <code>hintOptions.props</code>
         </div>
-        <p>表头与全部字段共享一个 Tooltip；两个字段通过 <code>hint: true</code> 复用表级 formatter。</p>
+        <p>表头与字段共享一个 Tooltip；普通字段继承全局 formatter，也可通过 <code>true/false</code> 强制启用或退出。</p>
         <FormTable
           v-model="tooltipRows"
           :columns="tooltipColumns"
@@ -76,7 +76,7 @@
         />
         <ul class="scenario-notes">
           <li><code>placement: 'bottom-start'</code>、浅色主题、自定义 popper class。</li>
-          <li>修改输入值可以观察统一格式化后的动态 Hint；清空后浮层不会显示。</li>
+          <li>前两项使用统一格式化；第三项配置 <code>hint: false</code>，只保留原生 title。</li>
           <li>使用 Tab 聚焦表头或字段，按 Escape 关闭；移动到下一目标后可再次打开。</li>
         </ul>
       </article>
@@ -369,7 +369,8 @@ const titleColumns: ColumnConfig[] = [{
 
 const tooltipRows = ref<TableRow[]>([{
   dynamicText: '提示会随字段值变化',
-  secondaryText: '第二个字段复用相同 formatter'
+  secondaryText: '第二个字段通过 true 强制启用',
+  privateText: '不进入 Hint 系统'
 }])
 
 const tooltipHintOptions: FormTableHintOptions = {
@@ -380,7 +381,10 @@ const tooltipHintOptions: FormTableHintOptions = {
     openDelay: 80,
     popperClass: 'hint-scenarios-popper'
   },
-  fieldFormatter: ({ value }) => value ? `当前完整内容：${String(value)}` : ''
+  field: {
+    enabled: true,
+    formatter: ({ value }) => value ? `当前完整内容：${String(value)}` : null
+  }
 }
 
 const tooltipColumns: ColumnConfig[] = [{
@@ -392,15 +396,21 @@ const tooltipColumns: ColumnConfig[] = [{
     children: [{
       fieldKey: 'dynamicText',
       type: 'input',
-      colProps: { span: 12 },
-      hint: true,
+      colProps: { span: 8 },
       component: { props: { clearable: true, placeholder: '输入或清空内容' } }
     }, {
       fieldKey: 'secondaryText',
       type: 'input',
-      colProps: { span: 12 },
+      colProps: { span: 8 },
       hint: true,
-      component: { props: { placeholder: '同样由 fieldFormatter 格式化' } }
+      component: { props: { placeholder: 'true 使用相同 formatter' } }
+    }, {
+      fieldKey: 'privateText',
+      type: 'input',
+      colProps: { span: 8 },
+      hint: false,
+      formItemProps: { title: 'hint: false 保留的原生 title' },
+      component: { props: { placeholder: 'false 退出全局 Hint' } }
     }]
   }]
 }]
@@ -617,7 +627,10 @@ const configurationExample = `<FormTable
       openDelay: 80,
       popperClass: 'hint-scenarios-popper'
     },
-    fieldFormatter: ({ value }) => value ? \`当前完整内容：\${String(value)}\` : ''
+    field: {
+      enabled: true,
+      formatter: ({ value }) => value ? \`当前完整内容：\${String(value)}\` : null
+    }
   }"
 >
   <!-- ownership: 'custom' 时，Slot 从配置解析结果自行渲染 Tooltip -->
@@ -639,8 +652,10 @@ const columns = [{
   }] }]
 }]
 
-// 多个普通字段只需配置 hint: true，共用表级 fieldFormatter。
-const formattedItem = { fieldKey: 'remark', type: 'input', hint: true }
+// 未声明 hint 时继承全局；true 强制启用；false 退出并保留底层 title。
+const inheritedItem = { fieldKey: 'remark', type: 'input' }
+const forcedItem = { fieldKey: 'summary', type: 'input', hint: true }
+const disabledItem = { fieldKey: 'password', type: 'input', hint: false }
 
 // 内容完全不属于 Schema 时，也可以省略 hint，在 Slot 内独立处理。`
 </script>

@@ -53,7 +53,7 @@
 
 `component.resolveRenderer/props/options/optionProps` 和组件 listener 同样获得标准化后的 `hint`。Hint 自身的动态函数使用不含 `hint` 的基础字段上下文，避免配置引用自身。
 
-Item 配置 `hint: true` 时，`hintOptions.fieldFormatter` 获得同一份基础 `FormTableFieldRenderContext`。formatter 在 component 解析前执行，因此不包含标准化 `hint`、`setValue/updateRow` 或解析后的 component 配置。
+未声明 Hint 且 `hintOptions.field.enabled` 开启，或 Item 配置 `hint: true` 时，`hintOptions.field.formatter` 获得同一份基础 `FormTableFieldRenderContext`。formatter 在 component 解析前执行，因此不包含标准化 `hint`、`setValue/updateRow` 或解析后的 component 配置。
 
 ## FormTableHeaderSlotContext
 

@@ -11,6 +11,7 @@ import FormTable, {
   type FormTableExpose,
   type FormTableFieldHint,
   type FormTableFieldHintFormatter,
+  type FormTableFieldHintOptions,
   type FormTableHeaderSlotContext,
   type FormTableHint,
   type FormTableHintConfig,
@@ -37,6 +38,9 @@ const CustomInput: Component = { name: 'CustomInput' }
 const AlternativeInput: Component = { name: 'AlternativeInput' }
 const completeValueHint: FormTableHint = '完整字段值'
 const formattedFieldHint: FormTableFieldHint = true
+const disabledFieldHint: FormTableFieldHint = false
+void formattedFieldHint
+void disabledFieldHint
 // @ts-expect-error 表头使用的显式 FormTableHint 不接受 true。
 const invalidExplicitHint: FormTableHint = true
 const customValueHint: FormTableHintConfig = { content: '自行展示', ownership: 'custom' }
@@ -211,9 +215,13 @@ const tooltipHintOptions: FormTableHintOptions = {
 const typedFieldFormatter: FormTableFieldHintFormatter<PurchaseRow> = ({ value, row }) => (
   `${row.name}:${String(value)}`
 )
+const typedFieldHintOptions: FormTableFieldHintOptions<PurchaseRow> = {
+  enabled: true,
+  formatter: typedFieldFormatter
+}
 const typedHintOptions: FormTableHintOptions<PurchaseRow> = {
   mode: 'tooltip',
-  fieldFormatter: typedFieldFormatter
+  field: typedFieldHintOptions
 }
 void typedHintOptions
 // @ts-expect-error title 模式不接受 Tooltip 属性。

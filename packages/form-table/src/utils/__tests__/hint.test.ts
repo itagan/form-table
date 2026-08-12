@@ -58,7 +58,9 @@ describe('FormTable hint utilities', () => {
     })
     expect(resolveFormTableFieldHint(true, createFieldContext(0))?.content).toBe('0')
     expect(resolveFormTableFieldHint(true, createFieldContext(false))?.content).toBe('false')
-    expect(resolveFormTableFieldHint(true, createFieldContext(null))?.content).toBe('')
+    expect(resolveFormTableFieldHint(true, createFieldContext(null))).toBeNull()
+    expect(resolveFormTableFieldHint(true, createFieldContext(''))).toBeNull()
+    expect(resolveFormTableFieldHint(false, createFieldContext('隐藏'))).toBeNull()
   })
 
   it('uses the table formatter only for hint=true and preserves empty formatter results', () => {

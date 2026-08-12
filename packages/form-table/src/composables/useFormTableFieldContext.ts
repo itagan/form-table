@@ -3,7 +3,7 @@ import type {
   FormItemConfig,
   FormTableFieldContext,
   FormTableHintModeContext,
-  FormTableHintFormatterContext,
+  FormTableFieldHintOptionsContext,
   FormTableResolvedFieldContext,
   FormTableRowContext,
   FormTableUpdateApi,
@@ -11,7 +11,7 @@ import type {
   TableRow
 } from '../types'
 import {
-  FORM_TABLE_HINT_FORMATTER_KEY,
+  FORM_TABLE_FIELD_HINT_OPTIONS_KEY,
   FORM_TABLE_HINT_MODE_KEY,
   FORM_TABLE_UPDATE_KEY
 } from '../types'
@@ -39,9 +39,9 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
   /** 注入缺失时字段仍可只读渲染，更新助手退化为空操作。 */
   const updateApi = inject<FormTableUpdateApi<TRow>>(FORM_TABLE_UPDATE_KEY)
   const hintMode = inject<FormTableHintModeContext>(FORM_TABLE_HINT_MODE_KEY, ref<'title'>('title'))
-  const hintFormatter = inject<FormTableHintFormatterContext<TRow>>(
-    FORM_TABLE_HINT_FORMATTER_KEY,
-    ref(undefined)
+  const fieldHintOptions = inject<FormTableFieldHintOptionsContext<TRow>>(
+    FORM_TABLE_FIELD_HINT_OPTIONS_KEY,
+    ref({})
   )
 
   /**
@@ -60,15 +60,23 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
   ))
 
   /** Hint 与其他动态字段配置共享上下文，并只在当前响应式周期求值一次。 */
-  const resolvedHint = computed(() => {
+  const resolvedHintState = computed(() => {
     const config = options.getConfig()
-    if (!Object.prototype.hasOwnProperty.call(config, 'hint')) return null
-    return resolveFormTableFieldHint(
-      resolveDynamicValue(config.hint, runtimeContext.value),
-      runtimeContext.value,
-      hintFormatter.value
-    )
+    const declared = Object.prototype.hasOwnProperty.call(config, 'hint')
+    const source = declared
+      ? resolveDynamicValue(config.hint, runtimeContext.value)
+      : fieldHintOptions.value.enabled ? true : false
+    return {
+      participates: source !== false,
+      hint: resolveFormTableFieldHint(
+        source,
+        runtimeContext.value,
+        fieldHintOptions.value.formatter
+      )
+    }
   })
+
+  const resolvedHint = computed(() => resolvedHintState.value.hint)
 
   /** 组件配置、监听器和 Slot 共享 Hint 求值后的稳定上下文。 */
   const resolvedContext = computed<FormTableResolvedFieldContext<TRow>>(() => extendLazyContext(
@@ -87,7 +95,7 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
   const resolvedFormItemProps = computed(() => {
     const config = options.getConfig()
     const formItemProps = resolveDynamicValue(config.formItemProps, runtimeContext.value) || {}
-    if (!Object.prototype.hasOwnProperty.call(config, 'hint')) {
+    if (!resolvedHintState.value.participates) {
       return { ...formItemProps, prop: propPath.value }
     }
 

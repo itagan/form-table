@@ -32,10 +32,11 @@ export function resolveFormTableFieldHint<TRow extends TableRow = TableRow>(
   context: FormTableFieldRenderContext<TRow>,
   formatter?: FormTableFieldHintFormatter<TRow>
 ): ResolvedFormTableHint | null {
+  if (hint === false) return null
   if (hint !== true) return resolveFormTableHint(hint)
   const content = formatter
     ? formatter(context)
-    : context.value == null ? '' : String(context.value)
+    : context.value == null || context.value === '' ? null : String(context.value)
   return resolveFormTableHint(content)
 }
 
