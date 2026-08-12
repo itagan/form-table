@@ -69,7 +69,7 @@ custom → FormTable 不写 title、内部标记或 ARIA
 | --- | --- | --- |
 | 表级展示策略 | `hintOptions` | `{ mode: 'title' }`（默认）或 `{ mode: 'tooltip', props }` |
 | Tooltip 属性 | `hintOptions.props` | 透传给表格唯一的 `el-tooltip` |
-| 字段默认内容 | `hintOptions.field` | `true` 默认字符串化；函数统一格式化未声明或空 Hint 的字段 |
+| 字段默认内容 | `hintOptions.field` | 未配置/`false` 关闭；`true` 默认字符串化；函数统一格式化 |
 | 表头提示 | `columns[].headerHint` | 默认表头或 `headerSlot` 的统一包装节点 |
 | 字段外层提示 | `columns[].children[].children[].hint` | `el-form-item` |
 | 表头原生属性 | `columns[].headerProps.title` | 默认表头或 `headerSlot` 的统一包装节点 |
@@ -133,7 +133,7 @@ const columns: ColumnConfig[] = [{
 }]
 ```
 
-配置 `field: true` 时，`null/undefined/''` 不展示，其余值使用 `String(value)`。formatter 返回 `null/undefined/''` 时不展示，且不再继续回退。
+未配置 `field` 或配置 `field: false` 时没有全局字段处理。配置 `field: true` 时，`null/undefined/''` 不展示，其余值使用 `String(value)`。formatter 返回 `null/undefined/''` 时不展示，且不再继续回退。
 
 字段非空字符串或对象覆盖全局，`false` 明确关闭；未声明及 `null/undefined/''` 回退全局。formatter 只接收基础 `FormTableFieldRenderContext`，不包含解析后的 component 配置；表头不继承字段默认值。
 
@@ -163,6 +163,14 @@ const columns: ColumnConfig[] = [{
 | 非空字符串或 `{ content, behavior: 'auto' }` | 按当前 `hintOptions.mode` 自动显示提示 |
 | `{ content, behavior: 'custom' }` | FormTable 不处理提示；配置内容的用途由调用方决定 |
 | `{ content: '' }` | 作为空内容回退全局；全局未配置则不显示 |
+
+全局字段默认值本身只有三种状态：
+
+```ts
+hintOptions: { field: false } // 或不配置 field：无全局处理
+hintOptions: { field: true }  // 默认 String(value)
+hintOptions: { field: context => format(context) } // 自定义格式化
+```
 
 动态函数应直接返回最终展示字符串。Select、日期、对象等字段的内部值不一定等于用户看到的文本，FormTable 不猜测 label：
 

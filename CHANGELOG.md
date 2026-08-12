@@ -5,7 +5,7 @@
 ### Improved
 
 - `headerHint/hint` 使用 `{ content, behavior }` 表达自动或自定义处理方式；标准化 Hint 统一提供给 component 动态配置、listener、表头和字段 Slot。
-- `hintOptions.field` 支持 `true` 默认字符串化或函数统一格式化；Item 不写或返回空值时继承、`false` 关闭、非空内容覆盖。只有有效 `auto` Hint 会在渲染属性中取代同层 title，源配置保持不变。
+- `hintOptions.field` 未配置或为 `false` 时无全局字段处理，`true` 默认字符串化，函数统一格式化；Item 不写或返回空值时继承、`false` 关闭、非空内容覆盖。
 - 单实例 Tooltip 增加嵌套 FormTable 隔离、表头键盘入口、Escape 关闭和 token 安全的 `aria-describedby` 管理，并将 Element UI 私有能力收口到版本适配层。
 - 新增独立 Hint 多场景 Demo 和选型速查，并列展示默认 title、单实例 Tooltip 透传、统一字段格式化、动态 Hint、键盘操作、底层原生 title、表头/字段 Slot、自定义组件、字段 Slot 自主管理 `el-tooltip`、嵌套表格、`renderHeader` 与 `cellSlot/showOverflowTooltip` 的职责边界；专题文档补充三层决策模型、属性优先级和常见业务配方。
 - 新增可直接复制的常见操作列文档，覆盖末尾新增、当前行后插入、复制、删除、稳定行标识和校验清理；行列操作 Demo 同步改用 `cellSlot` 并增加后插按钮。

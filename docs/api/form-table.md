@@ -13,7 +13,7 @@
 
 `tableData` 和 `columns` 在公开 `FormTableProps` 类型中是必填项；组件仍提供空数组作为运行时容错默认值。TypeScript 项目应显式传入两者，不依赖运行时默认值。
 
-`hintOptions` 是可辨识联合：title 模式使用 `{ mode?: 'title' }`，Tooltip 模式使用 `{ mode: 'tooltip', props?: ComponentProps }`。两种模式都可配置 `field: true | FormTableFieldHintFormatter`：Item 不写或返回空值时继承，`false` 关闭，非空字符串/对象覆盖。表头不继承字段默认值。同一个 FormTable 的自动 Hint 只能选择一种展示方式；`props` 可配置 `placement/effect/openDelay/popperClass` 等属性，内部受控属性不接受覆盖。完整行为见 [Hint 提示模式](../features/native-title.md)。
+`hintOptions` 是可辨识联合：title 模式使用 `{ mode?: 'title' }`，Tooltip 模式使用 `{ mode: 'tooltip', props?: ComponentProps }`。两种模式都可配置 `field: boolean | FormTableFieldHintFormatter`：未配置或 `false` 表示无全局字段处理，`true` 默认字符串化，函数统一格式化。Item 不写或返回空值时继承，`false` 关闭，非空内容覆盖。表头不继承字段默认值。完整行为见 [Hint 提示模式](../features/native-title.md)。
 
 ## 受控数据
 

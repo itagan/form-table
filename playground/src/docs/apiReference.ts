@@ -25,7 +25,7 @@ export const apiGroups: ApiGroup[] = [
       { path: 'formProps', type: 'Record<string, unknown>', defaultValue: '{}', target: 'el-form', description: '透传 Element Form 属性。' },
       { path: 'tableProps', type: 'Record<string, unknown>', defaultValue: '{}', target: 'el-table', description: '透传 Element Table 属性；异步更新建议配置 rowKey。' },
       { path: 'hintOptions', type: 'FormTableHintOptions', defaultValue: "{ mode: 'title' }", target: '表头与字段 Hint', description: '整表统一选择展示模式，并可配置字段默认策略。' },
-      { path: 'hintOptions.field', type: 'true | FormTableFieldHintFormatter', defaultValue: '—', target: '未声明或空 hint 的字段', description: 'true 默认字符串化；函数统一格式化；不影响表头。', context: 'FieldContext' },
+      { path: 'hintOptions.field', type: 'boolean | FormTableFieldHintFormatter', defaultValue: 'false', target: '未声明或空 hint 的字段', description: 'false/未配置关闭；true 默认字符串化；函数统一格式化。', context: 'FieldContext' },
       { path: 'loading', type: 'boolean', defaultValue: 'false', target: 'el-table v-loading', description: '表格加载状态。' }
     ]
   },
