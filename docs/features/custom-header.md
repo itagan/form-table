@@ -37,7 +37,7 @@ const columns: ColumnConfig[] = [{
 </FormTable>
 ```
 
-FormTable 会在 Slot 外创建 `.form-table-column-header`。默认的 `headerHint` 自动应用于该节点，并作为 title 或表级单实例 Tooltip 的锚点。Slot 不要重复绑定 `header.props`；需要自行展示时可配置 `headerHint: { content, ownership: 'custom' }`，并读取 `header.hint.content`。
+FormTable 会在 Slot 外创建 `.form-table-column-header`。默认的 `headerHint` 自动应用于该节点，并作为 title 或表级单实例 Tooltip 的锚点。Slot 不要重复绑定 `header.props`；需要自行展示时可配置 `headerHint: { content, behavior: 'custom' }`，并读取 `header.hint.content`。
 
 ## Slot scope
 
@@ -61,7 +61,7 @@ interface FormTableHeaderSlotContext {
 | `columnIndex` | 当前可见列下标，不保证等于原始数组下标 |
 | `tableData` | 显示行数、汇总状态等只读信息 |
 | `header.props` | 当前列已解析的 `headerProps`，供读取兼容，已由包装节点应用 |
-| `header.hint` | 标准化后的 `{ content, ownership }` 或 `null`；仅 `ownership: 'table'` 由包装节点自动应用 |
+| `header.hint` | 标准化后的 `{ content, behavior }` 或 `null`；仅 `behavior: 'auto'` 由包装节点自动应用 |
 
 ## 动态配置
 
@@ -84,7 +84,7 @@ Tooltip 模式会让托管 Hint 的表头包装节点默认获得 `tabindex="0"`
 需要表头 Slot 自行控制 Tooltip 时：
 
 ```ts
-headerHint: { content: '自定义表头说明', ownership: 'custom' }
+headerHint: { content: '自定义表头说明', behavior: 'custom' }
 ```
 
 ```vue

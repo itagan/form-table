@@ -51,7 +51,7 @@ describe('FormTable hint modes', () => {
     wrapper.destroy()
   })
 
-  it('formats inherited and hint=true fields while keeping explicit hints authoritative', async () => {
+  it('formats inherited fields, lets empty results fall back, and keeps explicit hints authoritative', async () => {
     const formatter = vi.fn(({ fieldKey, value }: FormTableFieldRenderContext) => (
       fieldKey === 'empty' ? null : `${fieldKey}：${String(value)}`
     ))
@@ -59,7 +59,7 @@ describe('FormTable hint modes', () => {
       'data-resolved-hint': hint?.content
     }))
     const wrapper = mountFormTable({
-      hintOptions: { mode: 'tooltip', field: { enabled: true, formatter } },
+      hintOptions: { mode: 'tooltip', field: formatter },
       tableData: [{ inherited: 'global', name: 'Alice', dynamic: 'A', explicit: 'raw', disabled: 'secret', empty: '' }],
       columns: [{
         label: '格式化字段',
@@ -70,12 +70,12 @@ describe('FormTable hint modes', () => {
         }, {
           fieldKey: 'name',
           type: 'input',
-          hint: true,
+          hint: undefined,
           component: { props: componentProps }
         }, {
           fieldKey: 'dynamic',
           type: 'input',
-          hint: () => true as const
+          hint: () => ''
         }, {
           fieldKey: 'explicit',
           type: 'input',
@@ -88,8 +88,8 @@ describe('FormTable hint modes', () => {
         }, {
           fieldKey: 'empty',
           type: 'input',
-          hint: true,
-          formItemProps: { title: '应由空格式化结果清除' }
+          hint: undefined,
+          formItemProps: { title: '空格式化结果保留的 title' }
         }] }]
       }]
     })
@@ -104,10 +104,10 @@ describe('FormTable hint modes', () => {
     expect(formItems.at(4).attributes('data-form-table-hint')).toBeUndefined()
     expect(formItems.at(4).attributes('title')).toBe('false 保留底层 title')
     expect(formItems.at(5).attributes('data-form-table-hint')).toBeUndefined()
-    expect(formItems.at(5).attributes('title')).toBeUndefined()
+    expect(formItems.at(5).attributes('title')).toBe('空格式化结果保留的 title')
     expect(componentProps.mock.calls[0][0].hint).toEqual({
       content: 'name：Alice',
-      ownership: 'table'
+      behavior: 'auto'
     })
     expect(formatter).toHaveBeenCalledTimes(4)
 
@@ -122,10 +122,10 @@ describe('FormTable hint modes', () => {
     wrapper.destroy()
   })
 
-  it('reacts to the global field enabled switch without changing explicit field overrides', async () => {
+  it('reacts to the global field default without changing explicit field overrides', async () => {
     const wrapper = mountFormTable({
-      hintOptions: { mode: 'title', field: { enabled: true } },
-      tableData: [{ inherited: '全局值', forced: '强制值', disabled: '关闭值' }],
+      hintOptions: { mode: 'title', field: true },
+      tableData: [{ inherited: '全局值', emptyFallback: '空值回退', disabled: '关闭值' }],
       columns: [{
         label: '全局开关',
         children: [{ children: [{
@@ -133,9 +133,9 @@ describe('FormTable hint modes', () => {
           type: 'input',
           formItemProps: { title: '继承字段底层 title' }
         }, {
-          fieldKey: 'forced',
+          fieldKey: 'emptyFallback',
           type: 'input',
-          hint: true
+          hint: () => undefined
         }, {
           fieldKey: 'disabled',
           type: 'input',
@@ -148,12 +148,22 @@ describe('FormTable hint modes', () => {
 
     const formItems = wrapper.findAll('.el-form-item')
     expect(formItems.at(0).attributes('title')).toBe('全局值')
-    expect(formItems.at(1).attributes('title')).toBe('强制值')
+    expect(formItems.at(1).attributes('title')).toBe('空值回退')
     expect(formItems.at(2).attributes('title')).toBe('关闭字段底层 title')
 
-    await wrapper.setProps({ hintOptions: { mode: 'title', field: { enabled: false } } })
+    await wrapper.setProps({
+      hintOptions: {
+        mode: 'title',
+        field: ({ value }: FormTableFieldRenderContext) => `替换：${String(value)}`
+      }
+    })
+    expect(formItems.at(0).attributes('title')).toBe('替换：全局值')
+    expect(formItems.at(1).attributes('title')).toBe('替换：空值回退')
+    expect(formItems.at(2).attributes('title')).toBe('关闭字段底层 title')
+
+    await wrapper.setProps({ hintOptions: { mode: 'title' } })
     expect(formItems.at(0).attributes('title')).toBe('继承字段底层 title')
-    expect(formItems.at(1).attributes('title')).toBe('强制值')
+    expect(formItems.at(1).attributes('title')).toBeUndefined()
     expect(formItems.at(2).attributes('title')).toBe('关闭字段底层 title')
     wrapper.destroy()
   })
@@ -489,7 +499,7 @@ describe('FormTable hint modes', () => {
       scopedSlots: {
         'school-header': `
           <span class="school-header">
-            {{ props.label }}|{{ props.header.hint.content }}|{{ props.header.hint.ownership }}
+            {{ props.label }}|{{ props.header.hint.content }}|{{ props.header.hint.behavior }}
           </span>
         `
       }
@@ -501,7 +511,7 @@ describe('FormTable hint modes', () => {
     expect(header.attributes('data-form-table-hint')).toBe('学校完整说明（1）')
     expect(header.attributes('aria-label')).toBe('学校表头')
     expect(header.attributes('title')).toBeUndefined()
-    expect(slotContent.text()).toBe('学校|学校完整说明（1）|table')
+    expect(slotContent.text()).toBe('学校|学校完整说明（1）|auto')
     expect(slotContent.attributes('data-form-table-hint')).toBeUndefined()
     expect(slotContent.attributes('title')).toBeUndefined()
 
@@ -534,7 +544,7 @@ describe('FormTable hint modes', () => {
       }],
       scopedSlots: {
         'name-field': `<button class="slot-field">
-          {{ props.value }}|{{ props.hint.content }}|{{ props.hint.ownership }}
+          {{ props.value }}|{{ props.hint.content }}|{{ props.hint.behavior }}
         </button>`
       }
     })
@@ -543,7 +553,7 @@ describe('FormTable hint modes', () => {
     const formItem = wrapper.find('.el-form-item')
     const slotField = wrapper.find('.slot-field')
     expect(formItem.attributes('data-form-table-hint')).toBe('字段 Slot 说明')
-    expect(slotField.text()).toBe('Alice|字段 Slot 说明|table')
+    expect(slotField.text()).toBe('Alice|字段 Slot 说明|auto')
     expect(slotField.attributes('data-form-table-hint')).toBeUndefined()
 
     const tooltip = getHintTooltip(wrapper)
@@ -556,28 +566,28 @@ describe('FormTable hint modes', () => {
     wrapper.destroy()
   })
 
-  it('exposes ownership=custom hints to slots without changing target props or triggering singleton', async () => {
+  it('exposes behavior=custom hints to slots without changing target props or triggering singleton', async () => {
     const wrapper = mountFormTable({
       hintOptions: { mode: 'tooltip' },
       columns: [{
         label: '自定义提示',
         headerSlot: 'custom-header',
-        headerHint: { content: '表头自行展示', ownership: 'custom' },
+        headerHint: { content: '表头自行展示', behavior: 'custom' },
         headerProps: { title: '底层表头 title' },
         children: [{ children: [{
           fieldKey: 'name',
           type: 'slot',
-          hint: { content: '字段自行展示', ownership: 'custom' },
+          hint: { content: '字段自行展示', behavior: 'custom' },
           formItemProps: { title: '底层字段 title' },
           component: { renderer: 'custom-field' }
         }] }]
       }],
       scopedSlots: {
         'custom-header': `<span class="custom-hint-header">
-          {{ props.header.hint.content }}|{{ props.header.hint.ownership }}
+          {{ props.header.hint.content }}|{{ props.header.hint.behavior }}
         </span>`,
         'custom-field': `<button class="custom-hint-field">
-          {{ props.hint.content }}|{{ props.hint.ownership }}
+          {{ props.hint.content }}|{{ props.hint.behavior }}
         </button>`
       }
     })
@@ -600,7 +610,7 @@ describe('FormTable hint modes', () => {
     wrapper.destroy()
   })
 
-  it('disables managed hints for builtin and component fields when ownership=custom', async () => {
+  it('disables managed hints for builtin and component fields when behavior=custom', async () => {
     const wrapper = mountFormTable({
       hintOptions: { mode: 'tooltip' },
       tableData: [{ name: 'Alice', age: '18' }],
@@ -609,12 +619,12 @@ describe('FormTable hint modes', () => {
         children: [{ children: [{
           fieldKey: 'name',
           type: 'input',
-          hint: { content: '内置字段配置内容', ownership: 'custom' },
+          hint: { content: '内置字段配置内容', behavior: 'custom' },
           formItemProps: { title: '内置字段原生 title' }
         }, {
           fieldKey: 'age',
           type: 'component',
-          hint: { content: '自定义组件配置内容', ownership: 'custom' },
+          hint: { content: '自定义组件配置内容', behavior: 'custom' },
           formItemProps: { title: '组件字段原生 title' },
           component: { renderer: 'el-input' }
         }] }]
@@ -638,10 +648,10 @@ describe('FormTable hint modes', () => {
     wrapper.destroy()
   })
 
-  it('closes an active managed tooltip when a dynamic hint switches to custom ownership', async () => {
+  it('closes an active managed tooltip when a dynamic hint switches to custom behavior', async () => {
     const hint = ({ row, value }: FormTableFieldRenderContext) => ({
       content: `当前内容：${String(value)}`,
-      ownership: row.customHint ? 'custom' as const : 'table' as const
+      behavior: row.customHint ? 'custom' as const : 'auto' as const
     })
     const wrapper = mountFormTable({
       hintOptions: { mode: 'tooltip' },
@@ -678,27 +688,25 @@ describe('FormTable hint modes', () => {
     wrapper.destroy()
   })
 
-  it('preserves empty custom hint content for slots while leaving native props untouched', async () => {
+  it('treats empty custom hint content as no hint and leaves native props untouched', async () => {
     const wrapper = mountFormTable({
       columns: [{
         label: '空提示',
         children: [{ children: [{
           fieldKey: 'name',
           type: 'slot',
-          hint: { content: '', ownership: 'custom' },
+          hint: { content: '', behavior: 'custom' },
           formItemProps: { title: '底层字段 title' },
           component: { renderer: 'empty-hint-field' }
         }] }]
       }],
       scopedSlots: {
-        'empty-hint-field': `<span class="empty-custom-hint">
-          {{ props.hint.content === '' }}|{{ props.hint.ownership }}
-        </span>`
+        'empty-hint-field': '<span class="empty-custom-hint">{{ props.hint === null }}</span>'
       }
     })
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.find('.empty-custom-hint').text()).toBe('true|custom')
+    expect(wrapper.find('.empty-custom-hint').text()).toBe('true')
     expect(wrapper.find('.el-form-item').attributes('title')).toBe('底层字段 title')
     wrapper.destroy()
   })
@@ -730,8 +738,8 @@ describe('FormTable hint modes', () => {
 
     expect(wrapper.find('.null-hint').text()).toBe('true')
     expect(wrapper.find('.undefined-hint').text()).toBe('true')
-    wrapper.findAll('.el-form-item').wrappers.forEach((formItem) => {
-      expect(formItem.attributes('title')).toBeUndefined()
+    wrapper.findAll('.el-form-item').wrappers.forEach((formItem, index) => {
+      expect(formItem.attributes('title')).toBe(index === 0 ? '应被清除' : '也应被清除')
       expect(formItem.attributes('data-form-table-hint')).toBeUndefined()
     })
     wrapper.destroy()

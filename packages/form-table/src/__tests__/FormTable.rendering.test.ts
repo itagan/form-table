@@ -221,7 +221,7 @@ describe('FormTable rendering and configuration', () => {
     const listener = vi.fn((context) => context.setValue('disabled'))
     const componentProps = vi.fn((context: FormTableResolvedFieldContext) => ({
       marker: 'status',
-      hintOwnership: context.hint?.ownership
+      hintBehavior: context.hint?.behavior
     }))
     const StatusInput = {
       props: ['value'],
@@ -255,7 +255,7 @@ describe('FormTable rendering and configuration', () => {
     expect(componentProps).toHaveBeenCalledTimes(1)
     expect(componentProps.mock.calls[0][0].hint).toEqual({
       content: '状态字段说明',
-      ownership: 'table'
+      behavior: 'auto'
     })
     await wrapper.find('.status-input').trigger('click')
 
@@ -267,7 +267,7 @@ describe('FormTable rendering and configuration', () => {
       value: 'enabled',
       columnConfig: { label: '状态' },
       itemConfig: { fieldKey: 'status', type: 'component' },
-      hint: { content: '状态字段说明', ownership: 'table' }
+      hint: { content: '状态字段说明', behavior: 'auto' }
     })
     expect(Object.keys(listener.mock.calls[0][0]).sort()).toEqual([
       'columnConfig',

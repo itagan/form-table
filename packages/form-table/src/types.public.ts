@@ -26,7 +26,7 @@ export type {
   FormTableHintConfig,
   FormTableFieldHint,
   FormTableFieldHintFormatter,
-  FormTableFieldHintOptions,
+  FormTableDefaultFieldHint,
   FormTableHintOptions,
   FormTableProps,
   FormTableRecord,

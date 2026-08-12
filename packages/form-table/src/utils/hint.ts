@@ -1,7 +1,7 @@
 import type {
   ComponentProps,
+  FormTableDefaultFieldHint,
   FormTableFieldHint,
-  FormTableFieldHintFormatter,
   FormTableFieldRenderContext,
   FormTableHint,
   FormTableHintMode,
@@ -18,24 +18,27 @@ export const FORM_TABLE_HINT_ROOT_ATTRIBUTE = 'data-form-table-hint-root'
 export function resolveFormTableHint(
   hint: FormTableHint | null | undefined
 ): ResolvedFormTableHint | null {
-  if (hint === null || hint === undefined) return null
-  if (typeof hint === 'string') return { content: hint, ownership: 'table' }
+  if (hint === null || hint === undefined || hint === '') return null
+  if (typeof hint === 'string') return { content: hint, behavior: 'auto' }
+  if (hint.content === '') return null
   return {
     content: hint.content,
-    ownership: hint.ownership || 'table'
+    behavior: hint.behavior || 'auto'
   }
 }
 
-/** hint=true 时统一从字段上下文生成内容；显式 Hint 保持原有解析路径。 */
+/** 字段非空内容覆盖默认值；false 关闭；未声明或空内容回退表级默认值。 */
 export function resolveFormTableFieldHint<TRow extends TableRow = TableRow>(
   hint: FormTableFieldHint | null | undefined,
   context: FormTableFieldRenderContext<TRow>,
-  formatter?: FormTableFieldHintFormatter<TRow>
+  defaultHint?: FormTableDefaultFieldHint<TRow>
 ): ResolvedFormTableHint | null {
   if (hint === false) return null
-  if (hint !== true) return resolveFormTableHint(hint)
-  const content = formatter
-    ? formatter(context)
+  const explicitHint = resolveFormTableHint(hint)
+  if (explicitHint) return explicitHint
+  if (!defaultHint) return null
+  const content = typeof defaultHint === 'function'
+    ? defaultHint(context)
     : context.value == null || context.value === '' ? null : String(context.value)
   return resolveFormTableHint(content)
 }
@@ -46,7 +49,7 @@ interface ApplyHintTargetOptions {
 }
 
 /**
- * 自动托管的显式 Hint 覆盖同层透传 title；自定义托管时保持底层 props 不变。
+ * 有效的自动 Hint 在渲染属性中取代同层 title；其他情况保持底层 props 不变。
  */
 export function applyHintTargetProps(
   sourceProps: ComponentProps,
@@ -54,16 +57,11 @@ export function applyHintTargetProps(
   mode: FormTableHintMode,
   options: ApplyHintTargetOptions = {}
 ): ComponentProps {
-  // 自定义渲染拥有完整控制权，FormTable 不改变底层 props。
-  if (hint?.ownership === 'custom') return sourceProps
+  if (hint === null || hint.behavior === 'custom') return sourceProps
 
   const targetProps = { ...sourceProps }
   delete targetProps.title
   delete targetProps[FORM_TABLE_HINT_ATTRIBUTE]
-
-  if (hint === null || hint.content === '') {
-    return targetProps
-  }
 
   if (mode === 'tooltip') {
     const tooltipProps: ComponentProps = {
