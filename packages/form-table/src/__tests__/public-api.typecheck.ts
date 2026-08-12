@@ -2,6 +2,7 @@ import type { Component, PluginObject } from 'vue'
 import FormTable, {
   FormTable as NamedFormTable,
   FormTablePlugin,
+  createFormTable,
   defineFormTableColumns,
   type BuiltinFormItemType,
   type CellSlotColumnConfig,
@@ -86,6 +87,35 @@ const typedColumns = defineFormTableColumns<PurchaseRow>([{
     }]
   }]
 }])
+const TypedFormTable = createFormTable<PurchaseRow>()
+const typedComponent: Component = TypedFormTable
+void typedComponent
+type TypedFormTableProps = InstanceType<typeof TypedFormTable>['$props']
+const typedComponentProps: TypedFormTableProps = {
+  tableData: [{ name: '采购单', amount: 10 }],
+  columns: typedColumns,
+  rowKey: row => row.amount
+}
+if (typeof typedComponentProps.rowKey === 'function') {
+  typedComponentProps.rowKey({ name: '采购单', amount: 10 })
+}
+const invalidTypedComponentProps: TypedFormTableProps = {
+  // @ts-expect-error generic component tableData must use PurchaseRow.
+  tableData: [{ name: '缺少金额' }],
+  columns: typedColumns
+}
+void invalidTypedComponentProps
+declare const typedFormTableInstance: InstanceType<typeof TypedFormTable>
+typedFormTableInstance.$emit('update:tableData', [{ name: '更新', amount: 20 }])
+typedFormTableInstance.$emit('field-change', {
+  row: { name: '更新', amount: 20 },
+  index: 0,
+  fieldKey: 'amount',
+  value: 20,
+  previousValue: 10
+})
+// @ts-expect-error field-change rows must preserve the generic business row shape.
+typedFormTableInstance.$emit('field-change', { row: { name: '缺少金额' }, index: 0 })
 const columns: ColumnConfig[] = [{
   label: '基本信息',
   headerHint: ({ tableData, columnConfig }) => `${columnConfig.label}：${tableData.length} 条`,

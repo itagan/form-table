@@ -83,6 +83,7 @@ import {
 } from './types'
 import { useColumnIdentity } from './composables/useColumnIdentity'
 import { useControlledTableUpdate } from './composables/useControlledTableUpdate'
+import { useFormTableDiagnostics } from './composables/useFormTableDiagnostics'
 import {
   useFormTableHintTooltip
 } from './composables/useFormTableHintTooltip'
@@ -177,11 +178,15 @@ const tableListeners = computed(() => {
 
 /** rowKey 是 FormTable 核心身份协议，不允许继续藏在 Element Table 透传属性中。 */
 const resolvedTableProps = computed(() => {
-  const { rowKey: legacyRowKey, ...tableProps } = props.tableProps as ComponentProps
-  if (import.meta.env.DEV && legacyRowKey !== undefined) {
-    console.warn('[FormTable] tableProps.rowKey is no longer supported; use the top-level rowKey prop.')
-  }
+  const { rowKey: _legacyRowKey, ...tableProps } = props.tableProps as ComponentProps
   return tableProps
+})
+
+useFormTableDiagnostics({
+  getTableData: () => props.tableData,
+  getColumns: () => props.columns,
+  getRowKey: () => props.rowKey,
+  getLegacyRowKey: () => (props.tableProps as ComponentProps).rowKey
 })
 
 /** el-form 的校验模型；字段 prop 均以 tableData.{rowIndex}.{fieldKey} 开头。 */
