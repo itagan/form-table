@@ -234,7 +234,7 @@ const hintOptions = {
 
 - 每个 FormTable 只有一个 `el-tooltip`，表头和字段共享。
 - 事件委托根据当前悬停或聚焦目标更新内容和锚点。
-- Hover 优先于 focus；Hover 离开后会恢复仍处于焦点中的字段提示。
+- Hover 优先于 focus；指针离开 Hint 区域后会关闭提示，即使输入框仍保有焦点也不会常驻。纯键盘焦点迁移仍可触发提示。
 - 嵌套 FormTable 按最近实例隔离，内层目标不会同时激活外层 Tooltip。
 - `content/reference/popper/manual/value/enterable` 由 FormTable 管理，外部配置不会覆盖这些内部属性。
 
