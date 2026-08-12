@@ -6,7 +6,7 @@
 - `BuiltinFormItemConfig`、`ComponentFormItemConfig`、`SlotFormItemConfig`
 - `FieldComponentConfig`、`FieldModelConfig`、`FieldRendererResolver`、`BuiltinFormItemType`、`FormItemType`
 - `FormItemOption`、`OptionPropsConfig`、`ResolvedComponentConfig`、`ResolvedHeaderConfig`
-- `FormTableHint`、`FormTableFieldHint`、`FormTableHintConfig`、`FormTableFieldHintFormatter`、`ResolvedFormTableHint`、`FormTableHintOptions`
+- `FormTableHint`、`FormTableFieldHint`、`FormTableHintConfig`、`FormTableFieldHintFormatter`、`FormTableFieldHintOptions`、`ResolvedFormTableHint`、`FormTableHintOptions`
 - `TableRow`、`FormTableRecord`、`FormTableProps`
 - `FormTableTableContext`、`FormTableColumnContext`、`FormTableRowContext`、`FormTableFieldRenderContext`
 - `FormTableResolvedFieldContext`、`FormTableFieldContext`、`FormTableSlotContext`、`FormTableCellSlotContext`
@@ -138,4 +138,4 @@ interface FieldModelConfig {
 
 `ColumnConfig.headerProps` 传给默认或 Slot 表头的 `.form-table-column-header`，可配置原生 `title`、class、style 和 aria 属性。存在 `column.props.renderHeader` 时由 Element UI 完全接管，FormTable 不包装也不应用 `headerProps/headerHint`。
 
-`ColumnConfig.headerHint` 接受显式 `FormTableHint`；Item 的 `hint` 使用 `FormTableFieldHint`，额外支持 `true`。字符串会标准化为 `{ content, ownership: 'table' }`，对象缺省 `ownership` 时也由 FormTable 托管；`hint: true` 使用 `FormTableHintOptions.fieldFormatter`，未配置 formatter 时对当前值执行内置字符串转换。显式 Hint 不经过 formatter。字段 component 动态配置、listener、字段 Slot 与表头 Slot 均可读取标准化结果；空字符串、`null/undefined` 不产生自动提示。
+`ColumnConfig.headerHint` 接受显式 `FormTableHint`；Item 的 `hint` 使用 `FormTableFieldHint`，额外支持布尔值。字符串会标准化为 `{ content, ownership: 'table' }`，对象缺省 `ownership` 时也由 FormTable 托管。未声明 Hint 时可继承 `FormTableHintOptions.field`；`true` 强制使用 formatter，`false` 退出 Hint 系统并保留底层属性。显式内容不经过 formatter。字段 component 动态配置、listener、字段 Slot 与表头 Slot 均可读取标准化结果；空字符串、`null/undefined` 不产生自动提示。
