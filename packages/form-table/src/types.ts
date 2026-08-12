@@ -1,4 +1,4 @@
-import type { Component, Ref } from 'vue'
+import type { Component, DefineComponent, Ref } from 'vue'
 
 /** 表格字段允许承载的任意业务值。 */
 export type FormTableValue = any
@@ -339,6 +339,12 @@ export interface FormTableFieldChangePayload<TRow extends TableRow = TableRow> {
   previousValue: FormTableValue
 }
 
+/** FormTable 自身派发的受控数据事件。 */
+export type FormTableEmits<TRow extends TableRow = TableRow> = {
+  'update:tableData': (data: TRow[]) => void
+  'field-change': (payload: FormTableFieldChangePayload<TRow>) => void
+}
+
 /** 动态配置求值后交给渲染层和插槽使用的组件配置。 */
 export interface ResolvedComponentConfig {
   renderer?: string | Component
@@ -394,6 +400,22 @@ export interface FormTableExpose {
   getFormRef: () => FormTableElementFormRef | null
   getTableRef: () => FormTableElementTableRef | null
 }
+
+/**
+ * 绑定业务行类型后的 Vue 2 组件类型。
+ * 运行时仍是同一个 FormTable，仅用于让模板、Props、事件和组件实例共享 TRow。
+ */
+export type FormTableComponent<TRow extends TableRow = TableRow> = DefineComponent<
+FormTableProps<TRow>,
+FormTableExpose,
+Record<string, never>,
+Record<string, never>,
+Record<string, never>,
+Record<string, never>,
+Record<string, never>,
+FormTableEmits<TRow>,
+keyof FormTableEmits<TRow>
+>
 
 export interface FormTableUpdateApi<TRow extends TableRow = TableRow> {
   /** 组件内部更新入口；通过行身份重新定位，不依赖可能过期的渲染下标。 */

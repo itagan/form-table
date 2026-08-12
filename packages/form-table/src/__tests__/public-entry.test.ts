@@ -3,6 +3,7 @@ import type { VueConstructor } from 'vue'
 import FormTable, {
   FormTable as NamedFormTable,
   FormTablePlugin,
+  createFormTable,
   defineFormTableColumns
 } from '../index'
 import * as publicEntry from '../index'
@@ -17,6 +18,7 @@ describe('public package entry', () => {
     expect(Object.keys(publicEntry).sort()).toEqual([
       'FormTable',
       'FormTablePlugin',
+      'createFormTable',
       'default',
       'defineFormTableColumns'
     ])
@@ -36,5 +38,9 @@ describe('public package entry', () => {
     const columns = [{ label: '姓名', children: [] }]
 
     expect(defineFormTableColumns(columns)).toBe(columns)
+  })
+
+  it('returns the same runtime component from the generic factory', () => {
+    expect(createFormTable<{ id: string }>()).toBe(FormTable)
   })
 })

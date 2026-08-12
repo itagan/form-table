@@ -11,7 +11,7 @@
 
     <section class="table-card">
       <FormTable
-        v-model="tableData"
+        :table-data.sync="tableData"
         :columns="columns"
         row-key="id"
         :table-props="{ border: true }"
@@ -51,26 +51,35 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import FormTable, { defineFormTableColumns } from '@itagan/form-table'
+import { createFormTable, defineFormTableColumns } from '@itagan/form-table'
 import type { TableRow } from '@itagan/form-table'
 import DemoCollapsiblePanel from '../components/DemoCollapsiblePanel.vue'
 
-const tableData = ref<TableRow[]>([
+interface DemoRow extends TableRow {
+  id: number
+  name: string
+  department: string
+  locked: boolean
+  remark: string
+}
+
+const FormTable = createFormTable<DemoRow>()
+const tableData = ref<DemoRow[]>([
   { id: 1, name: '张三', department: '产品部', locked: false, remark: '可参与本次审批' },
   { id: 2, name: '李四', department: '财务部', locked: true, remark: '锁定行不可选择' },
   { id: 3, name: '王五', department: '研发部', locked: false, remark: '负责技术评审' }
 ])
-const selection = ref<TableRow[]>([])
+const selection = ref<DemoRow[]>([])
 const showIndex = ref(true)
 
-const columns = computed(() => defineFormTableColumns([
+const columns = computed(() => defineFormTableColumns<DemoRow>([
   {
     key: 'selection',
     props: {
       type: 'selection',
       width: 48,
       reserveSelection: true,
-      selectable: (row: TableRow) => !row.locked
+      selectable: (row: DemoRow) => !row.locked
     }
   },
   {
@@ -102,7 +111,9 @@ const columns = computed(() => defineFormTableColumns([
   }
 ]))
 
-const columnsExample = `const columns = defineFormTableColumns<DemoRow>([
+const columnsExample = `const FormTable = createFormTable<DemoRow>()
+
+const columns = defineFormTableColumns<DemoRow>([
   {
     props: {
       type: 'selection',

@@ -1,4 +1,6 @@
-# npm 包迁移与发布准备
+# npm 包首次发布准备
+
+> `@itagan/form-table` 尚未发布到 npm。本页只描述首次发布前的仓库验证和发布清单，不代表任何版本已经上线。
 
 仓库采用“组件包 + playground + 独立 docs”的单体仓库结构：
 
@@ -112,19 +114,6 @@ npm publish --access public
 ```
 
 `packages/form-table/package.json` 已配置 `publishConfig.access = "public"`，命令中仍显式带上 `--access public`，避免首次发布 scoped package 时误发布失败。
-
-## 后续版本流程
-
-1. 在变更说明中记录本次修改。
-2. 更新 `packages/form-table/package.json` 的 `version`。
-3. 执行 `pnpm release:check`。
-4. 合并到 `master` 并推送远端。
-5. 在 `packages/form-table` 执行 `npm publish --access public`。
-6. 发布后用安装命令验证：
-
-```bash
-pnpm add @itagan/form-table
-```
 
 ## 常见发布失败
 

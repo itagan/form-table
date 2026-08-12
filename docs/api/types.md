@@ -12,19 +12,22 @@
 - `FormTableResolvedFieldContext`、`FormTableFieldContext`、`FormTableSlotContext`、`FormTableCellSlotContext`
 - `FormTableFieldChangePayload`、`FormTableHeaderSlotContext`
 - `FormTableExpose`、`FormTableElementFormRef`、`FormTableElementTableRef`
+- `FormTableComponent`、`FormTableEmits`
 
-运行时入口导出默认组件、`FormTable`、`FormTablePlugin` 和泛型配置助手 `defineFormTableColumns`。上下文注入 key、内部更新 API、动态解析和渲染模式工具都不属于公共入口。
+运行时入口导出默认组件、`FormTable`、`FormTablePlugin`、泛型组件工厂 `createFormTable` 和泛型配置助手 `defineFormTableColumns`。上下文注入 key、内部更新 API、动态解析和渲染模式工具都不属于公共入口。
 
-需要让动态配置回调获得业务行类型时，使用运行时原样返回数组的泛型助手：
+需要让组件 Props、事件和动态配置回调使用同一个业务行类型时，组合两个泛型入口：
 
 ```ts
-import { defineFormTableColumns, type TableRow } from '@itagan/form-table'
+import { createFormTable, defineFormTableColumns, type TableRow } from '@itagan/form-table'
 
 interface PurchaseRow extends TableRow {
+  id: string
   name: string
   amount: number
 }
 
+const FormTable = createFormTable<PurchaseRow>()
 const columns = defineFormTableColumns<PurchaseRow>([{
   label: '采购信息',
   visible: ({ tableData }) => tableData.some(row => row.amount > 0),
@@ -39,6 +42,18 @@ const columns = defineFormTableColumns<PurchaseRow>([{
   }]
 }])
 ```
+
+```vue
+<FormTable
+  :table-data.sync="tableData"
+  :columns="columns"
+  :row-key="row => row.id"
+/>
+```
+
+`createFormTable<TRow>()` 只把同一个 FormTable 运行时对象转换为 `FormTableComponent<TRow>`，不会创建包装组件或额外实例；它负责约束 `tableData/columns/rowKey` 以及 `update:tableData/field-change`。`defineFormTableColumns<TRow>()` 原样返回数组，负责让 Column、Row、Item 及其动态上下文获得 `TRow`。
+
+Vue 2.7 当前的模板类型检查器无法从类型转换后的组件读取自定义 `model` 声明，可能把 `v-model` 误判为 `modelValue`。泛型组件在模板中推荐使用语义完全相同且可正确检查的 `:table-data.sync`；默认导出的通用 FormTable 仍可使用 `v-model`。
 
 `ColumnConfig`、Row/Item 配置、上下文、listener、事件载荷与 `FormTableProps` 都接受默认行泛型；省略泛型时继续使用原有 `TableRow`。`fieldKey` 仍是字符串，不执行类型级嵌套路径推导。
 

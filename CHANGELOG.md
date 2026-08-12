@@ -1,9 +1,13 @@
 # Changelog
 
+> 当前 npm 包尚未首次发布。以下版本标题和日期只记录首发前仓库演进，不代表 npm registry 中已有对应版本。
+
 ## Unreleased
 
 ### Improved
 
+- 新增 `createFormTable<TRow>()` 泛型组件工厂，使 `tableData`、列配置、rowKey、动态上下文和组件事件共享业务行类型，且不创建额外运行时组件。
+- 开发环境增加身份与列模式诊断，覆盖缺失或重复 rowKey、同级 Column/Row/Item 重复 key，以及互斥列配置混用；持续存在的问题会自动去重。
 - `headerHint/hint` 使用 `{ content, behavior }` 表达自动或自定义处理方式；标准化 Hint 统一提供给 component 动态配置、listener、表头和字段 Slot。
 - `hintOptions.field` 未配置或为 `false` 时无全局字段处理，`true` 默认字符串化，函数统一格式化；Item 不写或返回空值时继承、`false` 关闭、非空内容覆盖。
 - 单实例 Tooltip 增加嵌套 FormTable 隔离、表头键盘入口、Escape 关闭和 token 安全的 `aria-describedby` 管理，并将 Element UI 私有能力收口到版本适配层。
