@@ -27,6 +27,15 @@
     "tags": ["PlainColumnConfig", "selection", "index", "slot", "component.renderer"]
   },
   {
+    "title": "Element 功能列透传",
+    "description": "独立演示 selection、index、expand 与 cellSlot 的直接 columns 配置。",
+    "path": "/element-columns",
+    "name": "element-columns",
+    "view": "ElementColumnsView",
+    "type": "primary",
+    "tags": ["PlainColumnConfig", "selection", "index", "expand"]
+  },
+  {
     "title": "cellSlot 列级单元格",
     "description": "独立演示组合展示、派生值、行操作、异步 rowKey 和字段 Slot 对照。",
     "path": "/cell-slot",

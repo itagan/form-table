@@ -1,21 +1,17 @@
 # Element 功能列透传
 
-> 可运行 Demo：[高级示例 ↗](http://localhost:5173/form-table-advanced)
+> 可运行 Demo：[Element 功能列透传 ↗](http://localhost:5173/element-columns)
 
 `PlainColumnConfig` 表示一个不进入 FormTable 字段渲染链路的纯 `el-table-column`。它不重新定义 Element UI API，而是把 `props` 原样交给 `el-table-column`，适合选择列、序号列等原生功能。
 
 ## 基本配置
 
 ```ts
-import { defineFormTableColumns, type PlainColumnConfig, type TableRow } from '@itagan/form-table'
-
-const elementColumns: PlainColumnConfig[] = [
-  { props: { type: 'selection', width: 48 } },
-  { label: '序号', props: { type: 'index', width: 64, align: 'center' } }
-]
+import { defineFormTableColumns, type TableRow } from '@itagan/form-table'
 
 const columns = defineFormTableColumns<TableRow>([
-  ...elementColumns,
+  { props: { type: 'selection', width: 48 } },
+  { label: '序号', props: { type: 'index', width: 64, align: 'center' } },
   {
     label: '姓名',
     children: [{
@@ -24,6 +20,8 @@ const columns = defineFormTableColumns<TableRow>([
   }
 ])
 ```
+
+直接配置在 `columns` 中不会产生类型警告。TypeScript 会根据“具有 `props`，但没有 `children/cellSlot`”的结构自动识别为 `PlainColumnConfig`，通常无需显式导入这个类型。只有抽取可复用的纯 Element 列数组或编写配置工具时，才需要声明 `PlainColumnConfig[]`。
 
 `type` 属于 Element UI 的 `el-table-column` Prop，因此保留在 `props` 中。纯透传列不需要为了通过类型检查而配置无意义的 `children: []`：
 
