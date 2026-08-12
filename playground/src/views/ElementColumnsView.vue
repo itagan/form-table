@@ -11,7 +11,7 @@
 
     <section class="table-card">
       <FormTable
-        :table-data.sync="tableData"
+        v-model="tableData"
         :columns="columns"
         row-key="id"
         :table-props="{ border: true }"

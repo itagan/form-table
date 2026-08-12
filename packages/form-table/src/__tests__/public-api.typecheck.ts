@@ -105,6 +105,17 @@ const invalidTypedComponentProps: TypedFormTableProps = {
   columns: typedColumns
 }
 void invalidTypedComponentProps
+const typedVModelProps: TypedFormTableProps = {
+  value: [{ name: '模板模型', amount: 30 }],
+  columns: typedColumns
+}
+const invalidTypedVModelProps: TypedFormTableProps = {
+  // @ts-expect-error Vue 2 v-model value must use PurchaseRow.
+  value: [{ name: '缺少金额' }],
+  columns: typedColumns
+}
+void typedVModelProps
+void invalidTypedVModelProps
 declare const typedFormTableInstance: InstanceType<typeof TypedFormTable>
 typedFormTableInstance.$emit('update:tableData', [{ name: '更新', amount: 20 }])
 typedFormTableInstance.$emit('field-change', {

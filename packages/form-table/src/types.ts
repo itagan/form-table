@@ -406,7 +406,18 @@ export interface FormTableExpose {
  * 运行时仍是同一个 FormTable，仅用于让模板、Props、事件和组件实例共享 TRow。
  */
 export type FormTableComponent<TRow extends TableRow = TableRow> = DefineComponent<
-FormTableProps<TRow>,
+Omit<FormTableProps<TRow>, 'tableData'> & (
+  | {
+      /** Vue 2 Volar 将无参数 v-model 映射到 value；运行时仍由 model 选项使用 tableData。 */
+      value: TRow[]
+      tableData?: TRow[]
+    }
+  | {
+      /** 显式 tableData 与 :table-data.sync 仍保持必填数据入口语义。 */
+      tableData: TRow[]
+      value?: TRow[]
+    }
+),
 FormTableExpose,
 Record<string, never>,
 Record<string, never>,
