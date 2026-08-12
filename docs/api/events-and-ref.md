@@ -32,6 +32,26 @@ Element Table 事件直接透传，参数顺序与引用保持不变。FormTable
 />
 ```
 
+```ts
+import type {
+  FormTableElementColumn,
+  FormTableFilterChangePayload,
+  FormTableSortChangePayload
+} from '@itagan/form-table'
+
+function handleSortChange({ column, prop, order }: FormTableSortChangePayload) {
+  console.log(column.columnKey, prop, order)
+}
+
+function handleFilterChange(filters: FormTableFilterChangePayload) {
+  console.log(filters)
+}
+
+function handleHeaderClick(column: FormTableElementColumn, event: MouseEvent) {
+  console.log(column.label, event.type)
+}
+```
+
 这些事件由 `el-table` 发出，不配置在 `columns[].listeners` 中。`FormTableElementColumn` 只描述跨版本稳定的列字段并允许 Element UI 扩展字段；排序和筛选载荷可分别使用 `FormTableSortChangePayload`、`FormTableFilterChangePayload`。
 
 事件回调与配置回调的参数边界：
@@ -81,6 +101,8 @@ function handleTableDataUpdate(nextTableData) {
 ```
 
 两者是无 scope 的原生 Table Slot。字段、表头和单元格自定义继续使用下述 FormTable Slot。
+
+可运行对照见 [Element 功能列透传 Demo ↗](http://localhost:5173/element-columns)：点击“清空数据”查看 `empty`，恢复数据后可操作部门筛选、排序和表头点击，并在表尾查看 `append`。
 
 ### 列级 cellSlot
 

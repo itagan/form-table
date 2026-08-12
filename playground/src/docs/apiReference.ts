@@ -103,7 +103,7 @@ export const renderModes = [
 export const eventRows = [
   { name: 'update:tableData', payload: 'TableRow[]', description: '受控数据的新数组，应立即回写。' },
   { name: 'field-change', payload: '{ row, index, fieldKey, value, previousValue }', description: '每个实际字段变化触发一次。' },
-  { name: 'Element Table 原生事件', payload: '保持 Element UI 原始参数', description: 'row-click、selection-change、sort-change 等直接透传。' }
+  { name: '列与选择事件', payload: '保持 Element UI 原始参数', description: 'sort/filter/header/cell/select 等事件直接透传并提供公开类型。' }
 ]
 
 export const refRows = [

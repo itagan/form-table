@@ -28,12 +28,12 @@
   },
   {
     "title": "Element 功能列透传",
-    "description": "独立演示 selection、index、expand 与 cellSlot 的直接 columns 配置。",
+    "description": "演示 selection、index、expand、列事件，以及 empty/append 原生 Slot。",
     "path": "/element-columns",
     "name": "element-columns",
     "view": "ElementColumnsView",
     "type": "primary",
-    "tags": ["PlainColumnConfig", "selection", "index", "expand"]
+    "tags": ["PlainColumnConfig", "sort-change", "filter-change", "empty", "append"]
   },
   {
     "title": "cellSlot 列级单元格",

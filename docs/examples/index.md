@@ -35,7 +35,7 @@ pnpm site:preview
 | [基础编辑 ↗](http://localhost:5173/form-table) | `/form-table` | 基础 children、type、校验与父级行操作 |
 | [Hint 多场景 ↗](http://localhost:5173/hint-scenarios) | `/hint-scenarios` | title、单实例 Tooltip、动态 Hint、Slot、自定义组件与接管边界 |
 | [高级示例 ↗](http://localhost:5173/form-table-advanced) | `/form-table-advanced` | 原生选择/序号列、多行栅格、component.renderer、slot、动态 options、嵌套路径 |
-| [Element 功能列透传 ↗](http://localhost:5173/element-columns) | `/element-columns` | 直接配置 selection、index、禁选规则、动态显隐和 expand + cellSlot |
+| [Element 功能列透传 ↗](http://localhost:5173/element-columns) | `/element-columns` | selection/index/expand、排序筛选事件，以及 empty/append 原生 Slot |
 | [`cellSlot` 列级单元格 ↗](http://localhost:5173/cell-slot) | `/cell-slot` | 组合展示、派生值、updateRow、异步 rowKey、字段 Slot 对照和 scope 检视 |
 | [远程 Schema ↗](http://localhost:5173/remote-schema) | `/remote-schema` | 远程纯 JSON 配置与页面本地组件、事件增强 |
 | [企业复杂组件接入 ↗](http://localhost:5173/enterprise-components) | `/enterprise-components` | 企业全局组件、局部业务组件、自定义绑定协议与复杂事件联动 |

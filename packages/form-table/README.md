@@ -52,10 +52,37 @@ const columns: ColumnConfig[] = defineFormTableColumns([{
   :form-props="{ size: 'small' }"
   :table-props="{ border: true }"
   @field-change="handleFieldChange"
-/>
+  @sort-change="handleSortChange"
+>
+  <template #empty>暂无可编辑数据</template>
+  <template #append>
+    <el-button type="text" @click="loadMore">加载更多</el-button>
+  </template>
+</FormTable>
 ```
 
 根组件 `v-model` 使用 `tableData/update:tableData`；`:table-data.sync` 仍兼容。字段输入和 Slot 更新助手均进行不可变写回。Table 原生事件直接透传，通过 ref 可调用 `validate()`、`clearValidate()`、`getFormRef()` 和 `getTableRef()`。
+
+## Element Table 事件与根级 Slot
+
+列相关事件继续在 FormTable 根组件监听，不配置额外的 `column.listeners`。排序、筛选、表头、单元格和选择事件均保留 Element UI 的原始参数：
+
+```ts
+import type {
+  FormTableFilterChangePayload,
+  FormTableSortChangePayload
+} from '@itagan/form-table'
+
+function handleSortChange({ prop, order }: FormTableSortChangePayload) {
+  console.log(prop, order)
+}
+
+function handleFilterChange(filters: FormTableFilterChangePayload) {
+  console.log(filters)
+}
+```
+
+`#empty` 和 `#append` 会直接转发给 `el-table`，不增加额外 DOM 或 scope。未提供 `#empty` 时，`tableProps.emptyText` 和 Element UI 默认空状态保持有效。
 
 需要让 Props、事件和动态配置回调共享业务行类型时，使用 `createFormTable<TRow>()` 和 `defineFormTableColumns<TRow>()`；两者都不会创建额外运行时实例。
 
