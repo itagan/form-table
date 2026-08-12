@@ -12,7 +12,7 @@
 | [校验、清理与重置](./validation-reset.md) | Item `formItemProps.rules` | `validate/clearValidate/resetFields` | Element Form 校验状态 |
 | [动态显隐与配置更新](./dynamic-configuration.md) | 各层 `visible`、动态 props | 替换 `columns` | 响应式布局与组件配置 |
 | [稳定身份与异步安全](./stable-identity.md) | `rowKey`、Column/Row/Item `key` | 异步 `setValue/updateRow` | 正确定位数据与渲染节点 |
-| [Hint 提示模式](./native-title.md) | `hintOptions`、`columns[].headerHint`、Item `hint` | 默认/Slot 表头与字段外层自动应用 | [`/hint-scenarios`](http://localhost:5173/hint-scenarios) |
+| [Hint 提示体系](./hint.md) | `hintOptions`、`columns[].headerHint`、Item `hint` | 全局默认、字段覆盖、title/Tooltip 与自定义展示 | [`/hint-scenarios`](http://localhost:5173/hint-scenarios) |
 
 ## 渲染扩展
 
