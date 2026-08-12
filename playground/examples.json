@@ -45,11 +45,11 @@
     "tags": ["cellSlot", "updateRow", "slot context"]
   },
   {
-    "title": "动态插槽",
-    "description": "验证动态显隐、字段上下文和 slot 更新助手。",
+    "title": "字段 Slot 与动态显隐",
+    "description": "演示字段 Slot、更新助手和 Column、Row、Item 三级动态显隐。",
     "path": "/dynamic-slot-test",
     "name": "dynamic-slot-test",
-    "view": "DynamicSlotTestView",
+    "view": "FieldSlotVisibilityView",
     "type": "warning",
     "tags": ["visible", "slot props", "setValue"]
   },
@@ -126,12 +126,12 @@
     "tags": ["performance", "large data", "DOM count"]
   },
   {
-    "title": "组件调试",
-    "description": "用于验证自定义组件对象直传、事件和原生 Ref。",
+    "title": "组件对象直传与原生 Ref",
+    "description": "演示直接传入组件对象、字段事件上下文和原生 Form/Table Ref。",
     "path": "/debug",
     "name": "debug",
-    "view": "DebugView",
+    "view": "DirectComponentView",
     "type": "danger",
-    "tags": ["debug", "component.renderer", "native ref"]
+    "tags": ["component.renderer", "field context", "native ref"]
   }
 ]

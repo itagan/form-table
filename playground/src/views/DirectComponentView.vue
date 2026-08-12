@@ -1,7 +1,7 @@
 <template>
   <main class="demo-page">
     <router-link to="/">← 返回</router-link>
-    <h1>组件直传调试</h1>
+    <h1>组件对象直传与原生 Ref</h1>
     <p>使用 type: 'component' 和 component.renderer 直接传入组件对象，不经过业务注册表。</p>
 
     <section class="demo-card">

@@ -1,6 +1,6 @@
 # 动态显隐与配置更新
 
-> 可运行 Demo：[动态插槽测试 ↗](http://localhost:5173/dynamic-slot-test) · [行列操作 ↗](http://localhost:5173/row-column-operations)
+> 可运行 Demo：[字段 Slot 与动态显隐 ↗](http://localhost:5173/dynamic-slot-test) · [行列操作 ↗](http://localhost:5173/row-column-operations)
 
 Column、Row、Item 和字段组件属性都支持根据当前上下文动态计算。配置结构本身由父组件维护，增删、排序或整体变化时应替换 `columns`。
 

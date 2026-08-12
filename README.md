@@ -65,7 +65,6 @@ pnpm release:check
 - [VitePress 文档总站](./docs/index.md)
 - [功能专题](./docs/features/index.md)
 - [示例索引](./docs/examples/index.md)
-- [历史汇总文档](./CURRENT_FORMTABLE_DOC.md)
 - [更新记录](./CHANGELOG.md)
 - [组件包说明](./packages/form-table/README.md)
 - [维护与发布](./docs/migration/npm-package.md)

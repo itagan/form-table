@@ -14,13 +14,13 @@ const viewLoaders: Record<string, () => Promise<unknown>> = {
   FormTableDocsView: () => import('../views/FormTableDocsView.vue'),
   PerformanceView: () => import('../views/PerformanceView.vue'),
   RemoteSchemaView: () => import('../views/RemoteSchemaView.vue'),
-  DynamicSlotTestView: () => import('../views/DynamicSlotTestView.vue'),
+  FieldSlotVisibilityView: () => import('../views/FieldSlotVisibilityView.vue'),
   RowColumnOperationsView: () => import('../views/RowColumnOperationsView.vue'),
   CellMergeView: () => import('../views/CellMergeView.vue'),
   HeterogeneousDemandView: () => import('../views/HeterogeneousDemandView.vue'),
   ItinerarySimpleView: () => import('../views/ItinerarySimpleView.vue'),
   EnterpriseComponentsView: () => import('../views/EnterpriseComponentsView.vue'),
-  DebugView: () => import('../views/DebugView.vue')
+  DirectComponentView: () => import('../views/DirectComponentView.vue')
 }
 
 const router = new VueRouter({
