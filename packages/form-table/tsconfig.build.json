@@ -4,7 +4,8 @@
     "src/public-types.ts",
     "src/defineFormTableColumns.ts",
     "src/types.public.ts",
-    "src/types.ts"
+    "src/types.ts",
+    "src/types/**/*.ts"
   ],
   "compilerOptions": {
     "noEmit": false,

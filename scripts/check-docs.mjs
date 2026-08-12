@@ -33,6 +33,18 @@ const deprecatedReferences = [
   'guide/row-column-operations',
   'docs/README.md'
 ]
+const requiredPublicApiNames = [
+  'FormTable',
+  'FormTablePlugin',
+  'createFormTable',
+  'defineFormTableColumns',
+  'update:tableData',
+  'field-change',
+  'validate()',
+  'clearValidate()',
+  'getFormRef()',
+  'getTableRef()'
+]
 
 for (const file of uniqueMarkdownFiles) {
   const source = fs.readFileSync(file, 'utf8')
@@ -111,6 +123,28 @@ const documentedTypes = [...mappingSection.matchAll(/^\| `([a-z]+)` \|/gm)]
 
 if (sourceTypes.join(',') !== documentedTypes.join(',')) {
   errors.push(`docs/api/component.md: 内置类型映射与源码不一致；源码=${sourceTypes.join(',')}，文档=${documentedTypes.join(',')}`)
+}
+
+const canonicalApiSource = [
+  fs.readFileSync(path.join(repositoryRoot, 'docs/api/configuration.md'), 'utf8'),
+  fs.readFileSync(path.join(repositoryRoot, 'docs/api/events-and-ref.md'), 'utf8'),
+  fs.readFileSync(path.join(repositoryRoot, 'docs/api/types.md'), 'utf8')
+].join('\n')
+
+for (const apiName of requiredPublicApiNames) {
+  if (!canonicalApiSource.includes(apiName)) {
+    errors.push(`docs/api: 缺少公开 API ${apiName}`)
+  }
+}
+
+const publicEntrySource = fs.readFileSync(
+  path.join(repositoryRoot, 'packages/form-table/src/index.ts'),
+  'utf8'
+)
+for (const runtimeExport of ['FormTable', 'FormTablePlugin', 'createFormTable', 'defineFormTableColumns']) {
+  if (!publicEntrySource.includes(runtimeExport)) {
+    errors.push(`packages/form-table/src/index.ts: 缺少运行时导出 ${runtimeExport}`)
+  }
 }
 
 if (errors.length > 0) {

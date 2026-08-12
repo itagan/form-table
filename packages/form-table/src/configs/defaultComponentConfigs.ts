@@ -1,4 +1,5 @@
-import type { BuiltinFormItemType, ComponentProps } from '../types'
+import type { ComponentProps } from '../types/base'
+import type { BuiltinFormItemType } from '../types/config'
 
 /** 仅负责 type 到组件的映射，不覆盖 Element UI 的交互默认值。 */
 const componentTypeMap: Record<BuiltinFormItemType, string> = {

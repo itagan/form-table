@@ -1,13 +1,13 @@
 import type {
   ComponentProps,
-  FormTableDefaultFieldHint,
   FormTableFieldHint,
-  FormTableFieldRenderContext,
   FormTableHint,
   FormTableHintMode,
   ResolvedFormTableHint,
   TableRow
-} from '../types'
+} from '../types/base'
+import type { FormTableDefaultFieldHint } from '../types/config'
+import type { FormTableFieldRenderContext } from '../types/context'
 
 /** 事件委托使用的内部提示标记，不作为调用方配置入口。 */
 export const FORM_TABLE_HINT_ATTRIBUTE = 'data-form-table-hint'

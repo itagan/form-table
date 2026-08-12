@@ -1,6 +1,6 @@
 # FormTable Workspace
 
-`FormTable` 是一个基于 `Vue 2.7 + Element UI + TypeScript` 的表格表单组件。仓库已经调整为 npm 包、调试页面和文档说明共存的单体仓库。
+`FormTable` 是一个基于 `Vue 2.7 + Element UI + TypeScript` 的表格表单组件。本页只说明仓库开发；组件行为与 API 统一以 [VitePress 文档](./docs/index.md)为准。
 
 ## 仓库结构
 
@@ -50,20 +50,7 @@ pnpm release:check
 
 ## npm 包使用
 
-> `@itagan/form-table` 尚未发布到 npm。以下安装命令在首次发布后生效；当前请通过本仓库 workspace 运行示例，或使用 `npm pack` 生成的本地 tarball 验证。
-
-```bash
-pnpm add @itagan/form-table
-```
-
-```ts
-import 'element-ui/lib/theme-chalk/index.css'
-import '@itagan/form-table/style.css'
-import FormTable from '@itagan/form-table'
-import type { ColumnConfig, TableRow } from '@itagan/form-table'
-```
-
-FormTable 将 Vue 和 Element UI 声明为 peer dependencies，不会重复安装或注册它们。支持范围、推荐版本与最小使用示例见[快速开始](./docs/guide/quick-start.md)。
+安装、兼容范围和最小示例见[组件包说明](./packages/form-table/README.md)；完整行为说明以[快速开始](./docs/guide/quick-start.md)和 [API 总览](./docs/api/configuration.md)为准。
 
 ## 调试页面
 
@@ -73,19 +60,12 @@ FormTable 将 Vue 和 Element UI 声明为 peer dependencies，不会重复安�
 
 文档和示例保留独立源码目录，避免 Vue 2.7 与 VitePress 的 Vue 3 依赖混用；发布时由 `pnpm site:build` 合并为 `docs/.vitepress/dist`，只需部署一个静态目录和一个域名。
 
-## 测试覆盖
-
-`pnpm test` 会运行组件包的 Vitest 测试，当前覆盖：
-
-- 纯工具逻辑：嵌套字段路径的不可变读写。
-- 组件行为：渲染模式优先级、type、component、slot、动态配置、原生事件参数透传和不可变更新协议。
-
 ## 文档
 
-- [完整能力文档](./CURRENT_FORMTABLE_DOC.md)
 - [VitePress 文档总站](./docs/index.md)
 - [功能专题](./docs/features/index.md)
 - [示例索引](./docs/examples/index.md)
+- [历史汇总文档](./CURRENT_FORMTABLE_DOC.md)
 - [更新记录](./CHANGELOG.md)
 - [组件包说明](./packages/form-table/README.md)
 - [维护与发布](./docs/migration/npm-package.md)
