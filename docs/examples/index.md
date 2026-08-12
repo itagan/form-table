@@ -39,12 +39,12 @@ pnpm site:preview
 | [`cellSlot` 列级单元格 ↗](http://localhost:5173/cell-slot) | `/cell-slot` | 组合展示、派生值、updateRow、异步 rowKey、字段 Slot 对照和 scope 检视 |
 | [远程 Schema ↗](http://localhost:5173/remote-schema) | `/remote-schema` | 远程纯 JSON 配置与页面本地组件、事件增强 |
 | [企业复杂组件接入 ↗](http://localhost:5173/enterprise-components) | `/enterprise-components` | 企业全局组件、局部业务组件、自定义绑定协议与复杂事件联动 |
-| [动态插槽 ↗](http://localhost:5173/dynamic-slot-test) | `/dynamic-slot-test` | 动态显隐和 slot 更新助手 |
+| [字段 Slot 与动态显隐 ↗](http://localhost:5173/dynamic-slot-test) | `/dynamic-slot-test` | 字段 Slot、更新助手和三级动态显隐 |
 | [行列操作与异步提交 ↗](http://localhost:5173/row-column-operations) | `/row-column-operations` | 行增删复制移动、动态列和业务处理后异步提交 |
 | [单元格合并 ↗](http://localhost:5173/cell-merge) | `/cell-merge` | 分组纵向合并、汇总行横向合并、稳定列定位和表头隐藏 |
 | [多需求费用明细 ↗](http://localhost:5173/heterogeneous-demands) | `/heterogeneous-demands` | 公共表头下按需求类型加载独立组件、处理差异字段并归一化提交 |
 | [多日议程编排 ↗](http://localhost:5173/itinerary-simple) | `/itinerary-simple` | 日期与主题纵向合并、SortableJS 组内拖拽、行操作与分组提交 |
-| [组件调试 ↗](http://localhost:5173/debug) | `/debug` | 自定义组件事件和原生 Ref |
+| [组件对象直传与原生 Ref ↗](http://localhost:5173/debug) | `/debug` | 直接组件对象、字段事件上下文和原生 Ref |
 | [FormTable 精简 API ↗](http://localhost:5173/form-table-docs) | `/form-table-docs` | 精简 API 速查 |
 | [大数据量性能实验 ↗](http://localhost:5173/performance) | `/performance` | 可调行列规模、三类渲染场景、更新耗时、DOM 和动态回调计数 |
 

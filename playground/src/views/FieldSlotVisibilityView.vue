@@ -1,7 +1,7 @@
 <template>
   <main class="demo-page">
     <router-link to="/">← 返回</router-link>
-    <h1>Slot 与动态显隐</h1>
+    <h1>字段 Slot 与动态显隐</h1>
     <p>Slot 保留 el-col、el-form-item 和字段更新能力，内部模板由调用方控制；visible 可在 Column、Row、Item 三层按需判断。</p>
 
     <section class="demo-card">
