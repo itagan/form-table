@@ -89,6 +89,12 @@ import {
 } from './composables/useFormTableHintTooltip'
 import type { FormTableHintTooltipRef } from './composables/useFormTableHintTooltip'
 import { createTableContext } from './utils/dynamic'
+import {
+  getVue2ComponentListeners,
+  resolveHintTooltipProps,
+  resolveTableListeners,
+  resolveTableProps
+} from './utils/formTableRuntimeAdapter'
 
 /** FormTable 对外接收的受控数据、列配置以及 Element UI 透传属性。 */
 const props = withDefaults(defineProps<{
@@ -132,20 +138,7 @@ const resolvedHintTooltipProps = computed(() => {
   const tooltipProps = props.hintOptions.mode === 'tooltip'
     ? props.hintOptions.props || {}
     : {}
-  const managedProps = new Set(['content', 'reference', 'popper', 'manual', 'value', 'enterable'])
-  const passthrough = Object.keys(tooltipProps).reduce<ComponentProps>((result, key) => {
-    if (!managedProps.has(key)) result[key] = tooltipProps[key]
-    return result
-  }, {})
-  const customPopperClass = typeof passthrough.popperClass === 'string'
-    ? passthrough.popperClass
-    : ''
-  return {
-    placement: 'top',
-    effect: 'dark',
-    ...passthrough,
-    popperClass: ['form-table-hint-tooltip', customPopperClass].filter(Boolean).join(' ')
-  }
+  return resolveHintTooltipProps(tooltipProps)
 })
 
 const {
@@ -167,19 +160,12 @@ const instance = getCurrentInstance()
 
 // 组件自身事件在本层触发，其余监听器原样交给 el-table。
 const tableListeners = computed(() => {
-  const listeners = (instance?.proxy as any)?.$listeners || {}
-  return Object.keys(listeners).reduce<Record<string, (...args: unknown[]) => void>>((result, name) => {
-    if (name !== 'update:tableData' && name !== 'field-change') {
-      result[name] = listeners[name]
-    }
-    return result
-  }, {})
+  return resolveTableListeners(getVue2ComponentListeners(instance?.proxy))
 })
 
 /** rowKey 是 FormTable 核心身份协议，不允许继续藏在 Element Table 透传属性中。 */
 const resolvedTableProps = computed(() => {
-  const { rowKey: _legacyRowKey, ...tableProps } = props.tableProps as ComponentProps
-  return tableProps
+  return resolveTableProps(props.tableProps as ComponentProps)
 })
 
 useFormTableDiagnostics({
