@@ -17,6 +17,51 @@
 
 同一张表不能混用两种模式。多个 FormTable 各自维护自己的 Tooltip 实例。
 
+## 一分钟选型
+
+| 场景 | 推荐配置 | 原因 |
+| --- | --- | --- |
+| 少量固定补充说明 | `hint: '说明文本'` | 最短配置，默认使用原生 title |
+| 大量字段展示自身完整值 | 表级 `fieldFormatter` + 字段 `hint: true` | 格式化只写一次，字段按需开启 |
+| 提示依赖当前行、选项或权限 | `hint: context => ...` | 每次响应式更新都基于当前上下文求值 |
+| 全表需要统一视觉和延迟 | `hintOptions.mode: 'tooltip'` | 表头和字段共享一个 Tooltip 实例 |
+| 单个位置需要图标、富文本或独立交互 | `{ content, ownership: 'custom' }` + Slot | 内容保留在 Schema，展示完全交给调用方 |
+| 业务组件需要提示文案作为 prop | `component.props: ({ hint }) => ({ ... })` | 显式映射，不污染所有业务组件 props |
+| 纯展示单元格只需截断提示 | `column.props.showOverflowTooltip` | 这是展示文本溢出，不是字段说明语义 |
+| 必填、错误或关键操作说明 | 常驻文本、校验消息或可聚焦控件 | 关键信息不能只依赖悬停提示 |
+
+推荐从最简单的 `hint: '...'` 开始。只有大量字段需要同一种值格式化时才启用 `fieldFormatter`；只有需要统一视觉、键盘访问和延迟控制时才切换到 Tooltip；只有特殊交互才把所有权交给 Slot。
+
+## 核心模型
+
+Hint 分成三个相互独立的决定：
+
+1. **内容从哪里来**：固定字符串、动态回调，或 `hint: true` 触发表级 formatter。
+2. **谁负责展示**：`ownership: 'table'` 由 FormTable 展示；`ownership: 'custom'` 只保留标准化内容，由调用方展示。
+3. **FormTable 如何展示**：整表统一选择浏览器原生 `title` 或单实例 `tooltip`。
+
+因此 `fieldFormatter` 只负责生成字符串，不决定展示方式；`ownership` 只决定展示责任，不改变内容；`mode` 只影响 FormTable 托管的 Hint，不影响自定义 Hint。
+
+```text
+字段 hint / 表头 headerHint
+        ↓ 解析内容
+ResolvedFormTableHint { content, ownership }
+        ↓ 判断所有权
+table → 按整表 mode 输出 title 或 singleton Tooltip
+custom → FormTable 不写 title、内部标记或 ARIA
+```
+
+表头与字段遵循相同的目标属性优先级：
+
+| 配置状态 | 同层 `headerProps.title/formItemProps.title` | FormTable 自动提示 |
+| --- | --- | --- |
+| 未声明 Hint | 保留 | 无 |
+| `ownership: 'custom'` | 保留 | 无 |
+| 托管且内容非空 | 被 Hint 覆盖 | 按整表 mode 展示 |
+| 显式 `''`、`null` 或 `undefined` | 移除 | 无 |
+
+“显式空值”适合动态关闭提示：它与完全不声明 Hint 不同，前者会同时清除同层透传 title，后者保留底层属性。
+
 ## 配置入口
 
 | 需求 | 完整配置路径 | 应用节点 / 作用 |
@@ -124,6 +169,135 @@ const columns: ColumnConfig[] = [{
 ```ts
 hint: ({ value }) => schoolLabelMap[value] || ''
 ```
+
+## 常见场景配方
+
+### 1. 固定字段说明
+
+默认 title 模式下只需要一行配置：
+
+```ts
+{
+  fieldKey: 'taxNumber',
+  type: 'input',
+  hint: '请输入营业执照上的统一社会信用代码'
+}
+```
+
+需要统一视觉时只切换表级 mode，字段配置不变：
+
+```ts
+const hintOptions = {
+  mode: 'tooltip',
+  props: { placement: 'top', openDelay: 150 }
+}
+```
+
+### 2. 大量字段复用格式化
+
+金额、日期和枚举等字段可以按 `itemConfig` 或 `fieldKey` 集中处理。只在确实需要提示的 Item 上写 `hint: true`：
+
+```ts
+const hintOptions: FormTableHintOptions<OrderRow> = {
+  mode: 'tooltip',
+  fieldFormatter: ({ value, fieldKey, itemConfig }) => {
+    if (value == null || value === '') return null
+    if (fieldKey === 'amount') return `当前金额：¥${Number(value).toFixed(2)}`
+    if (itemConfig.type === 'date') return formatDate(value)
+    return String(value)
+  }
+}
+```
+
+如果个别字段需要特殊文案，直接提供显式 Hint 即可覆盖通用规则：
+
+```ts
+{ fieldKey: 'amount', type: 'input', hint: true }
+{ fieldKey: 'status', type: 'select', hint: '状态由审批流程自动更新' }
+```
+
+### 3. 依赖当前行的动态提示
+
+额度、库存、权限等说明应使用动态回调。回调返回最终内容，不要把业务判断放进 Slot：
+
+```ts
+hint: ({ row, value }) => {
+  if (!row.canEdit) return '当前状态不可编辑'
+  return `已填写 ${value || 0}，本行最多可填写 ${row.availableAmount}`
+}
+```
+
+动态决定是否复用统一 formatter 时可以返回 `true`：
+
+```ts
+hint: ({ row }) => row.showFullValue ? true : null
+```
+
+Select、级联选择和对象字段应自行把内部值映射为用户看到的 label：
+
+```ts
+hint: ({ value }) => statusOptions.find(option => option.value === value)?.label || ''
+```
+
+### 4. 自定义组件消费标准化 Hint
+
+component 的 `resolveRenderer/props/options/optionProps` 和 listener 都获得同一份解析后 `hint`。FormTable 不会把它隐式塞进业务组件 props，需要显式映射：
+
+```ts
+{
+  fieldKey: 'address',
+  type: 'component',
+  hint: ({ row }) => `配送范围：${row.deliveryArea}`,
+  component: {
+    renderer: AddressEditor,
+    props: ({ hint }) => ({
+      helpText: hint?.content,
+      showHelp: hint?.ownership === 'custom'
+    })
+  }
+}
+```
+
+如果只是希望 FormTable 在组件外层自动提示，保持默认 `ownership: 'table'`，无需映射 props。只有业务组件内部需要消费内容时才做显式映射。
+
+### 5. 动态关闭和切换所有权
+
+同一个字段可根据业务状态在自动展示、自定义展示和关闭之间切换：
+
+```ts
+hint: ({ row }) => {
+  if (!row.showHelp) return null
+  if (row.useHelpIcon) {
+    return { content: row.helpText, ownership: 'custom' }
+  }
+  return row.helpText
+}
+```
+
+动态切换到 `custom` 后，FormTable 会停止自动提示并保留原始 `formItemProps`；切换为空值后会移除当前自动提示和同层 title。Slot 和 component 配置在同一渲染周期读取到的是同一份标准化结果。
+
+### 6. 表头、字段 Slot 与嵌套表格
+
+- 默认表头和 `headerSlot` 都使用 `headerHint`；Slot 内只是增加图标或排版时，继续让 FormTable 托管。
+- 图标本身需要成为独立触发点时，使用 `ownership: 'custom'`，并为图标提供 `tabindex`、`aria-label` 等键盘语义。
+- 字段 Slot 同理：普通输入仍让外层 `el-form-item` 托管；特殊按钮、富文本或点击逻辑才交给 Slot。
+- 嵌套 FormTable 无需额外配置；每个实例只响应最近根容器内的目标，内层提示不会同时驱动外层 Tooltip。
+
+### 7. 运行时切换 title / Tooltip
+
+`hintOptions` 可以响应式切换，Hint 内容配置无需重写：
+
+```vue
+<FormTable
+  v-model="rows"
+  :columns="columns"
+  :hint-options="useTooltip
+    ? { mode: 'tooltip', props: { placement: 'top' } }
+    : { mode: 'title' }"
+/>
+```
+
+切换模式只改变 FormTable 托管 Hint 的呈现方式。`ownership: 'custom'` 的内容、Slot 内 Tooltip 和组件自己的 `title` 不受影响。
 
 ## 自定义表头中的提示
 

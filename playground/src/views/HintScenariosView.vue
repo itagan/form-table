@@ -10,6 +10,32 @@
       </p>
     </header>
 
+    <section class="hint-choice-panel">
+      <h2>先判断内容和展示责任</h2>
+      <div class="hint-choice-grid">
+        <div>
+          <strong>固定说明</strong>
+          <code>hint: '说明'</code>
+          <span>默认 title；切换整表 mode 即可统一改为 Tooltip。</span>
+        </div>
+        <div>
+          <strong>批量显示完整值</strong>
+          <code>hint: true</code>
+          <span>通过 hintOptions.fieldFormatter 集中格式化。</span>
+        </div>
+        <div>
+          <strong>特殊触发节点</strong>
+          <code>ownership: 'custom'</code>
+          <span>Schema 保留内容，Header/Field Slot 自行展示。</span>
+        </div>
+        <div>
+          <strong>纯文本溢出</strong>
+          <code>showOverflowTooltip</code>
+          <span>使用 Element UI 的单元格能力，不创建字段 Hint。</span>
+        </div>
+      </div>
+    </section>
+
     <section class="scenario-grid">
       <article class="scenario-card">
         <div class="scenario-heading">
@@ -51,6 +77,7 @@
         <ul class="scenario-notes">
           <li><code>placement: 'bottom-start'</code>、浅色主题、自定义 popper class。</li>
           <li>修改输入值可以观察统一格式化后的动态 Hint；清空后浮层不会显示。</li>
+          <li>使用 Tab 聚焦表头或字段，按 Escape 关闭；移动到下一目标后可再次打开。</li>
         </ul>
       </article>
     </section>
@@ -652,6 +679,47 @@ const formattedItem = { fieldKey: 'remark', type: 'input', hint: true }
   text-transform: uppercase;
 }
 
+.hint-choice-panel {
+  margin-top: 20px;
+  padding: 20px 22px;
+  background: #f8fafc;
+  border: 1px solid #dbe4ef;
+  border-radius: 12px;
+}
+
+.hint-choice-panel h2 {
+  margin: 0 0 14px;
+  color: #111827;
+  font-size: 18px;
+}
+
+.hint-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.hint-choice-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 14px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.hint-choice-grid code {
+  color: #1d4ed8;
+  font-size: 12px;
+}
+
+.hint-choice-grid span {
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
 .scenario-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -822,6 +890,10 @@ pre {
 }
 
 @media (max-width: 980px) {
+  .hint-choice-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .scenario-grid,
   .boundary-grid,
   .ownership-grid {
@@ -832,6 +904,10 @@ pre {
 @media (max-width: 640px) {
   .hint-demo-page {
     padding: 24px 16px 40px;
+  }
+
+  .hint-choice-grid {
+    grid-template-columns: 1fr;
   }
 
   .scenario-heading {
