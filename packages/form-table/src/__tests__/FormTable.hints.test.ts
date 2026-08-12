@@ -161,7 +161,7 @@ describe('FormTable hint modes', () => {
     expect(formItems.at(1).attributes('title')).toBe('替换：空值回退')
     expect(formItems.at(2).attributes('title')).toBe('关闭字段底层 title')
 
-    await wrapper.setProps({ hintOptions: { mode: 'title' } })
+    await wrapper.setProps({ hintOptions: { mode: 'title', field: false } })
     expect(formItems.at(0).attributes('title')).toBe('继承字段底层 title')
     expect(formItems.at(1).attributes('title')).toBeUndefined()
     expect(formItems.at(2).attributes('title')).toBe('关闭字段底层 title')
