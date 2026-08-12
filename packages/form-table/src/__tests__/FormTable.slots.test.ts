@@ -8,6 +8,21 @@ import type {
 import { localVue, mountFormTable } from './test-utils'
 
 describe('FormTable slot rendering', () => {
+  it('combines an Element expand column prop with cellSlot content', async () => {
+    const wrapper = mountFormTable({
+      columns: [{ label: '详情', props: { type: 'expand' }, cellSlot: 'row-detail' }],
+      scopedSlots: {
+        'row-detail': '<div class="expanded-detail">{{ props.row.name }}详情</div>'
+      }
+    })
+    await wrapper.vm.$nextTick()
+
+    const column = wrapper.findComponent({ name: 'ElTableColumn' })
+    expect((column.vm as any).type).toBe('expand')
+    expect((column.vm as any).$scopedSlots.default).toBeTypeOf('function')
+    wrapper.destroy()
+  })
+
   it('renders a named slot and exposes focused update helpers', async () => {
     const componentPropsResolver = vi.fn(({ row }: FormTableFieldRenderContext) => ({
       suffix: row.school === '一中' ? '（当前）' : ''
