@@ -224,7 +224,9 @@ const typedHintOptions: FormTableHintOptions<PurchaseRow> = {
   field: typedDefaultFieldHint
 }
 const defaultStringHintOptions: FormTableHintOptions<PurchaseRow> = { field: true }
+const disabledGlobalHintOptions: FormTableHintOptions<PurchaseRow> = { field: false }
 void defaultStringHintOptions
+void disabledGlobalHintOptions
 const legacyFieldHintOptions: FormTableHintOptions<PurchaseRow> = {
   // @ts-expect-error 旧 field.enabled/formatter 对象不再接受。
   field: { enabled: true, formatter: typedFieldFormatter }

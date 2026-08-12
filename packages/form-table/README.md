@@ -86,7 +86,7 @@ Item 的 `key` 是可选渲染身份，`fieldKey` 是必填数据路径。动态
 
 `component.props/listeners/options/optionProps` 是三种模式共用的渲染配置。自定义组件省略 `component.model` 或将其设为 `true` 时保留 Vue 2 原生 `v-model`；也可指定 `{ prop, event, valueFromEvent }`，或设为 `false` 禁用模型注入。slot 模式会把解析后的 `component` 通过上下文返回，由模板自行绑定。
 
-外层悬浮提示使用 `column.headerHint` 和 Item 的 `hint`。`hintOptions.field` 可用 `true` 默认字符串化或函数统一格式化；Item 不写或返回空值时继承、`false` 关闭、非空内容覆盖。`hintOptions` 在整张表内统一选择 `{ mode: 'title' }`（默认）或 `{ mode: 'tooltip', props }`。`behavior: 'custom'` 时 FormTable 不产生自动 DOM、ARIA 或 singleton 行为。只有有效 `auto` Hint 会在渲染属性中取代同层 title，源配置不变。
+外层悬浮提示使用 `column.headerHint` 和 Item 的 `hint`。`hintOptions.field` 未配置或为 `false` 时无全局处理，`true` 默认字符串化，函数统一格式化；Item 不写或返回空值时继承、`false` 关闭、非空内容覆盖。`behavior: 'custom'` 时 FormTable 不产生自动 DOM、ARIA 或 singleton 行为。只有有效 `auto` Hint 会在渲染属性中取代同层 title。
 
 字段 Slot 和列级 `cellSlot` 内容直接渲染，不附加内部 `div/span` 包装；需要根节点样式时由 Slot 模板自行提供。表头 Slot 例外：FormTable 会提供统一的提示包装节点。
 

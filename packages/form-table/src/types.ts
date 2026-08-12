@@ -76,11 +76,11 @@ export type FormTableFieldHintFormatter<TRow extends TableRow = TableRow> = (
 ) => string | null | undefined
 /** 未显式提供内容的字段所继承的默认 Hint。 */
 export type FormTableDefaultFieldHint<TRow extends TableRow = TableRow> =
-  | true
+  | boolean
   | FormTableFieldHintFormatter<TRow>
 /** FormTable 统一提示策略；Tooltip 属性仅在对应模式下有效。 */
 export type FormTableHintOptions<TRow extends TableRow = TableRow> = {
-  /** true 默认字符串化字段值；函数统一格式化字段值；不影响 headerHint。 */
+  /** false/未配置关闭；true 默认字符串化；函数统一格式化；不影响 headerHint。 */
   field?: FormTableDefaultFieldHint<TRow>
 } & (
   | {

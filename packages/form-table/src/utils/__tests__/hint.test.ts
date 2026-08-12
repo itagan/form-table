@@ -58,6 +58,7 @@ describe('FormTable hint utilities', () => {
     expect(resolveFormTableFieldHint(undefined, createFieldContext(false), true)?.content).toBe('false')
     expect(resolveFormTableFieldHint(undefined, createFieldContext(null), true)).toBeNull()
     expect(resolveFormTableFieldHint('', createFieldContext('回退'), true)?.content).toBe('回退')
+    expect(resolveFormTableFieldHint(undefined, createFieldContext('关闭'), false)).toBeNull()
     expect(resolveFormTableFieldHint(false, createFieldContext('隐藏'), true)).toBeNull()
   })
 

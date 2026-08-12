@@ -30,7 +30,7 @@ FormTable
 - 默认表头与表头 Slot 共用 `.form-table-column-header` 包装节点，FormTable 自动应用 `headerProps/headerHint`；Slot 只负责内部视觉内容。
 - 表头 Slot 获得原始 `columnConfig`、已解析的 `header.props` 与标准化 `header.hint`；`behavior: 'custom'` 时可自行消费提示。字段 component 动态配置、listener 和 Slot 同样获得标准化 `hint`。
 - `colProps`、`formItemProps`、`component.props` 分别透传到对应 Element UI 层。
-- `column.headerHint` 和 Item 的 `hint` 是语义提示入口；`hintOptions.field` 可用 `true` 默认字符串化或用函数统一格式化。Item 不写或返回空值时继承，`false` 关闭，非空内容覆盖。`behavior: 'auto'` 由 FormTable 展示，`custom` 时由调用方处理。Tooltip 模式支持表头键盘聚焦、Escape 关闭，并隔离嵌套实例。
+- `column.headerHint` 和 Item 的 `hint` 是语义提示入口；`hintOptions.field` 未配置或为 `false` 时不做全局字段处理，`true` 默认字符串化，函数统一格式化。Item 不写或返回空值时继承，`false` 关闭，非空内容覆盖。`behavior: 'auto'` 由 FormTable 展示，`custom` 时由调用方处理。Tooltip 模式支持表头键盘聚焦、Escape 关闭，并隔离嵌套实例。
 - `column.props.renderHeader` 是 Element UI 完全接管入口，FormTable 不自动包装或应用 `headerProps/headerHint`。
 - 动态上下文按层级提供：Column 只有 `tableData`，Row 增加 `row/index`，Field 再增加 `fieldKey`；不会回传空 row 或 `index = -1` 等占位值。
 - 组件 listener 在 Field 上下文后继续接收组件原始事件参数；字段 slot 再增加 `propPath/component`。
