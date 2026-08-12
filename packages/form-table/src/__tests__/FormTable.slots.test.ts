@@ -8,6 +8,53 @@ import type {
 import { localVue, mountFormTable } from './test-utils'
 
 describe('FormTable slot rendering', () => {
+  it('forwards the native empty slot only when it is provided', async () => {
+    const customWrapper = mountFormTable({
+      tableData: [],
+      tableProps: { emptyText: 'Element 默认空状态' },
+      scopedSlots: {
+        empty: '<strong class="custom-empty">暂无可编辑数据</strong>'
+      }
+    })
+    await customWrapper.vm.$nextTick()
+
+    expect(customWrapper.find('.custom-empty').text()).toBe('暂无可编辑数据')
+    expect(customWrapper.text()).not.toContain('Element 默认空状态')
+    customWrapper.destroy()
+
+    const defaultWrapper = mountFormTable({
+      tableData: [],
+      tableProps: { emptyText: 'Element 默认空状态' }
+    })
+    await defaultWrapper.vm.$nextTick()
+
+    expect(defaultWrapper.find('.el-table__empty-text').text()).toBe('Element 默认空状态')
+    defaultWrapper.destroy()
+  })
+
+  it('forwards the native append slot without adding a FormTable wrapper', async () => {
+    const renderAppend = async (tableData: Array<{ name: string }>) => {
+      const wrapper = mountFormTable({
+        tableData,
+        scopedSlots: {
+          append: '<div class="native-table-append">继续加载</div>'
+        }
+      })
+      await wrapper.vm.$nextTick()
+      expect(wrapper.find('.el-table__append-wrapper > .native-table-append').text()).toBe('继续加载')
+      expect(wrapper.find('.form-table-append').exists()).toBe(false)
+      wrapper.destroy()
+    }
+
+    await renderAppend([{ name: 'Alice' }])
+    await renderAppend([])
+
+    const wrapper = mountFormTable()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.el-table__append-wrapper').exists()).toBe(false)
+    wrapper.destroy()
+  })
+
   it('combines an Element expand column prop with cellSlot content', async () => {
     const wrapper = mountFormTable({
       columns: [{ label: '详情', props: { type: 'expand' }, cellSlot: 'row-detail' }],

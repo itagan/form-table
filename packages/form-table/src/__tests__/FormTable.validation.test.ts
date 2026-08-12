@@ -6,13 +6,23 @@ import type {
 import { mountFormTable } from './test-utils'
 
 describe('FormTable validation and exposed API', () => {
-  it('forwards only native table events and exposes native refs', async () => {
+  it('forwards native table events once with their original arguments and exposes native refs', async () => {
     const rowClick = vi.fn()
+    const sortChange = vi.fn()
+    const filterChange = vi.fn()
+    const headerClick = vi.fn()
+    const cellClick = vi.fn()
+    const selectionChange = vi.fn()
     const fieldChange = vi.fn()
     const updateTableData = vi.fn()
     const wrapper = mountFormTable({
       listeners: {
         'row-click': rowClick,
+        'sort-change': sortChange,
+        'filter-change': filterChange,
+        'header-click': headerClick,
+        'cell-click': cellClick,
+        'selection-change': selectionChange,
         'field-change': fieldChange,
         'update:tableData': updateTableData
       }
@@ -22,8 +32,33 @@ describe('FormTable validation and exposed API', () => {
     expect(Object.keys(table.$listeners)).toContain('row-click')
     expect(Object.keys(table.$listeners)).not.toContain('field-change')
     expect(Object.keys(table.$listeners)).not.toContain('update:tableData')
-    table.$emit('row-click', { name: 'Alice' })
-    expect(rowClick).toHaveBeenCalledWith({ name: 'Alice' })
+    const row = { name: 'Alice' }
+    const column = { id: 'el-table_1_column_1', property: 'name' }
+    const cell = document.createElement('td')
+    const event = new MouseEvent('click')
+    const sortPayload = { column, prop: 'name', order: 'ascending' }
+    const filterPayload = { status: ['enabled'] }
+    const selection = [row]
+
+    table.$emit('row-click', row)
+    table.$emit('sort-change', sortPayload)
+    table.$emit('filter-change', filterPayload)
+    table.$emit('header-click', column, event)
+    table.$emit('cell-click', row, column, cell, event)
+    table.$emit('selection-change', selection)
+
+    expect(rowClick).toHaveBeenCalledOnce()
+    expect(rowClick).toHaveBeenCalledWith(row)
+    expect(sortChange).toHaveBeenCalledOnce()
+    expect(sortChange).toHaveBeenCalledWith(sortPayload)
+    expect(filterChange).toHaveBeenCalledOnce()
+    expect(filterChange).toHaveBeenCalledWith(filterPayload)
+    expect(headerClick).toHaveBeenCalledOnce()
+    expect(headerClick).toHaveBeenCalledWith(column, event)
+    expect(cellClick).toHaveBeenCalledOnce()
+    expect(cellClick).toHaveBeenCalledWith(row, column, cell, event)
+    expect(selectionChange).toHaveBeenCalledOnce()
+    expect(selectionChange).toHaveBeenCalledWith(selection)
 
     const expose = wrapper.vm as unknown as FormTableExpose
     expect(expose.getFormRef()).toBeTruthy()

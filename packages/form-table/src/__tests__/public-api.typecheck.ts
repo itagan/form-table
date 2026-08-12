@@ -9,9 +9,12 @@ import FormTable, {
   type ColumnConfig,
   type FieldModelConfig,
   type FormTableCellSlotContext,
+  type FormTableElementColumn,
+  type FormTableEmits,
   type FormTableExpose,
   type FormTableFieldHint,
   type FormTableFieldHintFormatter,
+  type FormTableFilterChangePayload,
   type FormTableDefaultFieldHint,
   type FormTableHeaderSlotContext,
   type FormTableHint,
@@ -19,6 +22,7 @@ import FormTable, {
   type FormTableHintOptions,
   type FormTableProps,
   type FormTableResolvedFieldContext,
+  type FormTableSortChangePayload,
   type LayoutColumnConfig,
   type PlainColumnConfig,
   type ResolvedFormTableHint,
@@ -125,6 +129,38 @@ typedFormTableInstance.$emit('field-change', {
   value: 20,
   previousValue: 10
 })
+const elementColumn: FormTableElementColumn = {
+  id: 'el-table_1_column_1',
+  columnKey: 'amount-column',
+  label: '金额',
+  property: 'amount'
+}
+const sortChangePayload: FormTableSortChangePayload = {
+  column: elementColumn,
+  prop: 'amount',
+  order: 'ascending'
+}
+const filterChangePayload: FormTableFilterChangePayload = { status: ['enabled'] }
+const typedTableEmits: FormTableEmits<PurchaseRow> = {} as FormTableEmits<PurchaseRow>
+typedTableEmits['sort-change'](sortChangePayload)
+typedTableEmits['filter-change'](filterChangePayload)
+typedTableEmits['header-click'](elementColumn, new MouseEvent('click'))
+typedTableEmits['header-contextmenu'](elementColumn, new MouseEvent('contextmenu'))
+typedTableEmits['header-dragend'](180, 120, elementColumn, new MouseEvent('mouseup'))
+const typedCell = document.createElement('td')
+const typedRow: PurchaseRow = { name: '采购单', amount: 10 }
+typedTableEmits['cell-click'](typedRow, elementColumn, typedCell, new MouseEvent('click'))
+typedTableEmits['cell-dblclick'](typedRow, elementColumn, typedCell, new MouseEvent('dblclick'))
+typedTableEmits['cell-contextmenu'](typedRow, elementColumn, typedCell, new MouseEvent('contextmenu'))
+typedTableEmits['cell-mouse-enter'](typedRow, elementColumn, typedCell, new MouseEvent('mouseenter'))
+typedTableEmits['cell-mouse-leave'](typedRow, elementColumn, typedCell, new MouseEvent('mouseleave'))
+typedTableEmits.select([typedRow], typedRow)
+typedTableEmits['select-all']([typedRow])
+typedTableEmits['selection-change']([typedRow])
+// @ts-expect-error sort order follows Element Table's public values.
+typedTableEmits['sort-change']({ column: elementColumn, prop: 'amount', order: 'up' })
+// @ts-expect-error selection rows preserve the FormTable business row type.
+typedTableEmits['selection-change']([{ name: '缺少金额' }])
 // @ts-expect-error field-change rows must preserve the generic business row shape.
 typedFormTableInstance.$emit('field-change', { row: { name: '缺少金额' }, index: 0 })
 const columns: ColumnConfig[] = [{
