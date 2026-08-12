@@ -14,6 +14,18 @@ interface DiagnosticIssue {
   message: string
 }
 
+/** 每类诊断独立维护活动问题，避免无关数据变化触发整套配置扫描。 */
+const createIssueReporter = () => {
+  let activeIssueIds = new Set<string>()
+  return (issues: DiagnosticIssue[]) => {
+    const nextIssueIds = new Set(issues.map(issue => issue.id))
+    issues.forEach(issue => {
+      if (!activeIssueIds.has(issue.id)) console.warn(issue.message)
+    })
+    activeIssueIds = nextIssueIds
+  }
+}
+
 const describeValue = (value: unknown) => {
   if (typeof value === 'string') return JSON.stringify(value)
   if (typeof value === 'symbol') return value.toString()
@@ -154,7 +166,7 @@ export function useFormTableDiagnostics<TRow extends TableRow = TableRow>(
 ) {
   if (!import.meta.env.DEV) return
 
-  let activeIssueIds = new Set<string>()
+  const reportLegacyIssues = createIssueReporter()
   watchEffect(() => {
     const issues: DiagnosticIssue[] = []
     if (options.getLegacyRowKey() !== undefined) {
@@ -163,13 +175,20 @@ export function useFormTableDiagnostics<TRow extends TableRow = TableRow>(
         message: '[FormTable] tableProps.rowKey is no longer supported; use the top-level rowKey prop.'
       })
     }
-    collectRowKeyIssues(issues, options.getTableData(), options.getRowKey())
-    collectColumnIssues(issues, options.getColumns())
+    reportLegacyIssues(issues)
+  })
 
-    const nextIssueIds = new Set(issues.map(issue => issue.id))
-    issues.forEach(issue => {
-      if (!activeIssueIds.has(issue.id)) console.warn(issue.message)
-    })
-    activeIssueIds = nextIssueIds
+  const reportRowKeyIssues = createIssueReporter()
+  watchEffect(() => {
+    const issues: DiagnosticIssue[] = []
+    collectRowKeyIssues(issues, options.getTableData(), options.getRowKey())
+    reportRowKeyIssues(issues)
+  })
+
+  const reportColumnIssues = createIssueReporter()
+  watchEffect(() => {
+    const issues: DiagnosticIssue[] = []
+    collectColumnIssues(issues, options.getColumns())
+    reportColumnIssues(issues)
   })
 }
