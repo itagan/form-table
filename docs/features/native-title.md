@@ -23,6 +23,7 @@
 | --- | --- | --- |
 | 表级展示策略 | `hintOptions` | `{ mode: 'title' }`（默认）或 `{ mode: 'tooltip', props }` |
 | Tooltip 属性 | `hintOptions.props` | 透传给表格唯一的 `el-tooltip` |
+| 字段统一格式化 | `hintOptions.fieldFormatter` | `hint: true` 时根据字段上下文生成内容 |
 | 表头提示 | `columns[].headerHint` | 默认表头或 `headerSlot` 的统一包装节点 |
 | 字段外层提示 | `columns[].children[].children[].hint` | `el-form-item` |
 | 表头原生属性 | `columns[].headerProps.title` | 默认表头或 `headerSlot` 的统一包装节点 |
@@ -63,6 +64,34 @@ hint: '字段说明'
 hint: { content: '字段说明', ownership: 'table' }
 ```
 
+## 字段统一格式化
+
+多数提示只是当前字段完整值时，可在表级配置一次 `fieldFormatter`，字段使用 `hint: true` 开启：
+
+```ts
+const hintOptions: FormTableHintOptions = {
+  mode: 'tooltip',
+  fieldFormatter: ({ value, fieldKey, itemConfig }) => {
+    if (value == null || value === '') return ''
+    if (itemConfig.type === 'date') return formatDate(value)
+    return `${fieldKey}：${String(value)}`
+  }
+}
+
+const columns: ColumnConfig[] = [{
+  label: '备注',
+  children: [{ children: [{
+    fieldKey: 'remark',
+    type: 'input',
+    hint: true
+  }] }]
+}]
+```
+
+未配置 `fieldFormatter` 时，`hint: true` 默认把 `null/undefined` 格式化为空字符串，其余值使用 `String(value)`。formatter 返回 `null/undefined` 时标准化结果为 `null`，返回空字符串时保留空的表格托管 Hint；两者都不显示提示。
+
+显式字符串、对象和动态 Hint 函数优先，不经过 `fieldFormatter`。动态函数也可以返回 `true`，按当前字段上下文调用统一 formatter。该 formatter 只接收基础 `FormTableFieldRenderContext`，不包含解析后的 component 配置。
+
 ## 两种模式
 
 不配置 `hintOptions` 时继续输出原生 title，不渲染 FormTable 的 Hint Tooltip：
@@ -84,6 +113,7 @@ hint: { content: '字段说明', ownership: 'table' }
 
 | 返回值 | 行为 |
 | --- | --- |
+| `true` | 使用 `hintOptions.fieldFormatter`，未配置时格式化当前字段值 |
 | 非空字符串或 `{ content, ownership: 'table' }` | 按当前 `hintOptions.mode` 自动显示提示 |
 | `{ content, ownership: 'custom' }` | FormTable 不处理提示；配置内容的用途由调用方决定 |
 | `''` 或 `{ content: '', ownership: 'table' }` | 不显示提示 |
@@ -150,6 +180,7 @@ component: {
 - `tooltip` 模式只要 hint 非空就显示，不检查目标内容是否溢出。
 - `tooltip` 模式每个 FormTable 只有一个实例，表头与字段不能分别选择模式。
 - `component.props.title` 是否落在内部 input，取决于实际组件是否透传 `$attrs`。
+- `fieldFormatter` 只处理 `hint: true`，不会改写任何显式 Hint 内容。
 - `ownership: 'table'` 时表头和字段 Slot 的外层提示由 FormTable 自动应用，Slot 内部不应重复创建 Tooltip；`ownership: 'custom'` 时 FormTable 不处理提示，与字段渲染类型无关。
 - 普通 `component.renderer` 不会自动收到 `hint` prop；可在 `component.props` 中读取标准化 `hint` 后显式映射为业务组件需要的属性。
 - Hint 只适合作为补充说明；必填状态、校验错误和关键操作信息必须有始终可见或可聚焦的表达，不能只依赖悬停。

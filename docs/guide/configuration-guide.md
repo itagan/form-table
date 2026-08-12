@@ -12,7 +12,7 @@ FormTable 的顶层输入包括：
 | `columns` | Column → Row → Item 布局与渲染配置 |
 | `formProps` | 透传给 `el-form` |
 | `tableProps` | 透传给 `el-table` |
-| `hintOptions` | 整张表统一采用的 title 或单实例 Tooltip 提示策略 |
+| `hintOptions` | 整张表统一采用的 title/Tooltip 策略，以及 `hint: true` 的字段 formatter |
 | `loading` | 表格 loading 状态 |
 
 根组件 `v-model` 映射到 `tableData/update:tableData`。父组件收到更新后必须立即回写本地状态；后端保存可以独立防抖或批量处理。完整协议见 [FormTable Props](../api/form-table.md) 和[数据更新与受控回写](../features/data-updates.md)。
@@ -94,7 +94,7 @@ component: {
 
 ### 外层提示模式
 
-默认或 Slot 表头提示使用 `column.headerHint`，字段外层提示使用 Item `hint`。整张表通过 `hintOptions` 在原生 `title`（默认）和表格级单实例 `tooltip` 之间二选一；不支持字段级混用。`headerSlot` 和字段 Slot 的外层提示也由 FormTable 自动处理。详见 [Hint 提示模式](../features/native-title.md)和[自定义表头](../features/custom-header.md)。
+默认或 Slot 表头提示使用 `column.headerHint`，字段外层提示使用 Item `hint`。大量字段需要相同的值格式化时配置 `hintOptions.fieldFormatter`，字段仅写 `hint: true`；显式 Hint 不经过 formatter。整张表通过 `hintOptions` 在原生 `title`（默认）和表格级单实例 `tooltip` 之间二选一。详见 [Hint 提示模式](../features/native-title.md)和[自定义表头](../features/custom-header.md)。
 
 ### 自定义组件绑定协议
 

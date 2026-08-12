@@ -48,7 +48,7 @@ columns[]                                  ColumnConfig
 | `columns[].children[].children[].colProps` | `DynamicValue<ComponentProps, ItemContext>` | `{ span: 24 }` | ItemContext | 透传 `el-col` |
 | `columns[].children[].children[].formItemProps` | `DynamicValue<ComponentProps, ItemContext>` | `{}` | ItemContext | 透传 `el-form-item` |
 | `columns[].children[].children[].formItemProps.rules` | Element UI Rule(s) | 可选 | Element UI | 字段校验规则 |
-| `columns[].children[].children[].hint` | `DynamicValue<FormTableHint \| null \| undefined, ItemContext>` | 可选 | ItemContext | 字段 Hint；`ownership: 'table'` 应用于 `el-form-item`，`custom` 时不自动处理 |
+| `columns[].children[].children[].hint` | `DynamicValue<FormTableFieldHint \| null \| undefined, ItemContext>` | 可选 | ItemContext | `true` 使用表级 formatter；显式 Hint 按 ownership 应用于 `el-form-item` |
 | `columns[].children[].children[].component` | `FieldComponentConfig` | 按 `type` 决定 | Resolved ItemContext（增加 `hint`） | 字段组件、Slot 和绑定配置 |
 
 ## 校验路径

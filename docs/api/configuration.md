@@ -14,6 +14,8 @@ FormTable
 ├─ formProps
 ├─ tableProps
 ├─ hintOptions
+│  ├─ mode / props
+│  └─ fieldFormatter
 ├─ loading
 └─ columns[]
    ├─ key / label / visible / props
