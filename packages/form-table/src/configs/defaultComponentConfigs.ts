@@ -17,7 +17,6 @@ const componentTypeMap: Record<BuiltinFormItemType, string> = {
   rate: 'el-rate',
   slider: 'el-slider',
   color: 'el-color-picker',
-  upload: 'el-upload',
   cascader: 'el-cascader',
   autocomplete: 'el-autocomplete'
 }
