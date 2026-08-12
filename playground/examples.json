@@ -24,7 +24,7 @@
     "name": "form-table-advanced",
     "view": "FormTableAdvancedView",
     "type": "success",
-    "tags": ["NativeColumnConfig", "selection", "index", "slot", "component.renderer"]
+    "tags": ["PlainColumnConfig", "selection", "index", "slot", "component.renderer"]
   },
   {
     "title": "cellSlot 列级单元格",

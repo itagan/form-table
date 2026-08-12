@@ -18,7 +18,7 @@
 
 | 功能 | 配置入口 | 使用入口 | 可运行演示 |
 | --- | --- | --- | --- |
-| [原生选择与序号列](./native-columns.md) | `columns[].type` | `selection-change`、原生列 props | [`/form-table-advanced`](http://localhost:5173/form-table-advanced) |
+| [Element 功能列透传](./native-columns.md) | 纯 `columns[].props` | `selection-change`、Element Column props | [`/form-table-advanced`](http://localhost:5173/form-table-advanced) |
 | [自定义表头](./custom-header.md) | `columns[].headerSlot` | 父组件同名 scoped Slot | [`/hint-scenarios`](http://localhost:5173/hint-scenarios) |
 | [`cellSlot` 列级单元格](./cell-slot.md) | `columns[].cellSlot` | 父组件同名 scoped Slot | [`/cell-slot`](http://localhost:5173/cell-slot) |
 | [自定义字段组件](./custom-component.md) | Item `type: 'component'` | `component.renderer/model/props/listeners` | [`/enterprise-components`](http://localhost:5173/enterprise-components) |

@@ -125,7 +125,7 @@ async function approve(context: FormTableCellSlotContext) {
 
 - 未找到 `cellSlot` 对应的具名 Slot 时渲染空单元格。
 - `cellSlot` 不与 `children` 混用，TypeScript 联合类型会拒绝该配置。
-- `selection/index` 使用原生列顶层 `type`，不与 `cellSlot` 混用；`expand` 暂未开放。
+- `selection/index/expand` 等 Element 功能列通过纯透传列的 `props` 配置，不与 `cellSlot` 混用。
 - 固定列仍使用 `columns[].props.fixed`，其 DOM 复制行为遵循 Element UI。
 
 ## 完整示例

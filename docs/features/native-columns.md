@@ -1,21 +1,21 @@
-# 原生功能列
+# Element 功能列透传
 
 > 可运行 Demo：[高级示例 ↗](http://localhost:5173/form-table-advanced)
 
-`NativeColumnConfig` 用于 Element UI 的选择列和序号列。这类列不绑定业务字段，也不创建 Row、Item 或 `el-form-item`。
+`PlainColumnConfig` 表示一个不进入 FormTable 字段渲染链路的纯 `el-table-column`。它不重新定义 Element UI API，而是把 `props` 原样交给 `el-table-column`，适合选择列、序号列等原生功能。
 
 ## 基本配置
 
 ```ts
-import { defineFormTableColumns, type NativeColumnConfig, type TableRow } from '@itagan/form-table'
+import { defineFormTableColumns, type PlainColumnConfig, type TableRow } from '@itagan/form-table'
 
-const nativeColumns: NativeColumnConfig[] = [
-  { type: 'selection', props: { width: 48 } },
-  { type: 'index', label: '序号', props: { width: 64, align: 'center' } }
+const elementColumns: PlainColumnConfig[] = [
+  { props: { type: 'selection', width: 48 } },
+  { label: '序号', props: { type: 'index', width: 64, align: 'center' } }
 ]
 
 const columns = defineFormTableColumns<TableRow>([
-  ...nativeColumns,
+  ...elementColumns,
   {
     label: '姓名',
     children: [{
@@ -25,11 +25,11 @@ const columns = defineFormTableColumns<TableRow>([
 ])
 ```
 
-`type` 必须配置在列顶层，不能写入 `props`：
+`type` 属于 Element UI 的 `el-table-column` Prop，因此保留在 `props` 中。纯透传列不需要为了通过类型检查而配置无意义的 `children: []`：
 
 ```ts
-{ type: 'selection', props: { width: 48 } } // 正确
-{ props: { type: 'selection' }, children: [] } // 不支持
+{ props: { type: 'selection', width: 48 } } // 正确
+{ props: { type: 'selection' }, children: [] } // 不需要，也不允许混用
 ```
 
 ## 选择列
@@ -47,12 +47,12 @@ const columns = defineFormTableColumns<TableRow>([
 <span>已选择 {{ selection.length }} 行</span>
 ```
 
-当表格会排序、替换行对象或保留选择状态时，应配置唯一稳定的顶层 `rowKey`。`props` 可继续使用 Element UI 选择列支持的属性，例如 `selectable` 和 `reserveSelection`：
+当表格会排序、替换行对象或保留选择状态时，应配置唯一稳定的顶层 `rowKey`。选择列的其他能力也继续放在 `props`：
 
 ```ts
 {
-  type: 'selection',
   props: {
+    type: 'selection',
     width: 48,
     reserveSelection: true,
     selectable: row => !row.locked
@@ -62,13 +62,13 @@ const columns = defineFormTableColumns<TableRow>([
 
 ## 序号列
 
-不配置 `label` 时使用空表头。可通过 Element UI 原生 `index` 属性自定义序号：
+不配置 `label` 时使用空表头。可通过 Element UI 原生 `index` Prop 自定义序号：
 
 ```ts
 {
-  type: 'index',
   label: '序号',
   props: {
+    type: 'index',
     width: 64,
     align: 'center',
     index: rowIndex => rowIndex + 100
@@ -78,14 +78,14 @@ const columns = defineFormTableColumns<TableRow>([
 
 ## 动态配置
 
-原生列支持与其他列一致的 `key`、`visible` 和动态 `props`：
+纯透传列支持 `key`、`label`、`visible` 和动态 `props`：
 
 ```ts
 {
   key: 'selection-column',
-  type: 'selection',
   visible: ({ tableData }) => tableData.length > 0,
   props: ({ tableData }) => ({
+    type: 'selection',
     width: tableData.length > 100 ? 56 : 48
   })
 }
@@ -93,14 +93,18 @@ const columns = defineFormTableColumns<TableRow>([
 
 ## 能力边界
 
-| 能力 | `NativeColumnConfig` |
+| 能力 | `PlainColumnConfig` |
 | --- | --- |
-| 支持类型 | `selection`、`index` |
-| 可选配置 | `key`、`label`、`visible`、`props` |
+| Element Column 属性 | 通过 `props` 原样透传 |
+| 可选配置 | `key`、`label`、`visible` |
 | 字段路径与校验 | 不支持 |
 | `children` / `cellSlot` | 不支持 |
-| 自定义表头配置 | 不支持 |
-| `expand` | 暂不支持；需要单独设计展开内容 API |
+| FormTable 自定义表头 | 不支持 |
 
-需要操作按钮、状态组合或图片时使用 [`cellSlot`](./cell-slot.md)；需要字段绑定和校验时使用普通布局列。
+FormTable 不维护 `selection/index/expand` 枚举，具体属性遵循当前 Element UI 版本。需要内容的原生列可组合现有 `cellSlot`，例如展开列：
 
+```ts
+{ label: '详情', props: { type: 'expand' }, cellSlot: 'row-detail' }
+```
+
+需要 FormTable 字段绑定和校验时使用布局列，需要操作按钮或组合展示时使用 [`cellSlot`](./cell-slot.md)。

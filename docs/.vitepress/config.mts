@@ -80,7 +80,7 @@ export default defineConfig({
             text: '渲染扩展',
             collapsed: false,
             items: [
-              { text: '原生选择与序号列', link: '/features/native-columns' },
+              { text: 'Element 功能列透传', link: '/features/native-columns' },
               { text: '自定义表头', link: '/features/custom-header' },
               { text: 'cellSlot 列级单元格', link: '/features/cell-slot' },
               { text: '自定义字段组件', link: '/features/custom-component' }

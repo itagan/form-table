@@ -4,14 +4,14 @@
 
 ```text
 columns[]                                  ColumnConfig
-├─ type: selection | index              NativeColumnConfig
+├─ props only                            PlainColumnConfig
 ├─ children[]                            RowConfig
 │  └─ children[]                     FormItemConfig
 │     └─ component                   FieldComponentConfig
 └─ cellSlot                              列级单元格 Slot
 ```
 
-`NativeColumnConfig`、`children[]` 和 `cellSlot` 是三条互斥路径。字段列使用 `children[]`；不需要字段路径和校验的单元格可使用 [`cellSlot`](../features/cell-slot.md)。
+`PlainColumnConfig`、`children[]` 和 `cellSlot` 是三条互斥路径。纯 Element Column 只提供 `props`；字段列使用 `children[]`；不需要字段路径和校验的自定义单元格可使用 [`cellSlot`](../features/cell-slot.md)。
 
 ## ColumnConfig
 
@@ -27,14 +27,14 @@ columns[]                                  ColumnConfig
 | `columns[].children` | `RowConfig[]` | 与 `cellSlot` 互斥 | — | 进入 Row / Item 字段链路 |
 | `columns[].cellSlot` | `string` | 与 `children` 互斥 | `row, index, columnConfig, updateRow` | 直接渲染单元格 |
 
-`columns[].props` 可传入 `width/minWidth/fixed/align` 等 Element UI 原生属性，但不能传 `type`。无需字段渲染链路的功能列使用顶层判别字段：
+无需字段渲染链路的功能列使用 `PlainColumnConfig`，所有 Element Column 属性继续放在 `props` 中：
 
 ```ts
-{ type: 'selection', props: { width: 48 } }
-{ type: 'index', label: '序号', props: { width: 64 } }
+{ props: { type: 'selection', width: 48 } }
+{ label: '序号', props: { type: 'index', width: 64 } }
 ```
 
-原生列的 `label` 可选，且不接受 `children/cellSlot/headerSlot/headerProps/headerHint`。`expand` 尚未开放，后续需配合专用展开内容 API 设计。选择事件、序号函数和动态配置见[原生选择与序号列](../features/native-columns.md)。
+纯透传列的 `props` 必填、`label` 可选，且不接受 `children/cellSlot/headerSlot/headerProps/headerHint`。选择事件、序号函数和动态配置见[Element 功能列透传](../features/native-columns.md)。
 
 ## RowConfig
 
@@ -74,7 +74,7 @@ propPath: tableData.0.profile.city
 
 | 配置路径 | 配置与使用示例 |
 | --- | --- |
-| `columns[].type` | [原生选择与序号列](../features/native-columns.md) |
+| 纯 `columns[].props` | [Element 功能列透传](../features/native-columns.md) |
 | `columns[].headerHint`、Item `hint` | [Hint 提示体系](../features/hint.md) |
 | `columns[].headerSlot` | [自定义表头](../features/custom-header.md) |
 | `columns[].cellSlot` | [`cellSlot` 列级单元格](../features/cell-slot.md) |

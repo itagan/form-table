@@ -2,8 +2,8 @@
   <main class="demo-page">
     <header>
       <router-link to="/">← 返回</router-link>
-      <h1>原生功能列、复杂布局与三种渲染模式</h1>
-      <p>顶层 type 配置选择/序号列；children 布局演示内置字段、自定义 component、Render Function 组件和 slot。</p>
+      <h1>Element 功能列、复杂布局与三种渲染模式</h1>
+      <p>纯透传列通过 props 配置选择/序号能力；children 布局演示内置字段、自定义 component、Render Function 组件和 slot。</p>
     </header>
 
     <section class="demo-card">
@@ -47,7 +47,7 @@
 
       <el-alert
         class="native-column-note"
-        title="NativeColumnConfig 使用顶层 type: selection | index；选择结果通过 selection-change 获取，不需要 children 或 fieldKey。"
+        title="PlainColumnConfig 直接透传 el-table-column props；选择结果通过 selection-change 获取，不需要 children 或 fieldKey。"
         type="info"
         :closable="false"
         show-icon
@@ -109,8 +109,8 @@ const selection = ref<TableRow[]>([])
 const formTableRef = ref<FormTableExpose>()
 
 const columns: ColumnConfig[] = [
-  { type: 'selection', props: { width: 48 } },
-  { type: 'index', label: '序号', props: { width: 64, align: 'center' } },
+  { props: { type: 'selection', width: 48 } },
+  { label: '序号', props: { type: 'index', width: 64, align: 'center' } },
   {
     label: '联系人信息',
     headerSlot: 'contact-header',
