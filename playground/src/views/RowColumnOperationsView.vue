@@ -18,7 +18,8 @@
         :table-data="tableData"
         :columns="columns"
         :form-props="{ size: 'small' }"
-        :table-props="{ border: true, rowKey: '_rowKey' }"
+        row-key="_rowKey"
+        :table-props="{ border: true }"
         @update:tableData="replaceTableData"
       >
         <template #score-editor="{ row, value, component }">

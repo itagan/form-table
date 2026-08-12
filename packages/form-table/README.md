@@ -125,9 +125,9 @@ Item 的 `key` 是可选渲染身份，`fieldKey` 是必填数据路径。动态
 
 根组件 `v-model` 映射到 `tableData/update:tableData`。原有 `:table-data.sync="tableData"` 完全兼容；需要在回写时保存、记录日志或执行其他副作用时，可改用 `:table-data="tableData"` 与 `@update:tableData="handleUpdate"`。
 
-Table 原生事件直接透传。通过 ref 可调用 `validate()`、`resetFields()`、`clearValidate()`、`getFormRef()` 和 `getTableRef()`。
+Table 原生事件直接透传。通过 ref 可调用 `validate()`、`clearValidate()`、`getFormRef()` 和 `getTableRef()`。
 
-字段规则直接配置在 `formItemProps.rules`。`resetFields()` 保持 Element UI 原生语义；受控场景由调用方恢复 `tableData` 后调用 `clearValidate()`。单字段校验等底层能力可通过 `getFormRef()` 使用。
+字段规则直接配置在 `formItemProps.rules`。受控重置由调用方恢复 `tableData` 后调用 `clearValidate()`；原生 `resetFields()` 只能通过 `getFormRef()` 显式访问，它会直接修改数据并绕过受控更新事件。
 
 表头必填标记等展示使用 `headerSlot` 明确渲染；FormTable 自动把 `headerProps` 和 `behavior: 'auto'` 的 `headerHint` 应用到 Slot 外层包装节点。Slot scope 包含已解析的 `header.props` 与标准化 `header.hint`；仅在 `behavior: 'custom'` 时由模板自行消费提示。字段是否必填只由 `formItemProps.rules` 决定。
 
@@ -135,7 +135,7 @@ Table 原生事件直接透传。通过 ref 可调用 `validate()`、`resetField
 
 命名边界：`row` 是当前业务数据行，`rowConfig` 是布局配置；`itemConfig` 是原始字段配置，字段 Slot 的 `component` 是当前行解析后的组件配置，表头 Slot 的 `header` 是已解析的表头展示配置。
 
-`tableProps.rowKey` 是可选能力。普通同步编辑和增删行依靠对象引用即可；异步 listener 等待期间可能刷新、克隆或替换全部行对象时，建议配置唯一稳定的 rowKey。更新助手会在最新 `tableData` 中重新定位，目标行不存在时忽略更新，避免误写其他行。
+`rowKey` 是可选能力。普通同步编辑和增删行依靠对象引用即可；异步 listener 等待期间可能刷新、克隆或替换全部行对象时，建议配置唯一稳定的 rowKey。更新助手会在最新 `tableData` 中重新定位，目标行不存在时忽略更新，避免误写其他行。
 
 `tableData` 是受控数据：收到 `update:tableData` 后应立即更新父组件状态，不能对本地回写做防抖或等待接口成功。后端保存可以独立延迟、合并或防抖；推荐顺序是“立即更新本地 `tableData` → 延迟保存最新快照”。
 

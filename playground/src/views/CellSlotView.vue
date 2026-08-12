@@ -28,7 +28,8 @@
         :table-data="tableData"
         :columns="columns"
         :form-props="{ size: 'small' }"
-        :table-props="{ border: true, rowKey: 'id' }"
+        row-key="id"
+        :table-props="{ border: true }"
         @update:tableData="handleTableDataUpdate"
         @field-change="handleFieldChange"
       >

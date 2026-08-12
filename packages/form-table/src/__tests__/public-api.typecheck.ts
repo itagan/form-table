@@ -19,6 +19,7 @@ import FormTable, {
   type FormTableProps,
   type FormTableResolvedFieldContext,
   type LayoutColumnConfig,
+  type NativeColumnConfig,
   type ResolvedFormTableHint,
   type ResolvedHeaderConfig,
   type TableRow
@@ -137,6 +138,22 @@ const layoutColumn: LayoutColumnConfig = {
   label: '姓名',
   children: [{ children: [{ fieldKey: 'name', type: 'input' }] }]
 }
+const nativeColumns: NativeColumnConfig[] = [
+  { type: 'selection', props: { width: 48 } },
+  { type: 'index', label: '序号', props: { width: 64 } }
+]
+// @ts-expect-error expand requires a dedicated content API and is not supported yet.
+const unsupportedExpandColumn: NativeColumnConfig = { type: 'expand' }
+// @ts-expect-error native columns do not enter the Row/Item rendering chain.
+const nativeColumnWithChildren: NativeColumnConfig = { type: 'index', children: [] }
+const legacyNativeColumn: ColumnConfig = {
+  label: '旧原生列',
+  children: [],
+  props: {
+    // @ts-expect-error native column type moved to column.type.
+    type: 'selection'
+  }
+}
 // @ts-expect-error cellSlot columns do not accept Row/Item children.
 const mixedColumnModes: ColumnConfig = {
   label: '错误列模式',
@@ -203,11 +220,25 @@ const dynamicRendererVariants: ColumnConfig[] = [{
 const props: FormTableProps = {
   tableData: rows,
   columns,
+  rowKey: 'id',
   formProps: { size: 'small' },
   tableProps: { border: true },
   hintOptions: {
     mode: 'tooltip',
     props: { placement: 'top', openDelay: 200 }
+  }
+}
+const functionRowKeyProps: FormTableProps<PurchaseRow> = {
+  tableData: [{ name: '采购单', amount: 10 }],
+  columns: typedColumns,
+  rowKey: row => row.name
+}
+const legacyRowKeyProps: FormTableProps = {
+  tableData: rows,
+  columns,
+  tableProps: {
+    // @ts-expect-error rowKey is a top-level FormTable prop.
+    rowKey: 'id'
   }
 }
 const titleHintOptions: FormTableHintOptions = { mode: 'title' }
@@ -410,9 +441,15 @@ void cellSlotContext.fieldKey
 cellSlotContext.columnConfig.label = '新操作'
 
 void props
+void functionRowKeyProps
+void legacyRowKeyProps
 void typedColumns
 void cellSlotColumn
 void layoutColumn
+void nativeColumns
+void unsupportedExpandColumn
+void nativeColumnWithChildren
+void legacyNativeColumn
 void mixedColumnModes
 void modelVariants
 void dynamicRendererVariants

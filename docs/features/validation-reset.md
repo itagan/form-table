@@ -92,9 +92,7 @@ formTableRef.value
 
 ## 重置受控数据
 
-`resetFields()` 保持 Element Form 原生语义。由于 model 指向传入的 `tableData`，原生重置会直接修改相应字段，并且不会发出 `update:tableData` 或 `field-change`。
-
-受控业务更推荐显式保存并恢复初始快照：
+FormTable 不公开数据重置方法。受控业务显式保存并恢复初始快照：
 
 ```ts
 const initialTableData = cloneDeep(tableData.value)
@@ -107,6 +105,8 @@ async function resetTable() {
 ```
 
 这样可以明确决定是否删除新增行、恢复已删除行，以及哪些服务端字段需要保留。
+
+如确需 Element Form 原生行为，可以调用 `getFormRef().resetFields()`；它会直接修改 `tableData`，并且不会发出 `update:tableData` 或 `field-change`，不属于 FormTable 的受控更新协议。
 
 ## 动态规则
 
@@ -129,7 +129,7 @@ formItemProps: ({ row }) => ({
 | 提交前校验全部字段 | `await validate()` |
 | 校验某个动态字段 | `getFormRef().validateField(propPath)` |
 | 行变化后清除旧错误 | `clearValidate()` |
-| 完全使用 Element 原生重置 | `resetFields()` |
+| 完全使用 Element 原生重置 | `getFormRef().resetFields()`（绕过受控协议） |
 | 按业务初始数据重置 | 替换 `tableData` 后调用 `clearValidate()` |
 
 ## 相关 API

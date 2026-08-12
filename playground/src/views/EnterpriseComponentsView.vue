@@ -20,7 +20,8 @@
         :table-data="tableData"
         :columns="columns"
         :form-props="{ size: 'small', labelPosition: 'top' }"
-        :table-props="{ border: true, rowKey: 'id' }"
+        row-key="id"
+        :table-props="{ border: true }"
         @update:tableData="handleTableDataUpdate"
       >
         <template #row-actions="{ row, index, component }">

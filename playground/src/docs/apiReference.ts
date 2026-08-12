@@ -22,8 +22,9 @@ export const apiGroups: ApiGroup[] = [
     entries: [
       { path: 'tableData', type: 'TableRow[]', defaultValue: '必填', target: '根 v-model / el-table.data', description: 'v-model 对应 prop，通过 update:tableData 回写。' },
       { path: 'columns', type: 'ColumnConfig[]', defaultValue: '必填', target: '布局与渲染配置', description: 'Column → Row → Item 配置树。' },
+      { path: 'rowKey', type: 'string | ((row) => unknown)', defaultValue: '—', target: 'FormTable / el-table', description: '稳定行身份；异步更新期间用于重新定位原行。' },
       { path: 'formProps', type: 'Record<string, unknown>', defaultValue: '{}', target: 'el-form', description: '透传 Element Form 属性。' },
-      { path: 'tableProps', type: 'Record<string, unknown>', defaultValue: '{}', target: 'el-table', description: '透传 Element Table 属性；异步更新建议配置 rowKey。' },
+      { path: 'tableProps', type: 'Record<string, unknown>', defaultValue: '{}', target: 'el-table', description: '透传 Element Table 属性，不包含 rowKey。' },
       { path: 'hintOptions', type: 'FormTableHintOptions', defaultValue: "{ mode: 'title' }", target: '表头与字段 Hint', description: '整表统一选择展示模式，并可配置字段默认策略。' },
       { path: 'hintOptions.field', type: 'boolean | FormTableFieldHintFormatter', defaultValue: 'false', target: '未声明或空 hint 的字段', description: 'false/未配置关闭；true 默认字符串化；函数统一格式化。', context: 'FieldContext' },
       { path: 'loading', type: 'boolean', defaultValue: 'false', target: 'el-table v-loading', description: '表格加载状态。' }
@@ -36,7 +37,8 @@ export const apiGroups: ApiGroup[] = [
     entries: [
       { path: 'columns[].key', type: 'string', defaultValue: '—', target: '列渲染身份', description: '动态增删、替换列时建议使用稳定唯一值。' },
       { path: 'columns[].label', type: 'string', defaultValue: "''", target: 'el-table-column.label', description: '默认表头文本。' },
-      { path: 'columns[].props', type: 'Object | (context) => Object', defaultValue: '{}', target: 'el-table-column', description: '宽度、对齐、fixed、type 等原生列属性。', context: 'ColumnContext' },
+      { path: 'columns[].type', type: "'selection' | 'index'", defaultValue: '—', target: '原生 el-table-column', description: '原生功能列的顶层判别字段。' },
+      { path: 'columns[].props', type: 'Object | (context) => Object', defaultValue: '{}', target: 'el-table-column', description: '宽度、对齐、fixed 等原生列属性，不包含 type。', context: 'ColumnContext' },
       { path: 'columns[].headerProps', type: 'Object | (context) => Object', defaultValue: '{}', target: '默认/Slot 表头包装节点', description: 'title、class、style、aria-*；renderHeader 接管时不自动应用。', context: 'ColumnContext' },
       { path: 'columns[].headerHint', type: 'FormTableHint | (context) => FormTableHint', defaultValue: '—', target: '默认/Slot 表头包装节点', description: "字符串默认由表格托管；behavior: 'custom' 时 FormTable 不处理展示。", context: 'ColumnContext' },
       { path: 'columns[].headerSlot', type: 'string', defaultValue: '—', target: '表头 scoped Slot', description: '复杂表头、图标和交互内容。' },
@@ -107,7 +109,6 @@ export const eventRows = [
 
 export const refRows = [
   { name: 'validate()', result: 'Promise<boolean>', description: '执行完整表单校验。' },
-  { name: 'resetFields()', result: 'void', description: '保持 Element Form 原生重置语义。' },
   { name: 'clearValidate()', result: 'void', description: '清除校验状态。' },
   { name: 'getFormRef()', result: 'ElForm | undefined', description: '获取原生 Form Ref。' },
   { name: 'getTableRef()', result: 'ElTable | undefined', description: '获取原生 Table Ref。' }

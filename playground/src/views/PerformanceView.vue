@@ -93,7 +93,8 @@
           v-model="tableData"
           :columns="columns"
           :form-props="{ size: 'mini' }"
-          :table-props="{ border: true, stripe: true, rowKey: 'id', height: 520 }"
+          row-key="id"
+          :table-props="{ border: true, stripe: true, height: 520 }"
         >
           <template #perf-display="{ row, columnConfig }">
             <span class="display-value">{{ row[columnConfig.key] }}</span>

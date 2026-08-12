@@ -2,6 +2,7 @@
   <el-table-column
     v-if="isNativeColumn"
     :label="column.label"
+    :type="nativeColumnType"
     v-bind="columnProps"
   />
 
@@ -102,8 +103,15 @@ const columnContext = computed<FormTableColumnContext>(() => createColumnContext
   props.column
 ))
 
-/** 解析静态或函数形式的 el-table-column 透传属性。 */
-const columnProps = computed(() => resolveDynamicValue(props.column.props, columnContext.value) || {})
+/** type 是原生列的顶层判别字段，旧透传写法只提供迁移诊断。 */
+const columnProps = computed(() => {
+  const resolvedProps = resolveDynamicValue(props.column.props, columnContext.value) || {}
+  const { type: legacyType, ...passthrough } = resolvedProps
+  if (import.meta.env.DEV && legacyType !== undefined) {
+    console.warn('[FormTable] column.props.type is no longer supported; use column.type for native columns.')
+  }
+  return passthrough
+})
 
 /** 表头属性和提示只求值一次，默认表头与自定义 Slot 共享同一解析结果。 */
 const resolvedHeader = computed<ResolvedHeaderConfig>(() => ({
@@ -126,7 +134,8 @@ const resolvedHeaderTargetProps = computed(() => {
 })
 
 // Element UI 的功能列由 type 驱动，不应挂载普通字段的 scoped slot。
-const isNativeColumn = computed(() => ['index', 'selection', 'expand'].includes(columnProps.value.type))
+const isNativeColumn = computed(() => 'type' in props.column)
+const nativeColumnType = computed(() => 'type' in props.column ? props.column.type : undefined)
 
 /** cellSlot 列不经过 Row/Item 字段渲染链路。 */
 const cellSlotFn = computed(() => {
@@ -165,7 +174,7 @@ const headerSlotProps = computed<FormTableHeaderSlotContext>(() => extendLazyCon
   {
     columnIndex: props.columnIndex,
     header: resolvedHeader.value,
-    label: props.column.label
+    label: props.column.label || ''
   }
 ))
 </script>

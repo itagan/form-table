@@ -11,7 +11,7 @@
 | 普通字段输入 | 立即通过根 `v-model` 回写本地 `tableData` |
 | 延迟保存后端 | 本地立即回写，接口单独防抖或批量保存快照 |
 | 确认或接口成功后才修改字段 | 自定义组件保存草稿，成功后调用 `setValue/updateRow` |
-| 异步期间可能重建行对象 | 配置唯一稳定的 `tableProps.rowKey` |
+| 异步期间可能重建行对象 | 配置唯一稳定的 `rowKey` |
 | 同一字段允许连续请求 | 使用版本号、请求锁或 `AbortController` 处理竞争 |
 
 “异步提交”不是延迟接收 `update:tableData`。父组件必须同步接收组件已经发出的受控数据，否则后续更新可能继续基于旧 props 计算。
@@ -151,7 +151,7 @@ async function commit({ row, fieldKey, setValue }, draftValue) {
 <FormTable
   v-model="tableData"
   :columns="columns"
-  :table-props="{ rowKey: '_rowKey' }"
+  row-key="_rowKey"
 />
 ```
 

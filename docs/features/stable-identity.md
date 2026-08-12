@@ -10,7 +10,7 @@ FormTable 中有三类独立身份：业务数据行、Column 配置和 Item 配
 <FormTable
   v-model="tableData"
   :columns="columns"
-  :table-props="{ rowKey: 'id' }"
+  row-key="id"
 />
 ```
 
@@ -31,7 +31,7 @@ const columns: ColumnConfig[] = [{
 
 | 配置 | 标识对象 | 主要作用 |
 | --- | --- | --- |
-| `tableProps.rowKey` | 业务数据行 | 异步后定位原行，也供 Element Table 的选择、树形数据等能力使用 |
+| `rowKey` | 业务数据行 | 异步后定位原行，也供 Element Table 的选择、树形数据等能力使用 |
 | `columns[].key` | 列配置 | 动态增删、显隐和替换时保持列包装身份 |
 | `columns[].children[].key` | 单元格 Row 布局 | 动态布局行增删或排序时保持身份 |
 | `columns[].children[].children[].key` | Item 字段配置 | 动态字段、重复 fieldKey 或渲染器切换时保持身份 |

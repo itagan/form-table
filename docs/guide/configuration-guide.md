@@ -17,7 +17,7 @@ FormTable 的顶层输入包括：
 
 根组件 `v-model` 映射到 `tableData/update:tableData`。父组件收到更新后必须立即回写本地状态；后端保存可以独立防抖或批量处理。完整协议见 [FormTable Props](../api/form-table.md) 和[数据更新与受控回写](../features/data-updates.md)。
 
-`tableProps.rowKey` 不是普通编辑的必选项。只有异步期间可能刷新、克隆或替换行对象，或 Element Table 自身需要稳定身份时，才应配置唯一稳定的 rowKey。
+`rowKey` 不是普通编辑的必选项。只有异步期间可能刷新、克隆或替换行对象，或 Element Table 自身需要稳定身份时，才应配置唯一稳定的 rowKey。
 
 ## 布局
 
@@ -159,7 +159,7 @@ Item   → Row 信息 + fieldKey, value, itemConfig
 
 ### 异步更新与稳定行身份
 
-`row/index/value` 是触发时快照。更新助手绑定触发时的数据行；配置稳定 `tableProps.rowKey` 后，异步结束时会在最新数据中重新定位。目标行已删除或身份不唯一时忽略更新。详见[稳定身份与异步安全](../features/stable-identity.md)。
+`row/index/value` 是触发时快照。更新助手绑定触发时的数据行；配置稳定 `rowKey` 后，异步结束时会在最新数据中重新定位。目标行已删除或身份不唯一时忽略更新。详见[稳定身份与异步安全](../features/stable-identity.md)。
 
 ### 各回调上下文速查
 

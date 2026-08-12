@@ -17,7 +17,7 @@ export function useColumnIdentity<TRow extends TableRow = TableRow>(
     return columns.map((column, sourceIndex) => (
       column.key && keyCounts.get(column.key) === 1
         ? `key:${column.key}`
-        : `fallback:${column.key || column.label || 'column'}:${sourceIndex}`
+        : `fallback:${column.key || column.label || ('type' in column && column.type) || 'column'}:${sourceIndex}`
     ))
   })
 

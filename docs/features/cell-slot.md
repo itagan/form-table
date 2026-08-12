@@ -81,7 +81,7 @@ rowConfig / itemConfig / propPath / component
 | 需要 `fieldKey/value/setValue` | `type: 'slot'` |
 | 需要 `formItemProps.rules` 或 `propPath` | `type: 'slot'` |
 | 需要已解析 `component.props/options/listeners` | `type: 'slot'` |
-| 原生选择、序号或展开列 | `column.props.type` |
+| 原生选择或序号列 | `column.type` |
 
 `cellSlot` 内可以放置交互组件，但若它本质上是需要 FormTable 校验和字段写回的编辑器，仍应使用字段 Slot。
 
@@ -111,7 +111,7 @@ rowConfig / itemConfig / propPath / component
 ## 异步操作与 rowKey
 
 ```ts
-const tableProps = { rowKey: 'id' }
+const rowKey = 'id'
 
 async function approve(context: FormTableCellSlotContext) {
   await save(context.row.id)
@@ -125,7 +125,7 @@ async function approve(context: FormTableCellSlotContext) {
 
 - 未找到 `cellSlot` 对应的具名 Slot 时渲染空单元格。
 - `cellSlot` 不与 `children` 混用，TypeScript 联合类型会拒绝该配置。
-- `selection/index/expand` 使用 Element UI 原生 `props.type`，不与 `cellSlot` 混用。
+- `selection/index` 使用原生列顶层 `type`，不与 `cellSlot` 混用；`expand` 暂未开放。
 - 固定列仍使用 `columns[].props.fixed`，其 DOM 复制行为遵循 Element UI。
 
 ## 完整示例
