@@ -56,17 +56,17 @@ export type DynamicValue<T, Context> = T | ((context: Context) => T)
 /** 由 FormTable 或自定义渲染消费的提示配置。 */
 export interface FormTableHintConfig {
   content: string
-  /** Hint 展示所有权；默认由 FormTable 统一托管。 */
-  ownership?: 'table' | 'custom'
+  /** auto 由 FormTable 处理展示与可访问性；custom 交给调用方。 */
+  behavior?: 'auto' | 'custom'
 }
 /** FormTable 外层提示内容；字符串保持自动托管语义。 */
 export type FormTableHint = string | FormTableHintConfig
-/** 字段可用 true 强制启用统一 formatter，或用 false 退出 Hint 系统。 */
-export type FormTableFieldHint = boolean | FormTableHint
+/** 字段可用 false 关闭默认 Hint，或提供自己的提示内容。 */
+export type FormTableFieldHint = false | FormTableHint
 /** 动态 Hint 求值后提供给内部渲染与 Slot 的标准结构。 */
 export interface ResolvedFormTableHint {
   content: string
-  ownership: 'table' | 'custom'
+  behavior: 'auto' | 'custom'
 }
 /** 整个 FormTable 统一采用的提示展示方式。 */
 export type FormTableHintMode = 'title' | 'tooltip'
@@ -74,17 +74,14 @@ export type FormTableHintMode = 'title' | 'tooltip'
 export type FormTableFieldHintFormatter<TRow extends TableRow = TableRow> = (
   context: FormTableFieldRenderContext<TRow>
 ) => string | null | undefined
-/** 未显式配置 hint 的字段所继承的表级默认策略。 */
-export interface FormTableFieldHintOptions<TRow extends TableRow = TableRow> {
-  /** 是否让未声明 hint 的字段自动使用 formatter；默认 false。 */
-  enabled?: boolean
-  /** 统一生成字段 Hint；缺省时空值不展示，其余值使用 String(value)。 */
-  formatter?: FormTableFieldHintFormatter<TRow>
-}
+/** 未显式提供内容的字段所继承的默认 Hint。 */
+export type FormTableDefaultFieldHint<TRow extends TableRow = TableRow> =
+  | true
+  | FormTableFieldHintFormatter<TRow>
 /** FormTable 统一提示策略；Tooltip 属性仅在对应模式下有效。 */
 export type FormTableHintOptions<TRow extends TableRow = TableRow> = {
-  /** 字段默认启用与格式化策略；不影响 headerHint。 */
-  field?: FormTableFieldHintOptions<TRow>
+  /** true 默认字符串化字段值；函数统一格式化字段值；不影响 headerHint。 */
+  field?: FormTableDefaultFieldHint<TRow>
 } & (
   | {
       mode?: 'title'
@@ -188,7 +185,7 @@ interface BaseFormItemConfig<TRow extends TableRow = TableRow> {
   colProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext<TRow>>
   /** 直接传给 el-form-item。 */
   formItemProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext<TRow>>
-  /** 字段提示；ownership=table 按表级 hintOptions 应用，custom 时由调用方处理。 */
+  /** 字段提示；behavior=auto 按表级 hintOptions 应用，custom 时由调用方处理。 */
   hint?: DynamicValue<FormTableFieldHint | null | undefined, FormTableFieldRenderContext<TRow>>
 }
 
@@ -255,7 +252,7 @@ interface BaseColumnConfig<TRow extends TableRow = TableRow> {
   headerSlot?: string
   /** 传给默认或 Slot 表头包装节点；可配置原生 title、class、style 和 aria 属性。 */
   headerProps?: DynamicValue<ComponentProps, FormTableColumnContext<TRow>>
-  /** 表头提示；ownership=table 按表级 hintOptions 应用，custom 时由调用方处理。 */
+  /** 表头提示；behavior=auto 按表级 hintOptions 应用，custom 时由调用方处理。 */
   headerHint?: DynamicValue<FormTableHint | null | undefined, FormTableColumnContext<TRow>>
   /** 静态或动态显隐配置。 */
   visible?: DynamicValue<boolean, FormTableColumnContext<TRow>>
@@ -381,11 +378,11 @@ export const FORM_TABLE_CONTEXT_KEY: unique symbol = Symbol('formTableContext')
 export const FORM_TABLE_UPDATE_KEY: unique symbol = Symbol('formTableUpdate')
 export const FORM_TABLE_SLOTS_KEY: unique symbol = Symbol('formTableSlots')
 export const FORM_TABLE_HINT_MODE_KEY: unique symbol = Symbol('formTableHintMode')
-export const FORM_TABLE_FIELD_HINT_OPTIONS_KEY: unique symbol = Symbol('formTableFieldHintOptions')
+export const FORM_TABLE_DEFAULT_FIELD_HINT_KEY: unique symbol = Symbol('formTableDefaultFieldHint')
 
 /** 响应式提示模式仅供 FormTable 内部渲染链使用。 */
 export type FormTableHintModeContext = Readonly<Ref<FormTableHintMode>>
-/** 响应式字段 Hint 默认策略，仅供 FormTable 内部字段链使用。 */
-export type FormTableFieldHintOptionsContext<TRow extends TableRow = TableRow> = Readonly<
-Ref<FormTableFieldHintOptions<TRow>>
+/** 响应式字段默认 Hint，仅供 FormTable 内部字段链使用。 */
+export type FormTableDefaultFieldHintContext<TRow extends TableRow = TableRow> = Readonly<
+Ref<FormTableDefaultFieldHint<TRow> | undefined>
 >
