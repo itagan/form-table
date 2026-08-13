@@ -205,6 +205,28 @@ formTableRef.value?.getTableRef()
 
 `validate()` 使用 Element UI 完整规则并统一返回 `Promise<boolean>`；校验失败时返回 `false`，不会要求调用方捕获 rejected Promise。
 
+`getTableRef()` 返回带业务行泛型的 Element Table Ref。以下方法在支持范围 2.4.9–2.15.14 中保持稳定，公开类型以可选方法表达 Ref mock 和版本扩展兼容：
+
+| 方法 | 签名 |
+| --- | --- |
+| `clearSelection` | `() => void` |
+| `toggleRowSelection` | `(row: TRow, selected?: boolean) => void` |
+| `toggleAllSelection` | `() => void` |
+| `setCurrentRow` | `(row?: TRow) => void` |
+| `toggleRowExpansion` | `(row: TRow, expanded?: boolean) => void` |
+| `clearSort` / `clearFilter` | `() => void` |
+| `doLayout` | `() => void` |
+| `sort` | `(prop: string, order: 'ascending' \| 'descending') => void` |
+
+```ts
+const tableRef = formTableRef.value?.getTableRef()
+tableRef?.toggleRowSelection?.(tableData[0], true)
+tableRef?.sort?.('amount', 'descending')
+tableRef?.doLayout?.()
+```
+
+`clearFilter(columnKeys)` 和 `load()` 等较新版本能力不在稳定签名中；运行时 Ref 仍保留扩展字段，可由锁定对应 Element UI 版本的业务自行扩展类型。
+
 FormTable 不公开数据重置方法。受控场景由调用方明确保存和恢复业务初始数据，再清除校验状态：
 
 ```ts
@@ -222,7 +244,9 @@ const resetTable = async () => {
 ```ts
 formTableRef.value
   ?.getFormRef()
-  ?.validateField?.('tableData.0.phone')
+  ?.validateField?.('tableData.0.phone', message => {
+    if (message) console.warn(message)
+  })
 ```
 
 行增删、复制、移动由调用方直接维护 `tableData`。
