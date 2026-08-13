@@ -9,9 +9,9 @@
 | Column 动态配置 | `tableData` | `columnConfig` | — | — |
 | Row 动态配置 | `tableData, row, index` | `columnConfig, rowConfig` | — | — |
 | Item 动态配置 | 增加 `fieldKey, value` | 增加 `itemConfig` | — | — |
-| component 动态配置 | Item 数据 | Item 配置 | — | `hint` |
-| `component.listeners[event]` | Item 数据 | Item 配置 | `setValue, updateRow` | `hint` |
-| 字段 Slot | Item 数据 | Item 配置 | `setValue, updateRow` | `propPath, component, hint` |
+| component 动态配置 | Item 数据 | Item 配置 | — | — |
+| `component.listeners[event]` | Item 数据 | Item 配置 | `setValue, updateRow` | — |
+| 字段 Slot | Item 数据 | Item 配置 | `setValue, updateRow` | `propPath, component` |
 | `cellSlot` | `row, index` | `columnConfig` | `updateRow` | — |
 | 表头 Slot | `tableData, label, columnIndex` | `columnConfig` | — | `header` |
 
@@ -22,7 +22,7 @@
 | `columns[].visible/props/headerProps/headerHint` | `FormTableColumnContext` |
 | `columns[].children[].visible/props` | `FormTableRowContext` |
 | `columns[].children[].children[].visible/colProps/formItemProps/hint` | `FormTableFieldRenderContext` |
-| `...component.resolveRenderer/props/options/optionProps` | `FormTableResolvedFieldContext` |
+| `...component.resolveRenderer/props/options/optionProps` | `FormTableFieldRenderContext` |
 | `...component.listeners[event]` | `FormTableFieldContext, ...原始事件参数` |
 
 `cellSlot` 和表头 Slot 是 Vue scoped Slot，不是 `DynamicValue` 配置回调。
@@ -47,13 +47,11 @@
 | 数据 | `tableData, row, index, fieldKey, value` |
 | 配置 | `columnConfig, rowConfig, itemConfig` |
 | 更新 | `setValue, updateRow` |
-| 校验 / 解析 | `propPath, component, hint` |
+| 校验 / 解析 | `propPath, component` |
 
-`itemConfig.component` 是未解析的原始配置；`component` 是当前行已解析的 `props/listeners/options/optionProps/model`。`hint` 是标准化后的 `{ content, behavior }` 或 `null`；`behavior: 'custom'` 时 FormTable 不应用提示，Slot 可自行消费内容。
+`itemConfig.component` 是未解析的原始配置；`component` 是当前行已解析的 `props/listeners/options/optionProps/model`。组件动态配置使用 `FormTableFieldRenderContext`，listener 在此基础上增加 `setValue/updateRow`。
 
-`component.resolveRenderer/props/options/optionProps` 和组件 listener 同样获得标准化后的 `hint`。Hint 自身的动态函数使用不含 `hint` 的基础字段上下文，避免配置引用自身。
-
-Item 未声明 Hint 或返回空值，且 `hintOptions.field` 是函数时，该函数获得基础 `FormTableFieldRenderContext`。formatter 在 component 解析前执行，因此不包含标准化 `hint`、`setValue/updateRow` 或解析后的 component 配置。
+Item Hint 及 `hintOptions.field` formatter 都使用 `FormTableFieldRenderContext`。解析后的提示内容只由 FormTable 内部展示，不向组件动态配置、listener 或 Slot 传播。
 
 ## FormTableHeaderSlotContext
 
@@ -64,7 +62,6 @@ Item 未声明 Hint 或返回空值，且 `hintOptions.field` 是函数时，该
 | `columnIndex` | 当前可见列下标 |
 | `label` | 表头文本 |
 | `header.props` | 已解析表头属性，已由 FormTable 包装节点应用 |
-| `header.hint` | 标准化后的 `{ content, behavior }` 或 `null`；仅 `behavior: 'auto'` 自动应用 |
 
 ## 快照与异步更新
 

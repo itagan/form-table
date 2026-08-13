@@ -6,10 +6,10 @@
 - `BuiltinFormItemConfig`、`ComponentFormItemConfig`、`SlotFormItemConfig`
 - `FieldComponentConfig`、`FieldModelConfig`、`FieldRendererResolver`、`BuiltinFormItemType`、`FormItemType`
 - `FormItemOption`、`OptionPropsConfig`、`ResolvedComponentConfig`、`ResolvedHeaderConfig`
-- `FormTableHint`、`FormTableFieldHint`、`FormTableHintConfig`、`FormTableFieldHintFormatter`、`FormTableDefaultFieldHint`、`ResolvedFormTableHint`、`FormTableHintOptions`
+- `FormTableHintValue`、`FormTableHintMode`、`FormTableHintTargets`、`FormTableFieldHintFormatter`、`FormTableDefaultFieldHint`、`FormTableHintOptions`
 - `TableRow`、`FormTableRecord`、`FormTableProps`、`FormTableRowKey`、`FormTableTableProps`
 - `FormTableTableContext`、`FormTableColumnContext`、`FormTableRowContext`、`FormTableFieldRenderContext`
-- `FormTableResolvedFieldContext`、`FormTableFieldContext`、`FormTableSlotContext`、`FormTableCellSlotContext`
+- `FormTableFieldContext`、`FormTableSlotContext`、`FormTableCellSlotContext`
 - `FormTableFieldChangePayload`、`FormTableHeaderSlotContext`
 - `FormTableElementColumn`、`FormTableSortChangePayload`、`FormTableFilterChangePayload`
 - `FormTableExpose`、`FormTableElementFormRef`、`FormTableElementTableRef`
@@ -142,7 +142,7 @@ interface SlotFormItemConfig {
 
 ```ts
 type FieldRendererResolver = (
-  context: FormTableResolvedFieldContext
+  context: FormTableFieldRenderContext
 ) => string | Component | undefined
 ```
 
@@ -154,13 +154,13 @@ type FieldRendererResolver = (
 Column visible/props/headerProps/headerHint → tableData, columnConfig
 Row visible/props        → Column 信息 + row, index, rowConfig
 Field 布局与 Hint 求值   → Row 信息 + fieldKey, value, itemConfig
-component 动态配置       → Field 信息 + 标准化 hint
-component.listeners      → Resolved Field 信息 + setValue, updateRow
+component 动态配置       → Field 信息
+component.listeners      → Field 信息 + setValue, updateRow
 字段 slot                → Listener 信息 + propPath, component
 列级 cellSlot            → row, index, columnConfig, updateRow
 ```
 
-`FormTableSlotContext.itemConfig.component` 保留调用方传入的原始配置；`FormTableSlotContext.component` 的类型是 `ResolvedComponentConfig`，包含针对当前数据行解析并归一化后的 `props/listeners/options/optionProps/model`，用于直接绑定 Slot 内组件。`FormTableSlotContext.hint` 是标准化后的 `ResolvedFormTableHint | null`。
+`FormTableSlotContext.itemConfig.component` 保留调用方传入的原始配置；`FormTableSlotContext.component` 的类型是 `ResolvedComponentConfig`，包含针对当前数据行解析并归一化后的 `props/listeners/options/optionProps/model`，用于直接绑定 Slot 内组件。
 
 自定义组件绑定协议类型：
 
@@ -176,8 +176,8 @@ interface FieldModelConfig {
 
 `row/tableData` 与 `columnConfig/rowConfig/itemConfig` 在回调类型中采用浅层只读约束；运行时不会冻结原对象。字段更新使用 `setValue` 或 `updateRow`，配置调整由调用方替换 `columns`。
 
-表头 slot 接收 `tableData/label/columnIndex/columnConfig/header`。`columnIndex` 是动态显隐过滤后的可见列下标，不保证等于原始 `columns` 数组下标；`header.props` 是已解析属性，`header.hint` 是 `ResolvedFormTableHint | null`。只有 `behavior: 'auto'` 的 Hint 会由统一包装节点自动应用。
+表头 slot 接收 `tableData/label/columnIndex/columnConfig/header`。`columnIndex` 是动态显隐过滤后的可见列下标，不保证等于原始 `columns` 数组下标；`header.props` 是已解析属性。
 
 `ColumnConfig.headerProps` 传给默认或 Slot 表头的 `.form-table-column-header`，可配置原生 `title`、class、style 和 aria 属性。存在 `column.props.renderHeader` 时由 Element UI 完全接管，FormTable 不包装也不应用 `headerProps/headerHint`。
 
-`ColumnConfig.headerHint` 接受显式 `FormTableHint`；Item 的 `hint` 使用 `FormTableFieldHint`，额外支持 `false`。字符串会标准化为 `{ content, behavior: 'auto' }`。未声明或空 Hint 继承 `FormTableHintOptions.field`，`false` 关闭，非空内容覆盖。字段 component 动态配置、listener、字段 Slot 与表头 Slot 均可读取标准化结果。
+`ColumnConfig.headerHint` 与 Item 的 `hint` 都只接受动态字符串或 `false/null/undefined`。Item 未声明、返回 `null` 或空字符串时继承 `FormTableHintOptions.field`，`false` 关闭，非空字符串覆盖；表头不继承字段 formatter。`targets` 排除的目标不会求值，解析后的 Hint 只由 FormTable 内部展示，不进入组件回调、listener 或 Slot 上下文。

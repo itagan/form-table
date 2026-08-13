@@ -9,12 +9,14 @@
 | `rowKey` | `string \| ((row: TRow) => FormTableValue)` | 可选 | — | FormTable 与 Element Table 共用的稳定行身份 |
 | `formProps` | `ComponentProps` | 可选 | `{}` | 透传给 `el-form` |
 | `tableProps` | `ComponentProps` | 可选 | `{}` | 透传给 `el-table` |
-| `hintOptions` | `FormTableHintOptions<TRow>` | 可选 | `{ mode: 'title' }` | 整表 Hint 展示策略及字段统一格式化 |
+| `hintOptions` | `FormTableHintOptions<TRow>` | 可选 | `{ mode: 'title', targets: 'field' }` | 整表 Hint 展示策略、作用范围及字段统一格式化 |
 | `loading` | `boolean` | 可选 | `false` | `el-table` 的 `v-loading` |
 
 `tableData` 和 `columns` 在公开 `FormTableProps` 类型中是必填项；组件仍提供空数组作为运行时容错默认值。TypeScript 项目应显式传入两者，不依赖运行时默认值。
 
-`hintOptions` 是可辨识联合：title 模式使用 `{ mode?: 'title' }`，Tooltip 模式使用 `{ mode: 'tooltip', props?: ComponentProps }`。两种模式都可配置 `field: boolean | FormTableFieldHintFormatter`：未配置或 `false` 表示无全局字段处理，`true` 默认字符串化，函数统一格式化。Item 不写或返回空值时继承，`false` 关闭，非空内容覆盖。表头不继承字段默认值。完整行为见 [Hint 提示体系](../features/hint.md)。
+`mode` 支持 `false/'title'/'tooltip'`：关闭、原生 `title` 或整表共享单个 Element Tooltip。`targets` 支持 `field/header/all`，默认仅字段；被排除的目标不会求值。`tooltipProps` 只在 Tooltip 模式生效。
+
+`field` 可配置 `boolean | FormTableFieldHintFormatter`：未配置或 `false` 表示无全局字段处理，`true` 对非空字段值执行 `String(value)`，函数统一格式化。Item 不写、返回 `null` 或空字符串时继承，`false` 关闭，非空字符串覆盖。表头不继承字段默认值，必须显式配置 `headerHint`。完整行为见 [Hint 提示体系](../features/hint.md)。
 
 ## 受控数据
 

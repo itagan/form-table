@@ -23,7 +23,7 @@ columns[]                                  ColumnConfig
 | `columns[].props` | `DynamicValue<ComponentProps, ColumnContext>` | `{}` | `tableData, columnConfig` | 透传 `el-table-column` |
 | `columns[].headerSlot` | `string` | 可选 | Slot scope | 表头具名 Slot |
 | `columns[].headerProps` | `DynamicValue<ComponentProps, ColumnContext>` | `{}` | `tableData, columnConfig` | 默认或 Slot 表头包装节点属性 |
-| `columns[].headerHint` | `DynamicValue<FormTableHint \| null \| undefined, ColumnContext>` | 可选 | `tableData, columnConfig` | 表头 Hint；`behavior: 'auto'` 由 `hintOptions` 展示，`custom` 时不自动处理 |
+| `columns[].headerHint` | `DynamicValue<FormTableHintValue, ColumnContext>` | 可选 | `tableData, columnConfig` | 表头 Hint；仅在 `targets: 'header'/'all'` 时求值和展示 |
 | `columns[].children` | `RowConfig[]` | 与 `cellSlot` 互斥 | — | 进入 Row / Item 字段链路 |
 | `columns[].cellSlot` | `string` | 与 `children` 互斥 | `row, index, columnConfig, updateRow` | 直接渲染单元格 |
 
@@ -56,8 +56,8 @@ columns[]                                  ColumnConfig
 | `columns[].children[].children[].colProps` | `DynamicValue<ComponentProps, ItemContext>` | `{ span: 24 }` | ItemContext | 透传 `el-col` |
 | `columns[].children[].children[].formItemProps` | `DynamicValue<ComponentProps, ItemContext>` | `{}` | ItemContext | 透传 `el-form-item` |
 | `columns[].children[].children[].formItemProps.rules` | Element UI Rule(s) | 可选 | Element UI | 字段校验规则 |
-| `columns[].children[].children[].hint` | `DynamicValue<FormTableFieldHint \| null \| undefined, ItemContext>` | 可选 | ItemContext | 未声明或空值继承全局，`false` 关闭，非空内容按 behavior 覆盖 |
-| `columns[].children[].children[].component` | `FieldComponentConfig` | 按 `type` 决定 | Resolved ItemContext（增加 `hint`） | 字段组件、Slot 和绑定配置 |
+| `columns[].children[].children[].hint` | `DynamicValue<FormTableHintValue, ItemContext>` | 可选 | ItemContext | 未声明或空值继承全局，`false` 关闭，非空字符串覆盖 |
+| `columns[].children[].children[].component` | `FieldComponentConfig` | 按 `type` 决定 | ItemContext | 字段组件、Slot 和绑定配置 |
 
 ## 校验路径
 

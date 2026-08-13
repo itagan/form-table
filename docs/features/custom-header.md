@@ -27,7 +27,7 @@ const columns: ColumnConfig[] = [{
 <FormTable
   v-model="tableData"
   :columns="columns"
-  :hint-options="{ mode: 'tooltip' }"
+  :hint-options="{ mode: 'tooltip', targets: 'all' }"
 >
   <template #contact-header="{ label }">
     <span class="required-mark">*</span>
@@ -37,7 +37,7 @@ const columns: ColumnConfig[] = [{
 </FormTable>
 ```
 
-FormTable 会在 Slot 外创建 `.form-table-column-header`。默认的 `headerHint` 自动应用于该节点，并作为 title 或表级单实例 Tooltip 的锚点。Slot 不要重复绑定 `header.props`；需要自行展示时可配置 `headerHint: { content, behavior: 'custom' }`，并读取 `header.hint.content`。
+FormTable 会在 Slot 外创建 `.form-table-column-header`。当 `targets` 为 `header` 或 `all` 时，`headerHint` 自动应用于该节点，并作为 title 或表级单实例 Tooltip 的锚点。Slot 不要重复绑定 `header.props`。
 
 ## Slot scope
 
@@ -49,7 +49,6 @@ interface FormTableHeaderSlotContext {
   label: string
   header: {
     props: Record<string, unknown>
-    hint: ResolvedFormTableHint | null
   }
 }
 ```
@@ -61,7 +60,6 @@ interface FormTableHeaderSlotContext {
 | `columnIndex` | 当前可见列下标，不保证等于原始数组下标 |
 | `tableData` | 显示行数、汇总状态等只读信息 |
 | `header.props` | 当前列已解析的 `headerProps`，供读取兼容，已由包装节点应用 |
-| `header.hint` | 标准化后的 `{ content, behavior }` 或 `null`；仅 `behavior: 'auto'` 由包装节点自动应用 |
 
 ## 动态配置
 
@@ -77,20 +75,16 @@ headerProps: ({ columnConfig }) => ({
 })
 ```
 
-Slot 中获得的是当前渲染已经解析好的 `header`；不要再次执行原始配置函数，也不要把 `header.props` 重复绑定到 Slot 内容。`header.hint` 始终是标准对象或 `null`。
+Slot 中获得的是当前渲染已经解析好的 `header.props`；不要再次执行原始配置函数，也不要把它重复绑定到 Slot 内容。
 
 Tooltip 模式会让托管 Hint 的表头包装节点默认获得 `tabindex="0"`。Slot 内已经包含按钮等可聚焦控件时，在 `headerProps` 中显式设置 `tabindex: -1`，由内部控件承担键盘入口。
 
-需要表头 Slot 自行控制 Tooltip 时：
-
-```ts
-headerHint: { content: '自定义表头说明', behavior: 'custom' }
-```
+需要表头 Slot 使用不同于字段的 Tooltip 属性时，将 FormTable 作用范围保持为 `targets: 'field'`，不要配置 `headerHint`，直接在 Slot 内使用 Element Tooltip：
 
 ```vue
-<template #contact-header="{ label, header }">
+<template #contact-header="{ label }">
   <span>{{ label }}</span>
-  <el-tooltip :content="header.hint.content">
+  <el-tooltip content="自定义表头说明" placement="top-start">
     <i class="el-icon-question" aria-label="查看表头说明" />
   </el-tooltip>
 </template>

@@ -13,7 +13,7 @@
         :columns="columns"
         :form-props="{ size: 'small' }"
         :table-props="{ border: true, stripe: true }"
-        :hint-options="{ mode: 'tooltip' }"
+        :hint-options="{ mode: 'tooltip', targets: 'all' }"
       />
 
       <div class="actions">
