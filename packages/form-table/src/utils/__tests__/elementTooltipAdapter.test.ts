@@ -34,6 +34,7 @@ describe('Element UI Tooltip adapter', () => {
     const instance: FormTableHintTooltipRef = {
       $refs: { popper },
       tooltipId: 'tooltip-id',
+      showPopper: true,
       setExpectedState: vi.fn(),
       handleShowPopper: vi.fn(),
       handleClosePopper: vi.fn(),
@@ -44,7 +45,9 @@ describe('Element UI Tooltip adapter', () => {
     const target = document.createElement('button')
 
     adapter.hideImmediately()
+    expect(adapter.isVisible()).toBe(true)
     adapter.showFor(target)
+    adapter.retarget(target)
     adapter.update()
     adapter.close()
     adapter.destroy()
@@ -52,11 +55,13 @@ describe('Element UI Tooltip adapter', () => {
     expect(popper.style.display).toBe('none')
     expect(instance.referenceElm).toBe(target)
     expect(instance.setExpectedState).toHaveBeenNthCalledWith(1, true)
-    expect(instance.setExpectedState).toHaveBeenNthCalledWith(2, false)
+    expect(instance.setExpectedState).toHaveBeenNthCalledWith(2, true)
+    expect(instance.setExpectedState).toHaveBeenNthCalledWith(3, false)
     expect(instance.handleShowPopper).toHaveBeenCalledTimes(1)
     expect(instance.handleClosePopper).toHaveBeenCalledTimes(1)
     expect(instance.doDestroy).toHaveBeenNthCalledWith(1)
     expect(instance.doDestroy).toHaveBeenNthCalledWith(2, true)
-    expect(instance.updatePopper).toHaveBeenCalledTimes(1)
+    expect(instance.doDestroy).toHaveBeenNthCalledWith(3, true)
+    expect(instance.updatePopper).toHaveBeenCalledTimes(2)
   })
 })

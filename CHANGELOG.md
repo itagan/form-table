@@ -27,6 +27,7 @@
 
 ### Fixed
 
+- 修复单实例 Tooltip 在相邻字段间快速切换时，旧目标离场动画可能使新目标提示闪现后消失的问题；已显示的 Tooltip 现在会直接重定向到新目标。
 - 移除不符合字段默认 v-model 协议的内置 `upload` 类型；上传统一通过 `type: 'component'` 接入业务组件，或通过 `type: 'slot'` 直接组合 `el-upload`。
 - 修复 Tooltip 模式下输入框已聚焦时，鼠标移出字段后仍因焦点兜底导致提示常驻的问题；纯键盘焦点访问保持可用。
 - 内置字段类型只保留 Element UI 默认提供的组件映射；移除非 Element UI 内置的 `tree-select`，此类组件统一通过 `type: 'component'` 接入。
