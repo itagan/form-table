@@ -74,6 +74,69 @@ columns[].children[].children[].component
 
 `component.props` 会在自动补充属性之后合并，因此可以覆盖或扩展这些最小默认值。需要其他组件时使用 `type: 'component'`。
 
+## 复杂 Option 接入
+
+结构固定的扁平选项使用 `options + optionProps`，可以继续获得 FormTable 的最小选项渲染：
+
+```ts
+{
+  fieldKey: 'status',
+  type: 'select',
+  component: {
+    options: statusOptions,
+    optionProps: { label: 'name', value: 'code', disabled: 'readonly' }
+  }
+}
+```
+
+选项分组、自定义选项内容、跨字段禁用逻辑等场景改用字段 Slot，直接发挥 Element UI 的 `el-option-group`、`el-option` 和原生属性能力：
+
+```ts
+{
+  fieldKey: 'cityCode',
+  type: 'slot',
+  component: {
+    renderer: 'city-select',
+    props: { clearable: true, filterable: true },
+    listeners: {
+      change({ row }, value) {
+        console.log('城市变化', row, value)
+      }
+    }
+  }
+}
+```
+
+```vue
+<template #city-select="{ row, value, setValue, component }">
+  <el-select
+    :value="value"
+    v-bind="component.props"
+    v-on="component.listeners"
+    @input="setValue"
+  >
+    <el-option-group
+      v-for="group in cityGroups"
+      :key="group.name"
+      :label="group.name"
+    >
+      <el-option
+        v-for="city in group.options"
+        :key="city.code"
+        :label="city.name"
+        :value="city.code"
+        :disabled="city.disabled || city.country !== row.country"
+      >
+        <span>{{ city.name }}</span>
+        <small>{{ city.code }}</small>
+      </el-option>
+    </el-option-group>
+  </el-select>
+</template>
+```
+
+`setValue` 负责按当前 `fieldKey` 回写；只有显式绑定 `v-on="component.listeners"` 时，配置 listener 才会接收 Slot 内组件事件。FormTable 不增加 option-group 配置层，也不接管 Element UI 的选项 Slot。
+
 ### Upload 接入
 
 `el-upload` 不采用普通字段的 `value/input` 协议，还需要上传触发内容、`file-list`、生命周期回调和请求策略，因此不作为内置 `type`。根据封装程度选择：

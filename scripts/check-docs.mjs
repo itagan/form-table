@@ -37,6 +37,7 @@ const requiredPublicApiNames = [
   'FormTable',
   'FormTablePlugin',
   'createFormTable',
+  'createFormTableField',
   'defineFormTableColumns',
   'update:tableData',
   'field-change',
@@ -141,7 +142,7 @@ const publicEntrySource = fs.readFileSync(
   path.join(repositoryRoot, 'packages/form-table/src/index.ts'),
   'utf8'
 )
-for (const runtimeExport of ['FormTable', 'FormTablePlugin', 'createFormTable', 'defineFormTableColumns']) {
+for (const runtimeExport of ['FormTable', 'FormTablePlugin', 'createFormTable', 'createFormTableField', 'defineFormTableColumns']) {
   if (!publicEntrySource.includes(runtimeExport)) {
     errors.push(`packages/form-table/src/index.ts: 缺少运行时导出 ${runtimeExport}`)
   }

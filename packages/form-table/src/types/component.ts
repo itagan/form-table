@@ -52,15 +52,24 @@ export interface FormTableElementFormRef {
   clearValidate?: (fieldProps?: string | string[]) => void
 }
 
-export interface FormTableElementTableRef {
+export interface FormTableElementTableRef<TRow extends TableRow = TableRow> {
+  clearSelection?: () => void
+  toggleRowSelection?: (row: TRow, selected?: boolean) => void
+  toggleAllSelection?: () => void
+  setCurrentRow?: (row?: TRow) => void
+  toggleRowExpansion?: (row: TRow, expanded?: boolean) => void
+  clearSort?: () => void
+  clearFilter?: () => void
+  doLayout?: () => void
+  sort?: (prop: string, order: 'ascending' | 'descending') => void
   [key: string]: FormTableValue
 }
 
-export interface FormTableExpose {
+export interface FormTableExpose<TRow extends TableRow = TableRow> {
   validate: (callback?: (valid: boolean, fields?: FormTableValue) => void) => Promise<boolean>
   clearValidate: (fieldProps?: string | string[]) => void
   getFormRef: () => FormTableElementFormRef | null
-  getTableRef: () => FormTableElementTableRef | null
+  getTableRef: () => FormTableElementTableRef<TRow> | null
 }
 
 export type FormTableComponent<TRow extends TableRow = TableRow> = DefineComponent<
@@ -68,7 +77,7 @@ Omit<FormTableProps<TRow>, 'tableData'> & (
   | { value: TRow[], tableData?: TRow[] }
   | { tableData: TRow[], value?: TRow[] }
 ),
-FormTableExpose,
+FormTableExpose<TRow>,
 Record<string, never>,
 Record<string, never>,
 Record<string, never>,
