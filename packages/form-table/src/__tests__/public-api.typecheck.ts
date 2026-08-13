@@ -13,21 +13,19 @@ import FormTable, {
   type FormTableElementColumn,
   type FormTableEmits,
   type FormTableExpose,
-  type FormTableFieldHint,
+  type FormTableHintValue,
   type FormTableFieldPath,
   type FormTableFieldHintFormatter,
   type FormTableFilterChangePayload,
   type FormTableDefaultFieldHint,
   type FormTableHeaderSlotContext,
-  type FormTableHint,
-  type FormTableHintConfig,
+  type FormTableHintMode,
+  type FormTableHintTargets,
   type FormTableHintOptions,
   type FormTableProps,
-  type FormTableResolvedFieldContext,
   type FormTableSortChangePayload,
   type LayoutColumnConfig,
   type PlainColumnConfig,
-  type ResolvedFormTableHint,
   type ResolvedHeaderConfig,
   type TableRow
 } from '../index'
@@ -49,23 +47,13 @@ void unsupportedUploadBuiltin
 
 const CustomInput: Component = { name: 'CustomInput' }
 const AlternativeInput: Component = { name: 'AlternativeInput' }
-const completeValueHint: FormTableHint = '完整字段值'
-const disabledFieldHint: FormTableFieldHint = false
+const completeValueHint: FormTableHintValue = '完整字段值'
+const disabledFieldHint: FormTableHintValue = false
 void disabledFieldHint
-// @ts-expect-error 字段不再使用 true 强制 formatter。
-const invalidFormattedFieldHint: FormTableFieldHint = true
-// @ts-expect-error 表头使用的显式 FormTableHint 不接受 true。
-const invalidExplicitHint: FormTableHint = true
-const customValueHint: FormTableHintConfig = { content: '自行展示', behavior: 'custom' }
-const resolvedValueHint: ResolvedFormTableHint = { content: '自行展示', behavior: 'custom' }
-const resolvedContextHint: FormTableResolvedFieldContext['hint'] = resolvedValueHint
-const objectValueHint: FormTableHint = { content: '自动展示' }
-// @ts-expect-error Hint content 必须是字符串。
-const invalidHintContent: FormTableHint = { content: 123 }
-// @ts-expect-error Hint behavior 只接受 auto 或 custom。
-const invalidHintBehavior: FormTableHint = { content: '错误配置', behavior: 'invalid' }
-// @ts-expect-error 旧 ownership API 不再接受。
-const legacyHintOwnership: FormTableHint = { content: '旧配置', ownership: 'custom' }
+const disabledHintMode: FormTableHintMode = false
+const fieldHintTargets: FormTableHintTargets = 'field'
+// @ts-expect-error Hint 不再接受配置对象。
+const invalidObjectHint: FormTableHintValue = { content: '自动展示' }
 const rows: TableRow[] = [{ name: 'Alice', profile: { city: '杭州' } }]
 
 interface PurchaseRow {
@@ -239,7 +227,7 @@ const columns: ColumnConfig[] = [{
       {
         fieldKey: 'actions',
         type: 'slot',
-        hint: ({ row }) => ({ content: String(row.name || ''), behavior: 'custom' }),
+        hint: ({ row }) => String(row.name || ''),
         component: {
           renderer: 'actions',
           props: ({ row }) => ({ disabled: Boolean(row.locked) })
@@ -248,15 +236,9 @@ const columns: ColumnConfig[] = [{
     ]
   }]
 }]
-void customValueHint
-void invalidFormattedFieldHint
-void invalidExplicitHint
-void resolvedValueHint
-void resolvedContextHint
-void objectValueHint
-void invalidHintContent
-void invalidHintBehavior
-void legacyHintOwnership
+void disabledHintMode
+void fieldHintTargets
+void invalidObjectHint
 
 const cellSlotColumn: CellSlotColumnConfig = {
   key: 'actions-column',
@@ -354,7 +336,8 @@ const props: FormTableProps = {
   tableProps: { border: true },
   hintOptions: {
     mode: 'tooltip',
-    props: { placement: 'top', openDelay: 200 }
+    targets: 'all',
+    tooltipProps: { placement: 'top', openDelay: 200 }
   }
 }
 const functionRowKeyProps: FormTableProps<PurchaseRow> = {
@@ -373,7 +356,8 @@ const legacyRowKeyProps: FormTableProps = {
 const titleHintOptions: FormTableHintOptions = { mode: 'title' }
 const tooltipHintOptions: FormTableHintOptions = {
   mode: 'tooltip',
-  props: { placement: 'bottom' }
+  targets: 'header',
+  tooltipProps: { placement: 'bottom' }
 }
 const typedFieldFormatter: FormTableFieldHintFormatter<PurchaseRow> = ({ value, row }) => (
   `${row.name}:${String(value)}`
@@ -393,8 +377,9 @@ const legacyFieldHintOptions: FormTableHintOptions<PurchaseRow> = {
 }
 void legacyFieldHintOptions
 void typedHintOptions
-// @ts-expect-error title 模式不接受 Tooltip 属性。
-const invalidTitleHintOptions: FormTableHintOptions = { mode: 'title', props: {} }
+const disabledHintOptions: FormTableHintOptions = { mode: false }
+// @ts-expect-error 旧 props 入口不再接受。
+const invalidTooltipProps: FormTableHintOptions = { mode: 'tooltip', props: {} }
 const legacyHintModeProps: FormTableProps = {
   tableData: rows,
   columns,
@@ -404,12 +389,13 @@ const legacyHintModeProps: FormTableProps = {
 const legacyHintTooltipProps: FormTableProps = {
   tableData: rows,
   columns,
-  // @ts-expect-error hintTooltipProps 已收敛到 hintOptions.props。
+  // @ts-expect-error hintTooltipProps 已收敛到 hintOptions.tooltipProps。
   hintTooltipProps: { placement: 'top' }
 }
 void titleHintOptions
 void tooltipHintOptions
-void invalidTitleHintOptions
+void disabledHintOptions
+void invalidTooltipProps
 void legacyHintModeProps
 void legacyHintTooltipProps
 const component: Component = FormTable
@@ -551,6 +537,7 @@ void headerContext.columnIndex
 void headerContext.columnConfig.key
 const resolvedHeader: ResolvedHeaderConfig = headerContext.header
 void resolvedHeader.props
+// @ts-expect-error 表头 Slot 不再暴露解析后的 Hint。
 void resolvedHeader.hint
 // @ts-expect-error header slot column configuration is read-only.
 headerContext.columnConfig.label = '新表头'

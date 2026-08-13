@@ -2,8 +2,7 @@ import type { Component } from 'vue'
 import type {
   ComponentProps,
   DynamicValue,
-  FormTableFieldHint,
-  FormTableHint,
+  FormTableHintValue,
   FormTableTableProps,
   FormTableValue,
   TableRow
@@ -12,26 +11,25 @@ import type {
   FormTableColumnContext,
   FormTableFieldContext,
   FormTableFieldRenderContext,
-  FormTableResolvedFieldContext,
   FormTableRowContext
 } from './context'
 
 /** 根据基础字段上下文统一生成快捷 Hint 内容。 */
 export type FormTableFieldHintFormatter<TRow extends TableRow = TableRow> = (
   context: FormTableFieldRenderContext<TRow>
-) => string | null | undefined
+) => FormTableHintValue
 /** 未显式提供内容的字段所继承的默认 Hint。 */
 export type FormTableDefaultFieldHint<TRow extends TableRow = TableRow> =
   | boolean
   | FormTableFieldHintFormatter<TRow>
-/** FormTable 统一提示策略；Tooltip 属性仅在对应模式下有效。 */
-export type FormTableHintOptions<TRow extends TableRow = TableRow> = {
-  /** false/未配置关闭；true 默认字符串化；函数统一格式化；不影响 headerHint。 */
+/** FormTable 自动提示策略；Tooltip 属性仅在对应模式下有效。 */
+export interface FormTableHintOptions<TRow extends TableRow = TableRow> {
+  mode?: false | 'title' | 'tooltip'
+  targets?: 'field' | 'header' | 'all'
+  /** false/未配置关闭默认字段内容；true 默认字符串化；函数统一格式化。 */
   field?: FormTableDefaultFieldHint<TRow>
-} & (
-  | { mode?: 'title' }
-  | { mode: 'tooltip', props?: ComponentProps }
-)
+  tooltipProps?: ComponentProps
+}
 /** 字段组件事件监听器签名，第一个参数固定为字段上下文。 */
 export type FormTableFieldListener<TRow extends TableRow = TableRow> = (
   context: FormTableFieldContext<TRow>,
@@ -63,16 +61,16 @@ export interface FieldModelConfig {
 
 /** 根据当前字段所在行同步选择实际渲染组件。 */
 export type FieldRendererResolver<TRow extends TableRow = TableRow> = (
-  context: FormTableResolvedFieldContext<TRow>
+  context: FormTableFieldRenderContext<TRow>
 ) => string | Component | undefined
 
 export interface FieldComponentConfig<TRow extends TableRow = TableRow> {
   renderer?: string | Component
   resolveRenderer?: FieldRendererResolver<TRow>
-  props?: DynamicValue<ComponentProps, FormTableResolvedFieldContext<TRow>>
+  props?: DynamicValue<ComponentProps, FormTableFieldRenderContext<TRow>>
   listeners?: Record<string, FormTableFieldListener<TRow>>
-  options?: DynamicValue<FormItemOption[], FormTableResolvedFieldContext<TRow>>
-  optionProps?: DynamicValue<OptionPropsConfig, FormTableResolvedFieldContext<TRow>>
+  options?: DynamicValue<FormItemOption[], FormTableFieldRenderContext<TRow>>
+  optionProps?: DynamicValue<OptionPropsConfig, FormTableFieldRenderContext<TRow>>
   model?: FieldModelConfig | boolean
 }
 
@@ -89,7 +87,7 @@ interface BaseFormItemConfig<TRow extends TableRow = TableRow> {
   visible?: DynamicValue<boolean, FormTableFieldRenderContext<TRow>>
   colProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext<TRow>>
   formItemProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext<TRow>>
-  hint?: DynamicValue<FormTableFieldHint | null | undefined, FormTableFieldRenderContext<TRow>>
+  hint?: DynamicValue<FormTableHintValue, FormTableFieldRenderContext<TRow>>
 }
 
 export interface BuiltinFormItemConfig<TRow extends TableRow = TableRow> extends BaseFormItemConfig<TRow> {
@@ -128,7 +126,7 @@ interface BaseColumnConfig<TRow extends TableRow = TableRow> {
   label: string
   headerSlot?: string
   headerProps?: DynamicValue<ComponentProps, FormTableColumnContext<TRow>>
-  headerHint?: DynamicValue<FormTableHint | null | undefined, FormTableColumnContext<TRow>>
+  headerHint?: DynamicValue<FormTableHintValue, FormTableColumnContext<TRow>>
   visible?: DynamicValue<boolean, FormTableColumnContext<TRow>>
   props?: DynamicValue<ComponentProps, FormTableColumnContext<TRow>>
 }

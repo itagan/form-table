@@ -104,7 +104,6 @@ describe('FormTable slot rendering', () => {
     expect(Object.keys(componentPropsResolver.mock.calls[0][0]).sort()).toEqual([
       'columnConfig',
       'fieldKey',
-      'hint',
       'index',
       'itemConfig',
       'row',
@@ -285,7 +284,7 @@ describe('FormTable slot rendering', () => {
       scopedSlots: {
         'school-header': `
           <span class="school-header">
-            {{ props.columnConfig.key }}|{{ props.column === undefined }}|{{ props.header.hint.content }}|{{ props.header.hint.behavior }}
+            {{ props.columnConfig.key }}|{{ props.column === undefined }}|{{ props.header.hint === undefined }}
           </span>
         `
       }
@@ -293,20 +292,20 @@ describe('FormTable slot rendering', () => {
     await wrapper.vm.$nextTick()
 
     const header = wrapper.find('.form-table-column-header')
-    expect(wrapper.find('.school-header').text()).toBe('school-column|true|学校完整说明（1）|auto')
+    expect(wrapper.find('.school-header').text()).toBe('school-column|true|true')
     expect(wrapper.find('.school-header').classes()).not.toContain('resolved-header-1')
     expect(wrapper.find('.school-header').attributes('aria-label')).toBeUndefined()
     expect(wrapper.find('.school-header').attributes('title')).toBeUndefined()
     expect(header.classes()).toContain('resolved-header-1')
     expect(header.attributes('aria-label')).toBe('学校说明')
-    expect(header.attributes('title')).toBe('学校完整说明（1）')
+    expect(header.attributes('title')).toBeUndefined()
     expect(headerProps).toHaveBeenCalledTimes(1)
-    expect(headerHint).toHaveBeenCalledTimes(1)
+    expect(headerHint).not.toHaveBeenCalled()
 
     await wrapper.setProps({ tableData: [{ name: 'Alice' }, { name: 'Bob' }] })
     await wrapper.vm.$nextTick()
-    expect(header.attributes('title')).toBe('学校完整说明（2）')
-    expect(headerHint).toHaveBeenCalledTimes(2)
+    expect(header.attributes('title')).toBeUndefined()
+    expect(headerHint).not.toHaveBeenCalled()
     wrapper.destroy()
   })
 })

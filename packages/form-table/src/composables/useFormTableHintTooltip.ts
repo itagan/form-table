@@ -1,4 +1,4 @@
-import { nextTick, onBeforeUnmount, onUpdated, watch } from 'vue'
+import { nextTick, onBeforeUnmount, watch } from 'vue'
 import type { Ref } from 'vue'
 import {
   FORM_TABLE_HINT_ATTRIBUTE,
@@ -10,8 +10,7 @@ import type { FormTableHintTooltipRef } from '../utils/elementTooltipAdapter'
 export type { FormTableHintTooltipRef } from '../utils/elementTooltipAdapter'
 
 interface UseFormTableHintTooltipOptions {
-  enabled: Readonly<Ref<boolean>>
-  containerRef: Ref<HTMLElement | null>
+  containerRef: Readonly<Ref<HTMLElement | null>>
   tooltipRef: Ref<FormTableHintTooltipRef | null>
   content: Ref<string>
 }
@@ -38,6 +37,8 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
   let describedState: DescribedElementState | null = null
   let escapeSuppressed = false
   let focusSuppressedByPointer = false
+  let observedContainer: HTMLElement | null = null
+  let observer: MutationObserver | null = null
 
   const isOwnedByContainer = (element: HTMLElement | null): element is HTMLElement => {
     const container = options.containerRef.value
@@ -121,7 +122,7 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
     describeElement(ariaTarget)
 
     void nextTick(() => {
-      if (activeTarget !== target || activeContent !== content || !options.enabled.value) return
+      if (activeTarget !== target || activeContent !== content) return
       if (referenceTarget !== target) {
         referenceTarget = target
         tooltip.showFor(target)
@@ -132,7 +133,7 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
   }
 
   const syncActiveTarget = (forcePositionUpdate = false) => {
-    if (!options.enabled.value || escapeSuppressed) {
+    if (escapeSuppressed) {
       hideActiveTooltip()
       return
     }
@@ -207,32 +208,50 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
     hideActiveTooltip()
   }
 
-  watch(options.enabled, enabled => {
-    if (!enabled) {
-      hoveredTarget = null
-      focusedTarget = null
-      focusAriaTarget = null
-      escapeSuppressed = false
-      focusSuppressedByPointer = false
-      hideActiveTooltip()
-    }
-  })
+  const removeListeners = () => {
+    if (!observedContainer) return
+    observedContainer.removeEventListener('mouseover', handleMouseOver)
+    observedContainer.removeEventListener('mouseout', handleMouseOut)
+    observedContainer.removeEventListener('focusin', handleFocusIn)
+    observedContainer.removeEventListener('focusout', handleFocusOut)
+    observedContainer.removeEventListener('keydown', handleKeyDown)
+    observedContainer = null
+    observer?.disconnect()
+    observer = null
+  }
 
-  // 动态 Hint、显隐和行删除可能在没有新 DOM 事件时改变当前目标。
-  onUpdated(() => {
-    if (hoveredTarget || focusedTarget) syncActiveTarget(true)
-  })
+  const addListeners = (container: HTMLElement) => {
+    observedContainer = container
+    container.addEventListener('mouseover', handleMouseOver)
+    container.addEventListener('mouseout', handleMouseOut)
+    container.addEventListener('focusin', handleFocusIn)
+    container.addEventListener('focusout', handleFocusOut)
+    container.addEventListener('keydown', handleKeyDown)
+    observer = new MutationObserver(() => {
+      if (hoveredTarget || focusedTarget) syncActiveTarget(true)
+    })
+    observer.observe(container, {
+      attributes: true,
+      attributeFilter: [FORM_TABLE_HINT_ATTRIBUTE],
+      childList: true,
+      subtree: true
+    })
+  }
+
+  watch(options.containerRef, (container) => {
+    removeListeners()
+    hoveredTarget = null
+    focusedTarget = null
+    focusAriaTarget = null
+    escapeSuppressed = false
+    focusSuppressedByPointer = false
+    hideActiveTooltip()
+    if (container) addListeners(container)
+  }, { immediate: true, flush: 'post' })
 
   onBeforeUnmount(() => {
     hideActiveTooltip()
+    removeListeners()
     tooltip.destroy()
   })
-
-  return {
-    handleMouseOver,
-    handleMouseOut,
-    handleFocusIn,
-    handleFocusOut,
-    handleKeyDown
-  }
 }

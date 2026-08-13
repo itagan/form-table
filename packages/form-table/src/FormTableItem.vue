@@ -44,7 +44,7 @@ const parentSlots = inject<FormTableSlots>(FORM_TABLE_SLOTS_KEY, {})
 /** 字段定位、校验路径和安全写回由上下文组合式 API 统一维护。 */
 const {
   propPath,
-  resolvedContext,
+  runtimeContext,
   resolvedFormItemProps,
   fieldContext
 } = useFormTableFieldContext({
@@ -55,7 +55,7 @@ const {
 /** 组件选择、动态属性、选项和监听器统一归一化后再交给渲染层。 */
 const { resolvedComponent } = useResolvedFieldComponent({
   getConfig: () => props.config,
-  resolvedContext,
+  runtimeContext,
   fieldContext
 })
 

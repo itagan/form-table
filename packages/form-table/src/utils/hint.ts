@@ -1,9 +1,7 @@
 import type {
   ComponentProps,
-  FormTableFieldHint,
-  FormTableHint,
   FormTableHintMode,
-  ResolvedFormTableHint,
+  FormTableHintValue,
   TableRow
 } from '../types/base'
 import type { FormTableDefaultFieldHint } from '../types/config'
@@ -14,25 +12,17 @@ export const FORM_TABLE_HINT_ATTRIBUTE = 'data-form-table-hint'
 /** 标识事件委托所属的 FormTable 根实例，隔离嵌套表格。 */
 export const FORM_TABLE_HINT_ROOT_ATTRIBUTE = 'data-form-table-hint-root'
 
-/** 将字符串和对象 Hint 统一为 Slot 与自动展示逻辑共享的稳定结构。 */
-export function resolveFormTableHint(
-  hint: FormTableHint | null | undefined
-): ResolvedFormTableHint | null {
-  if (hint === null || hint === undefined || hint === '') return null
-  if (typeof hint === 'string') return { content: hint, behavior: 'auto' }
-  if (hint.content === '') return null
-  return {
-    content: hint.content,
-    behavior: hint.behavior || 'auto'
-  }
+/** 将公开 Hint 值归一化为自动展示使用的字符串。 */
+export function resolveFormTableHint(hint: FormTableHintValue): string | null {
+  return typeof hint === 'string' && hint !== '' ? hint : null
 }
 
 /** 字段非空内容覆盖默认值；false 关闭；未声明或空内容回退表级默认值。 */
 export function resolveFormTableFieldHint<TRow extends TableRow = TableRow>(
-  hint: FormTableFieldHint | null | undefined,
+  hint: FormTableHintValue,
   context: FormTableFieldRenderContext<TRow>,
   defaultHint?: FormTableDefaultFieldHint<TRow>
-): ResolvedFormTableHint | null {
+): string | null {
   if (hint === false) return null
   const explicitHint = resolveFormTableHint(hint)
   if (explicitHint) return explicitHint
@@ -53,11 +43,11 @@ interface ApplyHintTargetOptions {
  */
 export function applyHintTargetProps(
   sourceProps: ComponentProps,
-  hint: ResolvedFormTableHint | null,
+  hint: string | null,
   mode: FormTableHintMode,
   options: ApplyHintTargetOptions = {}
 ): ComponentProps {
-  if (hint === null || hint.behavior === 'custom') return sourceProps
+  if (hint === null || mode === false) return sourceProps
 
   const targetProps = { ...sourceProps }
   delete targetProps.title
@@ -66,7 +56,7 @@ export function applyHintTargetProps(
   if (mode === 'tooltip') {
     const tooltipProps: ComponentProps = {
       ...targetProps,
-      [FORM_TABLE_HINT_ATTRIBUTE]: hint.content
+      [FORM_TABLE_HINT_ATTRIBUTE]: hint
     }
     if (options.focusable && !Object.prototype.hasOwnProperty.call(sourceProps, 'tabindex')) {
       tooltipProps.tabindex = 0
@@ -76,6 +66,6 @@ export function applyHintTargetProps(
 
   return {
     ...targetProps,
-    title: hint.content
+    title: hint
   }
 }

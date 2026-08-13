@@ -5,7 +5,7 @@ import type {
   FormItemConfig,
   FormItemOption,
   FormTableFieldContext,
-  FormTableResolvedFieldContext,
+  FormTableFieldRenderContext,
   OptionPropsConfig,
   ResolvedComponentConfig,
   TableRow
@@ -14,7 +14,7 @@ import { resolveDynamicValue } from '../utils/dynamic'
 
 interface ResolvedFieldComponentOptions<TRow extends TableRow> {
   getConfig: () => FormItemConfig<TRow>
-  resolvedContext: ComputedRef<FormTableResolvedFieldContext<TRow>>
+  runtimeContext: ComputedRef<FormTableFieldRenderContext<TRow>>
   fieldContext: ComputedRef<FormTableFieldContext<TRow>>
 }
 
@@ -27,7 +27,7 @@ export function useResolvedFieldComponent<TRow extends TableRow = TableRow>(
 ) {
   const resolveRenderer = (
     config: FormItemConfig<TRow>,
-    context: FormTableResolvedFieldContext<TRow>
+    context: FormTableFieldRenderContext<TRow>
   ) => {
     if (config.type === 'component') {
       return config.component.resolveRenderer?.(context)
@@ -39,7 +39,7 @@ export function useResolvedFieldComponent<TRow extends TableRow = TableRow>(
 
   const resolvedComponent = computed<ResolvedComponentConfig>(() => {
     const config = options.getConfig()
-    const context = options.resolvedContext.value
+    const context = options.runtimeContext.value
     const component = config.component
     const listeners = component?.listeners || {}
 
