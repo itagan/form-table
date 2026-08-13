@@ -4,7 +4,7 @@ import type {
   FormTableFieldContext,
   FormTableHintModeContext,
   FormTableDefaultFieldHintContext,
-  FormTableResolvedFieldContext,
+  FormTableHintTargetsContext,
   FormTableRowContext,
   FormTableUpdateApi,
   FormTableValue,
@@ -13,6 +13,7 @@ import type {
 import {
   FORM_TABLE_DEFAULT_FIELD_HINT_KEY,
   FORM_TABLE_HINT_MODE_KEY,
+  FORM_TABLE_HINT_TARGETS_KEY,
   FORM_TABLE_UPDATE_KEY
 } from '../types'
 import {
@@ -39,6 +40,7 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
   /** 注入缺失时字段仍可只读渲染，更新助手退化为空操作。 */
   const updateApi = inject<FormTableUpdateApi<TRow>>(FORM_TABLE_UPDATE_KEY)
   const hintMode = inject<FormTableHintModeContext>(FORM_TABLE_HINT_MODE_KEY, ref<'title'>('title'))
+  const hintTargets = inject<FormTableHintTargetsContext>(FORM_TABLE_HINT_TARGETS_KEY, ref<'field'>('field'))
   const defaultFieldHint = inject<FormTableDefaultFieldHintContext<TRow>>(
     FORM_TABLE_DEFAULT_FIELD_HINT_KEY,
     ref(undefined)
@@ -61,20 +63,11 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
 
   /** Hint 与其他动态字段配置共享上下文，并只在当前响应式周期求值一次。 */
   const resolvedHint = computed(() => {
+    if (hintMode.value === false || hintTargets.value === 'header') return null
     const config = options.getConfig()
     const source = resolveDynamicValue(config.hint, runtimeContext.value)
     return resolveFormTableFieldHint(source, runtimeContext.value, defaultFieldHint.value)
   })
-
-  /** 组件配置、监听器和 Slot 共享 Hint 求值后的稳定上下文。 */
-  const resolvedContext = computed<FormTableResolvedFieldContext<TRow>>(() => extendLazyContext(
-    runtimeContext.value,
-    {
-      get hint() {
-        return resolvedHint.value
-      }
-    }
-  ))
 
   /**
    * FormTable 始终掌控 form-item 的 prop；自动 Hint 覆盖透传 title，
@@ -94,7 +87,7 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
    * 业务代码保存旧 context 后再调用 setValue，仍只会尝试更新原行和原字段。
    */
   const fieldContext = computed<FormTableFieldContext<TRow>>(() => {
-    const context = resolvedContext.value
+    const context = runtimeContext.value
     const targetRow = context.row as TRow
     const targetFieldKey = context.fieldKey
     return extendLazyContext(context, {
@@ -110,7 +103,6 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
   return {
     propPath,
     runtimeContext,
-    resolvedContext,
     resolvedFormItemProps,
     resolvedHint,
     fieldContext

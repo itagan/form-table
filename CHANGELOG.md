@@ -9,15 +9,15 @@
 - 原样透传 Element Table 的 `empty/append` 根级 Slot，并为排序、筛选、表头、单元格及选择事件补充公开类型、可运行示例和回归测试。
 - 新增 `createFormTable<TRow>()` 泛型组件工厂，使 `tableData`、列配置、rowKey、动态上下文和组件事件共享业务行类型，且不创建额外运行时组件。
 - 行更新按需校验 rowKey 身份，避免持续扫描整张表和配置树；互斥列模式与配置结构由公开联合类型约束。
-- `headerHint/hint` 使用 `{ content, behavior }` 表达自动或自定义处理方式；标准化 Hint 统一提供给 component 动态配置、listener、表头和字段 Slot。
+- `headerHint/hint` 收敛为动态字符串或关闭值；解析结果仅用于内部展示，不再传播给 component 动态配置、listener 或 Slot。
 - `hintOptions.field` 未配置或为 `false` 时无全局字段处理，`true` 默认字符串化，函数统一格式化；Item 不写或返回空值时继承、`false` 关闭、非空内容覆盖。
 - 单实例 Tooltip 增加嵌套 FormTable 隔离、表头键盘入口、Escape 关闭和 token 安全的 `aria-describedby` 管理，并将 Element UI 私有能力收口到版本适配层。
-- 新增独立 Hint 多场景 Demo，并将专题文档收敛为 `/features/hint`：按记忆规则、解析矩阵、全局格式化、title/Tooltip、自定义展示、键盘 ARIA 和能力边界组织，可直接查阅默认值、字段覆盖及原始 title 恢复规则。
+- 新增独立 Hint 多场景 Demo，并将专题文档收敛为 `/features/hint`：覆盖作用范围、全局格式化、关闭、title/Tooltip、键盘 ARIA 和 Slot 自定义边界。
 - 新增可直接复制的常见操作列文档，覆盖末尾新增、当前行后插入、复制、删除、稳定行标识和校验清理；行列操作 Demo 同步改用 `cellSlot` 并增加后插按钮。
 - 安装文档仅保留 FormTable 的安装命令，并单独说明项目需要预先安装、注册及满足的 Vue 和 Element UI peer dependency 版本，以及低版本升级建议和 Vue 3 暂不支持的兼容边界；经版本矩阵验证后，最低版本调整为 Vue `2.7.1` 和 Element UI `2.4.9`，最佳建议版本明确为 Vue 2 生态最终版本 Vue `2.7.16` + Element UI `2.15.14`。
 - 新增与 `children` 互斥的列级 `cellSlot`，用于操作列和纯展示组合单元格；不需要虚拟 `fieldKey`，也不创建 Row/Item 表单包装节点，高级、议程和费用明细示例已同步迁移。
 - 外层提示 API 收敛为语义内容与表级策略两层：默认表头、表头 Slot 与字段继续分别使用 `headerHint/hint`，根级 `hintOptions` 统一选择原生 title 或表级单实例 Tooltip；各层 props 中的 title 继续按目标节点透传。
-- 默认表头和表头 Slot 统一由 `.form-table-column-header` 包装并自动应用 `headerProps/headerHint`；Slot 保留已解析的 `header.props/header.hint` scope 供读取兼容，不再需要自行绑定提示或创建 Tooltip。
+- 默认表头和表头 Slot 统一由 `.form-table-column-header` 包装并应用 `headerProps`；`headerHint` 仅在目标范围包含表头时启用，Slot scope 只保留仍有用途的 `header.props`。
 - 优化动态 Column 渲染身份：唯一 `column.key` 在增删、显隐和同顺序配置替换时保持稳定，仅在已有列相对顺序变化时整体换代以同步 Element UI 列顺序。
 - 补充动态行列优化说明，明确 `rowKey`、`column.key`、`item.key` 的职责，以及受控数据立即回写、后端保存可延迟的边界。
 - 动态上下文改为按属性惰性建立响应依赖，单字段更新不再让其他行中仅依赖当前行的配置重新求值；同步连续更新同时复用 `rowKey` 索引。

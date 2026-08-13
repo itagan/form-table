@@ -1,10 +1,5 @@
 import type { Component, DefineComponent } from 'vue'
-import type {
-  ComponentProps,
-  FormTableValue,
-  ResolvedFormTableHint,
-  TableRow
-} from './base'
+import type { ComponentProps, FormTableValue, TableRow } from './base'
 import type {
   FieldModelConfig,
   FormItemOption,
@@ -26,10 +21,7 @@ export interface ResolvedComponentConfig {
   model?: FieldModelConfig | boolean
 }
 
-export interface ResolvedHeaderConfig {
-  props: ComponentProps
-  hint: ResolvedFormTableHint | null
-}
+export interface ResolvedHeaderConfig { props: ComponentProps }
 
 export interface FormTableSlotContext<TRow extends TableRow = TableRow> extends FormTableFieldContext<TRow> {
   propPath: string

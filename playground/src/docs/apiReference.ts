@@ -25,8 +25,10 @@ export const apiGroups: ApiGroup[] = [
       { path: 'rowKey', type: 'string | ((row) => unknown)', defaultValue: '—', target: 'FormTable / el-table', description: '稳定行身份；异步更新期间用于重新定位原行。' },
       { path: 'formProps', type: 'Record<string, unknown>', defaultValue: '{}', target: 'el-form', description: '透传 Element Form 属性。' },
       { path: 'tableProps', type: 'Record<string, unknown>', defaultValue: '{}', target: 'el-table', description: '透传 Element Table 属性，不包含 rowKey。' },
-      { path: 'hintOptions', type: 'FormTableHintOptions', defaultValue: "{ mode: 'title' }", target: '表头与字段 Hint', description: '整表统一选择展示模式，并可配置字段默认策略。' },
+      { path: 'hintOptions', type: 'FormTableHintOptions', defaultValue: "{ mode: 'title', targets: 'field' }", target: '字段 / 表头 Hint', description: '整表选择关闭、原生 title 或单实例 Tooltip。' },
+      { path: 'hintOptions.targets', type: "'field' | 'header' | 'all'", defaultValue: "'field'", target: 'Hint 作用范围', description: '排除的目标不会求值或生成标记。' },
       { path: 'hintOptions.field', type: 'boolean | FormTableFieldHintFormatter', defaultValue: 'false', target: '未声明或空 hint 的字段', description: 'false/未配置关闭；true 默认字符串化；函数统一格式化。', context: 'FieldContext' },
+      { path: 'hintOptions.tooltipProps', type: 'Record<string, unknown>', defaultValue: '{}', target: '共享 el-tooltip', description: "仅 mode: 'tooltip' 生效；整表目标共享同一实例和属性。" },
       { path: 'loading', type: 'boolean', defaultValue: 'false', target: 'el-table v-loading', description: '表格加载状态。' }
     ]
   },
@@ -39,7 +41,7 @@ export const apiGroups: ApiGroup[] = [
       { path: 'columns[].label', type: 'string', defaultValue: "''", target: 'el-table-column.label', description: '默认表头文本。' },
       { path: 'columns[].props', type: 'Object | (context) => Object', defaultValue: '{}', target: 'el-table-column', description: '宽度、对齐、fixed、type 等原生列属性；单独使用时为 PlainColumnConfig。', context: 'ColumnContext' },
       { path: 'columns[].headerProps', type: 'Object | (context) => Object', defaultValue: '{}', target: '默认/Slot 表头包装节点', description: 'title、class、style、aria-*；renderHeader 接管时不自动应用。', context: 'ColumnContext' },
-      { path: 'columns[].headerHint', type: 'FormTableHint | (context) => FormTableHint', defaultValue: '—', target: '默认/Slot 表头包装节点', description: "字符串默认由表格托管；behavior: 'custom' 时 FormTable 不处理展示。", context: 'ColumnContext' },
+      { path: 'columns[].headerHint', type: 'FormTableHintValue | (context) => FormTableHintValue', defaultValue: '—', target: '默认/Slot 表头包装节点', description: "动态字符串或 false；仅 targets: 'header'/'all' 时求值。", context: 'ColumnContext' },
       { path: 'columns[].headerSlot', type: 'string', defaultValue: '—', target: '表头 scoped Slot', description: '复杂表头、图标和交互内容。' },
       { path: 'columns[].visible', type: 'boolean | (context) => boolean', defaultValue: 'true', target: '列显隐', description: '控制当前列是否渲染。', context: 'ColumnContext' },
       { path: 'columns[].cellSlot', type: 'string', defaultValue: '—', target: '整格 scoped Slot', description: '直接渲染当前单元格，与 children 互斥且不要求 fieldKey。' },
@@ -61,7 +63,7 @@ export const apiGroups: ApiGroup[] = [
       { path: 'columns[].children[].children[].visible', type: 'boolean | (context) => boolean', defaultValue: 'true', target: '字段显隐', description: '按字段上下文控制渲染。', context: 'ItemContext' },
       { path: 'columns[].children[].children[].colProps', type: 'Object | (context) => Object', defaultValue: '{}', target: 'el-col', description: 'span、offset 等栅格属性。', context: 'ItemContext' },
       { path: 'columns[].children[].children[].formItemProps', type: 'Object | (context) => Object', defaultValue: '{}', target: 'el-form-item', description: 'label、rules 等；校验 prop 自动生成。', context: 'ItemContext' },
-      { path: 'columns[].children[].children[].hint', type: 'FormTableFieldHint | (context) => FormTableFieldHint', defaultValue: '继承 field', target: 'el-form-item / 字段配置', description: '空值继承、false 关闭、非空内容覆盖；对象可配置 behavior。', context: 'ItemContext' },
+      { path: 'columns[].children[].children[].hint', type: 'FormTableHintValue | (context) => FormTableHintValue', defaultValue: '继承 field', target: 'el-form-item / 字段配置', description: '空值继承、false 关闭、非空字符串覆盖。', context: 'ItemContext' },
       { path: 'columns[].children[].children[].component', type: 'ComponentConfig', defaultValue: '{}', target: '实际字段组件', description: '组件、绑定协议、属性、事件和选项。' }
     ]
   },
@@ -71,12 +73,12 @@ export const apiGroups: ApiGroup[] = [
     description: '以下 … 代表 columns[].children[].children[]，页面展示仍保留完整可复制路径。',
     entries: [
       { path: 'columns[].children[].children[].component.renderer', type: 'Component | string', defaultValue: '按 type', target: '字段组件 / Slot 名', description: 'component 模式为组件，slot 模式为具名 Slot。' },
-      { path: 'columns[].children[].children[].component.resolveRenderer', type: '(context) => Component | string', defaultValue: '—', target: '动态字段组件', description: '仅 component 模式，undefined 时回退 renderer。', context: 'ResolvedItemContext' },
+      { path: 'columns[].children[].children[].component.resolveRenderer', type: '(context) => Component | string', defaultValue: '—', target: '动态字段组件', description: '仅 component 模式，undefined 时回退 renderer。', context: 'ItemContext' },
       { path: 'columns[].children[].children[].component.model', type: 'true | false | ModelConfig', defaultValue: 'true', target: '值绑定协议', description: '默认 v-model、自定义 prop/event，或关闭自动绑定。' },
-      { path: 'columns[].children[].children[].component.props', type: 'Object | (context) => Object', defaultValue: '{}', target: '字段组件', description: '可读取标准化 hint，再显式映射给实际组件。', context: 'ResolvedItemContext' },
+      { path: 'columns[].children[].children[].component.props', type: 'Object | (context) => Object', defaultValue: '{}', target: '字段组件', description: '按当前字段上下文动态生成组件属性。', context: 'ItemContext' },
       { path: 'columns[].children[].children[].component.listeners', type: 'Record<string, Function>', defaultValue: '{}', target: '字段组件事件', description: '首参为 ActionContext，之后保持组件原始参数。', context: 'ActionContext + event args' },
-      { path: 'columns[].children[].children[].component.options', type: 'Option[] | (context) => Option[]', defaultValue: '[]', target: '选项型组件', description: 'select、radio、checkbox 等选项。', context: 'ResolvedItemContext' },
-      { path: 'columns[].children[].children[].component.optionProps', type: 'Object | (context) => Object', defaultValue: '—', target: '选项字段映射', description: '自定义 label、value、disabled、key 字段。', context: 'ResolvedItemContext' }
+      { path: 'columns[].children[].children[].component.options', type: 'Option[] | (context) => Option[]', defaultValue: '[]', target: '选项型组件', description: 'select、radio、checkbox 等选项。', context: 'ItemContext' },
+      { path: 'columns[].children[].children[].component.optionProps', type: 'Object | (context) => Object', defaultValue: '—', target: '选项字段映射', description: '自定义 label、value、disabled、key 字段。', context: 'ItemContext' }
     ]
   }
 ]
@@ -87,9 +89,9 @@ export const contextRows = [
   { location: 'columns[].cellSlot', context: 'FormTableCellSlotContext', fields: 'row, index, columnConfig, updateRow' },
   { location: 'columns[].children[].visible / props', context: 'RowContext', fields: 'ColumnContext + row, index, rowConfig' },
   { location: '…children[].visible / colProps / formItemProps / hint', context: 'ItemContext', fields: 'RowContext + fieldKey, value, itemConfig' },
-  { location: '…component.props / options / optionProps / resolveRenderer', context: 'ResolvedItemContext', fields: 'ItemContext + hint' },
-  { location: '…component.listeners[event]', context: 'ActionContext', fields: 'ResolvedItemContext + setValue, updateRow；后接原始事件参数' },
-  { location: 'type: slot 字段 Slot', context: 'FormTableSlotContext', fields: 'ActionContext + propPath, component, hint' }
+  { location: '…component.props / options / optionProps / resolveRenderer', context: 'ItemContext', fields: 'RowContext + fieldKey, value, itemConfig' },
+  { location: '…component.listeners[event]', context: 'ActionContext', fields: 'ItemContext + setValue, updateRow；后接原始事件参数' },
+  { location: 'type: slot 字段 Slot', context: 'FormTableSlotContext', fields: 'ActionContext + propPath, component' }
 ]
 
 export const renderModes = [
@@ -119,7 +121,7 @@ export const featureCards = [
   { title: '校验、清理与重置', path: '/form-table', description: '字段 rules、整表校验、清理状态和受控数据重置。', tags: ['rules', 'validate', 'clearValidate'] },
   { title: '动态显隐与配置', path: '/dynamic-slot-test', description: 'Column、Row、Item visible 与动态组件属性。', tags: ['visible', 'dynamic props'] },
   { title: '稳定身份与异步安全', path: '/row-column-operations', description: 'rowKey 与 Column、Row、Item key 的不同职责。', tags: ['rowKey', 'key', 'async'] },
-  { title: 'Hint 提示体系', path: '/hint-scenarios', description: '全局默认、字段覆盖、原生 title、单实例 Tooltip 和自定义展示边界。', tags: ['hint', 'headerHint', 'hintOptions', 'tooltip'] },
+  { title: 'Hint 提示体系', path: '/hint-scenarios', description: '作用范围、字段覆盖、关闭、原生 title 与按需单实例 Tooltip。', tags: ['hint', 'headerHint', 'hintOptions', 'tooltip'] },
   { title: '自定义表头', path: '/hint-scenarios', description: '表头文本、图标与 FormTable 自动 Hint 包装。', tags: ['headerSlot', 'headerHint'] },
   { title: 'cellSlot 列级单元格', path: '/cell-slot', description: '组合展示、状态、派生值、操作列，以及与字段 Slot 的边界。', tags: ['cellSlot', 'updateRow', 'rowKey'] },
   { title: '企业复杂组件接入', path: '/enterprise-components', description: '自定义 model、动态组件和复杂事件联动。', tags: ['component', 'model', 'listeners'] },

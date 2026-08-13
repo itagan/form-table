@@ -3,11 +3,7 @@ import type {
   FormItemConfig,
   RowConfig
 } from './config'
-import type {
-  FormTableValue,
-  ResolvedFormTableHint,
-  TableRow
-} from './base'
+import type { FormTableValue, TableRow } from './base'
 
 export interface FormTableTableContext<TRow extends TableRow = TableRow> {
   /** 当前受控表格数据，只读以避免动态配置直接修改 props。 */
@@ -37,13 +33,7 @@ export interface FormTableFieldRenderContext<TRow extends TableRow = TableRow> e
   itemConfig: Readonly<FormItemConfig<TRow>>
 }
 
-/** Hint 求值完成后提供给组件配置、监听器与 Slot 的字段上下文。 */
-export interface FormTableResolvedFieldContext<TRow extends TableRow = TableRow> extends FormTableFieldRenderContext<TRow> {
-  /** 当前字段已经标准化的 Hint；Hint 自身求值时不包含此属性。 */
-  hint: ResolvedFormTableHint | null
-}
-
-export interface FormTableFieldContext<TRow extends TableRow = TableRow> extends FormTableResolvedFieldContext<TRow> {
+export interface FormTableFieldContext<TRow extends TableRow = TableRow> extends FormTableFieldRenderContext<TRow> {
   /** 不可变地更新当前字段。 */
   setValue: (value: FormTableValue) => void
   /** 不可变地批量更新当前行，patch 的 key 支持字段路径。 */

@@ -3,11 +3,6 @@
     ref="containerRef"
     class="form-table-container"
     data-form-table-hint-root
-    @mouseover="handleMouseOver"
-    @mouseout="handleMouseOut"
-    @focusin="handleFocusIn"
-    @focusout="handleFocusOut"
-    @keydown="handleKeyDown"
   >
     <el-form
       ref="formRef"
@@ -36,12 +31,10 @@
         </template>
       </el-table>
     </el-form>
-    <el-tooltip
+    <FormTableHintTooltip
       v-if="isTooltipHintMode"
-      ref="hintTooltipRef"
-      v-bind="resolvedHintTooltipProps"
-      :content="hintTooltipContent"
-      :enterable="false"
+      ref="hintTooltipControllerRef"
+      :tooltip-props="props.hintOptions.tooltipProps"
     />
   </div>
 </template>
@@ -62,6 +55,7 @@ export default defineComponent({
 <script lang="ts" setup>
 import { computed, getCurrentInstance, provide, ref, useSlots } from 'vue'
 import FormTableColumn from './FormTableColumn.vue'
+import FormTableHintTooltip from './FormTableHintTooltip.vue'
 import type {
   ColumnConfig,
   ComponentProps,
@@ -70,6 +64,8 @@ import type {
   FormTableFieldChangePayload,
   FormTableHintMode,
   FormTableHintModeContext,
+  FormTableHintTargets,
+  FormTableHintTargetsContext,
   FormTableDefaultFieldHintContext,
   FormTableHintOptions,
   FormTableRowKey,
@@ -84,19 +80,16 @@ import {
   FORM_TABLE_CONTEXT_KEY,
   FORM_TABLE_DEFAULT_FIELD_HINT_KEY,
   FORM_TABLE_HINT_MODE_KEY,
+  FORM_TABLE_HINT_ROOT_KEY,
+  FORM_TABLE_HINT_TARGETS_KEY,
   FORM_TABLE_SLOTS_KEY,
   FORM_TABLE_UPDATE_KEY
 } from './types'
 import { useColumnIdentity } from './composables/useColumnIdentity'
 import { useControlledTableUpdate } from './composables/useControlledTableUpdate'
-import {
-  useFormTableHintTooltip
-} from './composables/useFormTableHintTooltip'
-import type { FormTableHintTooltipRef } from './composables/useFormTableHintTooltip'
 import { createTableContext } from './utils/dynamic'
 import {
   getVue2ComponentListeners,
-  resolveHintTooltipProps,
   resolveTableListeners,
   resolveTableProps
 } from './utils/formTableRuntimeAdapter'
@@ -116,7 +109,7 @@ const props = withDefaults(defineProps<{
   columns: () => [],
   formProps: () => ({}),
   tableProps: () => ({}),
-  hintOptions: () => ({ mode: 'title' }),
+  hintOptions: () => ({ mode: 'title', targets: 'field' }),
   loading: false
 })
 
@@ -130,34 +123,12 @@ const emit = defineEmits<{
 const formRef = ref<FormTableElementFormRef | null>(null)
 const tableRef = ref<FormTableElementTableRef | null>(null)
 const containerRef = ref<HTMLElement | null>(null)
-const hintTooltipRef = ref<FormTableHintTooltipRef | null>(null)
-const hintTooltipContent = ref('')
 
 /** hintOptions 是整个表格唯一的提示展示策略。 */
-const hintMode = computed<FormTableHintMode>(() => props.hintOptions.mode || 'title')
+const hintMode = computed<FormTableHintMode>(() => props.hintOptions.mode ?? 'title')
+const hintTargets = computed<FormTableHintTargets>(() => props.hintOptions.targets || 'field')
 const isTooltipHintMode = computed(() => hintMode.value === 'tooltip')
 const defaultFieldHint = computed(() => props.hintOptions.field)
-
-/** Tooltip 的内容、引用和显隐由内部统一控制，不允许透传属性改变。 */
-const resolvedHintTooltipProps = computed(() => {
-  const tooltipProps = props.hintOptions.mode === 'tooltip'
-    ? props.hintOptions.props || {}
-    : {}
-  return resolveHintTooltipProps(tooltipProps)
-})
-
-const {
-  handleMouseOver,
-  handleMouseOut,
-  handleFocusIn,
-  handleFocusOut,
-  handleKeyDown
-} = useFormTableHintTooltip({
-  enabled: isTooltipHintMode,
-  containerRef,
-  tooltipRef: hintTooltipRef,
-  content: hintTooltipContent
-})
 
 /** 保存父组件插槽和 Vue 2 组件实例，供后代组件及事件透传使用。 */
 const slots = useSlots()
@@ -194,6 +165,8 @@ provide(FORM_TABLE_CONTEXT_KEY, formTableContext)
 provide(FORM_TABLE_UPDATE_KEY, updateApi)
 provide(FORM_TABLE_SLOTS_KEY, slots as FormTableSlots)
 provide(FORM_TABLE_HINT_MODE_KEY, hintMode as FormTableHintModeContext)
+provide(FORM_TABLE_HINT_ROOT_KEY, containerRef)
+provide(FORM_TABLE_HINT_TARGETS_KEY, hintTargets as FormTableHintTargetsContext)
 provide(FORM_TABLE_DEFAULT_FIELD_HINT_KEY, defaultFieldHint as FormTableDefaultFieldHintContext)
 
 /**

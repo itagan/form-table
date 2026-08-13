@@ -14,7 +14,7 @@
         :form-props="{ size: 'small' }"
         row-key="id"
         :table-props="{ border: true }"
-        :hint-options="{ mode: 'tooltip' }"
+        :hint-options="{ mode: 'tooltip', targets: 'all' }"
         @field-change="handleFieldChange"
         @selection-change="selection = $event"
       >

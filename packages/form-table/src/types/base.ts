@@ -14,20 +14,9 @@ export interface TableRow extends FormTableRecord {}
 /** 支持直接值或根据运行时上下文计算的动态值。 */
 export type DynamicValue<T, Context> = T | ((context: Context) => T)
 
-/** 由 FormTable 或自定义渲染消费的提示配置。 */
-export interface FormTableHintConfig {
-  content: string
-  /** auto 由 FormTable 处理展示与可访问性；custom 交给调用方。 */
-  behavior?: 'auto' | 'custom'
-}
-/** FormTable 外层提示内容；字符串保持自动托管语义。 */
-export type FormTableHint = string | FormTableHintConfig
-/** 字段可用 false 关闭默认 Hint，或提供自己的提示内容。 */
-export type FormTableFieldHint = false | FormTableHint
-/** 动态 Hint 求值后提供给内部渲染与 Slot 的标准结构。 */
-export interface ResolvedFormTableHint {
-  content: string
-  behavior: 'auto' | 'custom'
-}
-/** 整个 FormTable 统一采用的提示展示方式。 */
-export type FormTableHintMode = 'title' | 'tooltip'
+/** 字段和表头 Hint 的唯一内容协议；false 显式关闭当前目标。 */
+export type FormTableHintValue = string | false | null | undefined
+/** 整个 FormTable 采用的提示展示方式；false 完全关闭 Hint。 */
+export type FormTableHintMode = false | 'title' | 'tooltip'
+/** 自动提示作用范围；默认仅处理字段。 */
+export type FormTableHintTargets = 'field' | 'header' | 'all'

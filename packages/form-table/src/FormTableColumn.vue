@@ -56,6 +56,7 @@ import type {
   FormTableTableContext,
   FormTableHeaderSlotContext,
   FormTableHintModeContext,
+  FormTableHintTargetsContext,
   FormTableSlots,
   FormTableUpdateApi,
   ResolvedHeaderConfig,
@@ -64,6 +65,7 @@ import type {
 import {
   FORM_TABLE_CONTEXT_KEY,
   FORM_TABLE_HINT_MODE_KEY,
+  FORM_TABLE_HINT_TARGETS_KEY,
   FORM_TABLE_SLOTS_KEY,
   FORM_TABLE_UPDATE_KEY
 } from './types'
@@ -92,6 +94,7 @@ const parentSlots = inject<FormTableSlots>(FORM_TABLE_SLOTS_KEY, {})
 
 /** 根组件未提供模式时保持原生 title，便于列组件独立挂载测试。 */
 const hintMode = inject<FormTableHintModeContext>(FORM_TABLE_HINT_MODE_KEY, ref<'title'>('title'))
+const hintTargets = inject<FormTableHintTargetsContext>(FORM_TABLE_HINT_TARGETS_KEY, ref<'field'>('field'))
 
 /** 根组件下发的行更新入口，供列级单元格 Slot 执行业务操作。 */
 const updateApi = inject<FormTableUpdateApi>(FORM_TABLE_UPDATE_KEY)
@@ -105,21 +108,24 @@ const columnContext = computed<FormTableColumnContext>(() => createColumnContext
 /** 解析静态或函数形式的 el-table-column 透传属性。 */
 const columnProps = computed(() => resolveDynamicValue(props.column.props, columnContext.value) || {})
 
-/** 表头属性和提示只求值一次，默认表头与自定义 Slot 共享同一解析结果。 */
+/** 表头属性保持独立解析，不向 Slot 暴露 Hint 内部状态。 */
 const resolvedHeader = computed<ResolvedHeaderConfig>(() => ({
-  props: resolveDynamicValue(props.column.headerProps, columnContext.value) || {},
-  hint: resolveFormTableHint(resolveDynamicValue(props.column.headerHint, columnContext.value))
+  props: resolveDynamicValue(props.column.headerProps, columnContext.value) || {}
 }))
 
 /** 默认和 Slot 表头共用同一个 FormTable 管理的属性与提示锚点。 */
 const resolvedHeaderTargetProps = computed(() => {
-  if (!Object.prototype.hasOwnProperty.call(props.column, 'headerHint')) {
+  if (
+    hintMode.value === false
+    || hintTargets.value === 'field'
+    || !Object.prototype.hasOwnProperty.call(props.column, 'headerHint')
+  ) {
     return resolvedHeader.value.props
   }
 
   return applyHintTargetProps(
     resolvedHeader.value.props,
-    resolvedHeader.value.hint,
+    resolveFormTableHint(resolveDynamicValue(props.column.headerHint, columnContext.value)),
     hintMode.value,
     { focusable: true }
   )
