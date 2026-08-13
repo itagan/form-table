@@ -125,6 +125,7 @@ component: {
 | --- | --- |
 | 标准 Element UI 字段 | 内置 `type` |
 | 自定义组件且绑定明确字段 | `type: 'component'` |
+| 分组选项、自定义选项内容或复杂禁用逻辑 | [`type: 'slot'` 组合原生 Option](../api/component.md#复杂-option-接入) |
 | 模板结构完全由页面控制，但仍需字段校验 | `type: 'slot'` 字段 Slot |
 | 不对应单一字段的整格展示或操作 | [`columns[].cellSlot`](./cell-slot.md) |
 
@@ -132,4 +133,4 @@ component: {
 
 ## 相关 API
 
-[Component 配置](../api/component.md) · [Slot 与上下文](../api/contexts.md)
+[Component 配置](../api/component.md) · [复杂 Option 接入](../api/component.md#复杂-option-接入) · [Slot 与上下文](../api/contexts.md)
