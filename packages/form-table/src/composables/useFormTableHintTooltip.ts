@@ -110,6 +110,18 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
 
     const targetChanged = activeTarget !== target
     if (targetChanged) {
+      if (activeTarget && tooltip.isVisible()) {
+        activeTarget = target
+        referenceTarget = target
+        activeAriaTarget = ariaTarget
+        activeContent = content
+        options.content.value = content
+        describeElement(ariaTarget)
+        void nextTick(() => {
+          if (activeTarget === target && activeContent === content) tooltip.retarget(target)
+        })
+        return
+      }
       tooltip.hideImmediately()
       if (activeTarget) tooltip.close()
       referenceTarget = null
@@ -174,7 +186,8 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
 
     hoveredTarget = null
     if (nextTarget) {
-      hideActiveTooltip()
+      hoveredTarget = nextTarget
+      syncActiveTarget()
       return
     }
     if (focusedTarget) focusSuppressedByPointer = true

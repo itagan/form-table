@@ -7,6 +7,7 @@ export interface FormTableHintTooltipRef {
   }
   referenceElm?: HTMLElement
   tooltipId?: string
+  showPopper?: boolean
   setExpectedState?: (expectedState: boolean) => void
   handleShowPopper?: () => void
   handleClosePopper?: () => void
@@ -25,6 +26,7 @@ export function createElementTooltipAdapter(
 
   return {
     getTooltipId: () => getInstance()?.tooltipId,
+    isVisible: () => Boolean(getInstance()?.showPopper),
     hideImmediately: () => {
       const popper = getInstance()?.$refs?.popper
       if (popper) popper.style.display = 'none'
@@ -41,6 +43,14 @@ export function createElementTooltipAdapter(
       tooltip.doDestroy?.()
       tooltip.setExpectedState?.(true)
       tooltip.handleShowPopper?.()
+    },
+    retarget: (target: HTMLElement) => {
+      const tooltip = getInstance()
+      if (!tooltip) return
+      tooltip.referenceElm = target
+      tooltip.doDestroy?.(true)
+      tooltip.setExpectedState?.(true)
+      tooltip.updatePopper?.()
     },
     update: () => getInstance()?.updatePopper?.(),
     destroy: () => getInstance()?.doDestroy?.(true)

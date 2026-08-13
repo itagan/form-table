@@ -190,6 +190,55 @@ describe('FormTable lightweight hint behavior', () => {
     wrapper.destroy()
   })
 
+  it('keeps the next tooltip open when the pointer moves directly between fields', async () => {
+    vi.useFakeTimers()
+    let wrapper: Wrapper<Vue> | null = null
+    try {
+      wrapper = mountFormTable({
+        hintOptions: { mode: 'tooltip', tooltipProps: { openDelay: 100 } },
+        tableData: [{ name: 'Alice', amount: 128.5 }],
+        columns: [
+          { label: '姓名', children: [{ children: [{ fieldKey: 'name', type: 'input', hint: '姓名说明' }] }] },
+          { label: '金额', children: [{ children: [{ fieldKey: 'amount', type: 'number', hint: '金额说明' }] }] }
+        ]
+      })
+      await wrapper.vm.$nextTick()
+      const tooltip = getHintTooltip(wrapper) as FormTableHintTooltipRef & {
+        content: string
+        showPopper: boolean
+      }
+      const close = vi.spyOn(tooltip, 'handleClosePopper')
+      const fields = wrapper.findAll('.el-form-item')
+      const firstInput = fields.at(0).find('input').element
+      const secondInput = fields.at(1).find('input').element
+
+      firstInput.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }))
+      await wrapper.vm.$nextTick()
+      vi.advanceTimersByTime(100)
+      await wrapper.vm.$nextTick()
+      expect(tooltip.showPopper).toBe(true)
+
+      firstInput.dispatchEvent(new MouseEvent('mouseout', {
+        bubbles: true,
+        relatedTarget: secondInput
+      }))
+      secondInput.dispatchEvent(new MouseEvent('mouseover', {
+        bubbles: true,
+        relatedTarget: firstInput
+      }))
+      await wrapper.vm.$nextTick()
+      vi.advanceTimersByTime(400)
+      await wrapper.vm.$nextTick()
+
+      expect(tooltip.content).toBe('金额说明')
+      expect(tooltip.showPopper).toBe(true)
+      expect(close).not.toHaveBeenCalled()
+    } finally {
+      wrapper?.destroy()
+      vi.useRealTimers()
+    }
+  })
+
   it('updates or closes the active tooltip when dynamic content or targets change', async () => {
     const wrapper = mountFormTable({
       hintOptions: { mode: 'tooltip' },
