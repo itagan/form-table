@@ -116,67 +116,6 @@ export type FormItemConfig<TRow extends TableRow = TableRow> =
   | ComponentFormItemConfig<TRow>
   | SlotFormItemConfig<TRow>
 
-type FormTableDeclaredFields<T> = {
-  [TKey in keyof T as string extends TKey
-    ? never
-    : number extends TKey
-      ? never
-      : TKey]: T[TKey]
-}
-
-type FormTableDeclaredStringKey<T> = Extract<keyof FormTableDeclaredFields<T>, string>
-type FormTablePathDepth = 0 | 1 | 2 | 3 | 4
-type FormTablePreviousDepth = [never, 0, 1, 2, 3]
-type FormTableIsAny<T> = 0 extends (1 & T) ? true : false
-type FormTablePathLeaf =
-  | string | number | boolean | bigint | symbol | null | undefined | Date | RegExp
-  | ((...args: never[]) => unknown)
-
-type FormTableNestedFieldPath<TValue, TDepth extends FormTablePathDepth> =
-  FormTableIsAny<TValue> extends true
-    ? never
-    : NonNullable<TValue> extends readonly (infer TItem)[]
-      ? `[${number}]` | (
-        TDepth extends 0
-          ? never
-          : FormTableFieldPathInternal<TItem, FormTablePreviousDepth[TDepth]> extends infer TNestedPath
-            ? TNestedPath extends string
-              ? `[${number}].${TNestedPath}`
-              : never
-            : never
-      )
-      : NonNullable<TValue> extends FormTablePathLeaf
-        ? never
-        : TDepth extends 0
-          ? never
-          : FormTableFieldPathInternal<NonNullable<TValue>, FormTablePreviousDepth[TDepth]>
-
-type FormTableFieldPathInternal<TValue, TDepth extends FormTablePathDepth> = {
-  [TKey in FormTableDeclaredStringKey<TValue>]:
-    | TKey
-    | (FormTableNestedFieldPath<TValue[TKey], TDepth> extends infer TNestedPath
-      ? TNestedPath extends string
-        ? TNestedPath extends `[${number}]${string}`
-          ? `${TKey}${TNestedPath}`
-          : `${TKey}.${TNestedPath}`
-        : never
-      : never)
-}[FormTableDeclaredStringKey<TValue>]
-
-/** 业务行中已声明字段形成的点路径或数组括号路径，最多递归五层。 */
-export type FormTableFieldPath<TRow extends TableRow> = string extends keyof TRow
-  ? string
-  : FormTableFieldPathInternal<TRow, 4>
-
-type FormTableFieldConfigWithPath<TConfig, TFieldPath extends string> =
-  TConfig extends unknown ? Omit<TConfig, 'fieldKey'> & { fieldKey: TFieldPath } : never
-
-/** createFormTableField 接受的严格 fieldKey 配置；普通 FormItemConfig 仍使用 string。 */
-export type FormTableFieldConfig<TRow extends TableRow = TableRow> = FormTableFieldConfigWithPath<
-  FormItemConfig<TRow>,
-  FormTableFieldPath<TRow>
->
-
 export interface RowConfig<TRow extends TableRow = TableRow> {
   key?: string
   visible?: DynamicValue<boolean, FormTableRowContext<TRow>>
