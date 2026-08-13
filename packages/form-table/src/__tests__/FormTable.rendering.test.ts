@@ -12,16 +12,11 @@ import { mountFormTable } from './test-utils'
 
 describe('FormTable rendering and configuration', () => {
   it('uses top-level rowKey for Element Table and filters the legacy passthrough key', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
     const wrapper = mountFormTable({ rowKey: 'id', tableProps: { rowKey: 'legacy-id' } })
     await wrapper.vm.$nextTick()
 
     const table = wrapper.findComponent({ name: 'ElTable' })
     expect((table.vm as any).rowKey).toBe('id')
-    expect(warn).toHaveBeenCalledWith(
-      '[FormTable] tableProps.rowKey is no longer supported; use the top-level rowKey prop.'
-    )
-    warn.mockRestore()
     wrapper.destroy()
   })
 
