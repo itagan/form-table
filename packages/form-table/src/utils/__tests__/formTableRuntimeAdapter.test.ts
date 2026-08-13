@@ -46,4 +46,9 @@ describe('FormTable runtime adapter', () => {
       openDelay: 200
     })
   })
+
+  it('uses a short default Tooltip delay while allowing explicit overrides', () => {
+    expect(resolveHintTooltipProps({}).openDelay).toBe(100)
+    expect(resolveHintTooltipProps({ openDelay: 0 }).openDelay).toBe(0)
+  })
 })

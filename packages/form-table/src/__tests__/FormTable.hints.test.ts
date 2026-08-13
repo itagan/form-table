@@ -11,6 +11,7 @@ const getHintTooltip = (wrapper: Wrapper<Vue>) => {
     content: string
     placement: string
     popperClass: string
+    openDelay: number
     manual: boolean
     enterable: boolean
     tooltipId: string
@@ -142,6 +143,7 @@ describe('FormTable lightweight hint behavior', () => {
     const tooltip = getHintTooltip(wrapper)
     expect(tooltip.placement).toBe('right')
     expect(tooltip.popperClass).toBe('form-table-hint-tooltip business-hint')
+    expect(tooltip.openDelay).toBe(100)
     expect(tooltip.manual).toBe(false)
     expect(tooltip.enterable).toBe(false)
     expect(wrapper.findAll('[data-form-table-hint]')).toHaveLength(2)

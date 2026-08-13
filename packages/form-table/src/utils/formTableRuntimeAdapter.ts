@@ -48,6 +48,7 @@ export function resolveHintTooltipProps(tooltipProps: ComponentProps): Component
   return {
     placement: 'top',
     effect: 'dark',
+    openDelay: 100,
     ...passthrough,
     popperClass: ['form-table-hint-tooltip', customPopperClass].filter(Boolean).join(' ')
   }
