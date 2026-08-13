@@ -12,6 +12,7 @@
 - `headerHint/hint` 收敛为动态字符串或关闭值；解析结果仅用于内部展示，不再传播给 component 动态配置、listener 或 Slot。
 - `hintOptions.field` 未配置或为 `false` 时无全局字段处理，`true` 默认字符串化，函数统一格式化；Item 不写或返回空值时继承、`false` 关闭、非空内容覆盖。
 - 单实例 Tooltip 增加嵌套 FormTable 隔离、表头键盘入口、Escape 关闭和 token 安全的 `aria-describedby` 管理，并将 Element UI 私有能力收口到版本适配层。
+- Tooltip 模式默认增加 100ms 打开延迟，减少鼠标快速扫过字段时的闪烁，同时允许通过 `tooltipProps.openDelay` 覆盖。
 - 新增独立 Hint 多场景 Demo，并将专题文档收敛为 `/features/hint`：覆盖作用范围、全局格式化、关闭、title/Tooltip、键盘 ARIA 和 Slot 自定义边界。
 - 新增可直接复制的常见操作列文档，覆盖末尾新增、当前行后插入、复制、删除、稳定行标识和校验清理；行列操作 Demo 同步改用 `cellSlot` 并增加后插按钮。
 - 安装文档仅保留 FormTable 的安装命令，并单独说明项目需要预先安装、注册及满足的 Vue 和 Element UI peer dependency 版本，以及低版本升级建议和 Vue 3 暂不支持的兼容边界；经版本矩阵验证后，最低版本调整为 Vue `2.7.1` 和 Element UI `2.4.9`，最佳建议版本明确为 Vue 2 生态最终版本 Vue `2.7.16` + Element UI `2.15.14`。
