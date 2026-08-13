@@ -21,9 +21,7 @@ export type {
   FormTableCellSlotContext,
   FormTableColumnContext,
   FormTableFieldChangePayload,
-  FormTableFieldConfig,
   FormTableFilterChangePayload,
-  FormTableFieldPath,
   FormTableFieldContext,
   FormTableFieldRenderContext,
   FormTableResolvedFieldContext,
@@ -54,4 +52,8 @@ export type {
   TableRow
 } from './types'
 
-export type { FormTableFieldDefinition } from './createFormTableField'
+export type {
+  FormTableFieldConfig,
+  FormTableFieldDefinition,
+  FormTableFieldPath
+} from './createFormTableField'

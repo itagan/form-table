@@ -61,7 +61,7 @@ const columns = defineFormTableColumns<PurchaseRow>([{
 
 ## fieldKey 路径助手
 
-`createFormTableField<TRow>()` 创建一个业务行专用的恒等函数，只在编译期校验字段路径，不包装配置，也不改变 Slot 的 `value` 类型：
+`createFormTableField<TRow>()` 是独立于核心配置类型的可选辅助入口。它创建一个业务行专用的恒等函数，只在编译期校验字段路径，不包装配置，也不改变 Slot 的 `value` 类型：
 
 ```ts
 import { createFormTableField, type FormTableFieldPath } from '@itagan/form-table'
