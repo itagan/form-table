@@ -65,6 +65,7 @@ FormTable
 | 自定义表头 | [配置与使用](../features/custom-header.md) | [`/hint-scenarios`](http://localhost:5173/hint-scenarios) |
 | 列级单元格 Slot | [`cellSlot` 专题](../features/cell-slot.md) | [`/cell-slot`](http://localhost:5173/cell-slot) |
 | 自定义字段组件 | [配置与使用](../features/custom-component.md) | [`/enterprise-components`](http://localhost:5173/enterprise-components) |
+| 复杂 Option / 分组选项 | [使用字段 Slot 接入](./component.md#复杂-option-接入) | — |
 | 远程 Schema | [配置与本地增强](../features/remote-schema.md) | [`/remote-schema`](http://localhost:5173/remote-schema) |
 | 行列动态操作 | [行列操作与异步提交](../features/row-column-operations.md) | [`/row-column-operations`](http://localhost:5173/row-column-operations) |
 | 企业自定义组件 | [复杂组件接入](../examples/enterprise-components.md) | [`/enterprise-components`](http://localhost:5173/enterprise-components) |
