@@ -2,6 +2,7 @@ import type { Component, PluginObject } from 'vue'
 import FormTable, {
   FormTable as NamedFormTable,
   FormTablePlugin,
+  createFormTableField,
   createFormTable,
   defineFormTableColumns,
   type BuiltinFormItemType,
@@ -13,6 +14,7 @@ import FormTable, {
   type FormTableEmits,
   type FormTableExpose,
   type FormTableFieldHint,
+  type FormTableFieldPath,
   type FormTableFieldHintFormatter,
   type FormTableFilterChangePayload,
   type FormTableDefaultFieldHint,
@@ -66,10 +68,42 @@ const invalidHintBehavior: FormTableHint = { content: '错误配置', behavior: 
 const legacyHintOwnership: FormTableHint = { content: '旧配置', ownership: 'custom' }
 const rows: TableRow[] = [{ name: 'Alice', profile: { city: '杭州' } }]
 
-interface PurchaseRow extends TableRow {
+interface PurchaseRow {
   name: string
   amount: number
+  profile?: {
+    city: string
+  }
+  items?: Array<{
+    name: string
+  }>
 }
+
+const definePurchaseField = createFormTableField<PurchaseRow>()
+const amountField = definePurchaseField({ fieldKey: 'amount', type: 'number' })
+const cityField = definePurchaseField({ fieldKey: 'profile.city', type: 'input' })
+const itemNameField = definePurchaseField({ fieldKey: 'items[0].name', type: 'input' })
+const itemPath: FormTableFieldPath<PurchaseRow> = 'items[12].name'
+const literalFieldKey: 'amount' = amountField.fieldKey
+void cityField
+void itemNameField
+void itemPath
+void literalFieldKey
+definePurchaseField({
+  // @ts-expect-error createFormTableField rejects unknown business fields.
+  fieldKey: 'ammount',
+  type: 'number'
+})
+definePurchaseField({
+  // @ts-expect-error nested object paths must match the declared row shape.
+  fieldKey: 'profile.country',
+  type: 'input'
+})
+definePurchaseField({
+  // @ts-expect-error array paths use bracket indices rather than dotted indices.
+  fieldKey: 'items.0.name',
+  type: 'input'
+})
 
 const typedColumns = defineFormTableColumns<PurchaseRow>([{
   label: '采购信息',
@@ -134,6 +168,20 @@ typedFormTableInstance.$emit('field-change', {
   value: 20,
   previousValue: 10
 })
+const typedTableRef = typedFormTableInstance.getTableRef()
+typedTableRef?.clearSelection?.()
+typedTableRef?.toggleRowSelection?.(typedComponentProps.tableData![0], true)
+typedTableRef?.toggleAllSelection?.()
+typedTableRef?.setCurrentRow?.(typedComponentProps.tableData![0])
+typedTableRef?.toggleRowExpansion?.(typedComponentProps.tableData![0], true)
+typedTableRef?.clearSort?.()
+typedTableRef?.clearFilter?.()
+typedTableRef?.doLayout?.()
+typedTableRef?.sort?.('amount', 'ascending')
+// @ts-expect-error table ref row methods preserve the business row type.
+typedTableRef?.toggleRowSelection?.({ name: '缺少金额' })
+// @ts-expect-error table ref sort only accepts Element UI's stable orders.
+typedTableRef?.sort?.('amount', 'up')
 const elementColumn: FormTableElementColumn = {
   id: 'el-table_1_column_1',
   columnKey: 'amount-column',

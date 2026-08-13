@@ -41,7 +41,7 @@
 
       <div class="actions">
         <el-button type="primary" @click="addRow">添加联系人</el-button>
-        <el-button @click="formTableRef?.getTableRef()?.doLayout()">重新布局</el-button>
+        <el-button @click="formTableRef?.getTableRef()?.doLayout?.()">重新布局</el-button>
         <span>已选择 {{ selection.length }} 行</span>
       </div>
 
