@@ -59,7 +59,6 @@ import type {
   FormTableHintTargetsContext,
   FormTableSlots,
   FormTableUpdateApi,
-  ResolvedHeaderConfig,
   TableRow
 } from './types'
 import {
@@ -109,9 +108,9 @@ const columnContext = computed<FormTableColumnContext>(() => createColumnContext
 const columnProps = computed(() => resolveDynamicValue(props.column.props, columnContext.value) || {})
 
 /** 表头属性保持独立解析，不向 Slot 暴露 Hint 内部状态。 */
-const resolvedHeader = computed<ResolvedHeaderConfig>(() => ({
-  props: resolveDynamicValue(props.column.headerProps, columnContext.value) || {}
-}))
+const resolvedHeaderProps = computed(() => (
+  resolveDynamicValue(props.column.headerProps, columnContext.value) || {}
+))
 
 /** 默认和 Slot 表头共用同一个 FormTable 管理的属性与提示锚点。 */
 const resolvedHeaderTargetProps = computed(() => {
@@ -120,11 +119,11 @@ const resolvedHeaderTargetProps = computed(() => {
     || hintTargets.value === 'field'
     || !Object.prototype.hasOwnProperty.call(props.column, 'headerHint')
   ) {
-    return resolvedHeader.value.props
+    return resolvedHeaderProps.value
   }
 
   return applyHintTargetProps(
-    resolvedHeader.value.props,
+    resolvedHeaderProps.value,
     resolveFormTableHint(resolveDynamicValue(props.column.headerHint, columnContext.value)),
     hintMode.value,
     { focusable: true }
@@ -170,7 +169,6 @@ const headerSlotProps = computed<FormTableHeaderSlotContext>(() => extendLazyCon
   columnContext.value,
   {
     columnIndex: props.columnIndex,
-    header: resolvedHeader.value,
     label: props.column.label || ''
   }
 ))

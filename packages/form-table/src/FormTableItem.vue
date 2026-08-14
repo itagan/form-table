@@ -6,7 +6,6 @@
       :slot-props="slotContext"
     />
     <span v-else-if="config.type === 'slot'" />
-    <span v-else-if="!config.type">{{ slotContext.value }}</span>
     <ComponentWrapper
       v-else
       :type="config.type"

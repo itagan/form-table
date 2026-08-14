@@ -71,7 +71,7 @@ export interface FieldComponentConfig<TRow extends TableRow = TableRow> {
   listeners?: Record<string, FormTableFieldListener<TRow>>
   options?: DynamicValue<FormItemOption[], FormTableFieldRenderContext<TRow>>
   optionProps?: DynamicValue<OptionPropsConfig, FormTableFieldRenderContext<TRow>>
-  model?: FieldModelConfig | boolean
+  model?: FieldModelConfig | false
 }
 
 export type BuiltinFormItemType =

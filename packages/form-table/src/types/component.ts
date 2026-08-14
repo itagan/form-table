@@ -1,10 +1,13 @@
 import type { Component, DefineComponent } from 'vue'
+import type { ElForm } from 'element-ui/types/form'
+import type { ElTable } from 'element-ui/types/table'
 import type { ComponentProps, FormTableValue, TableRow } from './base'
 import type {
   FieldModelConfig,
   FormItemOption,
   FormTableEmits,
   FormTableProps,
+  FormTableRowKey,
   OptionPropsConfig
 } from './config'
 import type {
@@ -18,10 +21,8 @@ export interface ResolvedComponentConfig {
   listeners: Record<string, (...args: unknown[]) => void>
   options: FormItemOption[]
   optionProps?: OptionPropsConfig
-  model?: FieldModelConfig | boolean
+  model?: FieldModelConfig | false
 }
-
-export interface ResolvedHeaderConfig { props: ComponentProps }
 
 export interface FormTableSlotContext<TRow extends TableRow = TableRow> extends FormTableFieldContext<TRow> {
   propPath: string
@@ -31,30 +32,25 @@ export interface FormTableSlotContext<TRow extends TableRow = TableRow> extends 
 export interface FormTableHeaderSlotContext<TRow extends TableRow = TableRow> extends FormTableColumnContext<TRow> {
   columnIndex: number
   label: string
-  header: ResolvedHeaderConfig
 }
 
 export type FormTableSlotFn<T = FormTableValue> = (slotProps: T) => FormTableValue
 export type FormTableSlots = Record<string, FormTableSlotFn | undefined>
 
-export interface FormTableElementFormRef {
-  validate?: (callback?: (valid: boolean, fields?: FormTableValue) => void) => Promise<boolean> | boolean
-  validateField?: (fieldProp: string, callback?: (message: string) => void) => void
-  resetFields?: () => void
-  clearValidate?: (fieldProps?: string | string[]) => void
-}
+/** FormTable 返回当前项目安装的 Element UI Form 原生实例。 */
+export type FormTableElementFormRef = ElForm
 
-export interface FormTableElementTableRef<TRow extends TableRow = TableRow> {
-  clearSelection?: () => void
-  toggleRowSelection?: (row: TRow, selected?: boolean) => void
-  toggleAllSelection?: () => void
-  setCurrentRow?: (row?: TRow) => void
-  toggleRowExpansion?: (row: TRow, expanded?: boolean) => void
-  clearSort?: () => void
-  clearFilter?: () => void
-  doLayout?: () => void
-  sort?: (prop: string, order: 'ascending' | 'descending') => void
-  [key: string]: FormTableValue
+/** Element Table 原生实例，并为数据与行方法补充业务行泛型。 */
+export type FormTableElementTableRef<TRow extends TableRow = TableRow> = Omit<
+  ElTable,
+  'data' | 'rowKey' | 'toggleRowSelection' | 'setCurrentRow' | 'toggleRowExpansion' | 'sort'
+> & {
+  data: TRow[]
+  rowKey?: FormTableRowKey<TRow>
+  toggleRowSelection: (row: TRow, selected?: boolean) => void
+  setCurrentRow: (row?: TRow) => void
+  toggleRowExpansion: (row: TRow, expanded?: boolean) => void
+  sort: (prop: string, order: 'ascending' | 'descending') => void
 }
 
 export interface FormTableExpose<TRow extends TableRow = TableRow> {
