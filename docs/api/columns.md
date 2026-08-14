@@ -4,13 +4,13 @@
 
 ```text
 columns[]                                  ColumnConfig
-├─ props only                            PlainColumnConfig
+├─ props only                            NativeColumnConfig
 ├─ children[]                            FormItemConfig
 │  └─ component                     FieldComponentConfig
 └─ cellSlot                              列级单元格 Slot
 ```
 
-`PlainColumnConfig`、`children[]` 和 `cellSlot` 是三条互斥路径。纯 Element Column 只提供 `props`；字段列使用 `children[]`；不需要字段路径和校验的自定义单元格可使用 [`cellSlot`](../features/cell-slot.md)。
+`NativeColumnConfig`、`children[]` 和 `cellSlot` 是三条互斥路径。纯 Element Column 只提供 `props`；字段列使用 `children[]`；不需要字段路径和校验的自定义单元格可使用 [`cellSlot`](../features/cell-slot.md)。
 
 ## ColumnConfig
 
@@ -27,7 +27,7 @@ columns[]                                  ColumnConfig
 | `columns[].children` | `FormItemConfig[]` | 与 `cellSlot` 互斥 | — | 进入 Item 字段链路 |
 | `columns[].cellSlot` | `string` | 与 `children` 互斥 | `row, index, columnConfig, updateRow` | 直接渲染单元格 |
 
-无需字段渲染链路的功能列使用 `PlainColumnConfig`，所有 Element Column 属性继续放在 `props` 中：
+无需字段渲染链路的功能列使用 `NativeColumnConfig`，所有 Element Column 属性继续放在 `props` 中：
 
 ```ts
 { props: { type: 'selection', width: 48 } }

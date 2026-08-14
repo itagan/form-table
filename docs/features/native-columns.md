@@ -2,7 +2,7 @@
 
 > 可运行 Demo：[Element 功能列透传 ↗](http://localhost:5173/element-columns)
 
-`PlainColumnConfig` 表示一个不进入 FormTable 字段渲染链路的纯 `el-table-column`。它不重新定义 Element UI API，而是把 `props` 原样交给 `el-table-column`，适合选择列、序号列等原生功能。
+`NativeColumnConfig` 表示一个不进入 FormTable 字段渲染链路的原生 `el-table-column`。它不重新定义 Element UI API，而是把 `props` 原样交给 `el-table-column`，适合选择列、序号列等原生功能。
 
 ## 基本配置
 
@@ -19,7 +19,7 @@ const columns = defineFormTableColumns<TableRow>([
 ])
 ```
 
-直接配置在 `columns` 中不会产生类型警告。TypeScript 会根据“具有 `props`，但没有 `children/cellSlot`”的结构自动识别为 `PlainColumnConfig`，通常无需显式导入这个类型。只有抽取可复用的纯 Element 列数组或编写配置工具时，才需要声明 `PlainColumnConfig[]`。
+直接配置在 `columns` 中不会产生类型警告。TypeScript 会根据“具有 `props`，但没有 `children/cellSlot`”的结构自动识别为 `NativeColumnConfig`，通常无需显式导入这个类型。只有抽取可复用的原生 Element 列数组或编写配置工具时，才需要声明 `NativeColumnConfig[]`。
 
 `type` 属于 Element UI 的 `el-table-column` Prop，因此保留在 `props` 中。纯透传列不需要为了通过类型检查而配置无意义的 `children: []`：
 
@@ -137,7 +137,7 @@ Element Table 的两个根级 Slot 可直接写在 FormTable 下：
 
 ## 能力边界
 
-| 能力 | `PlainColumnConfig` |
+| 能力 | `NativeColumnConfig` |
 | --- | --- |
 | Element Column 属性 | 通过 `props` 原样透传 |
 | 可选配置 | `key`、`label`、`visible` |

@@ -130,7 +130,7 @@ export interface LayoutColumnConfig<TRow extends TableRow = TableRow> extends Ba
   cellSlot?: never
 }
 
-export interface PlainColumnConfig<TRow extends TableRow = TableRow> {
+export interface NativeColumnConfig<TRow extends TableRow = TableRow> {
   key?: string
   label?: string
   visible?: DynamicValue<boolean, FormTableColumnContext<TRow>>
@@ -159,7 +159,7 @@ export interface FormTableCellSlotContext<TRow extends TableRow = TableRow> {
 export type ColumnConfig<TRow extends TableRow = TableRow> =
   | LayoutColumnConfig<TRow>
   | CellSlotColumnConfig<TRow>
-  | PlainColumnConfig<TRow>
+  | NativeColumnConfig<TRow>
 
 export type FormTableRowKey<TRow extends TableRow = TableRow> =
   | string

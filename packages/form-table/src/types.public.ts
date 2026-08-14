@@ -36,7 +36,7 @@ export type {
   FormTableTableProps,
   FormTableValue,
   LayoutColumnConfig,
-  PlainColumnConfig,
+  NativeColumnConfig,
   OptionPropsConfig,
   TableRow
 } from './types'
