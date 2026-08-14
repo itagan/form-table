@@ -39,6 +39,8 @@ export function createElementTooltipAdapter(
     showFor: (target: HTMLElement) => {
       const tooltip = getInstance()
       if (!tooltip) return
+      const popper = tooltip.$refs?.popper
+      if (popper) popper.style.pointerEvents = 'none'
       tooltip.referenceElm = target
       tooltip.doDestroy?.()
       tooltip.setExpectedState?.(true)
