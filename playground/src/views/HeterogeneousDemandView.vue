@@ -197,8 +197,7 @@ const columns: ColumnConfig[] = [
     key: 'description-column',
     label: '需求说明 *',
     props: { minWidth: 560 },
-    children: [{ children: [
-      {
+    children: [{
         key: 'complex-description',
         fieldKey: 'detail',
         type: 'component',
@@ -256,14 +255,13 @@ const columns: ColumnConfig[] = [
         visible: ({ row }) => asDemandRow(row).type === 'guest',
         colProps: { span: 17 },
         component: { props: () => ({ placeholder: '备注（非必填）', disabled: readonlyMode.value }) }
-      }
-    ] }]
+      }]
   },
   {
     key: 'schedule-column',
     label: '使用时间 *',
     props: { minWidth: 430 },
-    children: [{ children: [{
+    children: [{
       key: 'schedule-field',
       fieldKey: 'schedule',
       type: 'component',
@@ -275,13 +273,13 @@ const columns: ColumnConfig[] = [
         props: ({ row }) => ({ demandType: asDemandRow(row).type, readonly: readonlyMode.value }),
         model: { prop: 'value', event: 'change' }
       }
-    }] }]
+    }]
   },
   {
     key: 'pricing-column',
     label: '数量/单价 *',
     props: { minWidth: 330 },
-    children: [{ children: [{
+    children: [{
       key: 'pricing-field',
       fieldKey: 'pricing',
       type: 'component',
@@ -290,7 +288,7 @@ const columns: ColumnConfig[] = [
         props: ({ row }) => ({ demandType: asDemandRow(row).type, readonly: readonlyMode.value }),
         model: { prop: 'value', event: 'change' }
       }
-    }] }]
+    }]
   },
   {
     key: 'budget-column',

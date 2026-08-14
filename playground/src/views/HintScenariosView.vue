@@ -57,17 +57,17 @@ const tableProps: ComponentProps = { border: true, stripe: true }
 const columns: ColumnConfig[] = [{
   label: '姓名',
   headerHint: '默认不会求值，因为 targets 默认为 field',
-  children: [{ children: [{ fieldKey: 'name', type: 'input', hint: ({ value }) => `当前姓名：${value}` }] }]
+  children: [{ fieldKey: 'name', type: 'input', hint: ({ value }) => `当前姓名：${value}` }]
 }, {
   label: '金额',
   headerHint: '含税金额说明',
-  children: [{ children: [{ fieldKey: 'amount', type: 'number' }] }]
+  children: [{ fieldKey: 'amount', type: 'number' }]
 }]
 
 const customHeaderColumns: ColumnConfig[] = [{
   label: '金额',
   headerSlot: 'amount-header',
-  children: [{ children: [{ fieldKey: 'amount', type: 'number' }] }]
+  children: [{ fieldKey: 'amount', type: 'number' }]
 }]
 
 const tooltipOptions: FormTableHintOptions = {

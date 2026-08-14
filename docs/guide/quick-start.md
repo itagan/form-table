@@ -75,16 +75,14 @@ const tableData = ref([{ name: '张三' }])
 const columns: ColumnConfig[] = [{
   label: '姓名',
   children: [{
-    children: [{
-      fieldKey: 'name',
-      type: 'input',
-      formItemProps: {
-        rules: [{ required: true, message: '请输入姓名' }]
-      },
-      component: {
-        props: { placeholder: '请输入姓名', clearable: true }
-      }
-    }]
+    fieldKey: 'name',
+    type: 'input',
+    formItemProps: {
+      rules: [{ required: true, message: '请输入姓名' }]
+    },
+    component: {
+      props: { placeholder: '请输入姓名', clearable: true }
+    }
   }]
 }]
 

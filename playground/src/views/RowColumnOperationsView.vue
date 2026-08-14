@@ -103,20 +103,20 @@ const nameColumn: ColumnConfig = {
   key: 'name-column',
   label: '姓名',
   props: { minWidth: 180 },
-  children: [{ children: [{
+  children: [{
     key: 'name-field',
     fieldKey: 'name',
     type: 'input',
     formItemProps: { rules: [{ required: true, message: '请输入姓名' }] },
     component: { props: { placeholder: '请输入姓名', clearable: true } }
-  }] }]
+  }]
 }
 
 const scoreColumn: ColumnConfig = {
   key: 'score-column',
   label: '评分（延迟提交）',
   props: { minWidth: 300 },
-  children: [{ children: [{
+  children: [{
     key: 'score-field',
     fieldKey: 'score',
     type: 'slot',
@@ -143,19 +143,19 @@ const scoreColumn: ColumnConfig = {
         }
       }
     }
-  }] }]
+  }]
 }
 
 const remarkColumn: ColumnConfig = {
   key: 'remark-column',
   label: '备注',
   props: { minWidth: 180 },
-  children: [{ children: [{
+  children: [{
     key: 'remark-field',
     fieldKey: 'remark',
     type: 'input',
     component: { props: { placeholder: '请输入备注', clearable: true } }
-  }] }]
+  }]
 }
 
 const actionColumn: ColumnConfig = {

@@ -125,7 +125,7 @@ function handleTableDataUpdate(nextTableData) {
 
 `index` 是渲染快照，适合立即执行的页面操作；异步数据更新应使用已绑定当前行的 `updateRow`，并为表格配置唯一稳定的 `rowKey`。`updateRow` 发出 `update:tableData`，并为每个实际变化的 patch 字段发出 `field-change`。
 
-`cellSlot` 不提供 `tableData/columnIndex/fieldKey/value/setValue/rowConfig/itemConfig/propPath/component`。需要字段值、字段校验或已解析组件配置时，应改用 `type: 'slot'` 字段 Slot。
+`cellSlot` 不提供 `tableData/columnIndex/fieldKey/value/setValue/itemConfig/propPath/component`。需要字段值、字段校验或已解析组件配置时，应改用 `type: 'slot'` 字段 Slot。
 
 ### 字段 Slot
 
@@ -134,7 +134,7 @@ function handleTableDataUpdate(nextTableData) {
 | 内容 | 字段 |
 | --- | --- |
 | 数据定位 | `tableData`、`row`、`index`、`fieldKey`、`value` |
-| 原始配置 | `columnConfig`、`rowConfig`、`itemConfig` |
+| 原始配置 | `columnConfig`、`itemConfig` |
 | 更新能力 | `setValue`、`updateRow` |
 | 解析结果 / Slot 专属 | `propPath`、`component` |
 
@@ -190,9 +190,9 @@ component: {
 
 `component.listeners` 中的函数已经自动注入字段上下文。Slot 内只有显式使用 `v-on="component.listeners"`，自定义组件发出的同名事件才会进入配置 listener；FormTable 不会替 Slot 自动绑定。
 
-`row` 是当前业务数据行，`rowConfig` 是当前布局行配置。数据和三个 `*Config` 都是浅层只读约定，运行时不会冻结对象。请勿直接赋值：数据修改使用更新助手，配置调整由调用方替换 `columns`。异步回调中持有的是触发时配置引用，不保证异步结束后仍为最新配置。
+`row` 是当前业务数据行。数据和 `columnConfig/itemConfig` 都是浅层只读约定，运行时不会冻结对象。请勿直接赋值：数据修改使用更新助手，配置调整由调用方替换 `columns`。异步回调中持有的是触发时配置引用，不保证异步结束后仍为最新配置。
 
-`field-change` 是纯数据事件，可能来自一次多字段 `updateRow`，也可能对应多个相同 `fieldKey` 的 Item，因此不返回 `columnConfig/rowConfig/itemConfig`。
+`field-change` 是纯数据事件，可能来自一次多字段 `updateRow`，也可能对应多个相同 `fieldKey` 的 Item，因此不返回 `columnConfig/itemConfig`。
 
 ## Ref
 

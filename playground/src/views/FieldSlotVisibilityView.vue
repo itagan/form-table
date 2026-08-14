@@ -54,7 +54,7 @@
         <thead><tr><th>层级</th><th>隐藏范围</th><th>可用上下文</th></tr></thead>
         <tbody>
           <tr><td>Column</td><td>整列</td><td><code>tableData, columnConfig</code></td></tr>
-          <tr><td>Row</td><td>单元格内整行布局</td><td><code>Column 上下文 + row, index, rowConfig</code></td></tr>
+          <tr><td>rowProps</td><td>单元格内唯一 Flex Row</td><td><code>Column 上下文 + row, index</code></td></tr>
           <tr><td>Item</td><td>当前字段及 el-col</td><td><code>Row 上下文 + fieldKey, value, itemConfig</code></td></tr>
         </tbody>
       </table>
@@ -79,59 +79,53 @@ const columns: ColumnConfig[] = [
   {
     label: '内容',
     props: { minWidth: 420 },
+    rowProps: { gutter: 10 },
     children: [
+      { fieldKey: 'title', type: 'input', colProps: { span: 16 } },
       {
-        props: { gutter: 10 },
-        children: [
-          { fieldKey: 'title', type: 'input', colProps: { span: 16 } },
-          {
-            fieldKey: 'showDetail',
-            type: 'switch',
-            colProps: { span: 8 },
-            formItemProps: { label: '详情', labelWidth: '48px' }
-          }
-        ]
+        fieldKey: 'showDetail',
+        type: 'switch',
+        colProps: { span: 8 },
+        formItemProps: { label: '详情', labelWidth: '48px' }
       },
       {
-        children: [{
-          fieldKey: 'detail',
-          type: 'slot',
-          component: {
-            renderer: 'detail',
-            props: ({ row }) => ({
-              type: 'textarea',
-              rows: 2,
-              disabled: row.locked === true,
-              placeholder: '仅在开启详情时显示'
-            })
-          },
-          visible: ({ row }) => row.showDetail === true
-        }]
+        fieldKey: 'detail',
+        type: 'slot',
+        component: {
+          renderer: 'detail',
+          props: ({ row }) => ({
+            type: 'textarea',
+            rows: 2,
+            disabled: row.locked === true,
+            placeholder: '仅在开启详情时显示'
+          })
+        },
+        visible: ({ row }) => row.showDetail === true
       }
     ]
   },
   {
     label: '评分',
     props: { width: 180 },
-    children: [{ children: [{
+    children: [{
       fieldKey: 'score',
       type: 'slot',
       component: { renderer: 'score', props: { showScore: true } }
-    }] }]
+    }]
   },
   {
     label: '操作',
     props: { width: 90, align: 'center' },
-    children: [{ children: [{
+    children: [{
       fieldKey: '__actions',
       type: 'slot',
       component: { renderer: 'actions', props: { label: '删除' } }
-    }] }]
+    }]
   }
 ]
 const columnsCode = formatFormTableConfig(columns)
-const slotCode = `<template #score="{ value, setValue, component, columnConfig, rowConfig, itemConfig }">
-  <!-- 三个 *Config 是原始配置，component 是当前行解析结果 -->
+const slotCode = `<template #score="{ value, setValue, component, columnConfig, itemConfig }">
+  <!-- columnConfig/itemConfig 是原始配置，component 是当前行解析结果 -->
   <el-rate
     v-bind="component.props"
     v-on="component.listeners"
@@ -142,14 +136,12 @@ const slotCode = `<template #score="{ value, setValue, component, columnConfig, 
 const visibleCode = `{
   label: '内容',
   visible: ({ tableData }) => tableData.length > 0, // Column
+  rowProps: ({ index }) => ({ gutter: index ? 8 : 10 }),
   children: [{
-    visible: ({ row }) => row.enabled !== false,   // Row
-    children: [{
-      fieldKey: 'detail',
-      type: 'slot',
-      component: { renderer: 'detail' },
-      visible: ({ row }) => row.showDetail === true // Item
-    }]
+    fieldKey: 'detail',
+    type: 'slot',
+    component: { renderer: 'detail' },
+    visible: ({ row }) => row.showDetail === true // Item
   }]
 }`
 

@@ -10,16 +10,14 @@ FormTable 复用 Element UI `el-form-item` 的 rules 和 Form 实例，只负责
 const columns: ColumnConfig[] = [{
   label: '联系人',
   children: [{
-    children: [{
-      fieldKey: 'profile.phone',
-      type: 'input',
-      formItemProps: {
-        rules: [
-          { required: true, message: '请输入手机号', trigger: 'blur' },
-          { pattern: /^1\d{10}$/, message: '手机号格式不正确', trigger: 'blur' }
-        ]
-      }
-    }]
+    fieldKey: 'profile.phone',
+    type: 'input',
+    formItemProps: {
+      rules: [
+        { required: true, message: '请输入手机号', trigger: 'blur' },
+        { pattern: /^1\d{10}$/, message: '手机号格式不正确', trigger: 'blur' }
+      ]
+    }
   }]
 }]
 ```
@@ -134,4 +132,4 @@ formItemProps: ({ row }) => ({
 
 ## 相关 API
 
-[Column / Row / Item](../api/columns.md) · [事件与 Ref](../api/events-and-ref.md)
+[Column / Item](../api/columns.md) · [事件与 Ref](../api/events-and-ref.md)

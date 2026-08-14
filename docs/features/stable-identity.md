@@ -19,12 +19,9 @@ const columns: ColumnConfig[] = [{
   key: 'contact-column',
   label: '联系人',
   children: [{
-    key: 'primary-row',
-    children: [{
-      key: 'contact-name-field',
-      fieldKey: 'name',
-      type: 'input'
-    }]
+    key: 'contact-name-field',
+    fieldKey: 'name',
+    type: 'input'
   }]
 }]
 ```
@@ -33,8 +30,7 @@ const columns: ColumnConfig[] = [{
 | --- | --- | --- |
 | `rowKey` | 业务数据行 | 异步后定位原行，也供 Element Table 的选择、树形数据等能力使用 |
 | `columns[].key` | 列配置 | 动态增删、显隐和替换时保持列包装身份 |
-| `columns[].children[].key` | 单元格 Row 布局 | 动态布局行增删或排序时保持身份 |
-| `columns[].children[].children[].key` | Item 字段配置 | 动态字段、重复 fieldKey 或渲染器切换时保持身份 |
+| `columns[].children[].key` | Item 字段配置 | 动态字段、重复 fieldKey 或渲染器切换时保持身份 |
 
 所有 key 都应在各自作用域内唯一、稳定，不使用当前数组下标。
 
@@ -90,7 +86,7 @@ item.key → Vue 渲染身份
 
 简单静态布局可以省略 Item key，FormTable 会使用 fieldKey 等信息降级生成身份。以下情况建议显式提供：
 
-- 同一 Row 内重复使用相同 fieldKey。
+- 同一列内重复使用相同 fieldKey。
 - Item 会动态增删或排序。
 - 前方 Item 会显隐，后续字段不应重新挂载。
 - 同一字段在不同展示/编辑组件之间切换。
@@ -104,4 +100,4 @@ item.key → Vue 渲染身份
 
 ## 相关 API
 
-[Column / Row / Item](../api/columns.md) · [Slot 与上下文](../api/contexts.md)
+[Column / Item](../api/columns.md) · [Slot 与上下文](../api/contexts.md)

@@ -50,12 +50,9 @@ const columns = [
     key: 'amount',
     label: '金额',
     children: [{
-      key: 'amount-row',
-      children: [{
-        key: 'amount-item',
-        fieldKey: 'amount',
-        type: 'number'
-      }]
+      key: 'amount-item',
+      fieldKey: 'amount',
+      type: 'number'
     }]
   }
 ]

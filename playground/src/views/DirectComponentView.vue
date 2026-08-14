@@ -40,7 +40,7 @@ const formTableRef = ref<FormTableExpose>()
 const columns: ColumnConfig[] = [
   {
     label: '手机',
-    children: [{ children: [{
+    children: [{
       fieldKey: 'phone',
       type: 'component',
       component: {
@@ -48,11 +48,11 @@ const columns: ColumnConfig[] = [
         props: { size: 'small' },
         listeners: { change: ({ value }) => console.log('change', value) }
       }
-    }] }]
+    }]
   },
   {
     label: '状态展示',
-    children: [{ children: [{
+    children: [{
       fieldKey: 'status',
       type: 'component',
       component: {
@@ -64,7 +64,7 @@ const columns: ColumnConfig[] = [
           ]
         }
       }
-    }] }]
+    }]
   }
 ]
 const columnsCode = formatFormTableConfig(columns)

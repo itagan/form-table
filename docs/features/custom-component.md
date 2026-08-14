@@ -14,25 +14,23 @@ import UserSelector from './UserSelector.vue'
 const columns: ColumnConfig[] = [{
   label: '负责人',
   children: [{
-    children: [{
-      fieldKey: 'ownerId',
-      type: 'component',
-      formItemProps: {
-        rules: [{ required: true, message: '请选择负责人' }]
-      },
-      component: {
-        renderer: UserSelector,
-        props: ({ row }) => ({
-          departmentId: row.departmentId,
-          clearable: true
-        }),
-        listeners: {
-          change({ updateRow }, user) {
-            updateRow({ ownerName: user?.name || '' })
-          }
+    fieldKey: 'ownerId',
+    type: 'component',
+    formItemProps: {
+      rules: [{ required: true, message: '请选择负责人' }]
+    },
+    component: {
+      renderer: UserSelector,
+      props: ({ row }) => ({
+        departmentId: row.departmentId,
+        clearable: true
+      }),
+      listeners: {
+        change({ updateRow }, user) {
+          updateRow({ ownerName: user?.name || '' })
         }
       }
-    }]
+    }
   }]
 }]
 ```

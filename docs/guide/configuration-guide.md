@@ -9,7 +9,7 @@ FormTable 的顶层输入包括：
 | 属性 | 职责 |
 | --- | --- |
 | `tableData` | 受控表格数据，也是字段编辑的唯一数据源 |
-| `columns` | Column → Row → Item 布局与渲染配置 |
+| `columns` | Column → Item 布局与渲染配置 |
 | `formProps` | 透传给 `el-form` |
 | `tableProps` | 透传给 `el-table` |
 | `hintOptions` | 整张表统一采用的 title/Tooltip 策略，以及字段默认启用和 formatter |
@@ -21,12 +21,12 @@ FormTable 的顶层输入包括：
 
 ## 布局
 
-配置固定为三层：
+配置固定为两层：
 
 ```text
 columns[]                              ColumnConfig
-└─ children[]                         RowConfig / el-row
-   └─ children[]                      FormItemConfig / el-col + el-form-item
+├─ rowProps                           唯一 Flex el-row
+└─ children[]                         FormItemConfig / el-col + el-form-item
 ```
 
 最小布局示例：
@@ -36,20 +36,17 @@ const columns: ColumnConfig[] = [{
   key: 'profile',
   label: '基本信息',
   props: { minWidth: 320 },
+  rowProps: { gutter: 8 },
   children: [{
-    key: 'profile-row',
-    props: { gutter: 8 },
-    children: [{
-      key: 'name',
-      fieldKey: 'name',
-      type: 'input',
-      colProps: { span: 12 }
-    }]
+    key: 'name',
+    fieldKey: 'name',
+    type: 'input',
+    colProps: { span: 12 }
   }]
 }]
 ```
 
-Column 负责表格列，Row 负责单元格内的栅格行，Item 负责字段路径、校验和实际组件。完整属性见 [Column / Row / Item](../api/columns.md)。不需要字段语义的操作列或展示单元格使用列级 [`cellSlot`](../features/cell-slot.md)。
+Column 负责表格列及单元格内唯一 Flex Row，Item 负责 `el-col`、字段路径、校验和实际组件。完整属性见 [Column / Item](../api/columns.md)。不需要字段语义的操作列或展示单元格使用列级 [`cellSlot`](../features/cell-slot.md)。
 
 ## 校验规则
 
@@ -151,7 +148,7 @@ component: {
 
 ```text
 Column → tableData, columnConfig
-Row    → Column 信息 + row, index, rowConfig
+rowProps → Column 信息 + row, index
 Item   → Row 信息 + fieldKey, value, itemConfig
 ```
 
@@ -166,7 +163,7 @@ Item   → Row 信息 + fieldKey, value, itemConfig
 | 入口 | 读取数据 | 更新能力 |
 | --- | --- | --- |
 | Column 动态配置 | `tableData` | — |
-| Row 动态配置 | `row/index` | — |
+| `rowProps` 动态配置 | `row/index` | — |
 | Item 动态配置 | `fieldKey/value` | — |
 | `component.listeners` | Item 全部数据 | `setValue/updateRow` |
 | 字段 Slot | Item 全部数据与已解析组件 | `setValue/updateRow` |

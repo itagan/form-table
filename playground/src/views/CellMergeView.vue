@@ -147,31 +147,31 @@ const columns: ColumnConfig[] = [
     key: 'department',
     label: '采购部门',
     props: { prop: 'departmentName', width: 150, align: 'center' },
-    children: [{ children: [{ fieldKey: 'departmentName', type: 'text' }] }]
+    children: [{ fieldKey: 'departmentName', type: 'text' }]
   },
   {
     key: 'item',
     label: '物料 / 部门小计',
     props: { prop: 'itemDisplay', minWidth: 280 },
-    children: [{ children: [{ fieldKey: 'itemDisplay', type: 'text' }] }]
+    children: [{ fieldKey: 'itemDisplay', type: 'text' }]
   },
   {
     key: 'quantity',
     label: '数量',
     props: { prop: 'quantity', width: 100, align: 'right' },
-    children: [{ children: [{ fieldKey: 'quantity', type: 'text' }] }]
+    children: [{ fieldKey: 'quantity', type: 'text' }]
   },
   {
     key: 'amount',
     label: '含税金额',
     props: { prop: 'amountDisplay', width: 140, align: 'right' },
-    children: [{ children: [{ fieldKey: 'amountDisplay', type: 'text' }] }]
+    children: [{ fieldKey: 'amountDisplay', type: 'text' }]
   },
   {
     key: 'note',
     label: '业务备注（独立编辑）',
     props: { prop: 'note', minWidth: 220 },
-    children: [{ children: [{
+    children: [{
       fieldKey: 'note',
       type: 'input',
       component: {
@@ -180,7 +180,7 @@ const columns: ColumnConfig[] = [
           clearable: true
         })
       }
-    }] }]
+    }]
   }
 ]
 

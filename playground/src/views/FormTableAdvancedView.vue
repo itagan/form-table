@@ -117,34 +117,27 @@ const columns: ColumnConfig[] = [
     headerHint: '一个单元格内包含两行栅格布局',
     headerProps: { 'aria-label': '联系人信息说明' },
     props: { minWidth: 600 },
+    rowProps: { gutter: 10 },
     children: [
       {
-        props: { gutter: 10 },
-        children: [
-          {
-            fieldKey: 'name',
-            type: 'input',
-            colProps: { span: 8 },
-            formItemProps: { label: '姓名', labelWidth: '52px', rules: [{ required: true, message: '请输入姓名' }] },
-            component: { props: { clearable: true } }
-          },
-          {
-            fieldKey: 'phone',
-            type: 'component',
-            colProps: { span: 16 },
-            formItemProps: { label: '手机', labelWidth: '52px' },
-            component: {
-              renderer: PhoneInput,
-              props: { size: 'small', clearable: true },
-              listeners: { change: ({ value }) => console.log('phone changed', value) }
-            }
-          }
-        ]
+        fieldKey: 'name',
+        type: 'input',
+        colProps: { span: 8 },
+        formItemProps: { label: '姓名', labelWidth: '52px', rules: [{ required: true, message: '请输入姓名' }] },
+        component: { props: { clearable: true } }
       },
       {
-        props: { gutter: 10 },
-        children: [
-          {
+        fieldKey: 'phone',
+        type: 'component',
+        colProps: { span: 16 },
+        formItemProps: { label: '手机', labelWidth: '52px' },
+        component: {
+          renderer: PhoneInput,
+          props: { size: 'small', clearable: true },
+          listeners: { change: ({ value }) => console.log('phone changed', value) }
+        }
+      },
+      {
             fieldKey: 'province',
             type: 'select',
             colProps: { span: 7 },
@@ -170,26 +163,24 @@ const columns: ColumnConfig[] = [
             colProps: { span: 10 },
             formItemProps: { label: '地址', labelWidth: '52px' }
           }
-        ]
-      }
     ]
   },
   {
     label: '状态',
     props: { width: 90, align: 'center' },
-    children: [{ children: [{
+    children: [{
       fieldKey: 'status',
       type: 'slot',
       component: {
         renderer: 'status',
         props: ({ row }) => ({ type: row.status === 'enabled' ? 'success' : 'info' })
       }
-    }] }]
+    }]
   },
   {
     label: 'Render Function',
     props: { width: 150, align: 'center' },
-    children: [{ children: [{
+    children: [{
       key: 'active-render-field',
       fieldKey: 'active',
       type: 'component',
@@ -202,7 +193,7 @@ const columns: ColumnConfig[] = [
           }
         }
       }
-    }] }]
+    }]
   },
   {
     key: 'actions-column',

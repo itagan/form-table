@@ -141,7 +141,7 @@ const columns = computed(() => defineFormTableColumns<DemoRow>([
   {
     label: '姓名',
     props: { minWidth: 180 },
-    children: [{ children: [{ fieldKey: 'name', type: 'input' }] }]
+    children: [{ fieldKey: 'name', type: 'input' }]
   },
   {
     label: '部门',
@@ -157,7 +157,7 @@ const columns = computed(() => defineFormTableColumns<DemoRow>([
       ],
       filterMethod: (value: string, row: DemoRow) => row.department === value
     },
-    children: [{ children: [{ fieldKey: 'department', type: 'text' }] }]
+    children: [{ fieldKey: 'department', type: 'text' }]
   }
 ]))
 
@@ -184,7 +184,7 @@ const columns = defineFormTableColumns<DemoRow>([
   },
   {
     label: '姓名',
-    children: [{ children: [{ fieldKey: 'name', type: 'input' }] }]
+    children: [{ fieldKey: 'name', type: 'input' }]
   }
 ])
 

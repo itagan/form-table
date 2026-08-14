@@ -17,7 +17,7 @@ const columns: ColumnConfig[] = [{
     'aria-label': '联系人信息说明'
   },
   props: { minWidth: 420 },
-  children: [/* Row / Item 配置 */]
+  children: [/* Item 配置 */]
 }]
 ```
 
@@ -99,4 +99,4 @@ Tooltip 模式会让托管 Hint 的表头包装节点默认获得 `tabindex="0"`
 
 ## 相关 API
 
-[Column / Row / Item](../api/columns.md) · [Slot 与上下文](../api/contexts.md)
+[Column / Item](../api/columns.md) · [Slot 与下文](../api/contexts.md)

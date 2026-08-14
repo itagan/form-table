@@ -185,11 +185,11 @@ const tableProps = computed(() => ({ border: true, spanMethod }))
 const columns: ColumnConfig[] = [
   {
     key: 'date-column', label: '议程日期', props: { prop: 'dateLabel', width: 150, align: 'center' },
-    children: [{ children: [{ key: 'date-field', fieldKey: 'dateLabel', type: 'slot', component: { renderer: 'day-date' } }] }]
+    children: [{ key: 'date-field', fieldKey: 'dateLabel', type: 'slot', component: { renderer: 'day-date' } }]
   },
   {
     key: 'topic-column', label: '议程主题', props: { prop: 'topic', minWidth: 200 },
-    children: [{ children: [{ key: 'topic-field', fieldKey: 'topic', type: 'slot', component: { renderer: 'day-topic' } }] }]
+    children: [{ key: 'topic-field', fieldKey: 'topic', type: 'slot', component: { renderer: 'day-topic' } }]
   },
   {
     key: 'sequence-column', label: '议程', props: { width: 82, align: 'center' },
@@ -197,28 +197,28 @@ const columns: ColumnConfig[] = [
   },
   {
     key: 'time-column', label: '时间计划', props: { minWidth: 230 },
-    children: [{ children: [{ key: 'time-field', fieldKey: 'timeRange', type: 'slot', component: { renderer: 'time-plan' } }] }]
+    children: [{ key: 'time-field', fieldKey: 'timeRange', type: 'slot', component: { renderer: 'time-plan' } }]
   },
   {
     key: 'name-column', label: '议程名称', props: { minWidth: 280 },
-    children: [{ children: [{ key: 'name-field', fieldKey: 'name', type: 'slot', component: { renderer: 'itinerary-name' } }] }]
+    children: [{ key: 'name-field', fieldKey: 'name', type: 'slot', component: { renderer: 'itinerary-name' } }]
   },
   {
     key: 'city-column', label: '议程城市', props: { minWidth: 150 },
-    children: [{ children: [{
+    children: [{
       key: 'city-field', fieldKey: 'city', type: 'select',
       component: {
         props: { placeholder: '请选择城市', filterable: true },
         options: ['杭州', '上海', '北京', '深圳', '广州'].map(value => ({ label: value, value }))
       }
-    }] }]
+    }]
   },
   {
     key: 'location-column', label: '议程地点', props: { minWidth: 220 },
-    children: [{ children: [{
+    children: [{
       key: 'location-field', fieldKey: 'location', type: 'input',
       component: { props: { placeholder: '请输入议程地点', clearable: true } }
-    }] }]
+    }]
   },
   {
     key: 'action-column', label: '操作', props: { width: 190, fixed: 'right', align: 'center' },

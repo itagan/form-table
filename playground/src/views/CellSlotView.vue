@@ -160,13 +160,13 @@ const columns: ColumnConfig[] = [
     key: 'score-column',
     label: '评分（字段 Slot）',
     props: { minWidth: 220 },
-    children: [{ children: [{
+    children: [{
       key: 'score-field',
       fieldKey: 'score',
       type: 'slot',
       formItemProps: { rules: [{ required: true, message: '请输入评分' }] },
       component: { renderer: 'score-editor' }
-    }] }]
+    }]
   },
   {
     key: 'actions-column',

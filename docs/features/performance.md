@@ -17,7 +17,7 @@ FormTable 基于 Element UI Table 和 Form，不包含虚拟滚动。数据规�
 | 场景 | 渲染路径 | 主要观察目标 |
 | --- | --- | --- |
 | `cellSlot` 纯展示 | `el-table-column → scoped Slot` | Element Table 行和文本 DOM 的基础成本 |
-| 内置 Input 编辑 | Row → Item → `el-input` | `el-form-item`、输入组件和受控回写成本 |
+| 内置 Input 编辑 | 单 Flex Row → Item → `el-input` | `el-form-item`、输入组件和受控回写成本 |
 | 动态配置编辑 | 编辑路径 + 动态回调 | `visible/props/formItemProps/component.props` 求值次数 |
 
 页面可选择 50、100、300、500、1000 行，以及 2、4、6 个数据列。编辑场景额外提供一个 `cellSlot` 操作列，用于测量真实 `updateRow` 通道。

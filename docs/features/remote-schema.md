@@ -38,7 +38,7 @@
 
 远程配置可以包含：
 
-- Column / Row / Item 布局和稳定 key。
+- Column / Item 布局和稳定 key。
 - 内置 `type`、静态 props、options、optionProps。
 - 由前端约定并实现的 Slot 名称。
 
