@@ -53,6 +53,7 @@ describe('Element UI Tooltip adapter', () => {
     adapter.destroy()
 
     expect(popper.style.display).toBe('none')
+    expect(popper.style.pointerEvents).toBe('none')
     expect(instance.referenceElm).toBe(target)
     expect(instance.setExpectedState).toHaveBeenNthCalledWith(1, true)
     expect(instance.setExpectedState).toHaveBeenNthCalledWith(2, true)
