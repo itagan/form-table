@@ -2,7 +2,7 @@
 
 包入口导出：
 
-- `ColumnConfig`、`LayoutColumnConfig`、`CellSlotColumnConfig`、`PlainColumnConfig`、`FormItemConfig`
+- `ColumnConfig`、`LayoutColumnConfig`、`CellSlotColumnConfig`、`NativeColumnConfig`、`FormItemConfig`
 - `FieldComponentConfig`、`FieldModelConfig`、`FieldRendererResolver`、`BuiltinFormItemType`
 - `FormItemOption`、`OptionPropsConfig`
 - `FormTableHintValue`、`FormTableHintMode`、`FormTableHintTargets`、`FormTableFieldHintFormatter`、`FormTableHintOptions`
@@ -60,10 +60,10 @@ const columns = defineFormTableColumns<PurchaseRow>([{
 列配置通过联合类型互斥：
 
 ```ts
-type ColumnConfig = LayoutColumnConfig | CellSlotColumnConfig | PlainColumnConfig
+type ColumnConfig = LayoutColumnConfig | CellSlotColumnConfig | NativeColumnConfig
 ```
 
-`LayoutColumnConfig` 使用 `children` 进入 Item 字段渲染链路，并可用 `rowProps` 配置单元格内唯一 Flex Row；`CellSlotColumnConfig` 使用 `cellSlot` 直接渲染单元格；`PlainColumnConfig` 只透传 `el-table-column` props。三种列模式互斥。
+`LayoutColumnConfig` 使用 `children` 进入 Item 字段渲染链路，并可用 `rowProps` 配置单元格内唯一 Flex Row；`CellSlotColumnConfig` 使用 `cellSlot` 直接渲染单元格；`NativeColumnConfig` 只透传 `el-table-column` props。三种列模式互斥。
 
 ```ts
 interface CellSlotColumnConfig extends BaseColumnConfig {

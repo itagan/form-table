@@ -4,7 +4,7 @@
       <div>
         <p class="eyebrow">FEATURE DEMO</p>
         <h1>Element 功能列透传</h1>
-        <p>直接在 columns 中配置 selection、index 和 expand，无需单独声明 PlainColumnConfig 数组。</p>
+        <p>直接在 columns 中配置 selection、index 和 expand，无需单独声明 NativeColumnConfig 数组。</p>
       </div>
       <div class="page-actions">
         <el-switch v-model="showIndex" active-text="显示序号列" />
@@ -57,7 +57,7 @@
       <h2>配置边界</h2>
       <ul>
         <li><code>selection/index/expand</code> 都是 Element Column 的 <code>props.type</code>。</li>
-        <li>纯透传列省略 <code>children/cellSlot</code>，TypeScript 会自动识别为 <code>PlainColumnConfig</code>。</li>
+        <li>原生透传列省略 <code>children/cellSlot</code>，TypeScript 会自动识别为 <code>NativeColumnConfig</code>。</li>
         <li>需要内容的 expand 列可组合 <code>cellSlot</code>；普通编辑列继续使用 <code>children</code>。</li>
       </ul>
     </section>

@@ -47,7 +47,7 @@
 
       <el-alert
         class="native-column-note"
-        title="PlainColumnConfig 直接透传 el-table-column props；选择结果通过 selection-change 获取，不需要 children 或 fieldKey。"
+        title="NativeColumnConfig 直接透传 el-table-column props；选择结果通过 selection-change 获取，不需要 children 或 fieldKey。"
         type="info"
         :closable="false"
         show-icon
