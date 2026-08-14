@@ -1,21 +1,14 @@
-import { computed, inject, ref } from 'vue'
+import { computed, inject } from 'vue'
 import type {
   FormItemConfig,
   FormTableFieldContext,
-  FormTableHintModeContext,
-  FormTableDefaultFieldHintContext,
-  FormTableHintTargetsContext,
+  FormTableHintContext,
   FormTableRowContext,
   FormTableUpdateApi,
   FormTableValue,
   TableRow
 } from '../types'
-import {
-  FORM_TABLE_DEFAULT_FIELD_HINT_KEY,
-  FORM_TABLE_HINT_MODE_KEY,
-  FORM_TABLE_HINT_TARGETS_KEY,
-  FORM_TABLE_UPDATE_KEY
-} from '../types'
+import { FORM_TABLE_HINT_CONTEXT_KEY, FORM_TABLE_UPDATE_KEY } from '../types'
 import {
   createFieldRenderContext,
   extendLazyContext,
@@ -38,13 +31,14 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
   options: FormTableFieldContextOptions<TRow>
 ) {
   /** 注入缺失时字段仍可只读渲染，更新助手退化为空操作。 */
-  const updateApi = inject<FormTableUpdateApi<TRow>>(FORM_TABLE_UPDATE_KEY)
-  const hintMode = inject<FormTableHintModeContext>(FORM_TABLE_HINT_MODE_KEY, ref<'title'>('title'))
-  const hintTargets = inject<FormTableHintTargetsContext>(FORM_TABLE_HINT_TARGETS_KEY, ref<'field'>('field'))
-  const defaultFieldHint = inject<FormTableDefaultFieldHintContext<TRow>>(
-    FORM_TABLE_DEFAULT_FIELD_HINT_KEY,
-    ref(undefined)
+  const updateApi = inject<FormTableUpdateApi<TRow> | undefined>(FORM_TABLE_UPDATE_KEY, undefined)
+  const hintContext = inject<FormTableHintContext<TRow> | undefined>(
+    FORM_TABLE_HINT_CONTEXT_KEY,
+    undefined
   )
+  const hintMode = computed(() => hintContext?.mode.value ?? 'title')
+  const hintTargets = computed(() => hintContext?.targets.value ?? 'field')
+  const defaultFieldHint = computed(() => hintContext?.defaultFieldHint.value)
 
   /**
    * Element UI 以数组下标组织表单校验路径；行排序后 computed 会生成新路径，
@@ -104,7 +98,6 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
     propPath,
     runtimeContext,
     resolvedFormItemProps,
-    resolvedHint,
     fieldContext
   }
 }

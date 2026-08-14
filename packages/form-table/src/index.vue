@@ -34,6 +34,7 @@
     <FormTableHintTooltip
       v-if="isTooltipHintMode"
       ref="hintTooltipControllerRef"
+      :container="containerRef"
       :tooltip-props="props.hintOptions.tooltipProps"
     />
   </div>
@@ -62,11 +63,9 @@ import type {
   FormTableElementFormRef,
   FormTableElementTableRef,
   FormTableFieldChangePayload,
+  FormTableHintContext,
   FormTableHintMode,
-  FormTableHintModeContext,
   FormTableHintTargets,
-  FormTableHintTargetsContext,
-  FormTableDefaultFieldHintContext,
   FormTableHintOptions,
   FormTableRowKey,
   FormTableTableProps,
@@ -78,10 +77,7 @@ import type {
 } from './types'
 import {
   FORM_TABLE_CONTEXT_KEY,
-  FORM_TABLE_DEFAULT_FIELD_HINT_KEY,
-  FORM_TABLE_HINT_MODE_KEY,
-  FORM_TABLE_HINT_ROOT_KEY,
-  FORM_TABLE_HINT_TARGETS_KEY,
+  FORM_TABLE_HINT_CONTEXT_KEY,
   FORM_TABLE_SLOTS_KEY,
   FORM_TABLE_UPDATE_KEY
 } from './types'
@@ -164,10 +160,11 @@ const updateApi: FormTableUpdateApi = useControlledTableUpdate({
 provide(FORM_TABLE_CONTEXT_KEY, formTableContext)
 provide(FORM_TABLE_UPDATE_KEY, updateApi)
 provide(FORM_TABLE_SLOTS_KEY, slots as FormTableSlots)
-provide(FORM_TABLE_HINT_MODE_KEY, hintMode as FormTableHintModeContext)
-provide(FORM_TABLE_HINT_ROOT_KEY, containerRef)
-provide(FORM_TABLE_HINT_TARGETS_KEY, hintTargets as FormTableHintTargetsContext)
-provide(FORM_TABLE_DEFAULT_FIELD_HINT_KEY, defaultFieldHint as FormTableDefaultFieldHintContext)
+provide<FormTableHintContext>(FORM_TABLE_HINT_CONTEXT_KEY, {
+  mode: hintMode,
+  targets: hintTargets,
+  defaultFieldHint
+})
 
 /**
  * 将 Element UI 的 Promise/callback 两种校验方式统一为 Promise<boolean>，
