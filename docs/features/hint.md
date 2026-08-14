@@ -87,7 +87,7 @@ const hintOptions: FormTableHintOptions<OrderRow> = {
 - `mode: 'title'`：只向有效目标添加原生 `title`，不挂载 Tooltip 控制器。
 - `mode: 'tooltip'`：每个 FormTable 仅挂载一个 Tooltip，通过根节点事件委托服务所有有效目标。
 
-Tooltip 模式内部默认使用 `placement: 'top'`、`effect: 'dark'` 和 `openDelay: 100`，减少鼠标快速扫过字段时的闪烁；同名 `tooltipProps` 会覆盖这些展示默认值。嵌套 FormTable 隔离、键盘焦点、Escape 关闭和 `aria-describedby` 保持有效。`content/reference/popper/manual/value/enterable` 由内部控制，其余属性透传。
+Tooltip 模式内部默认使用 `placement: 'top'`、`effect: 'dark'` 和 `openDelay: 100`，减少鼠标快速扫过字段时的闪烁；同名 `tooltipProps` 会覆盖这些展示默认值。字段仍由整个 `el-form-item` 统一触发，但浮层会优先定位到唯一且可见的实际组件根节点，使 InputNumber、Switch、Rate 等未铺满字段区域的组件保持自然的视觉位置；多根 Slot、空内容或零尺寸节点会回退到 `el-form-item`。嵌套 FormTable 隔离、键盘焦点、Escape 关闭和 `aria-describedby` 保持有效。`content/reference/popper/manual/value/enterable` 由内部控制，其余属性透传。
 
 有效 Hint 会覆盖同层 `headerProps.title` 或 `formItemProps.title`；没有有效 Hint、被作用范围排除或整个系统关闭时，原始 title 保持不变。
 

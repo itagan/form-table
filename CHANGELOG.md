@@ -6,6 +6,7 @@
 
 ### Improved
 
+- 字段 Hint Tooltip 保持 `el-form-item` 统一触发，并优先使用唯一可见的实际组件根节点定位；固定宽度组件不再按整个字段区域偏移，多根或无有效根节点时自动回退。
 - Hint 的内部依赖注入收敛为单一上下文，Tooltip 控制器改由根组件直接传入容器；同时停止从包入口导出仅服务实现拆分的字段分支、解析结果和内部上下文类型。
 - 字段布局从 `Column → RowConfig[] → FormItemConfig[]` 收平为 `Column → FormItemConfig[]`；每个单元格固定使用一个可换行 Flex Row，复杂多 Row 布局统一交给 `cellSlot`。
 - 原样透传 Element Table 的 `empty/append` 根级 Slot，并为排序、筛选、表头、单元格及选择事件补充公开类型、可运行示例和回归测试。
