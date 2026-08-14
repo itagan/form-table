@@ -76,23 +76,23 @@ const columns: ColumnConfig[] = [
   {
     key: 'name-column',
     label: '姓名',
-    children: [{ children: [{
+    children: [{
       key: 'name-field',
       fieldKey: 'name',
       type: 'input',
       formItemProps: {
         rules: [{ required: true, message: '请输入姓名' }]
       }
-    }] }]
+    }]
   },
   {
     key: 'phone-column',
     label: '手机号',
-    children: [{ children: [{
+    children: [{
       key: 'phone-field',
       fieldKey: 'phone',
       type: 'input'
-    }] }]
+    }]
   },
   {
     key: 'actions-column',
@@ -192,4 +192,4 @@ const actionColumn: ColumnConfig = {
 
 ## 相关 API
 
-[Column / Row / Item](../api/columns.md) · [事件与 Ref](../api/events-and-ref.md)
+[Column / Item](../api/columns.md) · [事件与 Ref](../api/events-and-ref.md)

@@ -256,15 +256,13 @@ const createEditColumn = (
           return { minWidth: 170 }
         }
       : { minWidth: 170 },
-    children: [{
-      key: `${fieldKey}-row`,
-      props: dynamic
+    rowProps: dynamic
         ? ({ index }) => {
             callbackCounts.row += 1
             return { gutter: index % 2 === 0 ? 0 : 2 }
           }
         : undefined,
-      children: [{
+    children: [{
         key: `${fieldKey}-item`,
         fieldKey,
         type: 'input',
@@ -295,7 +293,6 @@ const createEditColumn = (
             : { clearable: false }
         }
       }]
-    }]
   }
 }
 

@@ -10,11 +10,11 @@ Hint 是轻量的自动补充说明：字段和表头只提供字符串内容，
 const columns: ColumnConfig[] = [{
   label: '税号',
   headerHint: '纳税人识别号',
-  children: [{ children: [{
+  children: [{
     fieldKey: 'taxNumber',
     type: 'input',
     hint: '请输入营业执照上的统一社会信用代码'
-  }] }]
+  }]
 }]
 ```
 
@@ -113,4 +113,4 @@ Hint 不再作为业务元数据传播到 renderer、组件 props/listener 或 S
 - 同一字段列不建议同时启用 `showOverflowTooltip` 和 Hint，否则两个 Tooltip 可能重叠或闪烁；FormTable 不扫描、删除或改写透传属性。
 - 同一 FormTable 的自动字段和表头共享一组 `tooltipProps`；参数不同使用 Slot。
 
-相关文档：[FormTable Props](../api/form-table.md) · [Column / Row / Item](../api/columns.md) · [Slot 与上下文](../api/contexts.md) · [自定义表头](./custom-header.md)
+相关文档：[FormTable Props](../api/form-table.md) · [Column / Item](../api/columns.md) · [Slot 与上下文](../api/contexts.md) · [自定义表头](./custom-header.md)

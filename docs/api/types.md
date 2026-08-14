@@ -2,7 +2,7 @@
 
 包入口导出：
 
-- `ColumnConfig`、`LayoutColumnConfig`、`CellSlotColumnConfig`、`PlainColumnConfig`、`RowConfig`、`FormItemConfig`
+- `ColumnConfig`、`LayoutColumnConfig`、`CellSlotColumnConfig`、`PlainColumnConfig`、`FormItemConfig`
 - `BuiltinFormItemConfig`、`ComponentFormItemConfig`、`SlotFormItemConfig`
 - `FieldComponentConfig`、`FieldModelConfig`、`FieldRendererResolver`、`BuiltinFormItemType`、`FormItemType`
 - `FormItemOption`、`OptionPropsConfig`、`ResolvedComponentConfig`
@@ -33,13 +33,11 @@ const columns = defineFormTableColumns<PurchaseRow>([{
   label: '采购信息',
   visible: ({ tableData }) => tableData.some(row => row.amount > 0),
   children: [{
-    children: [{
-      fieldKey: 'amount',
-      type: 'number',
-      component: {
-        props: ({ row }) => ({ disabled: row.amount <= 0 })
-      }
-    }]
+    fieldKey: 'amount',
+    type: 'number',
+    component: {
+      props: ({ row }) => ({ disabled: row.amount <= 0 })
+    }
   }]
 }])
 ```
@@ -52,11 +50,11 @@ const columns = defineFormTableColumns<PurchaseRow>([{
 />
 ```
 
-`createFormTable<TRow>()` 只把同一个 FormTable 运行时对象转换为 `FormTableComponent<TRow>`，不会创建包装组件或额外实例；它负责约束 `v-model/tableData/columns/rowKey` 以及 `update:tableData/field-change`。`defineFormTableColumns<TRow>()` 原样返回数组，负责让 Column、Row、Item 及其动态上下文获得 `TRow`。
+`createFormTable<TRow>()` 只把同一个 FormTable 运行时对象转换为 `FormTableComponent<TRow>`，不会创建包装组件或额外实例；它负责约束 `v-model/tableData/columns/rowKey` 以及 `update:tableData/field-change`。`defineFormTableColumns<TRow>()` 原样返回数组，负责让 Column、Item 及其动态上下文获得 `TRow`。
 
 泛型组件与默认 FormTable 都推荐使用 `v-model="tableData"`。类型入口内部适配了 Vue 2 Volar 对无参数 `v-model` 的模板映射；这只是声明层适配，运行时仍由组件的 `model: { prop: 'tableData', event: 'update:tableData' }` 驱动。需要显式处理回写时仍可使用 `:table-data.sync` 或 `@update:tableData`。
 
-`ColumnConfig`、Row/Item 配置、上下文、listener、事件载荷与 `FormTableProps` 都接受默认行泛型；省略泛型时继续使用原有 `TableRow`。`fieldKey` 保持为字符串，以同时支持固定字段、嵌套对象与数组路径、服务端字段及其他动态配置。
+`ColumnConfig`、Item 配置、上下文、listener、事件载荷与 `FormTableProps` 都接受默认行泛型；省略泛型时继续使用原有 `TableRow`。`fieldKey` 保持为字符串，以同时支持固定字段、嵌套对象与数组路径、服务端字段及其他动态配置。
 
 根组件 Vue 2 `v-model` 映射到 `FormTableProps.tableData` 与 `update:tableData`，因此不会新增 `value` prop 或 `input` 事件。Item 的 `FieldComponentConfig.model` 只负责字段组件协议，与根组件 model 无关。
 
@@ -66,7 +64,7 @@ const columns = defineFormTableColumns<PurchaseRow>([{
 type ColumnConfig = LayoutColumnConfig | CellSlotColumnConfig | PlainColumnConfig
 ```
 
-`LayoutColumnConfig` 使用 `children` 进入 Row/Item 字段渲染链路；`CellSlotColumnConfig` 使用 `cellSlot` 直接渲染单元格；`PlainColumnConfig` 只透传 `el-table-column` props。三种列模式互斥。
+`LayoutColumnConfig` 使用 `children` 进入 Item 字段渲染链路，并可用 `rowProps` 配置单元格内唯一 Flex Row；`CellSlotColumnConfig` 使用 `cellSlot` 直接渲染单元格；`PlainColumnConfig` 只透传 `el-table-column` props。三种列模式互斥。
 
 ```ts
 interface CellSlotColumnConfig extends BaseColumnConfig {
@@ -126,7 +124,7 @@ type FieldRendererResolver = (
 
 ```text
 Column visible/props/headerProps/headerHint → tableData, columnConfig
-Row visible/props        → Column 信息 + row, index, rowConfig
+Column rowProps          → Column 信息 + row, index
 Field 布局与 Hint 求值   → Row 信息 + fieldKey, value, itemConfig
 component 动态配置       → Field 信息
 component.listeners      → Field 信息 + setValue, updateRow
@@ -148,7 +146,7 @@ interface FieldModelConfig {
 
 `FieldComponentConfig.model` 未配置时保留 Vue 2 原生 `v-model`；配置 `FieldModelConfig` 时使用指定 prop/event；配置 `false` 时不注入模型绑定。
 
-`row/tableData` 与 `columnConfig/rowConfig/itemConfig` 在回调类型中采用浅层只读约束；运行时不会冻结原对象。字段更新使用 `setValue` 或 `updateRow`，配置调整由调用方替换 `columns`。
+`row/tableData` 与 `columnConfig/itemConfig` 在回调类型中采用浅层只读约束；运行时不会冻结原对象。字段更新使用 `setValue` 或 `updateRow`，配置调整由调用方替换 `columns`。
 
 表头 slot 接收 `tableData/label/columnIndex/columnConfig`。`columnIndex` 是动态显隐过滤后的可见列下标，不保证等于原始 `columns` 数组下标。
 

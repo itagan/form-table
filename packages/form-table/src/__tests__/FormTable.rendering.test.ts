@@ -37,6 +37,49 @@ describe('FormTable rendering and configuration', () => {
     wrapper.destroy()
   })
 
+  it('renders one wrapping Flex row per field cell and lets rowProps configure it except type', async () => {
+    const rowProps = vi.fn((_context: FormTableRowContext) => ({
+      type: 'block',
+      gutter: 12,
+      justify: 'space-between',
+      align: 'middle',
+      class: 'custom-field-layout',
+      style: { minHeight: '40px' }
+    }))
+    const wrapper = mountFormTable({
+      tableData: [{ first: '', second: '', third: '', fourth: '', defaultSpan: '' }],
+      columns: [{
+        label: '分组字段',
+        rowProps,
+        children: [
+          { fieldKey: 'first', type: 'input', colProps: { span: 8 } },
+          { fieldKey: 'second', type: 'input', colProps: { span: 16 } },
+          { fieldKey: 'third', type: 'input', colProps: { span: 12 } },
+          { fieldKey: 'fourth', type: 'input', colProps: { span: 12 } },
+          { fieldKey: 'defaultSpan', type: 'input', colProps: {} }
+        ]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    const rows = wrapper.findAllComponents({ name: 'ElRow' })
+    expect(rows).toHaveLength(1)
+    expect(rowProps).toHaveBeenCalledTimes(1)
+    expect((rows.at(0).vm as any).type).toBe('flex')
+    expect((rows.at(0).vm as any).gutter).toBe(12)
+    expect((rows.at(0).vm as any).justify).toBe('space-between')
+    expect((rows.at(0).vm as any).align).toBe('middle')
+    expect(rows.at(0).classes()).toEqual(expect.arrayContaining([
+      'form-table-field-layout',
+      'custom-field-layout',
+      'el-row--flex'
+    ]))
+    expect(rows.at(0).attributes('style')).toContain('min-height: 40px')
+    expect(rows.at(0).findAllComponents({ name: 'ElCol' }).wrappers.map(col => (col.vm as any).span))
+      .toEqual([8, 16, 12, 12, 24])
+    wrapper.destroy()
+  })
+
   it('applies headerHint and other properties to the default header text node', async () => {
     const headerProps = vi.fn(({ tableData, columnConfig }: FormTableColumnContext) => ({
       class: `records-${tableData.length}`,
@@ -52,7 +95,7 @@ describe('FormTable rendering and configuration', () => {
         label: '姓名',
         headerProps,
         headerHint,
-        children: [{ children: [{ fieldKey: 'name', type: 'input' }] }]
+        children: [{ fieldKey: 'name', type: 'input' }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -79,7 +122,7 @@ describe('FormTable rendering and configuration', () => {
         props: {
           renderHeader: (h: any) => h('strong', { class: 'native-render-header' }, ['自定义表头'])
         },
-        children: [{ children: [{ fieldKey: 'name', type: 'input' }] }]
+        children: [{ fieldKey: 'name', type: 'input' }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -95,7 +138,7 @@ describe('FormTable rendering and configuration', () => {
       tableData: [{ summary: '完整说明' }],
       columns: [{
         label: '摘要',
-        children: [{ children: [{
+        children: [{
           fieldKey: 'summary',
           type: 'text',
           component: {
@@ -104,7 +147,7 @@ describe('FormTable rendering and configuration', () => {
               class: 'summary-text'
             })
           }
-        }] }]
+        }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -121,14 +164,14 @@ describe('FormTable rendering and configuration', () => {
       tableData: [{ summary: '只读摘要' }],
       columns: [{
         label: '摘要',
-        children: [{ children: [{
+        children: [{
           fieldKey: 'summary',
           type: 'text',
           component: {
             props: { class: 'clickable-summary', title: '查看摘要' },
             listeners: { click }
           }
-        }] }]
+        }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -155,11 +198,11 @@ describe('FormTable rendering and configuration', () => {
       tableData: [{ name: 'Alice' }],
       columns: [{
         label: '姓名',
-        children: [{ children: [{
+        children: [{
           fieldKey: 'name',
           type: 'input',
           hint
-        }] }]
+        }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -182,12 +225,12 @@ describe('FormTable rendering and configuration', () => {
       columns: [{
         label: '姓名',
         headerProps: { title: '底层表头提示' },
-        children: [{ children: [{
+        children: [{
           fieldKey: 'name',
           type: 'input',
           formItemProps: { title: '底层字段提示' },
           component: { props: { title: '底层组件提示' } }
-        }] }]
+        }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -203,7 +246,7 @@ describe('FormTable rendering and configuration', () => {
       tableData: [{ name: 'Alice' }],
       columns: [{
         label: '姓名',
-        children: [{ children: [{
+        children: [{
           fieldKey: 'name',
           type: 'input',
           component: {
@@ -211,7 +254,7 @@ describe('FormTable rendering and configuration', () => {
               title: value ? `编辑：${value}` : undefined
             })
           }
-        }] }]
+        }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -248,7 +291,6 @@ describe('FormTable rendering and configuration', () => {
       columns: [{
         label: '状态',
         children: [{
-          children: [{
             fieldKey: 'status',
             type: 'component',
             hint: '状态字段说明',
@@ -258,7 +300,6 @@ describe('FormTable rendering and configuration', () => {
               listeners: { commit: listener }
             }
           }]
-        }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -281,7 +322,6 @@ describe('FormTable rendering and configuration', () => {
       'index',
       'itemConfig',
       'row',
-      'rowConfig',
       'setValue',
       'tableData',
       'updateRow',
@@ -327,11 +367,11 @@ describe('FormTable rendering and configuration', () => {
       ],
       columns: [{
         label: '需求说明',
-        children: [{ children: [{
+        children: [{
           fieldKey: 'detail',
           type: 'component',
           component: { resolveRenderer }
-        }] }]
+        }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -365,14 +405,14 @@ describe('FormTable rendering and configuration', () => {
       tableData: [{ detail: '默认需求' }],
       columns: [{
         label: '需求说明',
-        children: [{ children: [{
+        children: [{
           fieldKey: 'detail',
           type: 'component',
           component: {
             renderer: DefaultEditor,
             resolveRenderer: () => undefined
           }
-        }] }]
+        }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -386,11 +426,11 @@ describe('FormTable rendering and configuration', () => {
       tableData: [{ detail: '未支持的需求' }],
       columns: [{
         label: '需求说明',
-        children: [{ children: [{
+        children: [{
           fieldKey: 'detail',
           type: 'component',
           component: { resolveRenderer: () => undefined }
-        }] }]
+        }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -416,11 +456,11 @@ describe('FormTable rendering and configuration', () => {
       tableData: [{ enabled: true }],
       columns: [{
         label: '启用',
-        children: [{ children: [{
+        children: [{
           fieldKey: 'enabled',
           type: 'component',
           component: { renderer: DeclaredModelSwitch }
-        }] }]
+        }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -449,7 +489,7 @@ describe('FormTable rendering and configuration', () => {
       tableData: [{ ownerId: 'user-1' }],
       columns: [{
         label: '负责人',
-        children: [{ children: [{
+        children: [{
           fieldKey: 'ownerId',
           type: 'component',
           component: {
@@ -461,7 +501,7 @@ describe('FormTable rendering and configuration', () => {
             },
             listeners: { select: selectionListener }
           }
-        }] }]
+        }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -501,7 +541,7 @@ describe('FormTable rendering and configuration', () => {
       tableData: [{ status: 'approved' }],
       columns: [{
         label: '状态',
-        children: [{ children: [{
+        children: [{
           fieldKey: 'status',
           type: 'component',
           component: {
@@ -509,7 +549,7 @@ describe('FormTable rendering and configuration', () => {
             model: false,
             props: ({ value }) => ({ status: value })
           }
-        }] }]
+        }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -531,8 +571,7 @@ describe('FormTable rendering and configuration', () => {
       tableData: [{ choice: 'a', checked: ['b'] }],
       columns: [{
         label: '选项字段',
-        children: [{ children: [
-          {
+        children: [{
             fieldKey: 'choice',
             type: 'radio',
             component: { options }
@@ -541,8 +580,7 @@ describe('FormTable rendering and configuration', () => {
             fieldKey: 'checked',
             type: 'checkbox',
             component: { options }
-          }
-        ] }]
+          }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -575,7 +613,7 @@ describe('FormTable rendering and configuration', () => {
     const second = createItem('second-name', 'B')
     const createColumns = (children: FormItemConfig[]): ColumnConfig[] => [{
       label: '稳定字段身份',
-      children: [{ children }]
+      children
     }]
     const wrapper = mountFormTable({ columns: createColumns([first, second]) })
     await wrapper.vm.$nextTick()
@@ -588,7 +626,7 @@ describe('FormTable rendering and configuration', () => {
     wrapper.destroy()
   })
 
-  it('keeps keyed row instances and column content aligned when configs are reordered', async () => {
+  it('keeps column content aligned when configs are reordered', async () => {
     let nextInstanceId = 0
     const StatefulField = {
       props: ['marker'],
@@ -605,33 +643,15 @@ describe('FormTable rendering and configuration', () => {
       type: 'component',
       component: { renderer: StatefulField, props: { marker } }
     })
-    const firstRow = { key: 'first-row', children: [createItem('row-a', 'row-a')] }
-    const secondRow = { key: 'second-row', children: [createItem('row-b', 'row-b')] }
-    const rowWrapper = mountFormTable({
-      tableData: [{ 'row-a': '', 'row-b': '' }],
-      columns: [{ key: 'rows', label: '布局行', children: [firstRow, secondRow] }]
-    })
-    await rowWrapper.vm.$nextTick()
-    expect(rowWrapper.findAll('.dynamic-structure-field').wrappers.map(node => node.text()))
-      .toEqual(['row-a:1', 'row-b:2'])
-    await rowWrapper.setProps({
-      columns: [{ key: 'rows', label: '布局行', children: [secondRow, firstRow] }]
-    })
-    await rowWrapper.vm.$nextTick()
-    expect(rowWrapper.findAll('.dynamic-structure-field').wrappers.map(node => node.text()))
-      .toEqual(['row-b:2', 'row-a:1'])
-    rowWrapper.destroy()
-
-    nextInstanceId = 0
     const firstColumn: ColumnConfig = {
       key: 'first-column',
       label: '第一列',
-      children: [{ key: 'first-layout', children: [createItem('column-a', 'column-a')] }]
+      children: [createItem('column-a', 'column-a')]
     }
     const secondColumn: ColumnConfig = {
       key: 'second-column',
       label: '第二列',
-      children: [{ key: 'second-layout', children: [createItem('column-b', 'column-b')] }]
+      children: [createItem('column-b', 'column-b')]
     }
     const columnWrapper = mountFormTable({
       tableData: [{ 'column-a': '', 'column-b': '' }],
@@ -663,13 +683,10 @@ describe('FormTable rendering and configuration', () => {
       key,
       label: marker,
       children: [{
-        key: `${key}-layout`,
-        children: [{
-          key: `${key}-field`,
-          fieldKey: marker,
-          type: 'component',
-          component: { renderer: StatefulColumnField, props: { marker } }
-        }]
+        key: `${key}-field`,
+        fieldKey: marker,
+        type: 'component',
+        component: { renderer: StatefulColumnField, props: { marker } }
       }]
     })
     const first = createColumn('column-a', 'a')
@@ -743,7 +760,7 @@ describe('FormTable rendering and configuration', () => {
       key,
       label: key,
       visible,
-      children: [{ children: [{ fieldKey: key, type: 'text' }] }]
+      children: [{ fieldKey: key, type: 'text' }]
     })
     const first = createColumn('first')
     const second = createColumn('second', () => visibility.showSecond)
@@ -779,21 +796,17 @@ describe('FormTable rendering and configuration', () => {
     wrapper.destroy()
   })
 
-  it('reacts to dynamic column, row, and item visibility changes', async () => {
-    const state = { showColumn: true, showRow: true, showItem: true }
+  it('reacts to dynamic column and item visibility changes', async () => {
+    const state = { showColumn: true, showItem: true }
     const createColumns = (): ColumnConfig[] => [{
       key: 'dynamic-column',
       label: '动态列',
       visible: () => state.showColumn,
       children: [{
-        key: 'dynamic-row',
-        visible: () => state.showRow,
-        children: [{
-          key: 'dynamic-item',
-          fieldKey: 'name',
-          type: 'input',
-          visible: () => state.showItem
-        }]
+        key: 'dynamic-item',
+        fieldKey: 'name',
+        type: 'input',
+        visible: () => state.showItem
       }]
     }]
     const wrapper = mountFormTable({ columns: createColumns() })
@@ -804,10 +817,6 @@ describe('FormTable rendering and configuration', () => {
     await wrapper.setProps({ columns: createColumns() })
     expect(wrapper.find('input').exists()).toBe(false)
     state.showItem = true
-    state.showRow = false
-    await wrapper.setProps({ columns: createColumns() })
-    expect(wrapper.find('input').exists()).toBe(false)
-    state.showRow = true
     state.showColumn = false
     await wrapper.setProps({ columns: createColumns() })
     expect(wrapper.text()).not.toContain('动态列')
@@ -824,9 +833,8 @@ describe('FormTable rendering and configuration', () => {
     const columns: ColumnConfig[] = [{
       label: '地区',
       visible: columnVisible,
-      children: [{
-        props: rowProps,
-        children: [
+      rowProps,
+      children: [
           {
             fieldKey: 'province',
             type: 'select',
@@ -844,8 +852,7 @@ describe('FormTable rendering and configuration', () => {
               options: fieldOptions
             }
           }
-        ]
-      }]
+      ]
     }]
     const wrapper = mountFormTable({
       tableData: [{ province: 'zhejiang', city: 'hangzhou' }],
@@ -861,7 +868,6 @@ describe('FormTable rendering and configuration', () => {
       'columnConfig',
       'index',
       'row',
-      'rowConfig',
       'tableData'
     ])
     expect(Object.keys(fieldVisible.mock.calls[0][0]).sort()).toEqual([
@@ -870,7 +876,6 @@ describe('FormTable rendering and configuration', () => {
       'index',
       'itemConfig',
       'row',
-      'rowConfig',
       'tableData',
       'value'
     ])
@@ -880,7 +885,6 @@ describe('FormTable rendering and configuration', () => {
       'index',
       'itemConfig',
       'row',
-      'rowConfig',
       'tableData',
       'value'
     ])

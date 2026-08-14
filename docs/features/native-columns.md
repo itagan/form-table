@@ -14,9 +14,7 @@ const columns = defineFormTableColumns<TableRow>([
   { label: '序号', props: { type: 'index', width: 64, align: 'center' } },
   {
     label: '姓名',
-    children: [{
-      children: [{ fieldKey: 'name', type: 'input' }]
-    }]
+    children: [{ fieldKey: 'name', type: 'input' }]
   }
 ])
 ```

@@ -9,14 +9,12 @@ localVue.use(ElementUI)
 export const inputColumns: ColumnConfig[] = [{
   label: '姓名',
   children: [{
-    children: [{
       fieldKey: 'name',
       type: 'input',
       component: {
         props: { placeholder: '请输入姓名' }
       }
     }]
-  }]
 }]
 
 export function mountFormTable(options: {

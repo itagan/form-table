@@ -1,5 +1,5 @@
 import type { DynamicValue, TableRow } from '../types/base'
-import type { ColumnConfig, FormItemConfig, RowConfig } from '../types/config'
+import type { ColumnConfig, FormItemConfig } from '../types/config'
 import type {
   FormTableColumnContext,
   FormTableFieldRenderContext,
@@ -57,13 +57,11 @@ export function createColumnContext<TRow extends TableRow = TableRow>(
 export function createRowContext<TRow extends TableRow = TableRow>(
   columnContext: FormTableColumnContext<TRow>,
   row: Readonly<TRow>,
-  index: number,
-  rowConfig: Readonly<RowConfig<TRow>>
+  index: number
 ): FormTableRowContext<TRow> {
   return extendLazyContext(columnContext, {
     row,
-    index,
-    rowConfig
+    index
   })
 }
 

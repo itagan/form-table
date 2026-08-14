@@ -6,6 +6,7 @@
 
 ### Improved
 
+- 字段布局从 `Column → RowConfig[] → FormItemConfig[]` 收平为 `Column → FormItemConfig[]`；每个单元格固定使用一个可换行 Flex Row，复杂多 Row 布局统一交给 `cellSlot`。
 - 原样透传 Element Table 的 `empty/append` 根级 Slot，并为排序、筛选、表头、单元格及选择事件补充公开类型、可运行示例和回归测试。
 - 新增 `createFormTable<TRow>()` 泛型组件工厂，使 `tableData`、列配置、rowKey、动态上下文和组件事件共享业务行类型，且不创建额外运行时组件。
 - 公共 API 删除低收益的严格字段路径助手，字段 `model` 删除与省略配置重复的 `true` 状态；Form/Table Ref 改为继承 Element UI 原生类型并只补充业务行泛型。

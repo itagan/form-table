@@ -152,10 +152,8 @@ const columns: ColumnConfig[] = [
     key: 'material',
     label: '物料',
     props: { minWidth: 380 },
-    children: [{
-      key: 'material-row',
-      props: { gutter: 8 },
-      children: [
+    rowProps: { gutter: 8 },
+    children: [
         {
           key: 'sku',
           fieldKey: 'skuId',
@@ -197,15 +195,13 @@ const columns: ColumnConfig[] = [
           component: { props: { disabled: true, placeholder: '自动带出' } }
         }
       ]
-    }]
   },
   {
     key: 'organization',
     label: '组织 / 供应商',
     props: { minWidth: 430 },
-    children: [{
-      props: { gutter: 8 },
-      children: [
+    rowProps: { gutter: 8 },
+    children: [
         {
           key: 'organization-selector',
           fieldKey: 'orgCode',
@@ -272,15 +268,13 @@ const columns: ColumnConfig[] = [
           }
         }
       ]
-    }]
   },
   {
     key: 'quantity-price',
     label: '数量 / 单价',
     props: { minWidth: 280 },
-    children: [{
-      props: { gutter: 8 },
-      children: [
+    rowProps: { gutter: 8 },
+    children: [
         {
           fieldKey: 'quantity',
           type: 'number',
@@ -313,13 +307,12 @@ const columns: ColumnConfig[] = [
           }
         }
       ]
-    }]
   },
   {
     key: 'attachment',
     label: '附件',
     props: { minWidth: 260 },
-    children: [{ children: [{
+    children: [{
       fieldKey: 'attachmentIds',
       type: 'component',
       component: {
@@ -340,13 +333,13 @@ const columns: ColumnConfig[] = [
           }
         }
       }
-    }] }]
+    }]
   },
   {
     key: 'status',
     label: '状态',
     props: { width: 100, align: 'center' },
-    children: [{ children: [{
+    children: [{
       fieldKey: 'approvalStatus',
       type: 'component',
       component: {
@@ -355,13 +348,13 @@ const columns: ColumnConfig[] = [
         model: false,
         props: ({ value }) => ({ status: value })
       }
-    }] }]
+    }]
   },
   {
     key: 'actions',
     label: '操作',
     props: { width: 130, fixed: 'right', align: 'center' },
-    children: [{ children: [{
+    children: [{
       fieldKey: '__actions',
       type: 'slot',
       component: {
@@ -370,7 +363,7 @@ const columns: ColumnConfig[] = [
           removable: editable.value && !asPurchaseRow(row).locked
         })
       }
-    }] }]
+    }]
   }
 ]
 

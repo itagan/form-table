@@ -152,10 +152,8 @@ export function createPurchaseColumns(
       key: 'material',
       label: '物料信息',
       props: { minWidth: 460 },
-      children: [{
-        key: 'material-main',
-        props: { gutter: 8 },
-        children: [
+      rowProps: { gutter: 8 },
+      children: [
           {
             key: 'sku-selector',
             fieldKey: 'skuId',
@@ -206,16 +204,13 @@ export function createPurchaseColumns(
             }
           }
         ]
-      }]
     },
     {
       key: 'organization',
       label: '组织与供应商',
       props: { minWidth: 420 },
-      children: [{
-        key: 'organization-main',
-        props: { gutter: 8 },
-        children: [
+      rowProps: { gutter: 8 },
+      children: [
           {
             key: 'purchase-org',
             fieldKey: 'orgCode',
@@ -296,16 +291,13 @@ export function createPurchaseColumns(
             }
           }
         ]
-      }]
     },
     {
       key: 'quantity-price',
       label: '数量与价格',
       props: { minWidth: 340 },
-      children: [{
-        key: 'quantity-price-main',
-        props: { gutter: 8 },
-        children: [
+      rowProps: { gutter: 8 },
+      children: [
           {
             key: 'quantity',
             fieldKey: 'quantity',
@@ -349,16 +341,13 @@ export function createPurchaseColumns(
             }
           }
         ]
-      }]
     },
     {
       key: 'attachments',
       label: '附件',
       props: { minWidth: 280 },
       children: [{
-        key: 'attachment-main',
-        children: [{
-          key: 'attachment-upload',
+        key: 'attachment-upload',
           fieldKey: 'attachmentIds',
           type: 'component',
           formItemProps: {
@@ -393,7 +382,6 @@ export function createPurchaseColumns(
               }
             }
           }
-        }]
       }]
     },
     {
@@ -401,9 +389,7 @@ export function createPurchaseColumns(
       label: '状态',
       props: { width: 110, align: 'center' },
       children: [{
-        key: 'status-main',
-        children: [{
-          key: 'status-display',
+        key: 'status-display',
           fieldKey: 'approvalStatus',
           type: 'component',
           component: {
@@ -415,7 +401,6 @@ export function createPurchaseColumns(
               size: 'small'
             })
           }
-        }]
       }]
     },
     {
@@ -423,9 +408,7 @@ export function createPurchaseColumns(
       label: '操作',
       props: { width: 150, fixed: 'right', align: 'center' },
       children: [{
-        key: 'actions-main',
-        children: [{
-          key: 'row-actions',
+        key: 'row-actions',
           fieldKey: '__actions',
           type: 'slot',
           component: {
@@ -434,7 +417,6 @@ export function createPurchaseColumns(
               removable: options.editable && !asPurchaseRow(row).locked
             })
           }
-        }]
       }]
     }
   ]

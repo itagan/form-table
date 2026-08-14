@@ -1,7 +1,6 @@
 import type {
   ColumnConfig,
-  FormItemConfig,
-  RowConfig
+  FormItemConfig
 } from './config'
 import type { FormTableValue, TableRow } from './base'
 
@@ -20,8 +19,6 @@ export interface FormTableRowContext<TRow extends TableRow = TableRow> extends F
   row: Readonly<TRow>
   /** 当前数据行在 tableData 中的渲染下标。 */
   index: number
-  /** 当前布局行配置。 */
-  rowConfig: Readonly<RowConfig<TRow>>
 }
 
 export interface FormTableFieldRenderContext<TRow extends TableRow = TableRow> extends FormTableRowContext<TRow> {

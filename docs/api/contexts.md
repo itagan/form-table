@@ -7,7 +7,7 @@
 | 使用位置 | 业务数据 | 原始配置 | 更新能力 | 解析结果 |
 | --- | --- | --- | --- | --- |
 | Column 动态配置 | `tableData` | `columnConfig` | — | — |
-| Row 动态配置 | `tableData, row, index` | `columnConfig, rowConfig` | — | — |
+| `rowProps` 动态配置 | `tableData, row, index` | `columnConfig` | — | — |
 | Item 动态配置 | 增加 `fieldKey, value` | 增加 `itemConfig` | — | — |
 | component 动态配置 | Item 数据 | Item 配置 | — | — |
 | `component.listeners[event]` | Item 数据 | Item 配置 | `setValue, updateRow` | — |
@@ -20,8 +20,8 @@
 | 回调路径 | 上下文 |
 | --- | --- |
 | `columns[].visible/props/headerProps/headerHint` | `FormTableColumnContext` |
-| `columns[].children[].visible/props` | `FormTableRowContext` |
-| `columns[].children[].children[].visible/colProps/formItemProps/hint` | `FormTableFieldRenderContext` |
+| `columns[].rowProps` | `FormTableRowContext` |
+| `columns[].children[].visible/colProps/formItemProps/hint` | `FormTableFieldRenderContext` |
 | `...component.resolveRenderer/props/options/optionProps` | `FormTableFieldRenderContext` |
 | `...component.listeners[event]` | `FormTableFieldContext, ...原始事件参数` |
 
@@ -36,7 +36,7 @@
 | `columnConfig` | `Readonly<CellSlotColumnConfig>` | 配置快照 | 当前列原始配置 |
 | `updateRow` | `(patch: Partial<TableRow>) => void` | 绑定当前行 | 不可变更新当前行，patch key 支持嵌套路径 |
 
-不提供：`tableData/columnIndex/fieldKey/value/setValue/rowConfig/itemConfig/propPath/component`。完整用法见 [`cellSlot` 专题](../features/cell-slot.md)。
+不提供：`tableData/columnIndex/fieldKey/value/setValue/itemConfig/propPath/component`。完整用法见 [`cellSlot` 专题](../features/cell-slot.md)。
 
 ## FormTableSlotContext
 
@@ -45,7 +45,7 @@
 | 分类 | 字段 |
 | --- | --- |
 | 数据 | `tableData, row, index, fieldKey, value` |
-| 配置 | `columnConfig, rowConfig, itemConfig` |
+| 配置 | `columnConfig, itemConfig` |
 | 更新 | `setValue, updateRow` |
 | 校验 / 解析 | `propPath, component` |
 

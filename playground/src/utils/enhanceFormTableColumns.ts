@@ -15,9 +15,6 @@ export function enhanceFormTableColumns(
 ): ColumnConfig[] {
   return columns.map((column) => isLayoutColumn(column) ? ({
     ...column,
-    children: column.children.map((row) => ({
-      ...row,
-      children: row.children.map((item) => enhancements[item.fieldKey]?.(item) || item)
-    }))
+    children: column.children.map((item) => enhancements[item.fieldKey]?.(item) || item)
   }) : column)
 }

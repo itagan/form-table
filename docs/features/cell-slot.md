@@ -2,7 +2,7 @@
 
 > 可运行 Demo：[打开 cellSlot 专项页 ↗](http://localhost:5173/cell-slot)
 
-`cellSlot` 是与 Row / Item 字段链路并列的列级渲染入口。它适合操作按钮、状态、图片、派生值和多字段组合展示。
+`cellSlot` 是与 Item 字段链路并列的列级渲染入口。它适合操作按钮、状态、图片、派生值和多字段组合展示。
 
 ## 配置示例
 
@@ -70,7 +70,7 @@ interface FormTableCellSlotContext {
 
 ```text
 tableData / columnIndex / fieldKey / value / setValue
-rowConfig / itemConfig / propPath / component
+itemConfig / propPath / component
 ```
 
 ## 与字段 Slot 的选择
@@ -79,11 +79,45 @@ rowConfig / itemConfig / propPath / component
 | --- | --- |
 | 只从 `row` 读取展示值或执行行操作 | `cellSlot` |
 | 需要 `fieldKey/value/setValue` | `type: 'slot'` |
-| 需要 `formItemProps.rules` 或 `propPath` | `type: 'slot'` |
+| 需要自动解析 `formItemProps.rules` 或 `propPath` | `type: 'slot'` |
 | 需要已解析 `component.props/options/listeners` | `type: 'slot'` |
 | 原生选择或序号列 | `column.type` |
 
-`cellSlot` 内可以放置交互组件，但若它本质上是需要 FormTable 校验和字段写回的编辑器，仍应使用字段 Slot。
+`cellSlot` 内可以放置交互组件。单字段编辑优先使用字段 Slot；需要不规则多 Row 布局时，可以手写 Element Form 组件并接入根表单。
+
+## 手写多 Row 表单
+
+```vue
+<template #contact-fields="{ row, index, updateRow }">
+  <div>
+    <el-row :gutter="8">
+      <el-col :span="12">
+        <el-form-item
+          label="姓名"
+          :prop="`tableData.${index}.name`"
+          :rules="[{ required: true, message: '请输入姓名' }]"
+        >
+          <el-input :value="row.name" @input="updateRow({ name: $event })" />
+        </el-form-item>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item :prop="`tableData.${index}.phone`" label="手机">
+          <el-input :value="row.phone" @input="updateRow({ phone: $event })" />
+        </el-form-item>
+      </el-col>
+    </el-row>
+    <el-row>
+      <el-col :span="24">
+        <el-form-item :prop="`tableData.${index}.address`" label="地址">
+          <el-input :value="row.address" @input="updateRow({ address: $event })" />
+        </el-form-item>
+      </el-col>
+    </el-row>
+  </div>
+</template>
+```
+
+只要 `el-form-item` 仍在 FormTable 根 `el-form` 内，且 `prop` 使用 `tableData.${index}.${fieldKey}` 完整路径，`validate/clearValidate/getFormRef` 仍能管理它。`cellSlot` 不会自动提供字段 Hint、`setValue`、`propPath`、`component` 或 FormItem 配置解析；值写回统一使用 `updateRow()`。
 
 ## updateRow 与事件
 
@@ -141,4 +175,4 @@ Playground [`/cell-slot`](http://localhost:5173/cell-slot) 同时演示：
 
 ## 相关 API
 
-[Column / Row / Item](../api/columns.md) · [Slot 与上下文](../api/contexts.md) · [事件与 Ref](../api/events-and-ref.md)
+[Column / Item](../api/columns.md) · [Slot 与上下文](../api/contexts.md) · [事件与 Ref](../api/events-and-ref.md)

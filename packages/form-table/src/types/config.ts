@@ -114,13 +114,6 @@ export type FormItemConfig<TRow extends TableRow = TableRow> =
   | ComponentFormItemConfig<TRow>
   | SlotFormItemConfig<TRow>
 
-export interface RowConfig<TRow extends TableRow = TableRow> {
-  key?: string
-  visible?: DynamicValue<boolean, FormTableRowContext<TRow>>
-  props?: DynamicValue<ComponentProps, FormTableRowContext<TRow>>
-  children: FormItemConfig<TRow>[]
-}
-
 interface BaseColumnConfig<TRow extends TableRow = TableRow> {
   key?: string
   label: string
@@ -132,7 +125,8 @@ interface BaseColumnConfig<TRow extends TableRow = TableRow> {
 }
 
 export interface LayoutColumnConfig<TRow extends TableRow = TableRow> extends BaseColumnConfig<TRow> {
-  children: RowConfig<TRow>[]
+  rowProps?: DynamicValue<ComponentProps, FormTableRowContext<TRow>>
+  children: FormItemConfig<TRow>[]
   cellSlot?: never
 }
 
@@ -146,11 +140,13 @@ export interface PlainColumnConfig<TRow extends TableRow = TableRow> {
   headerSlot?: never
   headerProps?: never
   headerHint?: never
+  rowProps?: never
 }
 
 export interface CellSlotColumnConfig<TRow extends TableRow = TableRow> extends BaseColumnConfig<TRow> {
   cellSlot: string
   children?: never
+  rowProps?: never
 }
 
 export interface FormTableCellSlotContext<TRow extends TableRow = TableRow> {

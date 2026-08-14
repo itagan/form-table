@@ -1,5 +1,8 @@
 <template>
-  <el-row v-if="isVisible" v-bind="rowProps">
+  <el-row
+    class="form-table-field-layout"
+    v-bind="resolvedRowProps"
+  >
     <el-col
       v-for="(item, itemIndex) in visibleItems"
       :key="item.config.key || `${item.config.fieldKey}:${itemIndex}`"
@@ -20,7 +23,8 @@ import type {
   FormItemConfig,
   FormTableColumnContext,
   FormTableRowContext,
-  RowConfig,
+  ComponentProps,
+  DynamicValue,
   TableRow
 } from './types'
 import {
@@ -30,30 +34,30 @@ import {
   resolveVisible
 } from './utils/dynamic'
 
-/** 当前数据行、布局行配置以及上级已解析的列上下文。 */
+/** 当前数据行、扁平字段列表以及上级已解析的列上下文。 */
 const props = defineProps<{
   row: TableRow
   rowIndex: number
   columnContext: FormTableColumnContext
-  rowConfig: RowConfig
+  items: FormItemConfig[]
+  rowProps?: DynamicValue<ComponentProps, FormTableRowContext>
 }>()
 
-/** 为当前数据行补充真实表格下标和布局配置。 */
+/** 为当前数据行补充真实表格下标。 */
 const rowContext = computed<FormTableRowContext>(() => createRowContext(
   props.columnContext,
   props.row,
-  props.rowIndex,
-  props.rowConfig
+  props.rowIndex
 ))
 
-/** 控制整个布局行是否渲染。 */
-const isVisible = computed(() => resolveVisible(props.rowConfig.visible, rowContext.value))
-
-/** 解析透传给 el-row 的静态或动态属性。 */
-const rowProps = computed(() => resolveDynamicValue(props.rowConfig.props, rowContext.value) || {})
+/** 解析列级布局属性，并固定使用支持换行的 Flex Row。 */
+const resolvedRowProps = computed(() => ({
+  ...(resolveDynamicValue(props.rowProps, rowContext.value) || {}),
+  type: 'flex'
+}))
 
 // 在一次遍历中完成显隐过滤和栅格属性解析，模板不再重复执行动态回调。
-const visibleItems = computed(() => props.rowConfig.children.reduce<Array<{
+const visibleItems = computed(() => props.items.reduce<Array<{
   config: FormItemConfig
   colProps: Record<string, unknown>
 }>>((items, config) => {
@@ -62,7 +66,10 @@ const visibleItems = computed(() => props.rowConfig.children.reduce<Array<{
   if (resolveVisible(config.visible, itemContext)) {
     items.push({
       config,
-      colProps: resolveDynamicValue(config.colProps, itemContext) || { span: 24 }
+      colProps: {
+        span: 24,
+        ...(resolveDynamicValue(config.colProps, itemContext) || {})
+      }
     })
   }
   return items

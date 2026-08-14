@@ -52,9 +52,8 @@ const columns: ColumnConfig[] = [
     label: '姓名和年龄',
     headerHint: '姓名为必填项，年龄范围为 0 至 150',
     props: { minWidth: 320 },
-    children: [{
-      props: { gutter: 10 },
-      children: [
+    rowProps: { gutter: 10 },
+    children: [
         {
           fieldKey: 'name',
           type: 'input',
@@ -76,13 +75,11 @@ const columns: ColumnConfig[] = [
           component: { props: { min: 0, max: 150 } }
         }
       ]
-    }]
   },
   {
     label: '学校',
     props: { minWidth: 200 },
     children: [{
-      children: [{
         fieldKey: 'school',
         type: 'select',
         formItemProps: { rules: required('请选择学校', 'change') },
@@ -94,7 +91,6 @@ const columns: ColumnConfig[] = [
           ]
         }
       }]
-    }]
   }
 ]
 const columnsCode = formatFormTableConfig(columns)

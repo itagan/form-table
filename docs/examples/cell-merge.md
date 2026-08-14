@@ -32,10 +32,8 @@ const columns: ColumnConfig[] = [
       width: 160
     },
     children: [{
-      children: [{
-        fieldKey: 'departmentName',
-        type: 'text'
-      }]
+      fieldKey: 'departmentName',
+      type: 'text'
     }]
   }
 ]

@@ -1,13 +1,12 @@
-# Column / Row / Item
+# Column / Item
 
 ## 路径关系
 
 ```text
 columns[]                                  ColumnConfig
 ├─ props only                            PlainColumnConfig
-├─ children[]                            RowConfig
-│  └─ children[]                     FormItemConfig
-│     └─ component                   FieldComponentConfig
+├─ children[]                            FormItemConfig
+│  └─ component                     FieldComponentConfig
 └─ cellSlot                              列级单元格 Slot
 ```
 
@@ -24,7 +23,8 @@ columns[]                                  ColumnConfig
 | `columns[].headerSlot` | `string` | 可选 | Slot scope | 表头具名 Slot |
 | `columns[].headerProps` | `DynamicValue<ComponentProps, ColumnContext>` | `{}` | `tableData, columnConfig` | 默认或 Slot 表头包装节点属性 |
 | `columns[].headerHint` | `DynamicValue<FormTableHintValue, ColumnContext>` | 可选 | `tableData, columnConfig` | 表头 Hint；仅在 `targets: 'header'/'all'` 时求值和展示 |
-| `columns[].children` | `RowConfig[]` | 与 `cellSlot` 互斥 | — | 进入 Row / Item 字段链路 |
+| `columns[].rowProps` | `DynamicValue<ComponentProps, RowContext>` | `{}` | ColumnContext + `row, index` | 透传单元格内唯一 `el-row`；`type` 始终为 `flex` |
+| `columns[].children` | `FormItemConfig[]` | 与 `cellSlot` 互斥 | — | 进入 Item 字段链路 |
 | `columns[].cellSlot` | `string` | 与 `children` 互斥 | `row, index, columnConfig, updateRow` | 直接渲染单元格 |
 
 无需字段渲染链路的功能列使用 `PlainColumnConfig`，所有 Element Column 属性继续放在 `props` 中：
@@ -36,28 +36,21 @@ columns[]                                  ColumnConfig
 
 纯透传列的 `props` 必填、`label` 可选，且不接受 `children/cellSlot/headerSlot/headerProps/headerHint`。选择事件、序号函数和动态配置见[Element 功能列透传](../features/native-columns.md)。
 
-## RowConfig
-
-| 配置路径 | 类型 | 必填 / 默认值 | 动态上下文 | 目标 / 作用 |
-| --- | --- | --- | --- | --- |
-| `columns[].children[].key` | `string` | 可选 | — | 布局行渲染身份 |
-| `columns[].children[].visible` | `DynamicValue<boolean, RowContext>` | `true` | ColumnContext + `row, index, rowConfig` | 是否渲染布局行 |
-| `columns[].children[].props` | `DynamicValue<ComponentProps, RowContext>` | `{}` | RowContext | 透传 `el-row` |
-| `columns[].children[].children` | `FormItemConfig[]` | 必填 | — | 当前布局行内的字段 |
-
 ## FormItemConfig
 
 | 配置路径 | 类型 | 必填 / 默认值 | 动态上下文 | 目标 / 作用 |
 | --- | --- | --- | --- | --- |
-| `columns[].children[].children[].key` | `string` | 可选 | — | Item 稳定渲染身份 |
-| `columns[].children[].children[].fieldKey` | `string` | 必填 | — | 行数据路径，支持 `profile.city`、`items[0].name` |
-| `columns[].children[].children[].type` | `BuiltinFormItemType \| 'component' \| 'slot'` | 必填 | — | 字段渲染模式 |
-| `columns[].children[].children[].visible` | `DynamicValue<boolean, ItemContext>` | `true` | RowContext + `fieldKey, value, itemConfig` | 字段显隐 |
-| `columns[].children[].children[].colProps` | `DynamicValue<ComponentProps, ItemContext>` | `{ span: 24 }` | ItemContext | 透传 `el-col` |
-| `columns[].children[].children[].formItemProps` | `DynamicValue<ComponentProps, ItemContext>` | `{}` | ItemContext | 透传 `el-form-item` |
-| `columns[].children[].children[].formItemProps.rules` | Element UI Rule(s) | 可选 | Element UI | 字段校验规则 |
-| `columns[].children[].children[].hint` | `DynamicValue<FormTableHintValue, ItemContext>` | 可选 | ItemContext | 未声明或空值继承全局，`false` 关闭，非空字符串覆盖 |
-| `columns[].children[].children[].component` | `FieldComponentConfig` | 按 `type` 决定 | ItemContext | 字段组件、Slot 和绑定配置 |
+| `columns[].children[].key` | `string` | 可选 | — | Item 稳定渲染身份 |
+| `columns[].children[].fieldKey` | `string` | 必填 | — | 行数据路径，支持 `profile.city`、`items[0].name` |
+| `columns[].children[].type` | `BuiltinFormItemType \| 'component' \| 'slot'` | 必填 | — | 字段渲染模式 |
+| `columns[].children[].visible` | `DynamicValue<boolean, ItemContext>` | `true` | RowContext + `fieldKey, value, itemConfig` | 字段显隐 |
+| `columns[].children[].colProps` | `DynamicValue<ComponentProps, ItemContext>` | `{ span: 24 }` | ItemContext | 透传 `el-col` |
+| `columns[].children[].formItemProps` | `DynamicValue<ComponentProps, ItemContext>` | `{}` | ItemContext | 透传 `el-form-item` |
+| `columns[].children[].formItemProps.rules` | Element UI Rule(s) | 可选 | Element UI | 字段校验规则 |
+| `columns[].children[].hint` | `DynamicValue<FormTableHintValue, ItemContext>` | 可选 | ItemContext | 未声明或空值继承全局，`false` 关闭，非空字符串覆盖 |
+| `columns[].children[].component` | `FieldComponentConfig` | 按 `type` 决定 | ItemContext | 字段组件、Slot 和绑定配置 |
+
+每个字段单元格固定只渲染一个可换行的 Flex `el-row`。每个 Item 对应一个 `el-col`，`span` 默认为 24；多个 Item 可按 24 栅格总和自然换行。非规则的多 Row 布局使用 [`cellSlot`](../features/cell-slot.md) 手写。
 
 ## 校验路径
 
@@ -79,5 +72,5 @@ propPath: tableData.0.profile.city
 | `columns[].headerSlot` | [自定义表头](../features/custom-header.md) |
 | `columns[].cellSlot` | [`cellSlot` 列级单元格](../features/cell-slot.md) |
 | 各层 `visible` 与动态 props | [动态显隐与配置更新](../features/dynamic-configuration.md) |
-| Column / Row / Item `key` | [稳定身份与异步安全](../features/stable-identity.md) |
+| Column / Item `key` | [稳定身份与异步安全](../features/stable-identity.md) |
 | `formItemProps.rules` | [校验、清理与重置](../features/validation-reset.md) |

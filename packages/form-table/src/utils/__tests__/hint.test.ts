@@ -9,7 +9,7 @@ import type { FormTableFieldRenderContext } from '../../types'
 
 const createFieldContext = (value: unknown) => ({
   tableData: [], columnConfig: { label: '字段列', children: [] }, row: { value }, index: 0,
-  rowConfig: { children: [] }, fieldKey: 'value', value,
+  fieldKey: 'value', value,
   itemConfig: { fieldKey: 'value', type: 'input' }
 }) as FormTableFieldRenderContext
 

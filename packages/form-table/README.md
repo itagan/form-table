@@ -31,14 +31,12 @@ const columns: ColumnConfig[] = defineFormTableColumns([{
   key: 'basic',
   label: '基本信息',
   children: [{
-    children: [{
-      key: 'name',
-      fieldKey: 'name',
-      type: 'input',
-      formItemProps: {
-        rules: [{ required: true, message: '请输入姓名' }]
-      }
-    }]
+    key: 'name',
+    fieldKey: 'name',
+    type: 'input',
+    formItemProps: {
+      rules: [{ required: true, message: '请输入姓名' }]
+    }
   }]
 }])
 ```

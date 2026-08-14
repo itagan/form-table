@@ -2,7 +2,7 @@
 
 > 可运行 Demo：[字段 Slot 与动态显隐 ↗](http://localhost:5173/dynamic-slot-test) · [行列操作 ↗](http://localhost:5173/row-column-operations)
 
-Column、Row、Item 和字段组件属性都支持根据当前上下文动态计算。配置结构本身由父组件维护，增删、排序或整体变化时应替换 `columns`。
+Column、Item 和字段组件属性都支持根据当前上下文动态计算。配置结构本身由父组件维护，增删、排序或整体变化时应替换 `columns`。
 
 ## 动态显隐
 
@@ -12,14 +12,13 @@ const columns: ColumnConfig[] = [{
   label: '补充信息',
   visible: ({ tableData }) => tableData.some(row => row.showExtra),
   children: [{
-    key: 'extra-row',
+    key: 'detail-field',
+    fieldKey: 'detail',
+    type: 'textarea',
     visible: ({ row }) => row.showExtra === true,
-    children: [{
-      key: 'detail-field',
-      fieldKey: 'detail',
-      type: 'textarea',
-      visible: ({ row }) => row.detailType !== 'none'
-    }]
+    component: {
+      props: ({ row }) => ({ disabled: row.detailType === 'none' })
+    }
   }]
 }]
 ```
@@ -27,8 +26,8 @@ const columns: ColumnConfig[] = [{
 | 层级 | 完整配置路径 | 影响范围 | 上下文 |
 | --- | --- | --- | --- |
 | Column | `columns[].visible` | 整列 | `tableData, columnConfig` |
-| Row | `columns[].children[].visible` | 当前单元格的一行布局 | ColumnContext + `row, index, rowConfig` |
-| Item | `columns[].children[].children[].visible` | 当前字段和 `el-col` | RowContext + `fieldKey, value, itemConfig` |
+| Row props | `columns[].rowProps` | 当前单元格内唯一 Flex Row | ColumnContext + `row, index` |
+| Item | `columns[].children[].visible` | 当前字段和 `el-col` | RowContext + `fieldKey, value, itemConfig` |
 
 隐藏只影响渲染，不会自动删除 `tableData` 中的字段值。需要清空值时，在业务事件中显式更新。
 
@@ -77,7 +76,7 @@ const costColumn: ColumnConfig = {
 
 ## 修改字段配置
 
-不要直接修改回调上下文中的 `columnConfig/rowConfig/itemConfig`。由父组件不可变替换 columns：
+不要直接修改回调上下文中的 `columnConfig/itemConfig`。由父组件不可变替换 columns：
 
 ```ts
 function setItemDisabled(item, disabled) {
@@ -103,12 +102,9 @@ function disableField(targetKey, disabled) {
 
     return {
       ...column,
-      children: column.children.map(row => ({
-        ...row,
-        children: row.children.map(item =>
-          item.key === targetKey ? setItemDisabled(item, disabled) : item
-        )
-      }))
+      children: column.children.map(item =>
+        item.key === targetKey ? setItemDisabled(item, disabled) : item
+      )
     }
   })
 }
@@ -123,7 +119,6 @@ function disableField(targetKey, disabled) {
 ```text
 columns[].key
 columns[].children[].key
-columns[].children[].children[].key
 ```
 
 `fieldKey` 负责数据路径，不等于渲染身份。重复字段、同一字段切换渲染器或动态布局时尤其需要 Item key。详见[稳定身份与异步安全](./stable-identity.md)。
@@ -137,4 +132,4 @@ columns[].children[].children[].key
 
 ## 相关 API
 
-[Column / Row / Item](../api/columns.md) · [Component 配置](../api/component.md) · [Slot 与上下文](../api/contexts.md)
+[Column / Item](../api/columns.md) · [Component 配置](../api/component.md) · [Slot 与上下文](../api/contexts.md)
