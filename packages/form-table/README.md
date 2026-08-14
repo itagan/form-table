@@ -84,7 +84,7 @@ function handleFilterChange(filters: FormTableFilterChangePayload) {
 
 `#empty` 和 `#append` 会直接转发给 `el-table`，不增加额外 DOM 或 scope。未提供 `#empty` 时，`tableProps.emptyText` 和 Element UI 默认空状态保持有效。
 
-需要让 Props、事件和动态配置回调共享业务行类型时，使用 `createFormTable<TRow>()` 和 `defineFormTableColumns<TRow>()`；两者都不会创建额外运行时实例。固定字段还可选择使用 `createFormTableField<TRow>()` 校验对象与数组字段路径，普通配置的 `fieldKey` 继续接受动态字符串。
+需要让 Props、事件和动态配置回调共享业务行类型时，使用 `createFormTable<TRow>()` 和 `defineFormTableColumns<TRow>()`；两者都不会创建额外运行时实例。`fieldKey` 保持为字符串，以支持固定字段、嵌套路径和服务端动态字段。
 
 ## 完整文档
 

@@ -49,7 +49,7 @@
         </article>
         <article>
           <h2>默认双向绑定</h2>
-          <p>数量字段显式设置 <code>model: true</code>，采用组件原生 Vue 2 v-model 协议。</p>
+          <p>数量字段省略 <code>model</code>，采用组件原生 Vue 2 v-model 协议。</p>
         </article>
         <article>
           <h2>自定义绑定协议</h2>
@@ -286,8 +286,7 @@ const columns: ColumnConfig[] = [
           type: 'number',
           colProps: { span: 10 },
           component: {
-            // true 与省略 model 等价，使用 el-input-number 原生 value/input 协议。
-            model: true,
+            // 省略 model，使用 el-input-number 原生 value/input 协议。
             props: ({ row }) => ({
               disabled: !editable.value || asPurchaseRow(row).locked,
               min: 1,

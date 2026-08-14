@@ -13,7 +13,7 @@
 | `component.listeners[event]` | Item 数据 | Item 配置 | `setValue, updateRow` | — |
 | 字段 Slot | Item 数据 | Item 配置 | `setValue, updateRow` | `propPath, component` |
 | `cellSlot` | `row, index` | `columnConfig` | `updateRow` | — |
-| 表头 Slot | `tableData, label, columnIndex` | `columnConfig` | — | `header` |
+| 表头 Slot | `tableData, label, columnIndex` | `columnConfig` | — | — |
 
 ## 动态配置回调
 
@@ -61,7 +61,6 @@ Item Hint 及 `hintOptions.field` formatter 都使用 `FormTableFieldRenderConte
 | `columnConfig` | 当前列原始配置 |
 | `columnIndex` | 当前可见列下标 |
 | `label` | 表头文本 |
-| `header.props` | 已解析表头属性，已由 FormTable 包装节点应用 |
 
 ## 快照与异步更新
 

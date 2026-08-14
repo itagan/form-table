@@ -5,7 +5,7 @@
 - `ColumnConfig`、`LayoutColumnConfig`、`CellSlotColumnConfig`、`PlainColumnConfig`、`RowConfig`、`FormItemConfig`
 - `BuiltinFormItemConfig`、`ComponentFormItemConfig`、`SlotFormItemConfig`
 - `FieldComponentConfig`、`FieldModelConfig`、`FieldRendererResolver`、`BuiltinFormItemType`、`FormItemType`
-- `FormItemOption`、`OptionPropsConfig`、`ResolvedComponentConfig`、`ResolvedHeaderConfig`
+- `FormItemOption`、`OptionPropsConfig`、`ResolvedComponentConfig`
 - `FormTableHintValue`、`FormTableHintMode`、`FormTableHintTargets`、`FormTableFieldHintFormatter`、`FormTableDefaultFieldHint`、`FormTableHintOptions`
 - `TableRow`、`FormTableRecord`、`FormTableProps`、`FormTableRowKey`、`FormTableTableProps`
 - `FormTableTableContext`、`FormTableColumnContext`、`FormTableRowContext`、`FormTableFieldRenderContext`
@@ -13,10 +13,9 @@
 - `FormTableFieldChangePayload`、`FormTableHeaderSlotContext`
 - `FormTableElementColumn`、`FormTableSortChangePayload`、`FormTableFilterChangePayload`
 - `FormTableExpose`、`FormTableElementFormRef`、`FormTableElementTableRef`
-- `FormTableFieldPath`、`FormTableFieldConfig`、`FormTableFieldDefinition`
 - `FormTableComponent`、`FormTableEmits`
 
-运行时入口导出默认组件、`FormTable`、`FormTablePlugin`、泛型组件工厂 `createFormTable`、泛型配置助手 `defineFormTableColumns` 和可选字段助手 `createFormTableField`。上下文注入 key、内部更新 API、动态解析和渲染模式工具都不属于公共入口。
+运行时入口导出默认组件、`FormTable`、`FormTablePlugin`、泛型组件工厂 `createFormTable` 和泛型配置助手 `defineFormTableColumns`。上下文注入 key、内部更新 API、动态解析和渲染模式工具都不属于公共入口。
 
 需要让组件 Props、事件和动态配置回调使用同一个业务行类型时，组合两个泛型入口：
 
@@ -57,32 +56,7 @@ const columns = defineFormTableColumns<PurchaseRow>([{
 
 泛型组件与默认 FormTable 都推荐使用 `v-model="tableData"`。类型入口内部适配了 Vue 2 Volar 对无参数 `v-model` 的模板映射；这只是声明层适配，运行时仍由组件的 `model: { prop: 'tableData', event: 'update:tableData' }` 驱动。需要显式处理回写时仍可使用 `:table-data.sync` 或 `@update:tableData`。
 
-`ColumnConfig`、Row/Item 配置、上下文、listener、事件载荷与 `FormTableProps` 都接受默认行泛型；省略泛型时继续使用原有 `TableRow`。普通配置的 `fieldKey` 仍是字符串；需要校验固定字段路径时，可选择使用字段助手。
-
-## fieldKey 路径助手
-
-`createFormTableField<TRow>()` 是独立于核心配置类型的可选辅助入口。它创建一个业务行专用的恒等函数，只在编译期校验字段路径，不包装配置，也不改变 Slot 的 `value` 类型：
-
-```ts
-import { createFormTableField, type FormTableFieldPath } from '@itagan/form-table'
-
-interface PurchaseRow {
-  amount: number
-  profile?: { city: string }
-  items: Array<{ name: string }>
-}
-
-const definePurchaseField = createFormTableField<PurchaseRow>()
-
-const amountField = definePurchaseField({ fieldKey: 'amount', type: 'number' })
-const cityField = definePurchaseField({ fieldKey: 'profile.city', type: 'input' })
-const itemField = definePurchaseField({ fieldKey: 'items[0].name', type: 'input' })
-const fieldPath: FormTableFieldPath<PurchaseRow> = 'items[12].name'
-```
-
-路径支持已声明的对象字段和数组括号下标，最多五层；`any`、函数、日期等只作为叶节点。严格路径类型需要直接声明业务接口，不要让该接口 `extends TableRow`，否则 `TableRow` 为兼容动态数据保留的字符串索引签名会使 TypeScript 无法区分已声明键。直接声明的对象接口仍可用于 `createFormTable<TRow>()` 和 `defineFormTableColumns<TRow>()`。
-
-服务端字段、用户自定义路径或超过深度限制的动态路径继续使用普通 `FormItemConfig` / `ColumnConfig`；本次没有全局收紧 `fieldKey: string`。
+`ColumnConfig`、Row/Item 配置、上下文、listener、事件载荷与 `FormTableProps` 都接受默认行泛型；省略泛型时继续使用原有 `TableRow`。`fieldKey` 保持为字符串，以同时支持固定字段、嵌套对象与数组路径、服务端字段及其他动态配置。
 
 根组件 Vue 2 `v-model` 映射到 `FormTableProps.tableData` 与 `update:tableData`，因此不会新增 `value` prop 或 `input` 事件。Item 的 `FieldComponentConfig.model` 只负责字段组件协议，与根组件 model 无关。
 
@@ -172,11 +146,11 @@ interface FieldModelConfig {
 }
 ```
 
-`FieldComponentConfig.model` 未配置或为 `true` 时保留 Vue 2 原生 `v-model`；配置 `FieldModelConfig` 时使用指定 prop/event；配置 `false` 时不注入模型绑定。
+`FieldComponentConfig.model` 未配置时保留 Vue 2 原生 `v-model`；配置 `FieldModelConfig` 时使用指定 prop/event；配置 `false` 时不注入模型绑定。
 
 `row/tableData` 与 `columnConfig/rowConfig/itemConfig` 在回调类型中采用浅层只读约束；运行时不会冻结原对象。字段更新使用 `setValue` 或 `updateRow`，配置调整由调用方替换 `columns`。
 
-表头 slot 接收 `tableData/label/columnIndex/columnConfig/header`。`columnIndex` 是动态显隐过滤后的可见列下标，不保证等于原始 `columns` 数组下标；`header.props` 是已解析属性。
+表头 slot 接收 `tableData/label/columnIndex/columnConfig`。`columnIndex` 是动态显隐过滤后的可见列下标，不保证等于原始 `columns` 数组下标。
 
 `ColumnConfig.headerProps` 传给默认或 Slot 表头的 `.form-table-column-header`，可配置原生 `title`、class、style 和 aria 属性。存在 `column.props.renderHeader` 时由 Element UI 完全接管，FormTable 不包装也不应用 `headerProps/headerHint`。
 
