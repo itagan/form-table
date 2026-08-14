@@ -32,12 +32,11 @@
       />
       <template v-else>
         <FormTableRow
-          v-for="(rowConfig, rowIndex) in layoutRows"
-          :key="rowConfig.key || rowIndex"
           :row="scope.row"
           :row-index="scope.$index"
           :column-context="columnContext"
-          :row-config="rowConfig"
+          :items="layoutItems"
+          :row-props="layoutRowProps"
         />
       </template>
     </template>
@@ -139,10 +138,15 @@ const cellSlotFn = computed(() => {
   return slotName ? parentSlots[slotName] || null : null
 })
 
-/** 仅布局列具有 children；cellSlot 列缺失对应 Slot 时保持空单元格。 */
-const layoutRows = computed(() => 'children' in props.column
+/** 仅布局列具有字段 children；cellSlot 列缺失对应 Slot 时保持空单元格。 */
+const layoutItems = computed(() => 'children' in props.column
   ? props.column.children || []
   : [])
+
+/** 唯一字段布局行使用列级 rowProps。 */
+const layoutRowProps = computed(() => 'children' in props.column
+  ? props.column.rowProps
+  : undefined)
 
 /** 为当前单元格构造无字段语义的精简 Slot 上下文。 */
 const createCellSlotContext = (row: TableRow, index: number): FormTableCellSlotContext => ({

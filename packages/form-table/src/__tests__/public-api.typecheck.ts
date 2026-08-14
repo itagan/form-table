@@ -32,6 +32,9 @@ type PublicRuntimeEntry = typeof import('../index')
 // @ts-expect-error 严格字段路径助手已从轻量公共入口移除。
 type RemovedFieldHelper = PublicRuntimeEntry['createFormTableField']
 void (null as unknown as RemovedFieldHelper)
+// @ts-expect-error 布局 Row 已收平，不再导出 RowConfig。
+type RemovedRowConfig = import('../index').RowConfig
+void (null as unknown as RemovedRowConfig)
 
 // Element UI 未默认提供 Tree Select，不允许作为 FormTable 内置类型使用。
 // @ts-expect-error tree-select 应通过 type: 'component' 显式接入
@@ -79,7 +82,6 @@ const typedColumns = defineFormTableColumns<PurchaseRow>([{
     return true
   },
   children: [{
-    children: [{
       fieldKey: 'amount',
       type: 'input',
       component: {
@@ -93,7 +95,6 @@ const typedColumns = defineFormTableColumns<PurchaseRow>([{
         }
       }
     }]
-  }]
 }])
 const TypedFormTable = createFormTable<PurchaseRow>()
 const typedComponent: Component = TypedFormTable
@@ -191,9 +192,8 @@ const columns: ColumnConfig[] = [{
   label: '基本信息',
   headerHint: ({ tableData, columnConfig }) => `${columnConfig.label}：${tableData.length} 条`,
   headerProps: ({ columnConfig }) => ({ 'aria-label': columnConfig.label }),
-  children: [{
-    props: { gutter: 8 },
-    children: [
+  rowProps: { gutter: 8 },
+  children: [
       {
         fieldKey: 'name',
         type: 'input',
@@ -216,8 +216,7 @@ const columns: ColumnConfig[] = [{
           props: ({ row }) => ({ disabled: Boolean(row.locked) })
         }
       }
-    ]
-  }]
+  ]
 }]
 void disabledHintMode
 void fieldHintTargets
@@ -231,7 +230,7 @@ const cellSlotColumn: CellSlotColumnConfig = {
 }
 const layoutColumn: LayoutColumnConfig = {
   label: '姓名',
-  children: [{ children: [{ fieldKey: 'name', type: 'input' }] }]
+  children: [{ fieldKey: 'name', type: 'input' }]
 }
 const plainColumns: PlainColumnConfig[] = [
   { props: { type: 'selection', width: 48 } },
@@ -255,6 +254,15 @@ const mixedColumnModes: ColumnConfig = {
   children: []
 }
 
+const legacyNestedRows: ColumnConfig = {
+  label: '旧嵌套布局',
+  children: [
+    // @ts-expect-error children 直接接收 FormItemConfig，不再接收 RowConfig。
+    { children: [{ fieldKey: 'name', type: 'input' }] }
+  ]
+}
+void legacyNestedRows
+
 const customModel: FieldModelConfig = {
   prop: 'selectedId',
   event: 'select',
@@ -270,8 +278,6 @@ void invalidTrueModelConfig
 const modelVariants: ColumnConfig[] = [{
   label: '组件绑定协议',
   children: [{
-    children: [
-      {
         fieldKey: 'ownerId',
         type: 'component',
         component: { renderer: CustomInput, model: customModel }
@@ -285,16 +291,12 @@ const modelVariants: ColumnConfig[] = [{
         fieldKey: 'summary',
         type: 'component',
         component: { renderer: CustomInput, model: false }
-      }
-    ]
-  }]
+      }]
 }]
 
 const dynamicRendererVariants: ColumnConfig[] = [{
   label: '按行解析组件',
   children: [{
-    children: [
-      {
         fieldKey: 'profile',
         type: 'component',
         component: {
@@ -312,9 +314,7 @@ const dynamicRendererVariants: ColumnConfig[] = [{
           renderer: CustomInput,
           resolveRenderer: ({ row }) => row.useDefault ? undefined : AlternativeInput
         }
-      }
-    ]
-  }]
+      }]
 }]
 
 const props: FormTableProps = {
@@ -400,19 +400,15 @@ async function useExpose(expose: FormTableExpose) {
 const invalid: ColumnConfig[] = [{
   label: '错误配置',
   children: [{
-    children: [{
       fieldKey: 'bad',
       // @ts-expect-error unknown type aliases are rejected.
       type: 'unknown'
     }]
-  }]
 }]
 
 const invalidModes: ColumnConfig[] = [{
   label: '渲染模式约束',
-  children: [{
-    children: [
-      // @ts-expect-error builtin modes resolve their own renderer.
+  children: [// @ts-expect-error builtin modes resolve their own renderer.
       { fieldKey: 'name', type: 'input', component: { renderer: CustomInput } },
       // @ts-expect-error component mode requires renderer or resolveRenderer.
       { fieldKey: 'custom', type: 'component', component: { props: {} } },
@@ -423,9 +419,7 @@ const invalidModes: ColumnConfig[] = [{
       // @ts-expect-error slot names remain static and do not use component resolution.
       { fieldKey: 'dynamic-slot', type: 'slot', component: { renderer: 'actions', resolveRenderer: () => CustomInput } },
       // @ts-expect-error component resolution is synchronous and does not accept Promise results.
-      { fieldKey: 'async-renderer', type: 'component', component: { resolveRenderer: async () => CustomInput } }
-    ]
-  }]
+      { fieldKey: 'async-renderer', type: 'component', component: { resolveRenderer: async () => CustomInput } }]
 }]
 
 const renamedColumn: ColumnConfig = {
@@ -437,39 +431,25 @@ const renamedColumn: ColumnConfig = {
 
 const renamedItem: ColumnConfig = {
   label: '字段路径',
-  children: [{
-    children: [
-      // @ts-expect-error key is only the render identity; fieldKey remains required.
-      { key: 'name', type: 'input' }
-    ]
-  }]
+  children: [// @ts-expect-error key is only the render identity; fieldKey remains required.
+      { key: 'name', type: 'input' }]
 }
 
 const keyedItem: ColumnConfig = {
   label: '稳定字段身份',
-  children: [{
-    children: [{ key: 'primary-name', fieldKey: 'name', type: 'input' }]
-  }]
+  children: [{ key: 'primary-name', fieldKey: 'name', type: 'input' }]
 }
 
 const legacySlotString: ColumnConfig = {
   label: '旧 slot 写法',
-  children: [{
-    children: [
-      // @ts-expect-error standalone slot field was replaced by type: 'slot' + component.renderer.
-      { fieldKey: 'actions', slot: 'actions' }
-    ]
-  }]
+  children: [// @ts-expect-error standalone slot field was replaced by type: 'slot' + component.renderer.
+      { fieldKey: 'actions', slot: 'actions' }]
 }
 
 const legacyComponentIs: ColumnConfig = {
   label: '旧组件写法',
-  children: [{
-    children: [
-      // @ts-expect-error component mode requires type: 'component' + component.renderer.
-      { fieldKey: 'custom', component: { is: CustomInput } }
-    ]
-  }]
+  children: [// @ts-expect-error component mode requires type: 'component' + component.renderer.
+      { fieldKey: 'custom', component: { is: CustomInput } }]
 }
 
 const contextBoundaries: ColumnConfig[] = [{
@@ -483,17 +463,15 @@ const contextBoundaries: ColumnConfig[] = [{
     void tableContext.row
     return true
   },
+  rowProps: (rowContext) => {
+    void rowContext.row
+    void rowContext.index
+    void rowContext.columnConfig
+    // @ts-expect-error row callbacks do not have a current field.
+    void rowContext.fieldKey
+    return { gutter: 8 }
+  },
   children: [{
-    visible: (rowContext) => {
-      void rowContext.row
-      void rowContext.index
-      void rowContext.columnConfig
-      void rowContext.rowConfig
-      // @ts-expect-error row callbacks do not have a current field.
-      void rowContext.fieldKey
-      return true
-    },
-    children: [{
       fieldKey: 'name',
       type: 'input',
       visible: (fieldContext) => {
@@ -502,6 +480,7 @@ const contextBoundaries: ColumnConfig[] = [{
         void fieldContext.fieldKey
         void fieldContext.value
         void fieldContext.columnConfig
+        // @ts-expect-error 字段上下文不再包含已删除的布局 Row 配置。
         void fieldContext.rowConfig
         void fieldContext.itemConfig
         // @ts-expect-error configuration references are read-only.
@@ -517,7 +496,6 @@ const contextBoundaries: ColumnConfig[] = [{
           }
         }
       }
-    }]
   }]
 }]
 

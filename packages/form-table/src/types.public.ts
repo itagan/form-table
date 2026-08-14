@@ -44,7 +44,6 @@ export type {
   PlainColumnConfig,
   OptionPropsConfig,
   ResolvedComponentConfig,
-  RowConfig,
   SlotFormItemConfig,
   TableRow
 } from './types'

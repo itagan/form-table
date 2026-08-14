@@ -79,7 +79,7 @@ describe('FormTable slot rendering', () => {
       tableData: [{ school: '一中' }],
       columns: [{
         label: '学校',
-        children: [{ children: [{
+        children: [{
           fieldKey: 'school',
           type: 'slot',
           component: {
@@ -88,7 +88,7 @@ describe('FormTable slot rendering', () => {
             options: [{ label: '校区配置', value: 'campus' }],
             listeners: { commit: slotListener }
           }
-        }] }]
+        }]
       }],
       scopedSlots: {
         school: `<button
@@ -107,7 +107,6 @@ describe('FormTable slot rendering', () => {
       'index',
       'itemConfig',
       'row',
-      'rowConfig',
       'tableData',
       'value'
     ])
@@ -189,8 +188,7 @@ describe('FormTable slot rendering', () => {
       tableData: [{ native: '文本', component: '组件', empty: '', missing: '' }],
       columns: [{
         label: '透明 Slot',
-        children: [{ children: [
-          {
+        children: [{
             fieldKey: 'native',
             type: 'slot',
             component: { renderer: 'native-slot' }
@@ -209,8 +207,7 @@ describe('FormTable slot rendering', () => {
             fieldKey: 'missing',
             type: 'slot',
             component: { renderer: 'missing-slot' }
-          }
-        ] }]
+          }]
       }],
       scopedSlots: {
         'native-slot': '<span class="transparent-native">{{ props.value }}</span>',
@@ -236,12 +233,12 @@ describe('FormTable slot rendering', () => {
           tableData: [{ multiple: '' }],
           columns: [{
             label: '多根 Slot',
-            children: [{ children: [{
+            children: [{
               fieldKey: 'multiple',
               type: 'slot',
               hint: '多根内容',
               component: { renderer: 'multiple-slot' }
-            }] }]
+            }]
           }]
         }
       },
@@ -279,7 +276,7 @@ describe('FormTable slot rendering', () => {
         headerSlot: 'school-header',
         headerHint,
         headerProps,
-        children: [{ children: [{ fieldKey: 'name', type: 'input' }] }]
+        children: [{ fieldKey: 'name', type: 'input' }]
       }],
       scopedSlots: {
         'school-header': `

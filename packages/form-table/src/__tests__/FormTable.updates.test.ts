@@ -112,15 +112,12 @@ describe('FormTable data updates and row identity', () => {
         columns: [{
           key: 'name-column',
           label: '姓名',
+          rowProps: rowPropsResolver,
           children: [{
-            key: 'name-row',
-            props: rowPropsResolver,
-            children: [{
-              key: 'name-item',
-              fieldKey: 'name',
-              type: 'input',
-              component: { props: componentPropsResolver }
-            }]
+            key: 'name-item',
+            fieldKey: 'name',
+            type: 'input',
+            component: { props: componentPropsResolver }
           }]
         }] as ColumnConfig[]
       }),
@@ -146,7 +143,7 @@ describe('FormTable data updates and row identity', () => {
       tableData: [{ profile: { city: '杭州' } }],
       columns: [{
         label: '城市',
-        children: [{ children: [{ fieldKey: 'profile.city', type: 'input' }] }]
+        children: [{ fieldKey: 'profile.city', type: 'input' }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -164,11 +161,11 @@ describe('FormTable data updates and row identity', () => {
       tableData: original,
       columns: [{
         label: '批量更新',
-        children: [{ children: [{
+        children: [{
           fieldKey: 'name',
           type: 'slot',
           component: { renderer: 'batch-update' }
-        }] }]
+        }]
       }],
       scopedSlots: {
         'batch-update': `
@@ -213,11 +210,11 @@ describe('FormTable data updates and row identity', () => {
       tableData: original,
       columns: [{
         label: '连续更新',
-        children: [{ children: [{
+        children: [{
           fieldKey: 'name',
           type: 'slot',
           component: { renderer: 'compose-update' }
-        }] }]
+        }]
       }],
       scopedSlots: {
         'compose-update': `
@@ -251,11 +248,11 @@ describe('FormTable data updates and row identity', () => {
       rowKey,
       columns: [{
         label: '连续更新',
-        children: [{ children: [{
+        children: [{
           fieldKey: 'name',
           type: 'slot',
           component: { renderer: 'indexed-compose-update' }
-        }] }]
+        }]
       }],
       scopedSlots: {
         'indexed-compose-update': `
@@ -295,14 +292,14 @@ describe('FormTable data updates and row identity', () => {
       tableData: [{ name: 'Old row' }],
       columns: [{
         label: '姓名',
-        children: [{ children: [{
+        children: [{
           fieldKey: 'name',
           type: 'component',
           component: {
             renderer: CaptureField,
             listeners: { capture: context => contexts.push(context) }
           }
-        }] }]
+        }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -344,14 +341,14 @@ describe('FormTable data updates and row identity', () => {
       rowKey: 'id',
       columns: [{
         label: '姓名',
-        children: [{ children: [{
+        children: [{
           fieldKey: 'name',
           type: 'component',
           component: {
             renderer: CaptureField,
             listeners: { capture: context => { savedContext = context } }
           }
-        }] }]
+        }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -389,14 +386,14 @@ describe('FormTable data updates and row identity', () => {
       rowKey: 'id',
       columns: [{
         label: '姓名',
-        children: [{ children: [{
+        children: [{
           fieldKey: 'name',
           type: 'component',
           component: {
             renderer: CaptureField,
             listeners: { capture: captureContext }
           }
-        }] }]
+        }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -443,14 +440,14 @@ describe('FormTable data updates and row identity', () => {
       tableData: [first, second],
       columns: [{
         label: '姓名',
-        children: [{ children: [{
+        children: [{
           fieldKey: 'name',
           type: 'component',
           component: {
             renderer: CaptureField,
             listeners: { capture: context => { savedContext = context } }
           }
-        }] }]
+        }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -485,14 +482,14 @@ describe('FormTable data updates and row identity', () => {
       rowKey,
       columns: [{
         label: '姓名',
-        children: [{ children: [{
+        children: [{
           fieldKey: 'name',
           type: 'component',
           component: {
             renderer: CaptureField,
             listeners: { capture: context => { savedContext = context } }
           }
-        }] }]
+        }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -526,7 +523,7 @@ describe('FormTable data updates and row identity', () => {
     const createColumns = (key: string, fieldKey: string): ColumnConfig[] => [{
       key: 'identity-column',
       label: '身份',
-      children: [{ key: 'identity-row', children: [{
+      children: [{
         key,
         fieldKey,
         type: 'component',
@@ -534,7 +531,7 @@ describe('FormTable data updates and row identity', () => {
           renderer: CaptureField,
           listeners: { capture: context => { savedContext = context } }
         }
-      }] }]
+      }]
     }]
     const row = { name: 'Alice', alias: 'A' }
     const wrapper = mountFormTable({ tableData: [row], columns: createColumns('name-field', 'name') })
@@ -571,14 +568,14 @@ describe('FormTable data updates and row identity', () => {
       rowKey: 'id',
       columns: [{
         label: '姓名',
-        children: [{ children: [{
+        children: [{
           fieldKey: 'name',
           type: 'component',
           component: {
             renderer: CaptureField,
             listeners: { capture: context => { savedContext = context } }
           }
-        }] }]
+        }]
       }]
     })
     await wrapper.vm.$nextTick()
