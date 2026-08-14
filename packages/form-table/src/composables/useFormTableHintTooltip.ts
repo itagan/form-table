@@ -23,6 +23,34 @@ interface DescribedElementState {
 
 const HINT_SELECTOR = `[${FORM_TABLE_HINT_ATTRIBUTE}]`
 const HINT_ROOT_SELECTOR = `[${FORM_TABLE_HINT_ROOT_ATTRIBUTE}]`
+const FORM_ITEM_SELECTOR = '.el-form-item'
+const FORM_ITEM_CONTENT_SELECTOR = '.el-form-item__content'
+const FORM_ITEM_ERROR_SELECTOR = '.el-form-item__error'
+
+/**
+ * 字段仍由 el-form-item 统一触发，但 Tooltip 优先贴近唯一的实际组件根节点。
+ * 多根 Slot、空内容和零尺寸节点无法形成稳定锚点，因此保持原 form-item 定位。
+ */
+function resolveReferenceTarget(target: HTMLElement): HTMLElement {
+  if (!target.matches(FORM_ITEM_SELECTOR)) return target
+
+  const content = Array.from(target.children).find(element => (
+    element instanceof HTMLElement && element.matches(FORM_ITEM_CONTENT_SELECTOR)
+  ))
+  if (!(content instanceof HTMLElement)) return target
+
+  const candidates = Array.from(content.children).filter((element): element is HTMLElement => {
+    if (!(element instanceof HTMLElement) || element.matches(FORM_ITEM_ERROR_SELECTOR)) return false
+    const style = window.getComputedStyle(element)
+    const rect = element.getBoundingClientRect()
+    return !element.hidden
+      && style.display !== 'none'
+      && style.visibility !== 'hidden'
+      && rect.width > 0
+      && rect.height > 0
+  })
+  return candidates.length === 1 ? candidates[0] : target
+}
 
 /** 在当前 FormTable 根节点委托提示事件，并维护唯一 Tooltip 的状态。 */
 export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions) {
@@ -97,12 +125,20 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
     ariaTarget: HTMLElement,
     forcePositionUpdate = false
   ) => {
+    const nextReferenceTarget = resolveReferenceTarget(target)
     if (
       activeTarget === target
       && activeContent === content
       && activeAriaTarget === ariaTarget
     ) {
-      if (forcePositionUpdate && referenceTarget === target) {
+      if (referenceTarget !== nextReferenceTarget) {
+        referenceTarget = nextReferenceTarget
+        void nextTick(() => {
+          if (activeTarget === target && referenceTarget === nextReferenceTarget) {
+            tooltip.retarget(nextReferenceTarget)
+          }
+        })
+      } else if (forcePositionUpdate) {
         void nextTick(() => tooltip.update())
       }
       return
@@ -112,13 +148,17 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
     if (targetChanged) {
       if (activeTarget && tooltip.isVisible()) {
         activeTarget = target
-        referenceTarget = target
+        referenceTarget = nextReferenceTarget
         activeAriaTarget = ariaTarget
         activeContent = content
         options.content.value = content
         describeElement(ariaTarget)
         void nextTick(() => {
-          if (activeTarget === target && activeContent === content) tooltip.retarget(target)
+          if (
+            activeTarget === target
+            && activeContent === content
+            && referenceTarget === nextReferenceTarget
+          ) tooltip.retarget(nextReferenceTarget)
         })
         return
       }
@@ -135,9 +175,9 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
 
     void nextTick(() => {
       if (activeTarget !== target || activeContent !== content) return
-      if (referenceTarget !== target) {
-        referenceTarget = target
-        tooltip.showFor(target)
+      if (referenceTarget !== nextReferenceTarget) {
+        referenceTarget = nextReferenceTarget
+        tooltip.showFor(nextReferenceTarget)
       } else {
         tooltip.update()
       }

@@ -3,6 +3,7 @@ import { mount } from '@vue/test-utils'
 import type { Wrapper } from '@vue/test-utils'
 import type Vue from 'vue'
 import FormTableColumn from '../FormTableColumn.vue'
+import FormTable from '../index.vue'
 import type { FormTableHintTooltipRef } from '../composables/useFormTableHintTooltip'
 import type { FormTableFieldRenderContext } from '../types.public'
 import { localVue, mountFormTable } from './test-utils'
@@ -30,6 +31,22 @@ const flushTooltip = async (wrapper: Wrapper<Vue>) => {
   await new Promise(resolve => setTimeout(resolve, 0))
   await wrapper.vm.$nextTick()
 }
+
+const createRect = (width = 120, height = 32): DOMRect => ({
+  x: 0,
+  y: 0,
+  width,
+  height,
+  top: 0,
+  right: width,
+  bottom: height,
+  left: 0,
+  toJSON: () => ({})
+})
+
+const setElementRect = (element: Element, width = 120, height = 32) => (
+  vi.spyOn(element, 'getBoundingClientRect').mockReturnValue(createRect(width, height))
+)
 
 describe('FormTable lightweight hint behavior', () => {
   it('keeps field-only title defaults when column and item render without a root provider', async () => {
@@ -179,6 +196,129 @@ describe('FormTable lightweight hint behavior', () => {
     expect(tooltip.enterable).toBe(false)
     expect(wrapper.findAll('[data-form-table-hint]')).toHaveLength(2)
     wrapper.destroy()
+  })
+
+  it('anchors built-in fields and a single-root slot to their actual component roots', async () => {
+    const wrapper = mountFormTable({
+      hintOptions: { mode: 'tooltip' },
+      tableData: [{ input: 'A', number: 1, switch: true, rate: 3, slot: 'S' }],
+      columns: [
+        { label: 'Input', children: [{ fieldKey: 'input', type: 'input', hint: 'Input hint' }] },
+        { label: 'Number', children: [{ fieldKey: 'number', type: 'number', hint: 'Number hint' }] },
+        { label: 'Switch', children: [{ fieldKey: 'switch', type: 'switch', hint: 'Switch hint' }] },
+        { label: 'Rate', children: [{ fieldKey: 'rate', type: 'rate', hint: 'Rate hint' }] },
+        { label: 'Slot', children: [{
+          fieldKey: 'slot', type: 'slot', hint: 'Slot hint', component: { renderer: 'single' }
+        }] }
+      ],
+      scopedSlots: { single: '<button class="single-slot">Slot</button>' }
+    })
+    await wrapper.vm.$nextTick()
+    const tooltip = getHintTooltip(wrapper)
+    vi.spyOn(tooltip, 'handleShowPopper').mockImplementation(() => undefined)
+
+    for (const selector of ['.el-input', '.el-input-number', '.el-switch', '.el-rate', '.single-slot']) {
+      const root = wrapper.find(selector)
+      setElementRect(root.element)
+      await root.trigger('mouseover')
+      await flushTooltip(wrapper)
+      expect(tooltip.referenceElm).toBe(root.element)
+    }
+    wrapper.destroy()
+  })
+
+  it('falls back for multi-root or zero-size fields and ignores validation errors', async () => {
+    const Host = localVue.extend({
+      components: { FormTable },
+      data: () => ({
+        rows: [{ multiple: 'M', empty: '', single: 'S' }],
+        columns: [
+          { label: 'Multiple', children: [{
+            fieldKey: 'multiple', type: 'slot', hint: 'Multiple hint', component: { renderer: 'multiple' }
+          }] },
+          { label: 'Empty', children: [{ fieldKey: 'empty', type: 'input', hint: 'Empty hint' }] },
+          { label: 'Single', children: [{
+            fieldKey: 'single', type: 'slot', hint: 'Single hint', component: { renderer: 'single' }
+          }] }
+        ]
+      }),
+      template: `
+        <FormTable ref="formTable" :table-data="rows" :columns="columns" :hint-options="{ mode: 'tooltip' }">
+          <template #multiple>
+            <span class="first-root">One</span>
+            <span class="second-root">Two</span>
+          </template>
+          <template #single><button class="valid-root">Single</button></template>
+        </FormTable>
+      `
+    })
+    const wrapper = mount(Host, { localVue, attachTo: document.body })
+    await wrapper.vm.$nextTick()
+    const formTable = wrapper.findComponent(FormTable as any) as Wrapper<Vue>
+    const tooltip = getHintTooltip(formTable)
+    vi.spyOn(tooltip, 'handleShowPopper').mockImplementation(() => undefined)
+    const items = wrapper.findAll('.el-form-item')
+    const firstRoot = wrapper.find('.first-root')
+    const secondRoot = wrapper.find('.second-root')
+    setElementRect(firstRoot.element)
+    setElementRect(secondRoot.element)
+
+    await firstRoot.trigger('mouseover')
+    await flushTooltip(wrapper)
+    expect(tooltip.referenceElm).toBe(items.at(0).element)
+
+    const zeroSizeInput = items.at(1).find('.el-input')
+    await zeroSizeInput.trigger('mouseover')
+    await flushTooltip(wrapper)
+    expect(tooltip.referenceElm).toBe(items.at(1).element)
+
+    const validRoot = wrapper.find('.valid-root')
+    const error = document.createElement('div')
+    error.className = 'el-form-item__error'
+    items.at(2).find('.el-form-item__content').element.appendChild(error)
+    setElementRect(validRoot.element)
+    setElementRect(error)
+    await validRoot.trigger('mouseover')
+    await flushTooltip(wrapper)
+    expect(tooltip.referenceElm).toBe(validRoot.element)
+    wrapper.destroy()
+  })
+
+  it('retargets an active field hint when its component root changes', async () => {
+    const rectSpy = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(function (this: HTMLElement) {
+        return this.matches('.el-input, .el-input-number') ? createRect() : createRect(0, 0)
+      })
+    const createColumns = (type: 'input' | 'number') => [{
+      key: 'value-column',
+      label: 'Value',
+      children: [{ key: 'value-field', fieldKey: 'value', type, hint: 'Value hint' }]
+    }]
+    const wrapper = mountFormTable({
+      hintOptions: { mode: 'tooltip' },
+      tableData: [{ value: 1 }],
+      columns: createColumns('input')
+    })
+    try {
+      await wrapper.vm.$nextTick()
+      const tooltip = getHintTooltip(wrapper)
+      vi.spyOn(tooltip, 'handleShowPopper').mockImplementation(() => undefined)
+      const update = vi.spyOn(tooltip, 'updatePopper').mockImplementation(() => undefined)
+      const inputRoot = wrapper.find('.el-input')
+
+      await inputRoot.trigger('mouseover')
+      await flushTooltip(wrapper)
+      expect(tooltip.referenceElm).toBe(inputRoot.element)
+
+      await wrapper.setProps({ columns: createColumns('number') })
+      await flushTooltip(wrapper)
+      const numberRoot = wrapper.find('.el-input-number')
+      expect(tooltip.referenceElm).toBe(numberRoot.element)
+      expect(update).toHaveBeenCalled()
+    } finally {
+      wrapper.destroy()
+      rectSpy.mockRestore()
+    }
   })
 
   it('supports pointer, keyboard, Escape, ARIA tokens, and nested root isolation', async () => {
