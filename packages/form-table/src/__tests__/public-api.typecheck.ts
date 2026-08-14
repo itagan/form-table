@@ -23,7 +23,7 @@ import FormTable, {
   type FormTableProps,
   type FormTableSortChangePayload,
   type LayoutColumnConfig,
-  type PlainColumnConfig,
+  type NativeColumnConfig,
   type TableRow
 } from '../index'
 
@@ -48,6 +48,8 @@ type RemovedResolvedComponentConfig = import('../index').ResolvedComponentConfig
 type RemovedDefaultFieldHint = import('../index').FormTableDefaultFieldHint
 // @ts-expect-error 纯内部表级上下文不再从包入口导出。
 type RemovedTableContext = import('../index').FormTableTableContext
+// @ts-expect-error 原生 Element 列类型已统一命名为 NativeColumnConfig。
+type RemovedPlainColumnConfig = import('../index').PlainColumnConfig
 void (null as unknown as RemovedBuiltinFormItemConfig)
 void (null as unknown as RemovedComponentFormItemConfig)
 void (null as unknown as RemovedSlotFormItemConfig)
@@ -55,6 +57,7 @@ void (null as unknown as RemovedFormItemType)
 void (null as unknown as RemovedResolvedComponentConfig)
 void (null as unknown as RemovedDefaultFieldHint)
 void (null as unknown as RemovedTableContext)
+void (null as unknown as RemovedPlainColumnConfig)
 
 // Element UI 未默认提供 Tree Select，不允许作为 FormTable 内置类型使用。
 // @ts-expect-error tree-select 应通过 type: 'component' 显式接入
@@ -252,7 +255,7 @@ const layoutColumn: LayoutColumnConfig = {
   label: '姓名',
   children: [{ fieldKey: 'name', type: 'input' }]
 }
-const plainColumns: PlainColumnConfig[] = [
+const nativeColumns: NativeColumnConfig[] = [
   { props: { type: 'selection', width: 48 } },
   { label: '序号', props: { type: 'index', width: 64 } }
 ]
@@ -261,10 +264,10 @@ const expandSlotColumn: CellSlotColumnConfig = {
   props: { type: 'expand' },
   cellSlot: 'row-detail'
 }
-// @ts-expect-error plain columns require props to explicitly select passthrough mode.
-const emptyPlainColumn: PlainColumnConfig = {}
-// @ts-expect-error plain columns do not enter the Row/Item rendering chain.
-const plainColumnWithChildren: PlainColumnConfig = { props: { type: 'index' }, children: [] }
+// @ts-expect-error native columns require props to explicitly select passthrough mode.
+const emptyNativeColumn: NativeColumnConfig = {}
+// @ts-expect-error native columns do not enter the Row/Item rendering chain.
+const nativeColumnWithChildren: NativeColumnConfig = { props: { type: 'index' }, children: [] }
 // @ts-expect-error native Element column props stay inside props.
 const topLevelNativeType: ColumnConfig = { type: 'selection', props: { width: 48 } }
 // @ts-expect-error cellSlot columns do not accept Row/Item children.
@@ -547,10 +550,10 @@ void legacyRowKeyProps
 void typedColumns
 void cellSlotColumn
 void layoutColumn
-void plainColumns
+void nativeColumns
 void expandSlotColumn
-void emptyPlainColumn
-void plainColumnWithChildren
+void emptyNativeColumn
+void nativeColumnWithChildren
 void topLevelNativeType
 void mixedColumnModes
 void modelVariants
