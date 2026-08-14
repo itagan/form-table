@@ -44,14 +44,7 @@ export type {
   PlainColumnConfig,
   OptionPropsConfig,
   ResolvedComponentConfig,
-  ResolvedHeaderConfig,
   RowConfig,
   SlotFormItemConfig,
   TableRow
 } from './types'
-
-export type {
-  FormTableFieldConfig,
-  FormTableFieldDefinition,
-  FormTableFieldPath
-} from './createFormTableField'

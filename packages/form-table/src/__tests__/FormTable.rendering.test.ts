@@ -90,20 +90,6 @@ describe('FormTable rendering and configuration', () => {
     wrapper.destroy()
   })
 
-  it('renders the field value when an untyped config has no renderer', async () => {
-    const wrapper = mountFormTable({
-      tableData: [{ summary: '只读内容' }],
-      columns: [{
-        label: '默认展示',
-        children: [{ children: [{ fieldKey: 'summary' } as any] }]
-      }]
-    })
-    await wrapper.vm.$nextTick()
-
-    expect(wrapper.text()).toContain('只读内容')
-    wrapper.destroy()
-  })
-
   it('applies component props, including native title, to text fields', async () => {
     const wrapper = mountFormTable({
       tableData: [{ summary: '完整说明' }],
@@ -441,40 +427,6 @@ describe('FormTable rendering and configuration', () => {
 
     expect(wrapper.find('.declared-model-switch').text()).toBe('true')
     await wrapper.find('.declared-model-switch').trigger('click')
-    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{ enabled: false }])
-    wrapper.destroy()
-  })
-
-  it('treats model true as the component native Vue 2 model', async () => {
-    const DeclaredModelSwitch = {
-      model: { prop: 'checked', event: 'toggle' },
-      props: ['checked'],
-      render(this: any, h: any) {
-        return h('button', {
-          class: 'explicit-default-model-switch',
-          attrs: { type: 'button' },
-          on: { click: () => this.$emit('toggle', !this.checked) }
-        }, String(this.checked))
-      }
-    }
-    const wrapper = mountFormTable({
-      tableData: [{ enabled: true }],
-      columns: [{
-        label: '启用',
-        children: [{ children: [{
-          fieldKey: 'enabled',
-          type: 'component',
-          component: {
-            renderer: DeclaredModelSwitch,
-            model: true
-          }
-        }] }]
-      }]
-    })
-    await wrapper.vm.$nextTick()
-
-    expect(wrapper.find('.explicit-default-model-switch').text()).toBe('true')
-    await wrapper.find('.explicit-default-model-switch').trigger('click')
     expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{ enabled: false }])
     wrapper.destroy()
   })

@@ -2,19 +2,18 @@ import type { Component, PluginObject } from 'vue'
 import FormTable, {
   FormTable as NamedFormTable,
   FormTablePlugin,
-  createFormTableField,
   createFormTable,
   defineFormTableColumns,
   type BuiltinFormItemType,
   type CellSlotColumnConfig,
   type ColumnConfig,
+  type FieldComponentConfig,
   type FieldModelConfig,
   type FormTableCellSlotContext,
   type FormTableElementColumn,
   type FormTableEmits,
   type FormTableExpose,
   type FormTableHintValue,
-  type FormTableFieldPath,
   type FormTableFieldHintFormatter,
   type FormTableFilterChangePayload,
   type FormTableDefaultFieldHint,
@@ -26,9 +25,13 @@ import FormTable, {
   type FormTableSortChangePayload,
   type LayoutColumnConfig,
   type PlainColumnConfig,
-  type ResolvedHeaderConfig,
   type TableRow
 } from '../index'
+
+type PublicRuntimeEntry = typeof import('../index')
+// @ts-expect-error 严格字段路径助手已从轻量公共入口移除。
+type RemovedFieldHelper = PublicRuntimeEntry['createFormTableField']
+void (null as unknown as RemovedFieldHelper)
 
 // Element UI 未默认提供 Tree Select，不允许作为 FormTable 内置类型使用。
 // @ts-expect-error tree-select 应通过 type: 'component' 显式接入
@@ -66,32 +69,6 @@ interface PurchaseRow {
     name: string
   }>
 }
-
-const definePurchaseField = createFormTableField<PurchaseRow>()
-const amountField = definePurchaseField({ fieldKey: 'amount', type: 'number' })
-const cityField = definePurchaseField({ fieldKey: 'profile.city', type: 'input' })
-const itemNameField = definePurchaseField({ fieldKey: 'items[0].name', type: 'input' })
-const itemPath: FormTableFieldPath<PurchaseRow> = 'items[12].name'
-const literalFieldKey: 'amount' = amountField.fieldKey
-void cityField
-void itemNameField
-void itemPath
-void literalFieldKey
-definePurchaseField({
-  // @ts-expect-error createFormTableField rejects unknown business fields.
-  fieldKey: 'ammount',
-  type: 'number'
-})
-definePurchaseField({
-  // @ts-expect-error nested object paths must match the declared row shape.
-  fieldKey: 'profile.country',
-  type: 'input'
-})
-definePurchaseField({
-  // @ts-expect-error array paths use bracket indices rather than dotted indices.
-  fieldKey: 'items.0.name',
-  type: 'input'
-})
 
 const typedColumns = defineFormTableColumns<PurchaseRow>([{
   label: '采购信息',
@@ -166,10 +143,16 @@ typedTableRef?.clearSort?.()
 typedTableRef?.clearFilter?.()
 typedTableRef?.doLayout?.()
 typedTableRef?.sort?.('amount', 'ascending')
+void typedTableRef?.height
+void typedTableRef?.data[0]?.amount
 // @ts-expect-error table ref row methods preserve the business row type.
 typedTableRef?.toggleRowSelection?.({ name: '缺少金额' })
 // @ts-expect-error table ref sort only accepts Element UI's stable orders.
 typedTableRef?.sort?.('amount', 'up')
+const typedFormRef = typedFormTableInstance.getFormRef()
+typedFormRef?.resetFields()
+typedFormRef?.validateField('tableData.0.amount', () => undefined)
+void typedFormRef?.model
 const elementColumn: FormTableElementColumn = {
   id: 'el-table_1_column_1',
   columnKey: 'amount-column',
@@ -278,6 +261,12 @@ const customModel: FieldModelConfig = {
   valueFromEvent: (...args) => (args[0] as { id: string }).id
 }
 
+const invalidTrueModelConfig: FieldComponentConfig = {
+  // @ts-expect-error 原生 v-model 通过省略 model 表达，不再接受 true。
+  model: true
+}
+void invalidTrueModelConfig
+
 const modelVariants: ColumnConfig[] = [{
   label: '组件绑定协议',
   children: [{
@@ -290,7 +279,7 @@ const modelVariants: ColumnConfig[] = [{
       {
         fieldKey: 'enabled',
         type: 'component',
-        component: { renderer: CustomInput, model: true }
+        component: { renderer: CustomInput }
       },
       {
         fieldKey: 'summary',
@@ -535,10 +524,8 @@ const contextBoundaries: ColumnConfig[] = [{
 declare const headerContext: FormTableHeaderSlotContext
 void headerContext.columnIndex
 void headerContext.columnConfig.key
-const resolvedHeader: ResolvedHeaderConfig = headerContext.header
-void resolvedHeader.props
-// @ts-expect-error 表头 Slot 不再暴露解析后的 Hint。
-void resolvedHeader.hint
+// @ts-expect-error headerProps 已由包装节点应用，不再重复暴露解析结果。
+void headerContext.header
 // @ts-expect-error header slot column configuration is read-only.
 headerContext.columnConfig.label = '新表头'
 // @ts-expect-error legacy column alias is not exposed.

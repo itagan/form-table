@@ -26,7 +26,7 @@ columns[].children[].children[].component
 | --- | --- | --- | --- | --- |
 | `columns[].children[].children[].component.renderer` | `string \| Component` | `component` / `slot` | — | component 为组件；slot 为具名 Slot |
 | `...component.resolveRenderer` | `(ItemContext) => string \| Component \| undefined` | 仅 `component` | ItemContext | 按当前行同步选择组件 |
-| `...component.model` | `true \| false \| FieldModelConfig` | 内置 / `component` | — | 控制字段值绑定协议 |
+| `...component.model` | `false \| FieldModelConfig` | 内置 / `component` | — | 省略时使用原生 v-model；也可自定义或关闭绑定 |
 | `...component.model.prop` | `string` | 自定义 model | — | 接收字段值的 prop，默认 `value` |
 | `...component.model.event` | `string` | 自定义 model | — | 通知字段变化的事件，默认 `input` |
 | `...component.model.valueFromEvent` | `(...args) => FormTableValue` | 自定义 model | 原始事件参数 | 从事件参数提取写回值 |

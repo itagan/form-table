@@ -284,7 +284,7 @@ describe('FormTable slot rendering', () => {
       scopedSlots: {
         'school-header': `
           <span class="school-header">
-            {{ props.columnConfig.key }}|{{ props.column === undefined }}|{{ props.header.hint === undefined }}
+            {{ props.columnConfig.key }}|{{ props.column === undefined }}|{{ props.header === undefined }}
           </span>
         `
       }

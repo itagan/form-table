@@ -74,7 +74,7 @@ export const apiGroups: ApiGroup[] = [
     entries: [
       { path: 'columns[].children[].children[].component.renderer', type: 'Component | string', defaultValue: '按 type', target: '字段组件 / Slot 名', description: 'component 模式为组件，slot 模式为具名 Slot。' },
       { path: 'columns[].children[].children[].component.resolveRenderer', type: '(context) => Component | string', defaultValue: '—', target: '动态字段组件', description: '仅 component 模式，undefined 时回退 renderer。', context: 'ItemContext' },
-      { path: 'columns[].children[].children[].component.model', type: 'true | false | ModelConfig', defaultValue: 'true', target: '值绑定协议', description: '默认 v-model、自定义 prop/event，或关闭自动绑定。' },
+      { path: 'columns[].children[].children[].component.model', type: 'false | ModelConfig', defaultValue: '省略', target: '值绑定协议', description: '省略时使用原生 v-model；也可自定义 prop/event 或关闭自动绑定。' },
       { path: 'columns[].children[].children[].component.props', type: 'Object | (context) => Object', defaultValue: '{}', target: '字段组件', description: '按当前字段上下文动态生成组件属性。', context: 'ItemContext' },
       { path: 'columns[].children[].children[].component.listeners', type: 'Record<string, Function>', defaultValue: '{}', target: '字段组件事件', description: '首参为 ActionContext，之后保持组件原始参数。', context: 'ActionContext + event args' },
       { path: 'columns[].children[].children[].component.options', type: 'Option[] | (context) => Option[]', defaultValue: '[]', target: '选项型组件', description: 'select、radio、checkbox 等选项。', context: 'ItemContext' },

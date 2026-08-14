@@ -13,7 +13,7 @@
 | 物料 | 页面手动引入 `BusinessSkuSelector` | `model: false` + props + listeners 手动同步 |
 | 采购组织 | 公司组件库全局注册 | 字符串 renderer + 自定义 model |
 | 供应商 | 公司组件库全局注册 | 字符串 renderer + 复杂事件载荷 |
-| 数量 | Element UI | `model: true`，显式启用默认双向绑定 |
+| 数量 | Element UI | 省略 `model`，使用默认双向绑定 |
 | 含税单价 | 页面手动引入 `MoneyInput` | 组件对象 + 自定义 model |
 | 附件 | 页面手动引入 `BusinessAttachmentUploader` | 文件列表 model + 动态 props |
 | 审批状态 | 公司全局展示组件 | `model: false` |
@@ -316,8 +316,7 @@ export function createPurchaseColumns(
               rules: [{ required: true, type: 'number', min: 1, message: '数量必须大于 0' }]
             },
             component: {
-              // true 与省略 model 等价，使用组件原生 Vue 2 v-model。
-              model: true,
+              // 省略 model，使用组件原生 Vue 2 v-model。
               props: ({ row }) => ({
                 disabled: !options.editable || asPurchaseRow(row).locked,
                 min: 1,
@@ -595,16 +594,15 @@ const submit = async () => {
 
 ### 标准 Vue 2 v-model
 
-组件使用 `value/input`，或自己声明了 Vue 2 `model` 时，可以省略 `component.model`，也可以显式传入 `true`：
+组件使用 `value/input`，或自己声明了 Vue 2 `model` 时，省略 `component.model`：
 
 ```ts
 component: {
-  renderer: LocalStandardInput,
-  model: true
+  renderer: LocalStandardInput
 }
 ```
 
-`model: true` 与省略配置完全等价。FormTable 会把模型信息留给 Vue 2 在解析真实组件后处理，因此全局组件自身声明的 `model.prop/model.event` 也能生效。
+FormTable 会把模型信息留给 Vue 2 在解析真实组件后处理，因此全局组件自身声明的 `model.prop/model.event` 也能生效。
 
 ### 非标准受控组件
 

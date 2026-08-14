@@ -112,7 +112,7 @@
 
           <div class="model-panel">
             <h3>component.model</h3>
-            <div><code>省略 / true</code><span>使用组件原生 Vue 2 v-model</span></div>
+            <div><code>省略</code><span>使用组件原生 Vue 2 v-model</span></div>
             <div><code>{ prop, event, valueFromEvent }</code><span>适配非标准绑定协议</span></div>
             <div><code>false</code><span>关闭自动绑定，适合纯展示或手动同步</span></div>
           </div>

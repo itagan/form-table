@@ -136,9 +136,9 @@ function handleTableDataUpdate(nextTableData) {
 | 数据定位 | `tableData`、`row`、`index`、`fieldKey`、`value` |
 | 原始配置 | `columnConfig`、`rowConfig`、`itemConfig` |
 | 更新能力 | `setValue`、`updateRow` |
-| 解析结果 / Slot 专属 | `hint`、`propPath`、`component` |
+| 解析结果 / Slot 专属 | `propPath`、`component` |
 
-其中 `itemConfig.component` 是原始配置，可能仍包含动态函数；`hint` 是标准化结果；`component` 是解析后的 `renderer/props/listeners/options/optionProps`。
+其中 `itemConfig.component` 是原始配置，可能仍包含动态函数；`component` 是解析后的 `renderer/props/listeners/options/optionProps`。Hint 解析结果仅供 FormTable 内部展示，不进入 Slot。
 
 因此两者不是替代关系：`itemConfig` 用于读取当前字段的原始配置来源，`component` 用于在 Slot 模板中直接绑定。不要把 `itemConfig.component.props` 直接传给组件，因为它可能仍是一个动态函数。
 
@@ -205,7 +205,7 @@ formTableRef.value?.getTableRef()
 
 `validate()` 使用 Element UI 完整规则并统一返回 `Promise<boolean>`；校验失败时返回 `false`，不会要求调用方捕获 rejected Promise。
 
-`getTableRef()` 返回带业务行泛型的 Element Table Ref。以下方法在支持范围 2.4.9–2.15.14 中保持稳定，公开类型以可选方法表达 Ref mock 和版本扩展兼容：
+`getFormRef()` 和 `getTableRef()` 分别返回基于当前项目 Element UI 类型声明的原生 Form 与 Table 实例。Table Ref 额外为数据和行方法保留业务行泛型；以下方法在支持范围 2.4.9–2.15.14 中保持稳定：
 
 | 方法 | 签名 |
 | --- | --- |
@@ -225,7 +225,7 @@ tableRef?.sort?.('amount', 'descending')
 tableRef?.doLayout?.()
 ```
 
-`clearFilter(columnKeys)` 和 `load()` 等较新版本能力不在稳定签名中；运行时 Ref 仍保留扩展字段，可由锁定对应 Element UI 版本的业务自行扩展类型。
+其他属性与版本新增方法直接继承当前项目安装的 Element UI 类型，因此会与实际依赖版本保持一致。测试或 mock 不完整实例时，应使用 `Partial<FormTableElementFormRef>` 或 `Partial<FormTableElementTableRef<TRow>>`。
 
 FormTable 不公开数据重置方法。受控场景由调用方明确保存和恢复业务初始数据，再清除校验状态：
 

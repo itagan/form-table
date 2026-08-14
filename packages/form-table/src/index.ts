@@ -2,7 +2,6 @@ import type { PluginObject } from 'vue'
 import FormTable from './index.vue'
 import type { FormTableComponent, TableRow } from './types.public'
 export { defineFormTableColumns } from './defineFormTableColumns'
-export { createFormTableField } from './createFormTableField'
 
 export * from './types.public'
 export { FormTable }
