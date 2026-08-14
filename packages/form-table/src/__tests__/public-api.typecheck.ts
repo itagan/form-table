@@ -16,7 +16,6 @@ import FormTable, {
   type FormTableHintValue,
   type FormTableFieldHintFormatter,
   type FormTableFilterChangePayload,
-  type FormTableDefaultFieldHint,
   type FormTableHeaderSlotContext,
   type FormTableHintMode,
   type FormTableHintTargets,
@@ -35,6 +34,27 @@ void (null as unknown as RemovedFieldHelper)
 // @ts-expect-error 布局 Row 已收平，不再导出 RowConfig。
 type RemovedRowConfig = import('../index').RowConfig
 void (null as unknown as RemovedRowConfig)
+// @ts-expect-error 字段联合的内部分支类型不再从包入口导出。
+type RemovedBuiltinFormItemConfig = import('../index').BuiltinFormItemConfig
+// @ts-expect-error 字段联合的内部分支类型不再从包入口导出。
+type RemovedComponentFormItemConfig = import('../index').ComponentFormItemConfig
+// @ts-expect-error 字段联合的内部分支类型不再从包入口导出。
+type RemovedSlotFormItemConfig = import('../index').SlotFormItemConfig
+// @ts-expect-error 内部渲染联合不再作为独立公共类型。
+type RemovedFormItemType = import('../index').FormItemType
+// @ts-expect-error Slot 解析结果通过 FormTableSlotContext 获取，不单独导出。
+type RemovedResolvedComponentConfig = import('../index').ResolvedComponentConfig
+// @ts-expect-error 字段默认 Hint 通过 FormTableHintOptions['field'] 表达。
+type RemovedDefaultFieldHint = import('../index').FormTableDefaultFieldHint
+// @ts-expect-error 纯内部表级上下文不再从包入口导出。
+type RemovedTableContext = import('../index').FormTableTableContext
+void (null as unknown as RemovedBuiltinFormItemConfig)
+void (null as unknown as RemovedComponentFormItemConfig)
+void (null as unknown as RemovedSlotFormItemConfig)
+void (null as unknown as RemovedFormItemType)
+void (null as unknown as RemovedResolvedComponentConfig)
+void (null as unknown as RemovedDefaultFieldHint)
+void (null as unknown as RemovedTableContext)
 
 // Element UI 未默认提供 Tree Select，不允许作为 FormTable 内置类型使用。
 // @ts-expect-error tree-select 应通过 type: 'component' 显式接入
@@ -351,7 +371,7 @@ const tooltipHintOptions: FormTableHintOptions = {
 const typedFieldFormatter: FormTableFieldHintFormatter<PurchaseRow> = ({ value, row }) => (
   `${row.name}:${String(value)}`
 )
-const typedDefaultFieldHint: FormTableDefaultFieldHint<PurchaseRow> = typedFieldFormatter
+const typedDefaultFieldHint: FormTableHintOptions<PurchaseRow>['field'] = typedFieldFormatter
 const typedHintOptions: FormTableHintOptions<PurchaseRow> = {
   mode: 'tooltip',
   field: typedDefaultFieldHint

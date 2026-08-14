@@ -44,7 +44,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, ref } from 'vue'
+import { computed, inject } from 'vue'
 import FormTableRow from './FormTableRow.vue'
 import SlotRenderer from './SlotRenderer'
 import type {
@@ -52,18 +52,16 @@ import type {
   ColumnConfig,
   FormTableCellSlotContext,
   FormTableColumnContext,
+  FormTableHintContext,
   FormTableTableContext,
   FormTableHeaderSlotContext,
-  FormTableHintModeContext,
-  FormTableHintTargetsContext,
   FormTableSlots,
   FormTableUpdateApi,
   TableRow
 } from './types'
 import {
   FORM_TABLE_CONTEXT_KEY,
-  FORM_TABLE_HINT_MODE_KEY,
-  FORM_TABLE_HINT_TARGETS_KEY,
+  FORM_TABLE_HINT_CONTEXT_KEY,
   FORM_TABLE_SLOTS_KEY,
   FORM_TABLE_UPDATE_KEY
 } from './types'
@@ -91,11 +89,12 @@ const formTableContext = inject<FormTableTableContext>(
 const parentSlots = inject<FormTableSlots>(FORM_TABLE_SLOTS_KEY, {})
 
 /** 根组件未提供模式时保持原生 title，便于列组件独立挂载测试。 */
-const hintMode = inject<FormTableHintModeContext>(FORM_TABLE_HINT_MODE_KEY, ref<'title'>('title'))
-const hintTargets = inject<FormTableHintTargetsContext>(FORM_TABLE_HINT_TARGETS_KEY, ref<'field'>('field'))
+const hintContext = inject<FormTableHintContext | undefined>(FORM_TABLE_HINT_CONTEXT_KEY, undefined)
+const hintMode = computed(() => hintContext?.mode.value ?? 'title')
+const hintTargets = computed(() => hintContext?.targets.value ?? 'field')
 
 /** 根组件下发的行更新入口，供列级单元格 Slot 执行业务操作。 */
-const updateApi = inject<FormTableUpdateApi>(FORM_TABLE_UPDATE_KEY)
+const updateApi = inject<FormTableUpdateApi | undefined>(FORM_TABLE_UPDATE_KEY, undefined)
 
 /** 合并表级数据和当前列配置，供列属性、表头和下级行共同复用。 */
 const columnContext = computed<FormTableColumnContext>(() => createColumnContext(

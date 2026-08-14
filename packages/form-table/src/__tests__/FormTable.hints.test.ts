@@ -1,9 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
+import { mount } from '@vue/test-utils'
 import type { Wrapper } from '@vue/test-utils'
 import type Vue from 'vue'
+import FormTableColumn from '../FormTableColumn.vue'
 import type { FormTableHintTooltipRef } from '../composables/useFormTableHintTooltip'
 import type { FormTableFieldRenderContext } from '../types.public'
-import { mountFormTable } from './test-utils'
+import { localVue, mountFormTable } from './test-utils'
 
 const getHintTooltip = (wrapper: Wrapper<Vue>) => {
   const controller = (wrapper.vm.$refs as Record<string, any>).hintTooltipControllerRef
@@ -30,6 +32,35 @@ const flushTooltip = async (wrapper: Wrapper<Vue>) => {
 }
 
 describe('FormTable lightweight hint behavior', () => {
+  it('keeps field-only title defaults when column and item render without a root provider', async () => {
+    const headerHint = vi.fn(() => '表头说明')
+    const Host = localVue.extend({
+      components: { FormTableColumn },
+      data: () => ({
+        rows: [{ name: 'Alice' }],
+        column: {
+          label: '姓名',
+          headerHint,
+          children: [{ fieldKey: 'name', type: 'input', hint: '字段说明' }]
+        }
+      }),
+      template: `
+        <el-form :model="{ tableData: rows }">
+          <el-table :data="rows">
+            <FormTableColumn :column="column" :column-index="0" />
+          </el-table>
+        </el-form>
+      `
+    })
+    const wrapper = mount(Host, { localVue, attachTo: document.body })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.el-form-item').attributes('title')).toBe('字段说明')
+    expect(wrapper.find('.form-table-column-header').exists()).toBe(false)
+    expect(headerHint).not.toHaveBeenCalled()
+    wrapper.destroy()
+  })
+
   it('defaults to field-only native titles without creating a tooltip controller', async () => {
     const headerHint = vi.fn(() => '表头说明')
     const wrapper = mountFormTable({
@@ -138,6 +169,8 @@ describe('FormTable lightweight hint behavior', () => {
     await wrapper.vm.$nextTick()
 
     expect((wrapper.vm.$refs as Record<string, unknown>).hintTooltipControllerRef).toBeTruthy()
+    const controller = (wrapper.vm.$refs as Record<string, any>).hintTooltipControllerRef
+    expect(controller.$props.container).toBe(wrapper.find('.form-table-container').element)
     const tooltip = getHintTooltip(wrapper)
     expect(tooltip.placement).toBe('right')
     expect(tooltip.popperClass).toBe('form-table-hint-tooltip business-hint')

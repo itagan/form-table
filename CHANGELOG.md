@@ -6,6 +6,7 @@
 
 ### Improved
 
+- Hint 的内部依赖注入收敛为单一上下文，Tooltip 控制器改由根组件直接传入容器；同时停止从包入口导出仅服务实现拆分的字段分支、解析结果和内部上下文类型。
 - 字段布局从 `Column → RowConfig[] → FormItemConfig[]` 收平为 `Column → FormItemConfig[]`；每个单元格固定使用一个可换行 Flex Row，复杂多 Row 布局统一交给 `cellSlot`。
 - 原样透传 Element Table 的 `empty/append` 根级 Slot，并为排序、筛选、表头、单元格及选择事件补充公开类型、可运行示例和回归测试。
 - 新增 `createFormTable<TRow>()` 泛型组件工厂，使 `tableData`、列配置、rowKey、动态上下文和组件事件共享业务行类型，且不创建额外运行时组件。
