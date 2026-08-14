@@ -3,12 +3,11 @@
 包入口导出：
 
 - `ColumnConfig`、`LayoutColumnConfig`、`CellSlotColumnConfig`、`PlainColumnConfig`、`FormItemConfig`
-- `BuiltinFormItemConfig`、`ComponentFormItemConfig`、`SlotFormItemConfig`
-- `FieldComponentConfig`、`FieldModelConfig`、`FieldRendererResolver`、`BuiltinFormItemType`、`FormItemType`
-- `FormItemOption`、`OptionPropsConfig`、`ResolvedComponentConfig`
-- `FormTableHintValue`、`FormTableHintMode`、`FormTableHintTargets`、`FormTableFieldHintFormatter`、`FormTableDefaultFieldHint`、`FormTableHintOptions`
+- `FieldComponentConfig`、`FieldModelConfig`、`FieldRendererResolver`、`BuiltinFormItemType`
+- `FormItemOption`、`OptionPropsConfig`
+- `FormTableHintValue`、`FormTableHintMode`、`FormTableHintTargets`、`FormTableFieldHintFormatter`、`FormTableHintOptions`
 - `TableRow`、`FormTableRecord`、`FormTableProps`、`FormTableRowKey`、`FormTableTableProps`
-- `FormTableTableContext`、`FormTableColumnContext`、`FormTableRowContext`、`FormTableFieldRenderContext`
+- `FormTableColumnContext`、`FormTableRowContext`、`FormTableFieldRenderContext`
 - `FormTableFieldContext`、`FormTableSlotContext`、`FormTableCellSlotContext`
 - `FormTableFieldChangePayload`、`FormTableHeaderSlotContext`
 - `FormTableElementColumn`、`FormTableSortChangePayload`、`FormTableFilterChangePayload`
@@ -86,9 +85,15 @@ interface FormTableCellSlotContext {
 
 ```ts
 type FormItemConfig =
-  | BuiltinFormItemConfig
-  | ComponentFormItemConfig
-  | SlotFormItemConfig
+  | { type: BuiltinFormItemType; component?: FieldComponentConfig }
+  | {
+      type: 'component'
+      component: FieldComponentConfig & (
+        | { renderer: string | Component; resolveRenderer?: FieldRendererResolver }
+        | { renderer?: never; resolveRenderer: FieldRendererResolver }
+      )
+    }
+  | { type: 'slot'; component: FieldComponentConfig & { renderer: string } }
 ```
 
 三种 Item 都支持可选 `key` 作为稳定渲染身份，并要求 `fieldKey` 指向行数据路径。`key` 不参与取值、更新或表单校验路径计算。
@@ -96,7 +101,7 @@ type FormItemConfig =
 `type` 明确决定模式。component 模式要求静态 `renderer` 或动态 `resolveRenderer` 至少存在一个；slot 模式只接受静态字符串名称：
 
 ```ts
-interface ComponentFormItemConfig {
+interface ComponentItemShape {
   type: 'component'
   component: FieldComponentConfig & (
     | { renderer: string | Component; resolveRenderer?: FieldRendererResolver }
@@ -104,7 +109,7 @@ interface ComponentFormItemConfig {
   )
 }
 
-interface SlotFormItemConfig {
+interface SlotItemShape {
   type: 'slot'
   component: FieldComponentConfig & {
     renderer: string
@@ -132,7 +137,7 @@ component.listeners      → Field 信息 + setValue, updateRow
 列级 cellSlot            → row, index, columnConfig, updateRow
 ```
 
-`FormTableSlotContext.itemConfig.component` 保留调用方传入的原始配置；`FormTableSlotContext.component` 的类型是 `ResolvedComponentConfig`，包含针对当前数据行解析并归一化后的 `props/listeners/options/optionProps/model`，用于直接绑定 Slot 内组件。
+`FormTableSlotContext.itemConfig.component` 保留调用方传入的原始配置；`FormTableSlotContext.component` 包含针对当前数据行解析并归一化后的 `props/listeners/options/optionProps/model`，用于直接绑定 Slot 内组件。该解析结果不再作为独立顶层类型导出。
 
 自定义组件绑定协议类型：
 
