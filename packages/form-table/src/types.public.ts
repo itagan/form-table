@@ -21,6 +21,8 @@ export type {
   FormTableFilterChangePayload,
   FormTableFieldContext,
   FormTableFieldRenderContext,
+  FormTableFormItemErrorSlotContext,
+  FormTableFormItemSlotContext,
   FormTableHeaderSlotContext,
   FormTableHintValue,
   FormTableHintMode,

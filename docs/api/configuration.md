@@ -25,6 +25,7 @@ FormTable
    └─ children[]                         FormItemConfig
       ├─ key / fieldKey / visible / type
       ├─ colProps / formItemProps / hint
+      ├─ labelSlot / errorSlot
       └─ component
          ├─ renderer / resolveRenderer
          ├─ model
@@ -62,6 +63,7 @@ FormTable
 | --- | --- | --- |
 | Hint 提示体系 | [配置与使用](../features/hint.md) | [`/hint-scenarios`](http://localhost:5173/hint-scenarios) |
 | 自定义表头 | [配置与使用](../features/custom-header.md) | [`/hint-scenarios`](http://localhost:5173/hint-scenarios) |
+| FormItem Label / Error Slot | [能力边界与处理方案](../features/element-ui-boundaries.md#formitem-自定义-label-和-error) | [`/hint-scenarios`](http://localhost:5173/hint-scenarios) |
 | 列级单元格 Slot | [`cellSlot` 专题](../features/cell-slot.md) | [`/cell-slot`](http://localhost:5173/cell-slot) |
 | 自定义字段组件 | [配置与使用](../features/custom-component.md) | [`/enterprise-components`](http://localhost:5173/enterprise-components) |
 | 复杂 Option / 分组选项 | [使用字段 Slot 接入](./component.md#复杂-option-接入) | — |

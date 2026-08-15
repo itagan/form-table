@@ -84,6 +84,8 @@ export type FormItemType = BuiltinFormItemType | 'component' | 'slot'
 interface BaseFormItemConfig<TRow extends TableRow = TableRow> {
   key?: string
   fieldKey: string
+  labelSlot?: string
+  errorSlot?: string
   visible?: DynamicValue<boolean, FormTableFieldRenderContext<TRow>>
   colProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext<TRow>>
   formItemProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext<TRow>>
@@ -207,8 +209,10 @@ export type FormTableFilterChangePayload = Record<string, FormTableValue[]>
 export type FormTableEmits<TRow extends TableRow = TableRow> = {
   'update:tableData': (data: TRow[]) => void
   'field-change': (payload: FormTableFieldChangePayload<TRow>) => void
+  'form-validate': (propPath: string, valid: boolean, message: string | null) => void
   'sort-change': (payload: FormTableSortChangePayload) => void
   'filter-change': (filters: FormTableFilterChangePayload) => void
+  'current-change': (currentRow: TRow | null, oldCurrentRow: TRow | null) => void
   'header-click': (column: FormTableElementColumn, event: MouseEvent) => void
   'header-contextmenu': (column: FormTableElementColumn, event: MouseEvent) => void
   'header-dragend': (
@@ -247,6 +251,22 @@ export type FormTableEmits<TRow extends TableRow = TableRow> = {
     cell: HTMLTableCellElement,
     event: MouseEvent
   ) => void
+  'row-click': (
+    row: TRow,
+    column: FormTableElementColumn,
+    event: MouseEvent
+  ) => void
+  'row-dblclick': (
+    row: TRow,
+    column: FormTableElementColumn,
+    event: MouseEvent
+  ) => void
+  'row-contextmenu': (
+    row: TRow,
+    column: FormTableElementColumn,
+    event: MouseEvent
+  ) => void
+  'expand-change': (row: TRow, state: boolean | TRow[]) => void
   select: (selection: TRow[], row: TRow) => void
   'select-all': (selection: TRow[]) => void
   'selection-change': (selection: TRow[]) => void

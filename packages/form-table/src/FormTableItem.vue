@@ -1,5 +1,19 @@
 <template>
   <el-form-item v-bind="resolvedFormItemProps">
+    <template v-if="labelSlotFn" v-slot:label>
+      <SlotRenderer
+        :slot-fn="labelSlotFn"
+        :slot-props="formItemSlotContext"
+      />
+    </template>
+
+    <template v-if="errorSlotFn" v-slot:error="{ error }">
+      <SlotRenderer
+        :slot-fn="errorSlotFn"
+        :slot-props="createErrorSlotContext(error)"
+      />
+    </template>
+
     <SlotRenderer
       v-if="config.type === 'slot' && slotFn"
       :slot-fn="slotFn"
@@ -24,6 +38,8 @@ import { useFormTableFieldContext } from './composables/useFormTableFieldContext
 import { useResolvedFieldComponent } from './composables/useResolvedFieldComponent'
 import type {
   FormItemConfig,
+  FormTableFormItemErrorSlotContext,
+  FormTableFormItemSlotContext,
   FormTableRowContext,
   FormTableSlotContext,
   FormTableSlots
@@ -37,8 +53,16 @@ const props = defineProps<{
   config: FormItemConfig
 }>()
 
-/** 父组件具名插槽集合，用于 type="slot" 字段。 */
+/** 父组件具名插槽集合，用于字段 Slot 和 FormItem Label/Error Slot。 */
 const parentSlots = inject<FormTableSlots>(FORM_TABLE_SLOTS_KEY, {})
+
+/** 按 Item 配置名称解析 FormItem 的 Label 和 Error Slot；缺失时保留 Element 默认内容。 */
+const labelSlotFn = computed(() => props.config.labelSlot
+  ? parentSlots[props.config.labelSlot] || null
+  : null)
+const errorSlotFn = computed(() => props.config.errorSlot
+  ? parentSlots[props.config.errorSlot] || null
+  : null)
 
 /** 字段定位、校验路径和安全写回由上下文组合式 API 统一维护。 */
 const {
@@ -63,13 +87,24 @@ const slotFn = computed(() => props.config.type === 'slot'
   ? parentSlots[props.config.component.renderer] || null
   : null)
 
-/** 插槽上下文额外暴露校验路径和已经解析完成的组件配置。 */
-const slotContext = computed<FormTableSlotContext>(() => {
+/** Label/Error 共用字段更新能力和当前响应式校验路径。 */
+const formItemSlotContext = computed<FormTableFormItemSlotContext>(() => {
   const context = fieldContext.value
   return extendLazyContext(context, {
     get propPath() {
       return propPath.value
-    },
+    }
+  })
+})
+
+/** Error Slot 在通用 FormItem 上下文上增加 Element 当前错误文本。 */
+const createErrorSlotContext = (error: string): FormTableFormItemErrorSlotContext => (
+  extendLazyContext(formItemSlotContext.value, { error })
+)
+
+/** 字段内容 Slot 继续额外暴露已解析完成的组件配置。 */
+const slotContext = computed<FormTableSlotContext>(() => {
+  return extendLazyContext(formItemSlotContext.value, {
     get component() {
       return resolvedComponent.value
     }

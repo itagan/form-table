@@ -45,6 +45,8 @@ columns[]                                  ColumnConfig
 | `columns[].children[].key` | `string` | 可选 | — | Item 稳定渲染身份 |
 | `columns[].children[].fieldKey` | `string` | 必填 | — | 行数据路径，支持 `profile.city`、`items[0].name` |
 | `columns[].children[].type` | `BuiltinFormItemType \| 'component' \| 'slot'` | 必填 | — | 字段渲染模式 |
+| `columns[].children[].labelSlot` | `string` | 可选 | FormItem Slot scope | 自定义 `el-form-item` Label |
+| `columns[].children[].errorSlot` | `string` | 可选 | Error Slot scope | 自定义校验错误内容 |
 | `columns[].children[].visible` | `DynamicValue<boolean, ItemContext>` | `true` | RowContext + `fieldKey, value, itemConfig` | 字段显隐 |
 | `columns[].children[].colProps` | `DynamicValue<ComponentProps, ItemContext>` | `{ span: 24 }` | ItemContext | 透传 `el-col` |
 | `columns[].children[].formItemProps` | `DynamicValue<ComponentProps, ItemContext>` | `{}` | ItemContext | 透传 `el-form-item` |
@@ -64,6 +66,8 @@ propPath: tableData.0.profile.city
 ```
 
 `formItemProps.prop` 会被 FormTable 生成的完整路径覆盖，确保校验模型与字段更新一致。
+
+`labelSlot/errorSlot` 按名称查找 FormTable 父组件的具名 scoped Slot。只有对应 Slot 实际存在时才会接管 Element FormItem 的同名 Slot；配置名称缺失时保留 `formItemProps.label/error` 和 Element 默认错误展示。Error Slot 仍遵守 `showMessage/inlineMessage` 与当前校验状态。
 
 ## 独立功能示例
 

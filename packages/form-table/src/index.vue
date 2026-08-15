@@ -8,6 +8,7 @@
       ref="formRef"
       v-bind="props.formProps"
       :model="formModel"
+      @validate="handleFormValidate"
     >
       <el-table
         ref="tableRef"
@@ -113,6 +114,7 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   (event: 'update:tableData', data: TableRow[]): void
   (event: 'field-change', payload: FormTableFieldChangePayload): void
+  (event: 'form-validate', propPath: string, valid: boolean, message: string | null): void
 }>()
 
 /** 暴露给父组件的 Element UI 原始实例引用。 */
@@ -142,6 +144,11 @@ const resolvedTableProps = computed(() => {
 
 /** el-form 的校验模型；字段 prop 均以 tableData.{rowIndex}.{fieldKey} 开头。 */
 const formModel = computed(() => ({ tableData: props.tableData }))
+
+/** 将 Element Form 的逐字段校验结果与 Table 原生事件命名空间分离。 */
+const handleFormValidate = (propPath: string, valid: boolean, message: string | null) => {
+  emit('form-validate', propPath, valid, message)
+}
 
 /** 向列、行、字段组件提供的响应式表级上下文。 */
 const formTableContext: FormTableTableContext = createTableContext(() => props.tableData)

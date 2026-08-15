@@ -6,7 +6,7 @@ interface Vue2ComponentProxy {
   $listeners?: FormTableListenerMap
 }
 
-const MANAGED_TABLE_LISTENERS = new Set(['update:tableData', 'field-change'])
+const MANAGED_TABLE_LISTENERS = new Set(['update:tableData', 'field-change', 'form-validate'])
 const MANAGED_TOOLTIP_PROPS = new Set([
   'content',
   'reference',

@@ -60,6 +60,8 @@ export const apiGroups: ApiGroup[] = [
       { path: 'columns[].children[].visible', type: 'boolean | (context) => boolean', defaultValue: 'true', target: '字段显隐', description: '按字段上下文控制渲染。', context: 'ItemContext' },
       { path: 'columns[].children[].colProps', type: 'Object | (context) => Object', defaultValue: '{ span: 24 }', target: 'el-col', description: 'span、offset 等栅格属性。', context: 'ItemContext' },
       { path: 'columns[].children[].formItemProps', type: 'Object | (context) => Object', defaultValue: '{}', target: 'el-form-item', description: 'label、rules 等；校验 prop 自动生成。', context: 'ItemContext' },
+      { path: 'columns[].children[].labelSlot', type: 'string', defaultValue: '—', target: 'el-form-item label Slot', description: '引用 FormTable 具名 Slot；未提供对应 Slot 时保留原生 label。', context: 'FormTableFormItemSlotContext' },
+      { path: 'columns[].children[].errorSlot', type: 'string', defaultValue: '—', target: 'el-form-item error Slot', description: '引用 FormTable 具名 Slot；仅在校验错误展示时挂载。', context: 'FormTableFormItemErrorSlotContext' },
       { path: 'columns[].children[].hint', type: 'FormTableHintValue | (context) => FormTableHintValue', defaultValue: '继承 field', target: 'el-form-item / 字段配置', description: '空值继承、false 关闭、非空字符串覆盖。', context: 'ItemContext' },
       { path: 'columns[].children[].component', type: 'ComponentConfig', defaultValue: '{}', target: '实际字段组件', description: '组件、绑定协议、属性、事件和选项。' }
     ]
@@ -88,6 +90,8 @@ export const contextRows = [
   { location: '…children[].visible / colProps / formItemProps / hint', context: 'ItemContext', fields: 'RowContext + fieldKey, value, itemConfig' },
   { location: '…component.props / options / optionProps / resolveRenderer', context: 'ItemContext', fields: 'RowContext + fieldKey, value, itemConfig' },
   { location: '…component.listeners[event]', context: 'ActionContext', fields: 'ItemContext + setValue, updateRow；后接原始事件参数' },
+  { location: '…children[].labelSlot', context: 'FormTableFormItemSlotContext', fields: 'ActionContext + propPath' },
+  { location: '…children[].errorSlot', context: 'FormTableFormItemErrorSlotContext', fields: 'ActionContext + propPath, error' },
   { location: 'type: slot 字段 Slot', context: 'FormTableSlotContext', fields: 'ActionContext + propPath, component' }
 ]
 
@@ -102,7 +106,8 @@ export const renderModes = [
 export const eventRows = [
   { name: 'update:tableData', payload: 'TableRow[]', description: '受控数据的新数组，应立即回写。' },
   { name: 'field-change', payload: '{ row, index, fieldKey, value, previousValue }', description: '每个实际字段变化触发一次。' },
-  { name: '列与选择事件', payload: '保持 Element UI 原始参数', description: 'sort/filter/header/cell/select 等事件直接透传并提供公开类型。' }
+  { name: 'form-validate', payload: '(propPath, valid, message)', description: '转发 el-form 的逐字段校验结果，propPath 为完整动态路径。' },
+  { name: 'Table 原生事件', payload: '保持 Element UI 原始参数', description: 'sort/filter/header/cell/select/current/row/expand 等常用事件直接透传并提供公开类型。' }
 ]
 
 export const refRows = [

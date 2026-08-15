@@ -13,6 +13,8 @@ import FormTable, {
   type FormTableElementColumn,
   type FormTableEmits,
   type FormTableExpose,
+  type FormTableFormItemErrorSlotContext,
+  type FormTableFormItemSlotContext,
   type FormTableHintValue,
   type FormTableFieldHintFormatter,
   type FormTableFilterChangePayload,
@@ -190,18 +192,25 @@ const sortChangePayload: FormTableSortChangePayload = {
 }
 const filterChangePayload: FormTableFilterChangePayload = { status: ['enabled'] }
 const typedTableEmits: FormTableEmits<PurchaseRow> = {} as FormTableEmits<PurchaseRow>
+const typedCell = document.createElement('td')
+const typedRow: PurchaseRow = { name: '采购单', amount: 10 }
 typedTableEmits['sort-change'](sortChangePayload)
 typedTableEmits['filter-change'](filterChangePayload)
+typedTableEmits['form-validate']('tableData.0.amount', false, '请输入金额')
+typedTableEmits['current-change'](typedRow, null)
 typedTableEmits['header-click'](elementColumn, new MouseEvent('click'))
 typedTableEmits['header-contextmenu'](elementColumn, new MouseEvent('contextmenu'))
 typedTableEmits['header-dragend'](180, 120, elementColumn, new MouseEvent('mouseup'))
-const typedCell = document.createElement('td')
-const typedRow: PurchaseRow = { name: '采购单', amount: 10 }
 typedTableEmits['cell-click'](typedRow, elementColumn, typedCell, new MouseEvent('click'))
 typedTableEmits['cell-dblclick'](typedRow, elementColumn, typedCell, new MouseEvent('dblclick'))
 typedTableEmits['cell-contextmenu'](typedRow, elementColumn, typedCell, new MouseEvent('contextmenu'))
 typedTableEmits['cell-mouse-enter'](typedRow, elementColumn, typedCell, new MouseEvent('mouseenter'))
 typedTableEmits['cell-mouse-leave'](typedRow, elementColumn, typedCell, new MouseEvent('mouseleave'))
+typedTableEmits['row-click'](typedRow, elementColumn, new MouseEvent('click'))
+typedTableEmits['row-dblclick'](typedRow, elementColumn, new MouseEvent('dblclick'))
+typedTableEmits['row-contextmenu'](typedRow, elementColumn, new MouseEvent('contextmenu'))
+typedTableEmits['expand-change'](typedRow, true)
+typedTableEmits['expand-change'](typedRow, [typedRow])
 typedTableEmits.select([typedRow], typedRow)
 typedTableEmits['select-all']([typedRow])
 typedTableEmits['selection-change']([typedRow])
@@ -220,6 +229,8 @@ const columns: ColumnConfig[] = [{
       {
         fieldKey: 'name',
         type: 'input',
+        labelSlot: 'name-label',
+        errorSlot: 'name-error',
         hint: ({ value }) => value ? String(value) : completeValueHint,
         colProps: { span: 8 },
         formItemProps: { label: '姓名', rules: [{ required: true }] },
@@ -531,6 +542,15 @@ void headerContext.header
 headerContext.columnConfig.label = '新表头'
 // @ts-expect-error legacy column alias is not exposed.
 void headerContext.column
+
+declare const formItemSlotContext: FormTableFormItemSlotContext
+void formItemSlotContext.propPath
+void formItemSlotContext.value
+formItemSlotContext.setValue('Bob')
+
+declare const formItemErrorSlotContext: FormTableFormItemErrorSlotContext
+void formItemErrorSlotContext.error
+void formItemErrorSlotContext.itemConfig.errorSlot
 
 declare const cellSlotContext: FormTableCellSlotContext
 void cellSlotContext.row

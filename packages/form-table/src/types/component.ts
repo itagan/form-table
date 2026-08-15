@@ -24,8 +24,15 @@ export interface ResolvedComponentConfig {
   model?: FieldModelConfig | false
 }
 
-export interface FormTableSlotContext<TRow extends TableRow = TableRow> extends FormTableFieldContext<TRow> {
+export interface FormTableFormItemSlotContext<TRow extends TableRow = TableRow> extends FormTableFieldContext<TRow> {
   propPath: string
+}
+
+export interface FormTableFormItemErrorSlotContext<TRow extends TableRow = TableRow> extends FormTableFormItemSlotContext<TRow> {
+  error: string
+}
+
+export interface FormTableSlotContext<TRow extends TableRow = TableRow> extends FormTableFormItemSlotContext<TRow> {
   component: ResolvedComponentConfig
 }
 
