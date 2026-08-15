@@ -73,6 +73,7 @@ export default defineConfig({
               { text: '校验、清理与重置', link: '/features/validation-reset' },
               { text: '动态显隐与配置更新', link: '/features/dynamic-configuration' },
               { text: '稳定身份与异步安全', link: '/features/stable-identity' },
+              { text: 'Element UI 能力边界', link: '/features/element-ui-boundaries' },
               { text: 'Hint 提示体系', link: '/features/hint' }
             ]
           },
