@@ -6,7 +6,8 @@
 - `FieldComponentConfig`、`FieldModelConfig`、`FieldRendererResolver`、`BuiltinFormItemType`
 - `FormItemOption`、`OptionPropsConfig`
 - `FormTableHintValue`、`FormTableHintMode`、`FormTableHintTargets`、`FormTableFieldHintFormatter`、`FormTableHintOptions`
-- `TableRow`、`FormTableRecord`、`FormTableProps`、`FormTableRowKey`、`FormTableTableProps`
+- `TableRow`、`FormTableRecord`、`FormTableProps`、`FormTableRowKey`
+- `FormTableTableProps`、`FormTableFormProps`、`FormTableFormItemProps`
 - `FormTableColumnContext`、`FormTableRowContext`、`FormTableFieldRenderContext`
 - `FormTableFieldContext`、`FormTableFormItemSlotContext`、`FormTableFormItemErrorSlotContext`
 - `FormTableSlotContext`、`FormTableCellSlotContext`

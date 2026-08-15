@@ -5,8 +5,17 @@ export type FormTableRecord = Record<string, FormTableValue>
 /** 透传给 Vue/Element UI 组件的属性集合。 */
 export type ComponentProps = Record<string, FormTableValue>
 
-/** FormTable 自身管理 rowKey，Table 透传属性不再接受同名配置。 */
-export type FormTableTableProps = ComponentProps & { rowKey?: never }
+/** FormTable 自身管理 data/rowKey，Table 透传属性不再接受同名配置。 */
+export type FormTableTableProps = ComponentProps & {
+  data?: never
+  rowKey?: never
+}
+
+/** FormTable 固定使用 { tableData } 作为 Form model。 */
+export type FormTableFormProps = ComponentProps & { model?: never }
+
+/** FormTable 根据行下标和 fieldKey 自动生成 FormItem prop。 */
+export type FormTableFormItemProps = ComponentProps & { prop?: never }
 
 /** 单条表格行数据。 */
 export interface TableRow extends FormTableRecord {}
