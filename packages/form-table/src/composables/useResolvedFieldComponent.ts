@@ -1,6 +1,6 @@
 import { computed } from 'vue'
 import type { ComputedRef } from 'vue'
-import { getComponentType, getRequiredProps } from '../configs/defaultComponentConfigs'
+import { getComponentType } from '../configs/defaultComponentConfigs'
 import type {
   FormItemConfig,
   FormItemOption,
@@ -49,16 +49,9 @@ export function useResolvedFieldComponent<TRow extends TableRow = TableRow>(
       return result
     }, {})
 
-    const builtinType = config.type === 'component' || config.type === 'slot'
-      ? null
-      : config.type
-
     return {
       renderer: resolveRenderer(config, context),
-      props: {
-        ...(builtinType ? getRequiredProps(builtinType) : {}),
-        ...(resolveDynamicValue(component?.props, context) || {})
-      },
+      props: resolveDynamicValue(component?.props, context) || {},
       listeners: resolvedListeners,
       options: resolveDynamicValue(component?.options, context) as FormItemOption[] || [],
       optionProps: resolveDynamicValue(

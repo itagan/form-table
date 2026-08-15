@@ -73,6 +73,14 @@ void unsupportedBuiltinType
 const redundantBuiltinAlias: BuiltinFormItemType = 'tag-input'
 void redundantBuiltinAlias
 
+// Input 和 DatePicker 的具体模式通过 component.props.type 表达。
+// @ts-expect-error textarea 不再是独立内置类型
+const removedTextareaAlias: BuiltinFormItemType = 'textarea'
+// @ts-expect-error datetime 不再是独立内置类型
+const removedDatetimeAlias: BuiltinFormItemType = 'datetime'
+void removedTextareaAlias
+void removedDatetimeAlias
+
 // el-upload 依赖 file-list、生命周期回调和触发内容，不使用字段默认 v-model 协议。
 // @ts-expect-error upload 应通过 type: 'component' 或 type: 'slot' 显式接入
 const unsupportedUploadBuiltin: BuiltinFormItemType = 'upload'
@@ -88,6 +96,15 @@ const fieldHintTargets: FormTableHintTargets = 'field'
 // @ts-expect-error Hint 不再接受配置对象。
 const invalidObjectHint: FormTableHintValue = { content: '自动展示' }
 const rows: TableRow[] = [{ name: 'Alice', profile: { city: '杭州' } }]
+
+const componentVariantColumns: ColumnConfig[] = [{
+  label: '组件模式',
+  formItems: [
+    { fieldKey: 'description', type: 'input', component: { props: { type: 'textarea' } } },
+    { fieldKey: 'startedAt', type: 'date', component: { props: { type: 'datetime' } } }
+  ]
+}]
+void componentVariantColumns
 
 interface PurchaseRow {
   name: string
