@@ -1,8 +1,8 @@
 # Changelog
 
-> 当前 npm 包尚未首次发布。以下版本标题和日期只记录首发前仓库演进，不代表 npm registry 中已有对应版本。
+> npm 版本之前的条目保留为仓库演进记录。
 
-## Unreleased
+## 0.1.0 - 2026-08-15
 
 ### Improved
 
@@ -38,7 +38,7 @@
 - 内置字段类型只保留 Element UI 默认提供的组件映射；移除非 Element UI 内置的 `tree-select`，此类组件统一通过 `type: 'component'` 接入。
 - 移除重复的 `tag-input` 快捷别名；可创建多标签选择统一使用 `type: 'select'` 并通过 `component.props` 配置。
 
-## 0.1.0 - 2026-07-04
+## 首发前仓库节点 - 2026-07-04
 
 ### Changed
 

@@ -15,7 +15,7 @@
 - `FormTableExpose`、`FormTableElementFormRef`、`FormTableElementTableRef`
 - `FormTableComponent`、`FormTableEmits`
 
-运行时入口导出默认组件、`FormTable`、`FormTablePlugin`、泛型组件工厂 `createFormTable` 和泛型配置助手 `defineFormTableColumns`。上下文注入 key、内部更新 API、动态解析和渲染模式工具都不属于公共入口。
+运行时入口导出默认组件、具名 `FormTable`、泛型组件工厂 `createFormTable` 和泛型配置助手 `defineFormTableColumns`。上下文注入 key、内部更新 API、动态解析和渲染模式工具都不属于公共入口。
 
 需要让组件 Props、事件和动态配置回调使用同一个业务行类型时，组合两个泛型入口：
 

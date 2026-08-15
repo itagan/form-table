@@ -1,6 +1,4 @@
-# npm 包首次发布准备
-
-> `@itagan/form-table` 尚未发布到 npm。本页只描述首次发布前的仓库验证和发布清单，不代表任何版本已经上线。
+# npm 包发布与维护
 
 仓库采用“组件包 + playground + 独立 docs”的单体仓库结构：
 
@@ -32,14 +30,17 @@ pnpm release:check
 
 这条命令会依次执行：
 
-- `pnpm test`
+- `pnpm lint`
+- `pnpm test:coverage`
 - `pnpm type-check`
 - `pnpm build`
+- `pnpm compat:check`
+- `pnpm docs:check`
 - `pnpm site:build`
 - `pnpm site:check`
-- `cd packages/form-table && npm pack --dry-run`
+- `pnpm pack:check`
 
-其中 `site:build` 会先执行 `docs:install`，再生成文档、Playground 和各示例路由的静态直达入口；`site:check` 会检查统一基址、全部示例路由和生产产物中的 localhost 残留。
+其中 `compat:check` 使用 Vue 2.7.1 + Element UI 2.4.9 从构建后的包入口完成类型和运行时验证；`pack:check` 会断言 tarball 文件清单、公开声明和 ESM/CommonJS 导出。`site:build` 会先执行 `docs:install`，再生成文档、Playground 和各示例路由的静态直达入口；`site:check` 会检查统一基址、全部示例路由和生产产物中的 localhost 残留。
 
 ## 文档站部署
 
@@ -56,9 +57,10 @@ pnpm site:preview
 `packages/form-table/package.json` 通过 `files` 字段控制发布内容，目前只包含：
 
 - `dist`
+- `LICENSE`
 - `README.md`
 
-实际打包内容以 `npm pack --dry-run` 输出为准。
+实际打包内容由 `pnpm pack:check` 读取 `npm pack --dry-run --json` 后自动断言。
 
 当前期望 tarball 至少包含：
 
@@ -66,6 +68,7 @@ pnpm site:preview
 - `dist/formtable.umd.cjs`
 - `dist/style.css`
 - `dist/types/public-types.d.ts`
+- `LICENSE`
 - `README.md`
 - `package.json`
 
@@ -77,7 +80,7 @@ pnpm site:preview
 - `__tests__`
 - `vite.config.ts`
 
-## 首次发布 Checklist
+## 发布 Checklist
 
 1. 确认 npm 包名、版本和发布 registry：
 
@@ -93,11 +96,10 @@ npm config get registry
 pnpm release:check
 ```
 
-3. 确认 dry-run 输出：
+3. 确认发布包清单和入口：
 
 ```bash
-cd packages/form-table
-npm pack --dry-run
+pnpm pack:check
 ```
 
 4. 登录 npm：

@@ -4,8 +4,6 @@ Vue 2.7 + Element UI 的轻量表格内表单组件，负责布局、字段渲�
 
 ## 安装与版本
 
-> 包尚未发布到 npm。首次发布前请使用仓库 workspace 或 `npm pack` 生成的本地包验证。
-
 ```bash
 pnpm add @itagan/form-table
 ```

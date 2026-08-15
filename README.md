@@ -31,6 +31,8 @@ pnpm type-check
 pnpm test
 pnpm test:coverage
 pnpm build
+pnpm compat:check
+pnpm pack:check
 pnpm release:check
 ```
 
@@ -45,6 +47,8 @@ pnpm release:check
 - `pnpm test`：运行组件包核心逻辑单测。
 - `pnpm test:coverage`：运行组件测试并校验覆盖率阈值。
 - `pnpm build`：先构建 npm 包，再构建 playground。
+- `pnpm compat:check`：使用最低 peer dependency 组合验证构建后的包入口。
+- `pnpm pack:check`：检查 npm tarball 内容、声明文件和 ESM/CommonJS 导出。
 - `pnpm release:check`：执行 Lint、覆盖率测试、类型检查、构建、文档和 npm 打包预检。
 - `pnpm --filter @itagan/form-table build`：只构建可发布 npm 包。
 
