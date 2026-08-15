@@ -54,7 +54,7 @@ FormTable
 
 ## 功能专题
 
-高频单一能力可直接查询：[数据更新](../features/data-updates.md)、[校验与重置](../features/validation-reset.md)、[动态配置](../features/dynamic-configuration.md)、[稳定身份](../features/stable-identity.md)。
+高频单一能力可直接查询：[数据更新](../features/data-updates.md)、[校验与重置](../features/validation-reset.md)、[动态配置](../features/dynamic-configuration.md)、[稳定身份](../features/stable-identity.md)。Element Table/Form 的透传范围、组合限制和当前替代方案见 [Element UI 能力边界与处理方案](../features/element-ui-boundaries.md)。
 
 大数据量边界与测量方式见[性能与大数据量](../features/performance.md)，具体落地方案见[性能优化建议](../features/performance-optimization.md)，可运行实验位于 [`/performance`](http://localhost:5173/performance)。
 
