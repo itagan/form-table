@@ -84,6 +84,37 @@ importers:
         specifier: 2.7.16
         version: 2.7.16
 
+  packages/form-table-min-peer:
+    dependencies:
+      '@itagan/form-table':
+        specifier: workspace:*
+        version: link:../form-table
+      element-ui:
+        specifier: 2.4.9
+        version: 2.4.9(vue@2.7.1)
+      vue:
+        specifier: 2.7.1
+        version: 2.7.1
+    devDependencies:
+      '@types/node':
+        specifier: ^16.11.45
+        version: 16.18.126
+      jsdom:
+        specifier: 21.1.2
+        version: 21.1.2
+      typescript:
+        specifier: ~4.7.4
+        version: 4.7.4
+      vite:
+        specifier: ^3.0.2
+        version: 3.2.11(@types/node@16.18.126)(less@4.4.0)(terser@5.43.1)
+      vitest:
+        specifier: 0.34.6
+        version: 0.34.6(jsdom@21.1.2)(less@4.4.0)(terser@5.43.1)
+      vue-tsc:
+        specifier: ^0.38.8
+        version: 0.38.9(typescript@4.7.4)
+
   playground:
     dependencies:
       '@itagan/form-table':
@@ -387,6 +418,9 @@ packages:
 
   '@vue/compiler-dom@3.5.18':
     resolution: {integrity: sha512-RMbU6NTU70++B1JyVJbNbeFkK+A+Q7y9XKE2EM4NLGm2WFR8x9MbAtWxPPLdm0wUkuZv9trpwfSlL6tjdIa1+A==}
+
+  '@vue/compiler-sfc@2.7.1':
+    resolution: {integrity: sha512-YQRE2uYhlvyFgHmKAqySCdLm7O37XZc+yG9dujwD3h8em+rD1qGOthxc0H3XcijOy50gj/pYHgBO6C3MjV+oug==}
 
   '@vue/compiler-sfc@2.7.16':
     resolution: {integrity: sha512-KWhJ9k5nXuNtygPU7+t1rX6baZeqOYLEforUPjgNDBnLicfHCoi48H87Q8XyLZOrNNsmhuwKqtpDQWjEFe6Ekg==}
@@ -2129,6 +2163,10 @@ packages:
     peerDependencies:
       typescript: '*'
 
+  vue@2.7.1:
+    resolution: {integrity: sha512-X1YkFddhbTAU2FPK0gBZ/vDOcOMA8ZT4uHoFVor1bUb7BpVGdEswS286YGtODsf/Ghfr1LM1sBMFAY8XT+dVhA==}
+    deprecated: Vue 2 has reached EOL and is no longer actively maintained. See https://v2.vuejs.org/eol/ for more details.
+
   vue@2.7.16:
     resolution: {integrity: sha512-4gCtFXaAA3zYZdTp5s4Hl2sozuySsgz4jy1EnpBHNfpMa9dK1ZCG7viqBPCwXtmgc8nHqUsAu3G4gtmXkkY3Sw==}
     deprecated: Vue 2 has reached EOL and is no longer actively maintained. See https://v2.vuejs.org/eol/ for more details.
@@ -2555,6 +2593,12 @@ snapshots:
       '@vue/compiler-core': 3.5.18
       '@vue/shared': 3.5.18
 
+  '@vue/compiler-sfc@2.7.1':
+    dependencies:
+      '@babel/parser': 7.29.7
+      postcss: 8.5.16
+      source-map: 0.6.1
+
   '@vue/compiler-sfc@2.7.16':
     dependencies:
       '@babel/parser': 7.29.7
@@ -2914,6 +2958,16 @@ snapshots:
       resize-observer-polyfill: 1.5.1
       throttle-debounce: 1.1.0
       vue: 2.7.16
+
+  element-ui@2.4.9(vue@2.7.1):
+    dependencies:
+      async-validator: 1.8.5
+      babel-helper-vue-jsx-merge-props: 2.0.3
+      deepmerge: 1.5.2
+      normalize-wheel: 1.0.1
+      resize-observer-polyfill: 1.5.1
+      throttle-debounce: 1.1.0
+      vue: 2.7.1
 
   element-ui@2.4.9(vue@2.7.16):
     dependencies:
@@ -4451,6 +4505,11 @@ snapshots:
     dependencies:
       '@volar/vue-typescript': 0.38.9
       typescript: 4.7.4
+
+  vue@2.7.1:
+    dependencies:
+      '@vue/compiler-sfc': 2.7.1
+      csstype: 3.2.3
 
   vue@2.7.16:
     dependencies:
