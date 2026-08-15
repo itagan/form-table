@@ -45,6 +45,15 @@ const columns = defineFormTableColumns<PurchaseRow>([{
     }
   }]
 }])
+const timeSelectColumns = defineFormTableColumns<TableRow>([{
+  label: '预约时间',
+  formItems: [{
+    fieldKey: 'appointmentTime',
+    type: 'time-select',
+    component: { props: { pickerOptions: { start: '08:00', step: '00:30', end: '18:00' } } }
+  }]
+}])
+void timeSelectColumns
 const TypedFormTable = createFormTable<PurchaseRow>()
 const typedProps: InstanceType<typeof TypedFormTable>['$props'] = {
   tableData: [{ id: 'purchase-1', name: '采购单', amount: 100 }],

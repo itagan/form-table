@@ -42,8 +42,8 @@ import DemoCollapsiblePanel from '../components/DemoCollapsiblePanel.vue'
 import { formatFormTableConfig } from '../utils/formatFormTableConfig'
 
 const tableData = ref<TableRow[]>([
-  { name: '小米', age: 16, school: 'county-primary' },
-  { name: '小明', age: 18, school: 'city-middle' }
+  { name: '小米', age: 16, school: 'county-primary', appointmentTime: '09:00' },
+  { name: '小明', age: 18, school: 'city-middle', appointmentTime: '10:30' }
 ])
 
 const required = (message: string, trigger = 'blur') => [{ required: true, message, trigger }]
@@ -91,6 +91,25 @@ const columns: ColumnConfig[] = [
           ]
         }
       }]
+  },
+  {
+    label: '预约时间',
+    props: { width: 180 },
+    formItems: [{
+      fieldKey: 'appointmentTime',
+      type: 'time-select',
+      formItemProps: { rules: required('请选择预约时间', 'change') },
+      component: {
+        props: {
+          placeholder: '选择时间',
+          pickerOptions: {
+            start: '08:00',
+            step: '00:30',
+            end: '18:00'
+          }
+        }
+      }
+    }]
   }
 ]
 const columnsCode = formatFormTableConfig(columns)
@@ -101,7 +120,7 @@ const submit = async () => {
   Message[valid ? 'success' : 'error'](valid ? '校验通过' : '请完善表格内容')
 }
 const addRow = () => {
-  tableData.value = [...tableData.value, { name: '', age: 0, school: '' }]
+  tableData.value = [...tableData.value, { name: '', age: 0, school: '', appointmentTime: '' }]
 }
 const removeRow = () => {
   tableData.value = tableData.value.slice(0, -1)
