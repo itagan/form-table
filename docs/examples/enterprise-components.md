@@ -153,7 +153,7 @@ export function createPurchaseColumns(
       label: '物料信息',
       props: { minWidth: 460 },
       rowProps: { gutter: 8 },
-      children: [
+      formItems: [
           {
             key: 'sku-selector',
             fieldKey: 'skuId',
@@ -210,7 +210,7 @@ export function createPurchaseColumns(
       label: '组织与供应商',
       props: { minWidth: 420 },
       rowProps: { gutter: 8 },
-      children: [
+      formItems: [
           {
             key: 'purchase-org',
             fieldKey: 'orgCode',
@@ -297,7 +297,7 @@ export function createPurchaseColumns(
       label: '数量与价格',
       props: { minWidth: 340 },
       rowProps: { gutter: 8 },
-      children: [
+      formItems: [
           {
             key: 'quantity',
             fieldKey: 'quantity',
@@ -346,7 +346,7 @@ export function createPurchaseColumns(
       key: 'attachments',
       label: '附件',
       props: { minWidth: 280 },
-      children: [{
+      formItems: [{
         key: 'attachment-upload',
           fieldKey: 'attachmentIds',
           type: 'component',
@@ -388,7 +388,7 @@ export function createPurchaseColumns(
       key: 'approval-status',
       label: '状态',
       props: { width: 110, align: 'center' },
-      children: [{
+      formItems: [{
         key: 'status-display',
           fieldKey: 'approvalStatus',
           type: 'component',
@@ -407,7 +407,7 @@ export function createPurchaseColumns(
       key: 'actions',
       label: '操作',
       props: { width: 150, fixed: 'right', align: 'center' },
-      children: [{
+      formItems: [{
         key: 'row-actions',
           fieldKey: '__actions',
           type: 'slot',

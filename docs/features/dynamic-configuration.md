@@ -11,7 +11,7 @@ const columns: ColumnConfig[] = [{
   key: 'extra-column',
   label: '补充信息',
   visible: ({ tableData }) => tableData.some(row => row.showExtra),
-  children: [{
+  formItems: [{
     key: 'detail-field',
     fieldKey: 'detail',
     type: 'textarea',
@@ -27,7 +27,7 @@ const columns: ColumnConfig[] = [{
 | --- | --- | --- | --- |
 | Column | `columns[].visible` | 整列 | `tableData, columnConfig` |
 | Row props | `columns[].rowProps` | 当前单元格内唯一 Flex Row | ColumnContext + `row, index` |
-| Item | `columns[].children[].visible` | 当前字段和 `el-col` | RowContext + `fieldKey, value, itemConfig` |
+| Item | `columns[].formItems[].visible` | 当前字段和 `el-col` | RowContext + `fieldKey, value, itemConfig` |
 
 隐藏只影响渲染，不会自动删除 `tableData` 中的字段值。需要清空值时，在业务事件中显式更新。
 
@@ -68,7 +68,7 @@ const costColumn: ColumnConfig = {
   key: 'cost-column',
   label: '费用',
   visible: () => showCost.value,
-  children: costItems
+  formItems: costItems
 }
 ```
 
@@ -98,11 +98,11 @@ function setItemDisabled(item, disabled) {
 
 function disableField(targetKey, disabled) {
   columns.value = columns.value.map(column => {
-    if (!column.children) return column
+    if (!column.formItems) return column
 
     return {
       ...column,
-      children: column.children.map(item =>
+      formItems: column.formItems.map(item =>
         item.key === targetKey ? setItemDisabled(item, disabled) : item
       )
     }
@@ -118,7 +118,7 @@ function disableField(targetKey, disabled) {
 
 ```text
 columns[].key
-columns[].children[].key
+columns[].formItems[].key
 ```
 
 `fieldKey` 负责数据路径，不等于渲染身份。重复字段、同一字段切换渲染器或动态布局时尤其需要 Item key。详见[稳定身份与异步安全](./stable-identity.md)。

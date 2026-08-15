@@ -28,7 +28,7 @@ import '@itagan/form-table/style.css'
 const columns: ColumnConfig[] = defineFormTableColumns([{
   key: 'basic',
   label: '基本信息',
-  children: [{
+  formItems: [{
     key: 'name',
     fieldKey: 'name',
     type: 'input',

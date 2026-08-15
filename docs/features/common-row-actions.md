@@ -76,7 +76,7 @@ const columns: ColumnConfig[] = [
   {
     key: 'name-column',
     label: '姓名',
-    children: [{
+    formItems: [{
       key: 'name-field',
       fieldKey: 'name',
       type: 'input',
@@ -88,7 +88,7 @@ const columns: ColumnConfig[] = [
   {
     key: 'phone-column',
     label: '手机号',
-    children: [{
+    formItems: [{
       key: 'phone-field',
       fieldKey: 'phone',
       type: 'input'

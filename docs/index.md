@@ -16,4 +16,4 @@ Vue 2.7 + Element UI 的轻量表格内表单组件。
 | 查看独立功能和业务示例 | [功能专题](./features/) · [演示索引](./examples/) |
 | 直接运行和搜索 API | [打开 Playground 调试台 ↗](http://localhost:5173/) |
 
-核心原则：`children` 负责布局，`type/component/slot` 负责渲染，Element UI 负责组件行为，业务层负责行操作和字段联动。
+核心原则：`formItems` 负责字段布局，`type/component/slot` 负责渲染，Element UI 负责组件行为，业务层负责行操作和字段联动。

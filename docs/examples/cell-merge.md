@@ -31,7 +31,7 @@ const columns: ColumnConfig[] = [
       prop: 'departmentName',
       width: 160
     },
-    children: [{
+    formItems: [{
       fieldKey: 'departmentName',
       type: 'text'
     }]

@@ -17,7 +17,7 @@ const columns: ColumnConfig[] = [{
     'aria-label': '联系人信息说明'
   },
   props: { minWidth: 420 },
-  children: [/* Item 配置 */]
+  formItems: [/* Item 配置 */]
 }]
 ```
 

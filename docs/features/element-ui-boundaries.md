@@ -48,7 +48,7 @@ const columns = [
   {
     label: '金额',
     props: { prop: 'amount', minWidth: 140, sortable: 'custom' },
-    children: [{ fieldKey: 'amount', type: 'number' }]
+    formItems: [{ fieldKey: 'amount', type: 'number' }]
   }
 ]
 ```
@@ -77,7 +77,7 @@ Element UI 内置排序或筛选会改变显示顺序，但不会同步重排父
 const columns = [{
   label: '金额',
   props: { prop: 'amount', sortable: 'custom' },
-  children: [{
+  formItems: [{
     fieldKey: 'amount',
     type: 'number',
     formItemProps: { rules: [{ required: true, message: '请输入金额' }] }
@@ -161,7 +161,7 @@ function flattenRows(nodes, level = 0, parentId = null) {
 
 ### 能力边界
 
-FormTable 不递归渲染嵌套 `el-table-column`。`columns[].children` 表示单元格中的表单字段，不是子列；根级 Table 默认 Slot 也已由 FormTable 接管，不能在 FormTable 内手写嵌套列。
+FormTable 不递归渲染嵌套 `el-table-column`。`columns[].formItems` 表示单元格中的表单字段；`children` 当前不属于公开列配置，并保留给未来可能的子列语义。根级 Table 默认 Slot 也已由 FormTable 接管，不能在 FormTable 内手写嵌套列。
 
 ### 当前处理方案
 
@@ -169,8 +169,8 @@ FormTable 不递归渲染嵌套 `el-table-column`。`columns[].children` 表示�
 
 ```ts
 const columns = [
-  { label: '费用 / 单价', children: [{ fieldKey: 'price', type: 'number' }] },
-  { label: '费用 / 数量', children: [{ fieldKey: 'quantity', type: 'number' }] }
+  { label: '费用 / 单价', formItems: [{ fieldKey: 'price', type: 'number' }] },
+  { label: '费用 / 数量', formItems: [{ fieldKey: 'quantity', type: 'number' }] }
 ]
 ```
 
@@ -274,7 +274,7 @@ async function resetTable() {
 ```ts
 const columns = [{
   label: '人员',
-  children: [{
+  formItems: [{
     fieldKey: 'name',
     type: 'input',
     labelSlot: 'name-label',

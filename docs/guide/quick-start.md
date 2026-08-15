@@ -72,7 +72,7 @@ const formTableRef = ref<FormTableExpose | null>(null)
 const tableData = ref([{ name: '张三' }])
 const columns: ColumnConfig[] = [{
   label: '姓名',
-  children: [{
+  formItems: [{
     fieldKey: 'name',
     type: 'input',
     formItemProps: {

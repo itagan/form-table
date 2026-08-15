@@ -49,7 +49,7 @@ const columns = [
   {
     key: 'amount',
     label: '金额',
-    children: [{
+    formItems: [{
       key: 'amount-item',
       fieldKey: 'amount',
       type: 'number'

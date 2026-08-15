@@ -21,7 +21,7 @@
 - 新增独立 Hint 多场景 Demo，并将专题文档收敛为 `/features/hint`：覆盖作用范围、全局格式化、关闭、title/Tooltip、键盘 ARIA 和 Slot 自定义边界。
 - 新增可直接复制的常见操作列文档，覆盖末尾新增、当前行后插入、复制、删除、稳定行标识和校验清理；行列操作 Demo 同步改用 `cellSlot` 并增加后插按钮。
 - 安装文档仅保留 FormTable 的安装命令，并单独说明项目需要预先安装、注册及满足的 Vue 和 Element UI peer dependency 版本，以及低版本升级建议和 Vue 3 暂不支持的兼容边界；经版本矩阵验证后，最低版本调整为 Vue `2.7.1` 和 Element UI `2.4.9`，最佳建议版本明确为 Vue 2 生态最终版本 Vue `2.7.16` + Element UI `2.15.14`。
-- 新增与 `children` 互斥的列级 `cellSlot`，用于操作列和纯展示组合单元格；不需要虚拟 `fieldKey`，也不创建 Row/Item 表单包装节点，高级、议程和费用明细示例已同步迁移。
+- 新增与 `formItems` 互斥的列级 `cellSlot`，用于操作列和纯展示组合单元格；不需要虚拟 `fieldKey`，也不创建 Row/Item 表单包装节点，高级、议程和费用明细示例已同步迁移。
 - 外层提示 API 收敛为语义内容与表级策略两层：默认表头、表头 Slot 与字段继续分别使用 `headerHint/hint`，根级 `hintOptions` 统一选择原生 title 或表级单实例 Tooltip；各层 props 中的 title 继续按目标节点透传。
 - 默认表头和表头 Slot 统一由 `.form-table-column-header` 包装并应用 `headerProps`；`headerHint` 仅在目标范围包含表头时启用，Slot scope 不再重复暴露已经应用的表头属性。
 - 优化动态 Column 渲染身份：唯一 `column.key` 在增删、显隐和同顺序配置替换时保持稳定，仅在已有列相对顺序变化时整体换代以同步 Element UI 列顺序。

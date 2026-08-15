@@ -33,7 +33,7 @@ const FormTable = createFormTable<PurchaseRow>()
 const columns = defineFormTableColumns<PurchaseRow>([{
   label: '采购信息',
   visible: ({ tableData }) => tableData.some(row => row.amount > 0),
-  children: [{
+  formItems: [{
     fieldKey: 'amount',
     type: 'number',
     component: {
@@ -65,12 +65,12 @@ const columns = defineFormTableColumns<PurchaseRow>([{
 type ColumnConfig = LayoutColumnConfig | CellSlotColumnConfig | NativeColumnConfig
 ```
 
-`LayoutColumnConfig` 使用 `children` 进入 Item 字段渲染链路，并可用 `rowProps` 配置单元格内唯一 Flex Row；`CellSlotColumnConfig` 使用 `cellSlot` 直接渲染单元格；`NativeColumnConfig` 只透传 `el-table-column` props。三种列模式互斥。
+`LayoutColumnConfig` 使用 `formItems` 进入 Item 字段渲染链路，并可用 `rowProps` 配置单元格内唯一 Flex Row；`CellSlotColumnConfig` 使用 `cellSlot` 直接渲染单元格；`NativeColumnConfig` 只透传 `el-table-column` props。三种列模式互斥。
 
 ```ts
 interface CellSlotColumnConfig extends BaseColumnConfig {
   cellSlot: string
-  children?: never
+  formItems?: never
 }
 
 interface FormTableCellSlotContext {

@@ -23,7 +23,7 @@
 | --- | --- |
 | `columns[].visible/props/headerProps/headerHint` | `FormTableColumnContext` |
 | `columns[].rowProps` | `FormTableRowContext` |
-| `columns[].children[].visible/colProps/formItemProps/hint` | `FormTableFieldRenderContext` |
+| `columns[].formItems[].visible/colProps/formItemProps/hint` | `FormTableFieldRenderContext` |
 | `...component.resolveRenderer/props/options/optionProps` | `FormTableFieldRenderContext` |
 | `...component.listeners[event]` | `FormTableFieldContext, ...原始事件参数` |
 

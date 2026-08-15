@@ -18,7 +18,7 @@ FormTable 中有三类独立身份：业务数据行、Column 配置和 Item 配
 const columns: ColumnConfig[] = [{
   key: 'contact-column',
   label: '联系人',
-  children: [{
+  formItems: [{
     key: 'contact-name-field',
     fieldKey: 'name',
     type: 'input'
@@ -30,7 +30,7 @@ const columns: ColumnConfig[] = [{
 | --- | --- | --- |
 | `rowKey` | 业务数据行 | 异步后定位原行，也供 Element Table 的选择、树形数据等能力使用 |
 | `columns[].key` | 列配置 | 动态增删、显隐和替换时保持列包装身份 |
-| `columns[].children[].key` | Item 字段配置 | 动态字段、重复 fieldKey 或渲染器切换时保持身份 |
+| `columns[].formItems[].key` | Item 字段配置 | 动态字段、重复 fieldKey 或渲染器切换时保持身份 |
 
 所有 key 都应在各自作用域内唯一、稳定，不使用当前数组下标。
 

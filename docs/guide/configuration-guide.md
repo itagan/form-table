@@ -26,7 +26,7 @@ FormTable 的顶层输入包括：
 ```text
 columns[]                              ColumnConfig
 ├─ rowProps                           唯一 Flex el-row
-└─ children[]                         FormItemConfig / el-col + el-form-item
+└─ formItems[]                        FormItemConfig / el-col + el-form-item
 ```
 
 最小布局示例：
@@ -37,7 +37,7 @@ const columns: ColumnConfig[] = [{
   label: '基本信息',
   props: { minWidth: 320 },
   rowProps: { gutter: 8 },
-  children: [{
+  formItems: [{
     key: 'name',
     fieldKey: 'name',
     type: 'input',
@@ -116,7 +116,7 @@ component: {
 
 ### 列级 cellSlot
 
-`columns[].cellSlot` 直接渲染整个单元格，与 `children` 互斥：
+`columns[].cellSlot` 直接渲染整个单元格，与 `formItems` 互斥：
 
 ```ts
 {
