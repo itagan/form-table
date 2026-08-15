@@ -49,7 +49,7 @@ columns[]                                  ColumnConfig
 | `columns[].children[].errorSlot` | `string` | 可选 | Error Slot scope | 自定义校验错误内容 |
 | `columns[].children[].visible` | `DynamicValue<boolean, ItemContext>` | `true` | RowContext + `fieldKey, value, itemConfig` | 字段显隐 |
 | `columns[].children[].colProps` | `DynamicValue<ComponentProps, ItemContext>` | `{ span: 24 }` | ItemContext | 透传 `el-col` |
-| `columns[].children[].formItemProps` | `DynamicValue<ComponentProps, ItemContext>` | `{}` | ItemContext | 透传 `el-form-item` |
+| `columns[].children[].formItemProps` | `DynamicValue<FormTableFormItemProps, ItemContext>` | `{}` | ItemContext | 透传 `el-form-item`；不接受内部管理的 `prop` |
 | `columns[].children[].formItemProps.rules` | Element UI Rule(s) | 可选 | Element UI | 字段校验规则 |
 | `columns[].children[].hint` | `DynamicValue<FormTableHintValue, ItemContext>` | 可选 | ItemContext | 未声明或空值继承全局，`false` 关闭，非空字符串覆盖 |
 | `columns[].children[].component` | `FieldComponentConfig` | 按 `type` 决定 | ItemContext | 字段组件、Slot 和绑定配置 |
@@ -65,7 +65,9 @@ fieldKey: profile.city
 propPath: tableData.0.profile.city
 ```
 
-`formItemProps.prop` 会被 FormTable 生成的完整路径覆盖，确保校验模型与字段更新一致。
+`el-form-item.prop` 原本用于指向 `el-form.model` 中参与校验、清理和重置的字段。FormTable 根据当前行下标和 `fieldKey` 自动生成完整路径，确保每一行的同名字段拥有独立校验状态，并与字段更新目标一致。
+
+因此，`prop` 不属于 `formItemProps` 的透传范围。TypeScript 会拒绝手工配置；JavaScript 或远程 Schema 即使传入，也会被 FormTable 生成的路径覆盖。需要调用原生 `validateField/clearValidate` 时，应使用 `tableData.{rowIndex}.{fieldKey}` 形式的完整路径。
 
 `labelSlot/errorSlot` 按名称查找 FormTable 父组件的具名 scoped Slot。只有对应 Slot 实际存在时才会接管 Element FormItem 的同名 Slot；配置名称缺失时保留 `formItemProps.label/error` 和 Element 默认错误展示。Error Slot 仍遵守 `showMessage/inlineMessage` 与当前校验状态。
 
