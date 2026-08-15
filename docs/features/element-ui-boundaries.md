@@ -9,16 +9,16 @@ FormTable 在 `el-form` 内组合 `el-table`，并由列配置生成 `el-table-c
 | Element UI 入口 | FormTable 入口 | 当前状态 | 关键约束 |
 | --- | --- | --- | --- |
 | `el-table` Props | `tableProps` | 基本透传 | `data` 由 `tableData` 接管，`row-key` 由顶层 `rowKey` 接管 |
-| `el-table` Events | FormTable 根事件 | 运行时透传 | 部分版本差异事件没有精确公开类型 |
+| `el-table` Events | FormTable 根事件 | 运行时透传 | 常用事件提供公开类型 |
 | `el-table` Methods | `getTableRef()` | 可用 | 具体方法依赖当前 Element UI 版本 |
 | Table `empty/append` Slot | FormTable 同名 Slot | 直接转发 | 不增加 FormTable 上下文 |
 | Table 默认 Slot | `columns` | FormTable 接管 | 不能手写插入 `el-table-column` |
 | `el-table-column` Props | `columns[].props` | 基本透传 | 布局列和 `cellSlot` 列的单元格内容由 FormTable 接管 |
 | `el-form` Props | `formProps` | 基本透传 | `model` 固定为 `{ tableData }` |
-| `el-form` Events | — | 未声明式转发 | FormTable 根监听器会交给 `el-table` |
+| `el-form` `validate` Event | `form-validate` | 直接转发 | `propPath` 是包含动态行下标的完整路径 |
 | `el-form` Methods | FormTable Ref / `getFormRef()` | 可用 | `resetFields()` 会绕过受控回写 |
 | `el-form-item` Props | Item `formItemProps` | 基本透传 | `prop` 由 `fieldKey` 和行下标自动生成 |
-| FormItem `label/error` Slot | — | 未直接转发 | 可在 `cellSlot` 中手写 `el-form-item` |
+| FormItem `label/error` Slot | Item `labelSlot/errorSlot` | 按名称转发 | 缺少对应具名 Slot 时保留原生内容 |
 
 ## 可直接使用的 Element Table 能力
 
@@ -201,25 +201,25 @@ formTableRef.value
 
 ### `validate` 事件处理
 
-FormTable 根组件的原生监听器会转发给 `el-table`，因此不能直接使用 `@validate` 监听 `el-form` 的逐字段校验事件。
+使用 `form-validate` 监听 `el-form` 的逐字段校验结果，参数顺序保持为 `(propPath, valid, message)`：
 
-常规业务优先使用 `validate()` 的整体结果。确实需要 Element Form 的 `validate(prop, valid, message)` 事件时，可在页面挂载后监听原始 Form 实例，并在销毁前解除：
-
-```ts
-const handleFieldValidate = (prop, valid, message) => {
-  console.log(prop, valid, message)
-}
-
-onMounted(() => {
-  formTableRef.value?.getFormRef()?.$on('validate', handleFieldValidate)
-})
-
-onBeforeUnmount(() => {
-  formTableRef.value?.getFormRef()?.$off('validate', handleFieldValidate)
-})
+```vue
+<FormTable
+  v-model="tableData"
+  :columns="columns"
+  @form-validate="handleFieldValidate"
+/>
 ```
 
-Vue 2 Options API 页面可在 `mounted/beforeDestroy` 执行同样的 `$on/$off`。
+```ts
+function handleFieldValidate(propPath, valid, message) {
+  console.log(propPath, valid, message)
+}
+```
+
+这里保留完整 `propPath`，例如 `tableData.0.profile.name`。组件不额外推导 `row/fieldKey`，避免动态行移动、嵌套路径和重复字段配置产生歧义。
+
+顶层也不新增 `validateField(fieldKey)`：Element 原生方法要求完整 `propPath`，而 FormTable 的路径包含动态行下标。明确知道当前完整路径时，仍可通过 `getFormRef().validateField(propPath)` 调用；常规提交优先使用 `validate()`。
 
 ### 受控重置
 
@@ -257,35 +257,39 @@ async function resetTable() {
 
 ### Slot 方案
 
-FormTable 内置 Item 没有转发 `el-form-item` 的 `label/error` Slot。需要完全自定义时，使用 `cellSlot` 在根 Form 内手写 FormItem：
+使用 `labelSlot/errorSlot` 引用 FormTable 上的具名 Slot：
 
 ```vue
 <FormTable v-model="tableData" :columns="columns">
-  <template #manual-name="{ row, index, updateRow }">
-    <el-form-item
-      :prop="`tableData.${index}.name`"
-      :rules="[{ required: true, message: '请输入姓名' }]"
-    >
-      <template slot="label">
-        <span>姓名 <i class="el-icon-info" /></span>
-      </template>
-      <el-input :value="row.name" @input="name => updateRow({ name })" />
-      <template slot="error" slot-scope="{ error }">
-        <span class="business-error">{{ error }}</span>
-      </template>
-    </el-form-item>
+  <template #name-label="{ row, fieldKey }">
+    <span>{{ row.vip ? 'VIP 姓名' : '姓名' }}（{{ fieldKey }}）</span>
+  </template>
+  <template #name-error="{ error, setValue }">
+    <span class="business-error">{{ error }}</span>
+    <el-button type="text" @click="setValue('未命名')">使用默认值</el-button>
   </template>
 </FormTable>
 ```
 
 ```ts
 const columns = [{
-  label: '姓名',
-  cellSlot: 'manual-name'
+  label: '人员',
+  children: [{
+    fieldKey: 'name',
+    type: 'input',
+    labelSlot: 'name-label',
+    errorSlot: 'name-error',
+    formItemProps: {
+      label: '姓名',
+      rules: [{ required: true, message: '请输入姓名' }]
+    }
+  }]
 }]
 ```
 
-手写 FormItem 时必须使用 `tableData.${index}.${fieldKey}` 形式的完整 `prop`，值更新仍使用 `updateRow`，不要直接修改 `row`。
+Label Slot 获得字段操作上下文和 `propPath`；Error Slot 再增加 Element 当前的 `error` 文本。未提供配置名称对应的 Slot 时，Element 会继续使用 `formItemProps.label/error`。自定义 Label 会替换原生文本，因此需要后缀时应在 Slot 内自行输出；Error Slot 只在错误内容实际展示时挂载。
+
+只有需要完全接管 FormItem 结构时才使用 `cellSlot` 手写 `el-form-item`。此时必须使用 `tableData.${index}.${fieldKey}` 形式的完整 `prop`，值更新仍使用 `updateRow`，不要直接修改 `row`。
 
 ## Column formatter 和原生 Slot 上下文
 
@@ -303,13 +307,7 @@ const columns = [{
 
 ## 事件和方法的类型边界
 
-Element Table 原生事件在运行时会继续透传。`sort-change/filter-change/header-*/cell-*/select*` 已有公开类型；以下事件由于 Element UI 版本参数差异，当前没有加入精确 `FormTableEmits` 声明：
-
-- `current-change`；
-- `row-click/row-dblclick/row-contextmenu`；
-- `expand-change`。
-
-它们不是运行时缺失；TypeScript 页面可为自己的 handler 显式标注当前项目实际参数。
+Element Table 原生事件在运行时会继续透传。`sort-change/filter-change/header-*/cell-*/select*` 以及常用的 `current-change`、`row-click/row-dblclick/row-contextmenu`、`expand-change` 都已加入公开 `FormTableEmits` 类型。其他低频或不同 Element UI 版本签名不一致的事件仍可在运行时监听，TypeScript 页面可为自己的 handler 显式标注当前项目实际参数。
 
 Table 原生方法通过 `getTableRef()` 调用：
 
@@ -333,7 +331,7 @@ tableRef?.doLayout()
 | 排序、筛选后继续编辑和校验 | 页面重排或替换受控 `tableData` |
 | 可编辑树形数据 | 拉平后编辑，或树展示与节点编辑分离 |
 | 真实多级表头 | 使用独立 `el-table` |
-| FormItem 复杂 Label/Error | 在 `cellSlot` 中手写 `el-form-item` |
+| FormItem 复杂 Label/Error | 使用 Item `labelSlot/errorSlot`；完全接管结构时再用 `cellSlot` |
 | 虚拟滚动 | 当前不支持；先使用分页或按需编辑 |
 
 性能和虚拟滚动的详细取舍见[性能与大数据量](./performance.md)和[性能优化建议](./performance-optimization.md)。

@@ -8,8 +8,11 @@
 | --- | --- |
 | `update:tableData` | 更新后的新数组 |
 | `field-change` | `{ row, index, fieldKey, value, previousValue }` |
+| `form-validate` | `propPath, valid, message` |
 
-Element Table 事件直接透传，参数顺序与引用保持不变。FormTable 为跨兼容版本保持稳定的列、单元格和选择事件提供公开类型；存在版本差异的行事件和 `expand-change` 仍可监听，但不加入精确的 `FormTableEmits` 声明。
+`form-validate` 转发 Element Form 的逐字段校验结果；`message` 在校验通过时为 `null`。它保留 Element 生成的完整 `propPath`，不将原生 `validateField()` 提升为 FormTable 顶层方法。单字段校验继续使用字段 Slot 当前的 `propPath` 和 `getFormRef().validateField()`。
+
+Element Table 事件直接透传，参数顺序与引用保持不变。公开类型覆盖列、单元格、行、当前行、展开和选择事件；`expand-change` 的第二个参数使用 `boolean | TRow[]` 兼容树形展开和 expand 列。
 
 | 已类型化的原生事件 | 参数 |
 | --- | --- |
@@ -19,6 +22,9 @@ Element Table 事件直接透传，参数顺序与引用保持不变。FormTable
 | `header-dragend` | `newWidth, oldWidth, column, event` |
 | `cell-click` / `cell-dblclick` / `cell-contextmenu` | `row, column, cell, event` |
 | `cell-mouse-enter` / `cell-mouse-leave` | `row, column, cell, event` |
+| `current-change` | `currentRow, oldCurrentRow` |
+| `row-click` / `row-dblclick` / `row-contextmenu` | `row, column, event` |
+| `expand-change` | `row, boolean \| expandedRows` |
 | `select` | `selection, row` |
 | `select-all` / `selection-change` | `selection` |
 
@@ -60,6 +66,7 @@ function handleHeaderClick(column: FormTableElementColumn, event: MouseEvent) {
 | --- | --- | --- |
 | `@update:tableData="handler"` | 更新后的 `TableRow[]` | 否 |
 | `@field-change="handler"` | `{ row, index, fieldKey, value, previousValue }` | 否 |
+| `@form-validate="handler"` | `propPath, valid, message` | 否 |
 | `component.listeners[event]` | `ActionContext, ...组件原始事件参数` | 是 |
 | `cellSlot` scoped Slot | `{ row, index, columnConfig, updateRow }` | 是 |
 | Element Table 原生事件 | Element UI 原始事件参数 | 否 |

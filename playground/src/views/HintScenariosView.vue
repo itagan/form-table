@@ -38,6 +38,34 @@
       </FormTable>
     </section>
 
+    <section class="hint-card">
+      <h2>FormItem Label / Error Slot</h2>
+      <div class="slot-actions">
+        <el-button size="small" @click="validateItemSlots">触发校验</el-button>
+        <span>{{ latestValidation }}</span>
+      </div>
+      <FormTable
+        ref="slotTableRef"
+        v-model="slotRows"
+        :columns="itemSlotColumns"
+        :form-props="formProps"
+        :table-props="tableProps"
+        @form-validate="handleFormValidate"
+      >
+        <template #name-label="{ row, propPath }">
+          <span class="custom-item-label">
+            姓名
+            <el-tooltip :content="`行 ${row.id} · ${propPath}`" placement="top">
+              <i class="el-icon-info" />
+            </el-tooltip>
+          </span>
+        </template>
+        <template #name-error="{ error }">
+          <span class="custom-item-error"><i class="el-icon-warning" /> {{ error }}</span>
+        </template>
+      </FormTable>
+    </section>
+
     <DemoCollapsiblePanel title="关键配置">
       <pre>{{ configuration }}</pre>
     </DemoCollapsiblePanel>
@@ -47,7 +75,13 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import FormTable from '@itagan/form-table'
-import type { ColumnConfig, ComponentProps, FormTableHintOptions, TableRow } from '@itagan/form-table'
+import type {
+  ColumnConfig,
+  ComponentProps,
+  FormTableExpose,
+  FormTableHintOptions,
+  TableRow
+} from '@itagan/form-table'
 import DemoCollapsiblePanel from '../components/DemoCollapsiblePanel.vue'
 
 const rows = ref<TableRow[]>([{ id: 1, name: 'Alice', amount: 128.5 }])
@@ -69,6 +103,28 @@ const customHeaderColumns: ColumnConfig[] = [{
   headerSlot: 'amount-header',
   children: [{ fieldKey: 'amount', type: 'number' }]
 }]
+
+const slotRows = ref<TableRow[]>([{ id: 2, name: '' }])
+const slotTableRef = ref<FormTableExpose | null>(null)
+const latestValidation = ref('尚未校验')
+const itemSlotColumns: ColumnConfig[] = [{
+  label: '自定义 FormItem',
+  children: [{
+    fieldKey: 'name',
+    type: 'input',
+    labelSlot: 'name-label',
+    errorSlot: 'name-error',
+    formItemProps: {
+      rules: [{ required: true, message: '请输入姓名', trigger: 'blur' }]
+    }
+  }]
+}]
+
+const handleFormValidate = (propPath: string, valid: boolean, message: string | null) => {
+  latestValidation.value = `${propPath}：${valid ? '通过' : message}`
+}
+
+const validateItemSlots = () => slotTableRef.value?.validate()
 
 const tooltipOptions: FormTableHintOptions = {
   mode: 'tooltip',
@@ -93,5 +149,8 @@ const configuration = `hintOptions: {
 .hint-card { margin-bottom: 20px; padding: 20px; border: 1px solid #ebeef5; border-radius: 8px; background: #fff; }
 .hint-card h2 { margin: 0 0 16px; font-size: 18px; }
 .custom-header { cursor: help; }
+.slot-actions { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; color: #606266; }
+.custom-item-label { display: inline-flex; align-items: center; gap: 4px; }
+.custom-item-error { display: inline-flex; align-items: center; gap: 4px; color: #f56c6c; }
 pre { overflow: auto; padding: 16px; background: #f5f7fa; }
 </style>

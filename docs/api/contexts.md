@@ -12,6 +12,8 @@
 | component 动态配置 | Item 数据 | Item 配置 | — | — |
 | `component.listeners[event]` | Item 数据 | Item 配置 | `setValue, updateRow` | — |
 | 字段 Slot | Item 数据 | Item 配置 | `setValue, updateRow` | `propPath, component` |
+| FormItem Label Slot | Item 数据 | Item 配置 | `setValue, updateRow` | `propPath` |
+| FormItem Error Slot | Item 数据 | Item 配置 | `setValue, updateRow` | `propPath, error` |
 | `cellSlot` | `row, index` | `columnConfig` | `updateRow` | — |
 | 表头 Slot | `tableData, label, columnIndex` | `columnConfig` | — | — |
 
@@ -52,6 +54,22 @@
 `itemConfig.component` 是未解析的原始配置；`component` 是当前行已解析的 `props/listeners/options/optionProps/model`。组件动态配置使用 `FormTableFieldRenderContext`，listener 在此基础上增加 `setValue/updateRow`。
 
 Item Hint 及 `hintOptions.field` formatter 都使用 `FormTableFieldRenderContext`。解析后的提示内容只由 FormTable 内部展示，不向组件动态配置、listener 或 Slot 传播。
+
+## FormItem Label / Error Slot 上下文
+
+`labelSlot` 使用 `FormTableFormItemSlotContext`，包含完整字段数据、配置、`setValue/updateRow` 和 `propPath`。`errorSlot` 使用 `FormTableFormItemErrorSlotContext`，并额外增加 Element FormItem 当前的 `error: string`。
+
+```vue
+<template #amount-label="{ row, propPath }">
+  <span>金额 · {{ row.currency }} · {{ propPath }}</span>
+</template>
+
+<template #amount-error="{ error }">
+  <span class="business-error">{{ error }}</span>
+</template>
+```
+
+自定义 Label 遵守 Element UI 原生 Slot 语义，不会自动拼接 `formProps.labelSuffix`。Error Slot 只在 Element FormItem 处于错误状态且允许展示消息时挂载。
 
 ## FormTableHeaderSlotContext
 

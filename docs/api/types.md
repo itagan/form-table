@@ -8,7 +8,8 @@
 - `FormTableHintValue`、`FormTableHintMode`、`FormTableHintTargets`、`FormTableFieldHintFormatter`、`FormTableHintOptions`
 - `TableRow`、`FormTableRecord`、`FormTableProps`、`FormTableRowKey`、`FormTableTableProps`
 - `FormTableColumnContext`、`FormTableRowContext`、`FormTableFieldRenderContext`
-- `FormTableFieldContext`、`FormTableSlotContext`、`FormTableCellSlotContext`
+- `FormTableFieldContext`、`FormTableFormItemSlotContext`、`FormTableFormItemErrorSlotContext`
+- `FormTableSlotContext`、`FormTableCellSlotContext`
 - `FormTableFieldChangePayload`、`FormTableHeaderSlotContext`
 - `FormTableElementColumn`、`FormTableSortChangePayload`、`FormTableFilterChangePayload`
 - `FormTableExpose`、`FormTableElementFormRef`、`FormTableElementTableRef`
@@ -96,7 +97,7 @@ type FormItemConfig =
   | { type: 'slot'; component: FieldComponentConfig & { renderer: string } }
 ```
 
-三种 Item 都支持可选 `key` 作为稳定渲染身份，并要求 `fieldKey` 指向行数据路径。`key` 不参与取值、更新或表单校验路径计算。
+三种 Item 都支持可选 `key` 作为稳定渲染身份，并要求 `fieldKey` 指向行数据路径。`key` 不参与取值、更新或表单校验路径计算。Item 还可通过 `labelSlot/errorSlot` 引用 FormTable 上的具名 Slot；两者都获得字段操作上下文和完整 `propPath`，Error Slot 额外获得 `error`。
 
 `type` 明确决定模式。component 模式要求静态 `renderer` 或动态 `resolveRenderer` 至少存在一个；slot 模式只接受静态字符串名称：
 
