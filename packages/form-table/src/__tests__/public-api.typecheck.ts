@@ -1,7 +1,6 @@
-import type { Component, PluginObject } from 'vue'
+import type { Component } from 'vue'
 import FormTable, {
   FormTable as NamedFormTable,
-  FormTablePlugin,
   createFormTable,
   defineFormTableColumns,
   type BuiltinFormItemType,
@@ -423,7 +422,6 @@ void legacyHintModeProps
 void legacyHintTooltipProps
 const component: Component = FormTable
 const named: Component = NamedFormTable
-const plugin: PluginObject<undefined> = FormTablePlugin
 
 async function useExpose(expose: FormTableExpose) {
   await expose.validate()
@@ -580,7 +578,6 @@ void modelVariants
 void dynamicRendererVariants
 void component
 void named
-void plugin
 void useExpose
 void invalid
 void invalidModes

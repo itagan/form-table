@@ -31,11 +31,13 @@ const errors = []
 const markdownLinkPattern = /!?\[[^\]]*\]\(([^)]+)\)/g
 const deprecatedReferences = [
   'guide/row-column-operations',
-  'docs/README.md'
+  'docs/README.md',
+  'FormTablePlugin',
+  '尚未发布',
+  '未首次发布'
 ]
 const requiredPublicApiNames = [
   'FormTable',
-  'FormTablePlugin',
   'createFormTable',
   'defineFormTableColumns',
   'update:tableData',
@@ -141,7 +143,7 @@ const publicEntrySource = fs.readFileSync(
   path.join(repositoryRoot, 'packages/form-table/src/index.ts'),
   'utf8'
 )
-for (const runtimeExport of ['FormTable', 'FormTablePlugin', 'createFormTable', 'defineFormTableColumns']) {
+for (const runtimeExport of ['FormTable', 'createFormTable', 'defineFormTableColumns']) {
   if (!publicEntrySource.includes(runtimeExport)) {
     errors.push(`packages/form-table/src/index.ts: 缺少运行时导出 ${runtimeExport}`)
   }

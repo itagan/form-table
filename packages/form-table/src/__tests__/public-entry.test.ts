@@ -1,8 +1,6 @@
-import { describe, expect, it, vi } from 'vitest'
-import type { VueConstructor } from 'vue'
+import { describe, expect, it } from 'vitest'
 import FormTable, {
   FormTable as NamedFormTable,
-  FormTablePlugin,
   createFormTable,
   defineFormTableColumns
 } from '../index'
@@ -17,21 +15,10 @@ describe('public package entry', () => {
   it('keeps runtime exports limited to the supported public API', () => {
     expect(Object.keys(publicEntry).sort()).toEqual([
       'FormTable',
-      'FormTablePlugin',
       'createFormTable',
       'default',
       'defineFormTableColumns'
     ])
-  })
-
-  it('exposes a Vue 2 plugin that registers FormTable by name', () => {
-    const component = vi.fn()
-
-    FormTablePlugin.install?.({
-      component
-    } as unknown as VueConstructor)
-
-    expect(component).toHaveBeenCalledWith('FormTable', FormTable)
   })
 
   it('returns typed column definitions without changing their runtime identity', () => {
