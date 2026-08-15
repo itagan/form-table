@@ -1,12 +1,12 @@
 [
   {
     "title": "基础编辑",
-    "description": "统一 children 布局的基础编辑、字段组件和 Element UI 校验。",
+    "description": "统一 formItems 布局的基础编辑、字段组件和 Element UI 校验。",
     "path": "/form-table",
     "name": "form-table",
     "view": "FormTableView",
     "type": "primary",
-    "tags": ["children", "type", "formItemProps"]
+    "tags": ["formItems", "type", "formItemProps"]
   },
   {
     "title": "Hint 多场景",

@@ -197,7 +197,7 @@ const columns: ColumnConfig[] = [
     key: 'description-column',
     label: '需求说明 *',
     props: { minWidth: 560 },
-    children: [{
+    formItems: [{
         key: 'complex-description',
         fieldKey: 'detail',
         type: 'component',
@@ -261,7 +261,7 @@ const columns: ColumnConfig[] = [
     key: 'schedule-column',
     label: '使用时间 *',
     props: { minWidth: 430 },
-    children: [{
+    formItems: [{
       key: 'schedule-field',
       fieldKey: 'schedule',
       type: 'component',
@@ -279,7 +279,7 @@ const columns: ColumnConfig[] = [
     key: 'pricing-column',
     label: '数量/单价 *',
     props: { minWidth: 330 },
-    children: [{
+    formItems: [{
       key: 'pricing-field',
       fieldKey: 'pricing',
       type: 'component',

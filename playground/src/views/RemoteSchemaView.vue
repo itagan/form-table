@@ -43,36 +43,32 @@ import { formatFormTableConfig } from '../utils/formatFormTableConfig'
 const remoteSchemaJson = `[
   {
     "label": "联系人",
-    "children": [
+    "formItems": [
       {
-        "children": [
-          {
-            "fieldKey": "name",
-            "type": "input",
-            "colProps": { "span": 6 },
-            "component": { "props": { "placeholder": "请输入姓名" } }
-          },
-          {
-            "fieldKey": "phone",
-            "type": "input",
-            "colProps": { "span": 8 },
-            "component": { "props": { "placeholder": "请输入手机号" } }
-          },
-          {
-            "fieldKey": "enabled",
-            "type": "switch",
-            "colProps": { "span": 5 }
-          },
-          {
-            "fieldKey": "actions",
-            "type": "slot",
-            "component": {
-              "renderer": "actions",
-              "props": { "activeLabel": "停用", "inactiveLabel": "启用" }
-            },
-            "colProps": { "span": 5 }
-          }
-        ]
+        "fieldKey": "name",
+        "type": "input",
+        "colProps": { "span": 6 },
+        "component": { "props": { "placeholder": "请输入姓名" } }
+      },
+      {
+        "fieldKey": "phone",
+        "type": "input",
+        "colProps": { "span": 8 },
+        "component": { "props": { "placeholder": "请输入手机号" } }
+      },
+      {
+        "fieldKey": "enabled",
+        "type": "switch",
+        "colProps": { "span": 5 }
+      },
+      {
+        "fieldKey": "actions",
+        "type": "slot",
+        "component": {
+          "renderer": "actions",
+          "props": { "activeLabel": "停用", "inactiveLabel": "启用" }
+        },
+        "colProps": { "span": 5 }
       }
     ]
   }

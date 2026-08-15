@@ -3,7 +3,7 @@
     <header>
       <router-link to="/">← 返回</router-link>
       <h1>基础表格表单</h1>
-      <p>统一使用 children 布局，并以表格级单例 Tooltip 展示表头和字段 hint。</p>
+      <p>统一使用 formItems 布局，并以表格级单例 Tooltip 展示表头和字段 hint。</p>
     </header>
 
     <section class="demo-card">
@@ -53,7 +53,7 @@ const columns: ColumnConfig[] = [
     headerHint: '姓名为必填项，年龄范围为 0 至 150',
     props: { minWidth: 320 },
     rowProps: { gutter: 10 },
-    children: [
+    formItems: [
         {
           fieldKey: 'name',
           type: 'input',
@@ -79,7 +79,7 @@ const columns: ColumnConfig[] = [
   {
     label: '学校',
     props: { minWidth: 200 },
-    children: [{
+    formItems: [{
         fieldKey: 'school',
         type: 'select',
         formItemProps: { rules: required('请选择学校', 'change') },
