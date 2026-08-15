@@ -114,11 +114,13 @@ const componentConfigSource = fs.readFileSync(
   'utf8'
 )
 const componentTypeBlock = componentConfigSource.match(/componentTypeMap[^=]*=\s*\{([\s\S]*?)\n\}/)?.[1] || ''
-const sourceTypes = [...componentTypeBlock.matchAll(/^\s{2}([a-z]+):/gm)].map(match => match[1]).sort()
+const sourceTypes = [...componentTypeBlock.matchAll(/^\s{2}(?:'([a-z-]+)'|([a-z]+)):/gm)]
+  .map(match => match[1] || match[2])
+  .sort()
 
 const componentApiSource = fs.readFileSync(path.join(repositoryRoot, 'docs/api/component.md'), 'utf8')
 const mappingSection = componentApiSource.match(/## 内置类型映射([\s\S]*?)(?:\n## |$)/)?.[1] || ''
-const documentedTypes = [...mappingSection.matchAll(/^\| `([a-z]+)` \|/gm)]
+const documentedTypes = [...mappingSection.matchAll(/^\| `([a-z-]+)` \|/gm)]
   .map(match => match[1])
   .filter(type => type !== 'type')
   .sort()

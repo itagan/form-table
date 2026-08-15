@@ -59,6 +59,7 @@ columns[].formItems[].component
 | `select` | `el-select` |
 | `date` | `el-date-picker` |
 | `time` | `el-time-picker` |
+| `time-select` | `el-time-select` |
 | `number` | `el-input-number` |
 | `switch` | `el-switch` |
 | `radio` | `el-radio-group` |
@@ -76,6 +77,24 @@ columns[].formItems[].component
 { type: 'input', component: { props: { type: 'textarea', rows: 3 } } }
 { type: 'date', component: { props: { type: 'datetime' } } }
 { type: 'date', component: { props: { type: 'daterange' } } }
+```
+
+任意时间使用 `time`；按固定步长生成时间列表时使用独立的 `time-select`：
+
+```ts
+{
+  fieldKey: 'appointmentTime',
+  type: 'time-select',
+  component: {
+    props: {
+      pickerOptions: {
+        start: '08:00',
+        step: '00:30',
+        end: '18:00'
+      }
+    }
+  }
+}
 ```
 
 需要其他组件时使用 `type: 'component'`。
