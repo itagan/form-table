@@ -64,6 +64,7 @@ import type {
   FormTableElementFormRef,
   FormTableElementTableRef,
   FormTableFieldChangePayload,
+  FormTableFormProps,
   FormTableHintContext,
   FormTableHintMode,
   FormTableHintTargets,
@@ -96,7 +97,7 @@ const props = withDefaults(defineProps<{
   /** 根组件 v-model 对应 prop；更新统一发出 update:tableData。 */
   tableData: TableRow[]
   columns: ColumnConfig[]
-  formProps?: ComponentProps
+  formProps?: FormTableFormProps
   tableProps?: FormTableTableProps
   rowKey?: FormTableRowKey
   hintOptions?: FormTableHintOptions

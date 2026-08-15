@@ -2,6 +2,8 @@ import type { Component } from 'vue'
 import type {
   ComponentProps,
   DynamicValue,
+  FormTableFormItemProps,
+  FormTableFormProps,
   FormTableHintValue,
   FormTableTableProps,
   FormTableValue,
@@ -88,7 +90,7 @@ interface BaseFormItemConfig<TRow extends TableRow = TableRow> {
   errorSlot?: string
   visible?: DynamicValue<boolean, FormTableFieldRenderContext<TRow>>
   colProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext<TRow>>
-  formItemProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext<TRow>>
+  formItemProps?: DynamicValue<FormTableFormItemProps, FormTableFieldRenderContext<TRow>>
   hint?: DynamicValue<FormTableHintValue, FormTableFieldRenderContext<TRow>>
 }
 
@@ -171,7 +173,7 @@ export interface FormTableProps<TRow extends TableRow = TableRow> {
   tableData: TRow[]
   columns: ColumnConfig<TRow>[]
   rowKey?: FormTableRowKey<TRow>
-  formProps?: ComponentProps
+  formProps?: FormTableFormProps
   tableProps?: FormTableTableProps
   hintOptions?: FormTableHintOptions<TRow>
   loading?: boolean
