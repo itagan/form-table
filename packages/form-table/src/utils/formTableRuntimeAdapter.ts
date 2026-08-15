@@ -29,9 +29,13 @@ export function resolveTableListeners(listeners: FormTableListenerMap): FormTabl
   }, {})
 }
 
-/** rowKey 是根组件身份协议，不继续透传 tableProps 中的旧配置。 */
+/** data/rowKey 由根组件协议管理，不继续透传 tableProps 中的同名配置。 */
 export function resolveTableProps(tableProps: ComponentProps): ComponentProps {
-  const { rowKey: _legacyRowKey, ...resolvedProps } = tableProps
+  const {
+    data: _managedData,
+    rowKey: _managedRowKey,
+    ...resolvedProps
+  } = tableProps
   return resolvedProps
 }
 

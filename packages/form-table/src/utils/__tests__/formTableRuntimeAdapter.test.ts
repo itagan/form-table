@@ -25,11 +25,21 @@ describe('FormTable runtime adapter', () => {
     expect(getVue2ComponentListeners(null)).toEqual({})
   })
 
-  it('removes only the legacy table rowKey passthrough', () => {
-    const source = { rowKey: 'legacy-id', border: true, height: 320 }
+  it('removes managed table data and rowKey while preserving other passthrough props', () => {
+    const source = {
+      data: [{ id: 1 }],
+      rowKey: 'legacy-id',
+      border: true,
+      height: 320
+    }
 
     expect(resolveTableProps(source)).toEqual({ border: true, height: 320 })
-    expect(source).toEqual({ rowKey: 'legacy-id', border: true, height: 320 })
+    expect(source).toEqual({
+      data: [{ id: 1 }],
+      rowKey: 'legacy-id',
+      border: true,
+      height: 320
+    })
   })
 
   it('protects managed Tooltip props and preserves supported passthrough values', () => {

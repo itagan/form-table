@@ -65,7 +65,7 @@ const tableProps = {
 | `el-table.row-key` | 顶层 `rowKey` | Element Table 渲染身份与 FormTable 安全更新共用 |
 | `el-form.model` | 内部 `{ tableData }` | 与 `tableData.{rowIndex}.{fieldKey}` 校验路径保持一致 |
 
-这些属性不属于对应的透传对象。TypeScript 会拒绝在 `tableProps/formProps` 中配置它们；JavaScript 或远程 Schema 即使传入，也不会覆盖 FormTable 的内部绑定。
+这些属性不属于对应的透传对象。TypeScript 会拒绝在 `tableProps/formProps` 中配置它们；JavaScript 或远程 Schema 中的 `tableProps.data/rowKey` 会在运行时适配边界被主动丢弃，`formProps.model` 仍由内部显式绑定覆盖。表格数据应使用 `v-model`、`:table-data.sync`，或显式组合 `tableData/update:tableData` 受控协议。
 
 `rowKey` 同时传给 Element Table，并在异步字段回调或 `cellSlot.updateRow` 中用于重新定位原数据行。rowKey 必须唯一、稳定，不应使用数组下标。不同 key 的职责和配置时机见[稳定身份与异步安全](../features/stable-identity.md)。
 
