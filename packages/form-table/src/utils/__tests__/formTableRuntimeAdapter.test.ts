@@ -10,11 +10,13 @@ describe('FormTable runtime adapter', () => {
   it('reads Vue 2 listeners and forwards only native table events', () => {
     const rowClick = vi.fn()
     const fieldChange = vi.fn()
+    const formValidate = vi.fn()
     const updateTableData = vi.fn()
     const listeners = getVue2ComponentListeners({
       $listeners: {
         'row-click': rowClick,
         'field-change': fieldChange,
+        'form-validate': formValidate,
         'update:tableData': updateTableData
       }
     })

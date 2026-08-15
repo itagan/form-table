@@ -16,6 +16,7 @@ describe('FormTable validation and exposed API', () => {
     const cellClick = vi.fn()
     const selectionChange = vi.fn()
     const fieldChange = vi.fn()
+    const formValidate = vi.fn()
     const updateTableData = vi.fn()
     const wrapper = mountFormTable({
       listeners: {
@@ -26,13 +27,16 @@ describe('FormTable validation and exposed API', () => {
         'cell-click': cellClick,
         'selection-change': selectionChange,
         'field-change': fieldChange,
+        'form-validate': formValidate,
         'update:tableData': updateTableData
       }
     })
     await wrapper.vm.$nextTick()
     const table = wrapper.findComponent({ name: 'ElTable' }).vm as any
+    const form = wrapper.findComponent({ name: 'ElForm' }).vm as any
     expect(Object.keys(table.$listeners)).toContain('row-click')
     expect(Object.keys(table.$listeners)).not.toContain('field-change')
+    expect(Object.keys(table.$listeners)).not.toContain('form-validate')
     expect(Object.keys(table.$listeners)).not.toContain('update:tableData')
     const row = { name: 'Alice' }
     const column = { id: 'el-table_1_column_1', property: 'name' }
@@ -48,6 +52,7 @@ describe('FormTable validation and exposed API', () => {
     table.$emit('header-click', column, event)
     table.$emit('cell-click', row, column, cell, event)
     table.$emit('selection-change', selection)
+    form.$emit('validate', 'tableData.0.name', false, '请输入姓名')
 
     expect(rowClick).toHaveBeenCalledOnce()
     expect(rowClick).toHaveBeenCalledWith(row)
@@ -61,6 +66,8 @@ describe('FormTable validation and exposed API', () => {
     expect(cellClick).toHaveBeenCalledWith(row, column, cell, event)
     expect(selectionChange).toHaveBeenCalledOnce()
     expect(selectionChange).toHaveBeenCalledWith(selection)
+    expect(formValidate).toHaveBeenCalledOnce()
+    expect(formValidate).toHaveBeenCalledWith('tableData.0.name', false, '请输入姓名')
 
     const expose = wrapper.vm as unknown as FormTableExpose
     expect(expose.getFormRef()).toBeTruthy()
