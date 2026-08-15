@@ -161,7 +161,7 @@ function flattenRows(nodes, level = 0, parentId = null) {
 
 ### 能力边界
 
-FormTable 不递归渲染嵌套 `el-table-column`。`columns[].formItems` 表示单元格中的表单字段；`children` 当前不属于公开列配置，并保留给未来可能的子列语义。根级 Table 默认 Slot 也已由 FormTable 接管，不能在 FormTable 内手写嵌套列。
+FormTable 不递归渲染嵌套 `el-table-column`。`columns[].formItems` 表示单元格中的表单字段。根级 Table 默认 Slot 也已由 FormTable 接管，不能在 FormTable 内手写嵌套列。未来若支持多级表头，可考虑使用 `children` 表示子列。
 
 ### 当前处理方案
 

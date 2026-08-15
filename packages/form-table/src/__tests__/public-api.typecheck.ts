@@ -299,22 +299,6 @@ const legacyNestedRows: ColumnConfig = {
 }
 void legacyNestedRows
 
-const legacyChildrenColumn: ColumnConfig = {
-  label: '旧字段列表名称',
-  // @ts-expect-error 未发布 API 已将 children 破坏性改名为 formItems。
-  children: [{ fieldKey: 'name', type: 'input' }]
-}
-void legacyChildrenColumn
-
-const mixedLegacyColumn = {
-  label: '混合新旧字段列表名称',
-  formItems: [{ fieldKey: 'name', type: 'input' as const }],
-  children: [{ fieldKey: 'name', type: 'input' as const }]
-}
-// @ts-expect-error 经变量传递的旧 children 也必须被明确拒绝。
-const invalidMixedLegacyColumn: ColumnConfig = mixedLegacyColumn
-void invalidMixedLegacyColumn
-
 const customModel: FieldModelConfig = {
   prop: 'selectedId',
   event: 'select',
