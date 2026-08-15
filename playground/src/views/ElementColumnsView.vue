@@ -57,8 +57,8 @@
       <h2>配置边界</h2>
       <ul>
         <li><code>selection/index/expand</code> 都是 Element Column 的 <code>props.type</code>。</li>
-        <li>原生透传列省略 <code>children/cellSlot</code>，TypeScript 会自动识别为 <code>NativeColumnConfig</code>。</li>
-        <li>需要内容的 expand 列可组合 <code>cellSlot</code>；普通编辑列继续使用 <code>children</code>。</li>
+        <li>原生透传列省略 <code>formItems/cellSlot</code>，TypeScript 会自动识别为 <code>NativeColumnConfig</code>。</li>
+        <li>需要内容的 expand 列可组合 <code>cellSlot</code>；普通编辑列继续使用 <code>formItems</code>。</li>
       </ul>
     </section>
   </main>
@@ -141,7 +141,7 @@ const columns = computed(() => defineFormTableColumns<DemoRow>([
   {
     label: '姓名',
     props: { minWidth: 180 },
-    children: [{ fieldKey: 'name', type: 'input' }]
+    formItems: [{ fieldKey: 'name', type: 'input' }]
   },
   {
     label: '部门',
@@ -157,7 +157,7 @@ const columns = computed(() => defineFormTableColumns<DemoRow>([
       ],
       filterMethod: (value: string, row: DemoRow) => row.department === value
     },
-    children: [{ fieldKey: 'department', type: 'text' }]
+    formItems: [{ fieldKey: 'department', type: 'text' }]
   }
 ]))
 
@@ -184,7 +184,7 @@ const columns = defineFormTableColumns<DemoRow>([
   },
   {
     label: '姓名',
-    children: [{ fieldKey: 'name', type: 'input' }]
+    formItems: [{ fieldKey: 'name', type: 'input' }]
   }
 ])
 

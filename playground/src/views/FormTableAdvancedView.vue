@@ -3,7 +3,7 @@
     <header>
       <router-link to="/">← 返回</router-link>
       <h1>Element 功能列、复杂布局与三种渲染模式</h1>
-      <p>纯透传列通过 props 配置选择/序号能力；children 布局演示内置字段、自定义 component、Render Function 组件和 slot。</p>
+      <p>纯透传列通过 props 配置选择/序号能力；formItems 布局演示内置字段、自定义 component、Render Function 组件和 slot。</p>
     </header>
 
     <section class="demo-card">
@@ -47,7 +47,7 @@
 
       <el-alert
         class="native-column-note"
-        title="NativeColumnConfig 直接透传 el-table-column props；选择结果通过 selection-change 获取，不需要 children 或 fieldKey。"
+        title="NativeColumnConfig 直接透传 el-table-column props；选择结果通过 selection-change 获取，不需要 formItems 或 fieldKey。"
         type="info"
         :closable="false"
         show-icon
@@ -118,7 +118,7 @@ const columns: ColumnConfig[] = [
     headerProps: { 'aria-label': '联系人信息说明' },
     props: { minWidth: 600 },
     rowProps: { gutter: 10 },
-    children: [
+    formItems: [
       {
         fieldKey: 'name',
         type: 'input',
@@ -168,7 +168,7 @@ const columns: ColumnConfig[] = [
   {
     label: '状态',
     props: { width: 90, align: 'center' },
-    children: [{
+    formItems: [{
       fieldKey: 'status',
       type: 'slot',
       component: {
@@ -180,7 +180,7 @@ const columns: ColumnConfig[] = [
   {
     label: 'Render Function',
     props: { width: 150, align: 'center' },
-    children: [{
+    formItems: [{
       key: 'active-render-field',
       fieldKey: 'active',
       type: 'component',

@@ -3,7 +3,7 @@
 API 参考按配置对象拆分，表格首列始终使用完整属性路径。数组层级使用 `[]`，对象属性使用 `.`，例如：
 
 ```text
-columns[].children[].component.props
+columns[].formItems[].component.props
 ```
 
 ## 配置树
@@ -22,7 +22,7 @@ FormTable
    ├─ headerSlot / headerProps / headerHint
    ├─ cellSlot
    ├─ rowProps                            唯一 Flex el-row
-   └─ children[]                         FormItemConfig
+   └─ formItems[]                        FormItemConfig
       ├─ key / fieldKey / visible / type
       ├─ colProps / formItemProps / hint
       ├─ labelSlot / errorSlot
@@ -38,7 +38,7 @@ FormTable
             └─ disabled / key
 ```
 
-`columns[].cellSlot` 与 `columns[].children[]` 是两条互斥的单元格渲染路径。前者直接渲染列级 Slot，后者进入 Item → Component 的字段链路。
+`columns[].cellSlot` 与 `columns[].formItems[]` 是两条互斥的单元格渲染路径。前者直接渲染列级 Slot，后者进入 Item → Component 的字段链路。
 
 根组件 `v-model` 对应 `tableData/update:tableData`，不改变配置树结构。基础用法见 [FormTable Props](./form-table.md)。
 
@@ -48,7 +48,7 @@ FormTable
 | --- | --- | --- |
 | [FormTable Props](./form-table.md) | `tableData`、`columns`、`formProps`、`tableProps`、`hintOptions` | 顶层 props、受控数据和 Element UI 透传 |
 | [Column / Item](./columns.md) | `columns[]...` | 列、字段布局、校验和提示 |
-| [Component 配置](./component.md) | `columns[].children[].component...` | 渲染器、model、props、listeners 和 options |
+| [Component 配置](./component.md) | `columns[].formItems[].component...` | 渲染器、model、props、listeners 和 options |
 | [Slot 与上下文](./contexts.md) | 动态回调和 scoped Slot | 上下文矩阵、快照语义和更新能力 |
 | [事件与 Ref](./events-and-ref.md) | `update:tableData`、`field-change`、Ref | 受控回写、原生事件和实例方法 |
 | [公开类型](./types.md) | 包入口导出 | TypeScript 联合类型和公开接口 |

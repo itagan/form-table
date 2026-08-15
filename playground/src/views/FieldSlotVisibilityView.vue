@@ -80,7 +80,7 @@ const columns: ColumnConfig[] = [
     label: '内容',
     props: { minWidth: 420 },
     rowProps: { gutter: 10 },
-    children: [
+    formItems: [
       { fieldKey: 'title', type: 'input', colProps: { span: 16 } },
       {
         fieldKey: 'showDetail',
@@ -107,7 +107,7 @@ const columns: ColumnConfig[] = [
   {
     label: '评分',
     props: { width: 180 },
-    children: [{
+    formItems: [{
       fieldKey: 'score',
       type: 'slot',
       component: { renderer: 'score', props: { showScore: true } }
@@ -116,7 +116,7 @@ const columns: ColumnConfig[] = [
   {
     label: '操作',
     props: { width: 90, align: 'center' },
-    children: [{
+    formItems: [{
       fieldKey: '__actions',
       type: 'slot',
       component: { renderer: 'actions', props: { label: '删除' } }
@@ -137,7 +137,7 @@ const visibleCode = `{
   label: '内容',
   visible: ({ tableData }) => tableData.length > 0, // Column
   rowProps: ({ index }) => ({ gutter: index ? 8 : 10 }),
-  children: [{
+  formItems: [{
     fieldKey: 'detail',
     type: 'slot',
     component: { renderer: 'detail' },

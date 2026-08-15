@@ -12,24 +12,20 @@
     "key": "contact-column",
     "label": "联系人",
     "props": { "minWidth": 480 },
-    "children": [
+    "formItems": [
       {
-        "children": [
-          {
-            "fieldKey": "name",
-            "type": "input",
-            "component": {
-              "props": { "placeholder": "请输入姓名" }
-            }
-          },
-          {
-            "fieldKey": "phone",
-            "type": "input",
-            "component": {
-              "props": { "placeholder": "请输入手机号" }
-            }
-          }
-        ]
+        "fieldKey": "name",
+        "type": "input",
+        "component": {
+          "props": { "placeholder": "请输入姓名" }
+        }
+      },
+      {
+        "fieldKey": "phone",
+        "type": "input",
+        "component": {
+          "props": { "placeholder": "请输入手机号" }
+        }
       }
     ]
   }
@@ -79,15 +75,12 @@ const columns = enhanceFormTableColumns(remoteColumns, {
 
 ```ts
 function enhanceFormTableColumns(columns, enhancements) {
-  return columns.map(column => Array.isArray(column.children)
+  return columns.map(column => Array.isArray(column.formItems)
     ? {
         ...column,
-        children: column.children.map(row => ({
-          ...row,
-          children: row.children.map(item =>
-            enhancements[item.fieldKey]?.(item) || item
-          )
-        }))
+        formItems: column.formItems.map(item =>
+          enhancements[item.fieldKey]?.(item) || item
+        )
       }
     : column
   )

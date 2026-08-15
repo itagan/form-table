@@ -37,7 +37,7 @@ void namedExpose.clearValidate()
 
 const columns = defineFormTableColumns<PurchaseRow>([{
   label: '采购信息',
-  children: [{
+  formItems: [{
     fieldKey: 'amount',
     type: 'number',
     component: {

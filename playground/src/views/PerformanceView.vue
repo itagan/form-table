@@ -262,7 +262,7 @@ const createEditColumn = (
             return { gutter: index % 2 === 0 ? 0 : 2 }
           }
         : undefined,
-    children: [{
+    formItems: [{
         key: `${fieldKey}-item`,
         fieldKey,
         type: 'input',

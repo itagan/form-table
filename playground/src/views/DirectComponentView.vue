@@ -40,7 +40,7 @@ const formTableRef = ref<FormTableExpose>()
 const columns: ColumnConfig[] = [
   {
     label: '手机',
-    children: [{
+    formItems: [{
       fieldKey: 'phone',
       type: 'component',
       component: {
@@ -52,7 +52,7 @@ const columns: ColumnConfig[] = [
   },
   {
     label: '状态展示',
-    children: [{
+    formItems: [{
       fieldKey: 'status',
       type: 'component',
       component: {

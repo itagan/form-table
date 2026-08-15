@@ -185,11 +185,11 @@ const tableProps = computed(() => ({ border: true, spanMethod }))
 const columns: ColumnConfig[] = [
   {
     key: 'date-column', label: '议程日期', props: { prop: 'dateLabel', width: 150, align: 'center' },
-    children: [{ key: 'date-field', fieldKey: 'dateLabel', type: 'slot', component: { renderer: 'day-date' } }]
+    formItems: [{ key: 'date-field', fieldKey: 'dateLabel', type: 'slot', component: { renderer: 'day-date' } }]
   },
   {
     key: 'topic-column', label: '议程主题', props: { prop: 'topic', minWidth: 200 },
-    children: [{ key: 'topic-field', fieldKey: 'topic', type: 'slot', component: { renderer: 'day-topic' } }]
+    formItems: [{ key: 'topic-field', fieldKey: 'topic', type: 'slot', component: { renderer: 'day-topic' } }]
   },
   {
     key: 'sequence-column', label: '议程', props: { width: 82, align: 'center' },
@@ -197,15 +197,15 @@ const columns: ColumnConfig[] = [
   },
   {
     key: 'time-column', label: '时间计划', props: { minWidth: 230 },
-    children: [{ key: 'time-field', fieldKey: 'timeRange', type: 'slot', component: { renderer: 'time-plan' } }]
+    formItems: [{ key: 'time-field', fieldKey: 'timeRange', type: 'slot', component: { renderer: 'time-plan' } }]
   },
   {
     key: 'name-column', label: '议程名称', props: { minWidth: 280 },
-    children: [{ key: 'name-field', fieldKey: 'name', type: 'slot', component: { renderer: 'itinerary-name' } }]
+    formItems: [{ key: 'name-field', fieldKey: 'name', type: 'slot', component: { renderer: 'itinerary-name' } }]
   },
   {
     key: 'city-column', label: '议程城市', props: { minWidth: 150 },
-    children: [{
+    formItems: [{
       key: 'city-field', fieldKey: 'city', type: 'select',
       component: {
         props: { placeholder: '请选择城市', filterable: true },
@@ -215,7 +215,7 @@ const columns: ColumnConfig[] = [
   },
   {
     key: 'location-column', label: '议程地点', props: { minWidth: 220 },
-    children: [{
+    formItems: [{
       key: 'location-field', fieldKey: 'location', type: 'input',
       component: { props: { placeholder: '请输入议程地点', clearable: true } }
     }]

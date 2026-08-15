@@ -10,7 +10,7 @@ Hint 是轻量的自动补充说明：字段和表头只提供字符串内容，
 const columns: ColumnConfig[] = [{
   label: '税号',
   headerHint: '纳税人识别号',
-  children: [{
+  formItems: [{
     fieldKey: 'taxNumber',
     type: 'input',
     hint: '请输入营业执照上的统一社会信用代码'

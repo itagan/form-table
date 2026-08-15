@@ -13,7 +13,7 @@ import UserSelector from './UserSelector.vue'
 
 const columns: ColumnConfig[] = [{
   label: '负责人',
-  children: [{
+  formItems: [{
     fieldKey: 'ownerId',
     type: 'component',
     formItemProps: {

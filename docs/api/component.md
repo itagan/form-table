@@ -3,7 +3,7 @@
 ## 完整路径
 
 ```text
-columns[].children[].component
+columns[].formItems[].component
 ├─ renderer
 ├─ resolveRenderer
 ├─ model
@@ -24,7 +24,7 @@ columns[].children[].component
 
 | 配置路径 | 类型 | 模式 | 动态上下文 | 目标 / 作用 |
 | --- | --- | --- | --- | --- |
-| `columns[].children[].component.renderer` | `string \| Component` | `component` / `slot` | — | component 为组件；slot 为具名 Slot |
+| `columns[].formItems[].component.renderer` | `string \| Component` | `component` / `slot` | — | component 为组件；slot 为具名 Slot |
 | `...component.resolveRenderer` | `(ItemContext) => string \| Component \| undefined` | 仅 `component` | ItemContext | 按当前行同步选择组件 |
 | `...component.model` | `false \| FieldModelConfig` | 内置 / `component` | — | 省略时使用原生 v-model；也可自定义或关闭绑定 |
 | `...component.model.prop` | `string` | 自定义 model | — | 接收字段值的 prop，默认 `value` |
@@ -39,7 +39,7 @@ columns[].children[].component
 | `...component.optionProps.disabled` | `string` | 选项型 | — | 选项禁用字段 |
 | `...component.optionProps.key` | `string` | 选项型 | — | 选项渲染 key 字段 |
 
-`...` 在表格中缩写了共同前缀 `columns[].children[]`。
+`...` 在表格中缩写了共同前缀 `columns[].formItems[]`。
 
 ## 渲染模式约束
 

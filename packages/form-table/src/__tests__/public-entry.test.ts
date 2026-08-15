@@ -22,7 +22,7 @@ describe('public package entry', () => {
   })
 
   it('returns typed column definitions without changing their runtime identity', () => {
-    const columns = [{ label: '姓名', children: [] }]
+    const columns = [{ label: '姓名', formItems: [] }]
 
     expect(defineFormTableColumns(columns)).toBe(columns)
   })

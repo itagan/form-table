@@ -3,7 +3,7 @@ import type { ColumnConfig, FormItemConfig, LayoutColumnConfig } from '@itagan/f
 export type FormItemEnhancement = (item: FormItemConfig) => FormItemConfig
 
 const isLayoutColumn = (column: ColumnConfig): column is LayoutColumnConfig => (
-  Array.isArray(column.children)
+  Array.isArray(column.formItems)
 )
 
 /**
@@ -15,6 +15,6 @@ export function enhanceFormTableColumns(
 ): ColumnConfig[] {
   return columns.map((column) => isLayoutColumn(column) ? ({
     ...column,
-    children: column.children.map((item) => enhancements[item.fieldKey]?.(item) || item)
+    formItems: column.formItems.map((item) => enhancements[item.fieldKey]?.(item) || item)
   }) : column)
 }

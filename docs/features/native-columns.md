@@ -14,18 +14,18 @@ const columns = defineFormTableColumns<TableRow>([
   { label: '序号', props: { type: 'index', width: 64, align: 'center' } },
   {
     label: '姓名',
-    children: [{ fieldKey: 'name', type: 'input' }]
+    formItems: [{ fieldKey: 'name', type: 'input' }]
   }
 ])
 ```
 
-直接配置在 `columns` 中不会产生类型警告。TypeScript 会根据“具有 `props`，但没有 `children/cellSlot`”的结构自动识别为 `NativeColumnConfig`，通常无需显式导入这个类型。只有抽取可复用的原生 Element 列数组或编写配置工具时，才需要声明 `NativeColumnConfig[]`。
+直接配置在 `columns` 中不会产生类型警告。TypeScript 会根据“具有 `props`，但没有 `formItems/cellSlot`”的结构自动识别为 `NativeColumnConfig`，通常无需显式导入这个类型。只有抽取可复用的原生 Element 列数组或编写配置工具时，才需要声明 `NativeColumnConfig[]`。
 
-`type` 属于 Element UI 的 `el-table-column` Prop，因此保留在 `props` 中。纯透传列不需要为了通过类型检查而配置无意义的 `children: []`：
+`type` 属于 Element UI 的 `el-table-column` Prop，因此保留在 `props` 中。纯透传列不需要为了通过类型检查而配置无意义的 `formItems: []`：
 
 ```ts
 { props: { type: 'selection', width: 48 } } // 正确
-{ props: { type: 'selection' }, children: [] } // 不需要，也不允许混用
+{ props: { type: 'selection' }, formItems: [] } // 不需要，也不允许混用
 ```
 
 ## 选择列
@@ -142,7 +142,7 @@ Element Table 的两个根级 Slot 可直接写在 FormTable 下：
 | Element Column 属性 | 通过 `props` 原样透传 |
 | 可选配置 | `key`、`label`、`visible` |
 | 字段路径与校验 | 不支持 |
-| `children` / `cellSlot` | 不支持 |
+| `formItems` / `cellSlot` | 不支持 |
 | FormTable 自定义表头 | 不支持 |
 
 FormTable 不维护 `selection/index/expand` 枚举，具体属性遵循当前 Element UI 版本。需要内容的原生列可组合现有 `cellSlot`，例如展开列：

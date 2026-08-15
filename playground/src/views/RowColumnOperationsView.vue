@@ -103,7 +103,7 @@ const nameColumn: ColumnConfig = {
   key: 'name-column',
   label: '姓名',
   props: { minWidth: 180 },
-  children: [{
+  formItems: [{
     key: 'name-field',
     fieldKey: 'name',
     type: 'input',
@@ -116,7 +116,7 @@ const scoreColumn: ColumnConfig = {
   key: 'score-column',
   label: '评分（延迟提交）',
   props: { minWidth: 300 },
-  children: [{
+  formItems: [{
     key: 'score-field',
     fieldKey: 'score',
     type: 'slot',
@@ -150,7 +150,7 @@ const remarkColumn: ColumnConfig = {
   key: 'remark-column',
   label: '备注',
   props: { minWidth: 180 },
-  children: [{
+  formItems: [{
     key: 'remark-field',
     fieldKey: 'remark',
     type: 'input',

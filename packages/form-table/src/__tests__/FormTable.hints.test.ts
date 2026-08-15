@@ -58,7 +58,7 @@ describe('FormTable lightweight hint behavior', () => {
         column: {
           label: '姓名',
           headerHint,
-          children: [{ fieldKey: 'name', type: 'input', hint: '字段说明' }]
+          formItems: [{ fieldKey: 'name', type: 'input', hint: '字段说明' }]
         }
       }),
       template: `
@@ -84,7 +84,7 @@ describe('FormTable lightweight hint behavior', () => {
       columns: [{
         label: '姓名',
         headerHint,
-        children: [{ fieldKey: 'name', type: 'input', hint: '字段说明' }]
+        formItems: [{ fieldKey: 'name', type: 'input', hint: '字段说明' }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -108,7 +108,7 @@ describe('FormTable lightweight hint behavior', () => {
       columns: [{
         label: '姓名',
         headerHint,
-        children: [{ fieldKey: 'name', type: 'input', hint: fieldHint }]
+        formItems: [{ fieldKey: 'name', type: 'input', hint: fieldHint }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -131,7 +131,7 @@ describe('FormTable lightweight hint behavior', () => {
         label: '姓名',
         headerHint,
         headerProps: { title: '原生表头' },
-        children: [{
+        formItems: [{
           fieldKey: 'name', type: 'input', hint: fieldHint, formItemProps: { title: '原生字段' }
         }]
       }]
@@ -153,7 +153,7 @@ describe('FormTable lightweight hint behavior', () => {
     const wrapper = mountFormTable({
       hintOptions: { mode: 'title', field: formatter },
       tableData: [{ inherited: 'A', empty: 'B', explicit: 'C', disabled: 'D' }],
-      columns: [{ label: '字段', children: [{ fieldKey: 'inherited', type: 'input' },
+      columns: [{ label: '字段', formItems: [{ fieldKey: 'inherited', type: 'input' },
         { fieldKey: 'empty', type: 'input', hint: '' },
         { fieldKey: 'explicit', type: 'input', hint: '显式说明' },
         { fieldKey: 'disabled', type: 'input', hint: false }] }]
@@ -180,7 +180,7 @@ describe('FormTable lightweight hint behavior', () => {
       },
       columns: [{
         label: '姓名', headerHint: '表头说明',
-        children: [{ fieldKey: 'name', type: 'input', hint: '字段说明' }]
+        formItems: [{ fieldKey: 'name', type: 'input', hint: '字段说明' }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -203,11 +203,11 @@ describe('FormTable lightweight hint behavior', () => {
       hintOptions: { mode: 'tooltip' },
       tableData: [{ input: 'A', number: 1, switch: true, rate: 3, slot: 'S' }],
       columns: [
-        { label: 'Input', children: [{ fieldKey: 'input', type: 'input', hint: 'Input hint' }] },
-        { label: 'Number', children: [{ fieldKey: 'number', type: 'number', hint: 'Number hint' }] },
-        { label: 'Switch', children: [{ fieldKey: 'switch', type: 'switch', hint: 'Switch hint' }] },
-        { label: 'Rate', children: [{ fieldKey: 'rate', type: 'rate', hint: 'Rate hint' }] },
-        { label: 'Slot', children: [{
+        { label: 'Input', formItems: [{ fieldKey: 'input', type: 'input', hint: 'Input hint' }] },
+        { label: 'Number', formItems: [{ fieldKey: 'number', type: 'number', hint: 'Number hint' }] },
+        { label: 'Switch', formItems: [{ fieldKey: 'switch', type: 'switch', hint: 'Switch hint' }] },
+        { label: 'Rate', formItems: [{ fieldKey: 'rate', type: 'rate', hint: 'Rate hint' }] },
+        { label: 'Slot', formItems: [{
           fieldKey: 'slot', type: 'slot', hint: 'Slot hint', component: { renderer: 'single' }
         }] }
       ],
@@ -233,11 +233,11 @@ describe('FormTable lightweight hint behavior', () => {
       data: () => ({
         rows: [{ multiple: 'M', empty: '', single: 'S' }],
         columns: [
-          { label: 'Multiple', children: [{
+          { label: 'Multiple', formItems: [{
             fieldKey: 'multiple', type: 'slot', hint: 'Multiple hint', component: { renderer: 'multiple' }
           }] },
-          { label: 'Empty', children: [{ fieldKey: 'empty', type: 'input', hint: 'Empty hint' }] },
-          { label: 'Single', children: [{
+          { label: 'Empty', formItems: [{ fieldKey: 'empty', type: 'input', hint: 'Empty hint' }] },
+          { label: 'Single', formItems: [{
             fieldKey: 'single', type: 'slot', hint: 'Single hint', component: { renderer: 'single' }
           }] }
         ]
@@ -292,7 +292,7 @@ describe('FormTable lightweight hint behavior', () => {
     const createColumns = (type: 'input' | 'number') => [{
       key: 'value-column',
       label: 'Value',
-      children: [{ key: 'value-field', fieldKey: 'value', type, hint: 'Value hint' }]
+      formItems: [{ key: 'value-field', fieldKey: 'value', type, hint: 'Value hint' }]
     }]
     const wrapper = mountFormTable({
       hintOptions: { mode: 'tooltip' },
@@ -324,7 +324,7 @@ describe('FormTable lightweight hint behavior', () => {
   it('supports pointer, keyboard, Escape, ARIA tokens, and nested root isolation', async () => {
     const wrapper = mountFormTable({
       hintOptions: { mode: 'tooltip' },
-      columns: [{ label: '字段', children: [{
+      columns: [{ label: '字段', formItems: [{
         fieldKey: 'name', type: 'slot', hint: '字段说明', component: { renderer: 'content' }
       }] }],
       scopedSlots: { content: '<button class="target">字段</button>' }
@@ -369,8 +369,8 @@ describe('FormTable lightweight hint behavior', () => {
         hintOptions: { mode: 'tooltip', tooltipProps: { openDelay: 100 } },
         tableData: [{ name: 'Alice', amount: 128.5 }],
         columns: [
-          { label: '姓名', children: [{ fieldKey: 'name', type: 'input', hint: '姓名说明' }] },
-          { label: '金额', children: [{ fieldKey: 'amount', type: 'number', hint: '金额说明' }] }
+          { label: '姓名', formItems: [{ fieldKey: 'name', type: 'input', hint: '姓名说明' }] },
+          { label: '金额', formItems: [{ fieldKey: 'amount', type: 'number', hint: '金额说明' }] }
         ]
       })
       await wrapper.vm.$nextTick()
@@ -414,7 +414,7 @@ describe('FormTable lightweight hint behavior', () => {
     const wrapper = mountFormTable({
       hintOptions: { mode: 'tooltip' },
       tableData: [{ name: 'Alice' }],
-      columns: [{ label: '姓名', children: [{
+      columns: [{ label: '姓名', formItems: [{
         fieldKey: 'name', type: 'input', hint: ({ value }) => value ? `内容:${value}` : ''
       }] }]
     })
@@ -443,7 +443,7 @@ describe('FormTable lightweight hint behavior', () => {
   it('removes the controller when switching from tooltip to title or false', async () => {
     const wrapper = mountFormTable({
       hintOptions: { mode: 'tooltip' },
-      columns: [{ label: '姓名', children: [{ fieldKey: 'name', type: 'input', hint: '说明' }] }]
+      columns: [{ label: '姓名', formItems: [{ fieldKey: 'name', type: 'input', hint: '说明' }] }]
     })
     await wrapper.vm.$nextTick()
     expect((wrapper.vm.$refs as Record<string, unknown>).hintTooltipControllerRef).toBeTruthy()

@@ -91,17 +91,17 @@ const tableProps: ComponentProps = { border: true, stripe: true }
 const columns: ColumnConfig[] = [{
   label: '姓名',
   headerHint: '默认不会求值，因为 targets 默认为 field',
-  children: [{ fieldKey: 'name', type: 'input', hint: ({ value }) => `当前姓名：${value}` }]
+  formItems: [{ fieldKey: 'name', type: 'input', hint: ({ value }) => `当前姓名：${value}` }]
 }, {
   label: '金额',
   headerHint: '含税金额说明',
-  children: [{ fieldKey: 'amount', type: 'number' }]
+  formItems: [{ fieldKey: 'amount', type: 'number' }]
 }]
 
 const customHeaderColumns: ColumnConfig[] = [{
   label: '金额',
   headerSlot: 'amount-header',
-  children: [{ fieldKey: 'amount', type: 'number' }]
+  formItems: [{ fieldKey: 'amount', type: 'number' }]
 }]
 
 const slotRows = ref<TableRow[]>([{ id: 2, name: '' }])
@@ -109,7 +109,7 @@ const slotTableRef = ref<FormTableExpose | null>(null)
 const latestValidation = ref('尚未校验')
 const itemSlotColumns: ColumnConfig[] = [{
   label: '自定义 FormItem',
-  children: [{
+  formItems: [{
     fieldKey: 'name',
     type: 'input',
     labelSlot: 'name-label',

@@ -38,7 +38,7 @@
         <el-tab-pane label="配置路径" name="paths">
           <div class="tree-panel">
             <strong>配置树</strong>
-            <code>FormTable → columns[] → children[] (Row) → children[] (Item) → component</code>
+            <code>FormTable → columns[] → formItems[] (Item) → component</code>
             <small><code>[]</code> 表示数组元素，<code>.</code> 表示对象属性；表格中的路径可直接用于定位类型和文档。</small>
           </div>
 

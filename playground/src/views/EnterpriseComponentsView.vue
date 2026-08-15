@@ -153,7 +153,7 @@ const columns: ColumnConfig[] = [
     label: '物料',
     props: { minWidth: 380 },
     rowProps: { gutter: 8 },
-    children: [
+    formItems: [
         {
           key: 'sku',
           fieldKey: 'skuId',
@@ -201,7 +201,7 @@ const columns: ColumnConfig[] = [
     label: '组织 / 供应商',
     props: { minWidth: 430 },
     rowProps: { gutter: 8 },
-    children: [
+    formItems: [
         {
           key: 'organization-selector',
           fieldKey: 'orgCode',
@@ -274,7 +274,7 @@ const columns: ColumnConfig[] = [
     label: '数量 / 单价',
     props: { minWidth: 280 },
     rowProps: { gutter: 8 },
-    children: [
+    formItems: [
         {
           fieldKey: 'quantity',
           type: 'number',
@@ -312,7 +312,7 @@ const columns: ColumnConfig[] = [
     key: 'attachment',
     label: '附件',
     props: { minWidth: 260 },
-    children: [{
+    formItems: [{
       fieldKey: 'attachmentIds',
       type: 'component',
       component: {
@@ -339,7 +339,7 @@ const columns: ColumnConfig[] = [
     key: 'status',
     label: '状态',
     props: { width: 100, align: 'center' },
-    children: [{
+    formItems: [{
       fieldKey: 'approvalStatus',
       type: 'component',
       component: {
@@ -354,7 +354,7 @@ const columns: ColumnConfig[] = [
     key: 'actions',
     label: '操作',
     props: { width: 130, fixed: 'right', align: 'center' },
-    children: [{
+    formItems: [{
       fieldKey: '__actions',
       type: 'slot',
       component: {

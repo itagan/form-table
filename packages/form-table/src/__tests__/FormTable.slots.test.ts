@@ -18,7 +18,7 @@ describe('FormTable slot rendering', () => {
         tableData: [{ name: 'Alice' }],
         columns: [{
           label: '姓名',
-          children: [{
+          formItems: [{
             fieldKey: 'name',
             type: 'input',
             labelSlot: 'legacy-label',
@@ -45,7 +45,7 @@ describe('FormTable slot rendering', () => {
       tableData: [{ amount: '', currency: 'CNY' }],
       columns: [{
         label: '金额',
-        children: [{
+        formItems: [{
           fieldKey: 'amount',
           type: 'number',
           labelSlot: 'amount-label',
@@ -96,7 +96,7 @@ describe('FormTable slot rendering', () => {
     const wrapper = mountFormTable({
       columns: [{
         label: '姓名',
-        children: [{
+        formItems: [{
           fieldKey: 'name',
           type: 'input',
           labelSlot: 'missing-label',
@@ -117,7 +117,7 @@ describe('FormTable slot rendering', () => {
       tableData: [{ first: 'A', second: 'B' }],
       columns: [{
         label: '复用 Label',
-        children: [
+        formItems: [
           { fieldKey: 'first', type: 'input', labelSlot: 'shared-label' },
           { fieldKey: 'second', type: 'input', labelSlot: 'shared-label' }
         ]
@@ -206,7 +206,7 @@ describe('FormTable slot rendering', () => {
       tableData: [{ school: '一中' }],
       columns: [{
         label: '学校',
-        children: [{
+        formItems: [{
           fieldKey: 'school',
           type: 'slot',
           component: {
@@ -315,7 +315,7 @@ describe('FormTable slot rendering', () => {
       tableData: [{ native: '文本', component: '组件', empty: '', missing: '' }],
       columns: [{
         label: '透明 Slot',
-        children: [{
+        formItems: [{
             fieldKey: 'native',
             type: 'slot',
             component: { renderer: 'native-slot' }
@@ -360,7 +360,7 @@ describe('FormTable slot rendering', () => {
           tableData: [{ multiple: '' }],
           columns: [{
             label: '多根 Slot',
-            children: [{
+            formItems: [{
               fieldKey: 'multiple',
               type: 'slot',
               hint: '多根内容',
@@ -403,7 +403,7 @@ describe('FormTable slot rendering', () => {
         headerSlot: 'school-header',
         headerHint,
         headerProps,
-        children: [{ fieldKey: 'name', type: 'input' }]
+        formItems: [{ fieldKey: 'name', type: 'input' }]
       }],
       scopedSlots: {
         'school-header': `

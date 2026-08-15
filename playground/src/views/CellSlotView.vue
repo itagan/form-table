@@ -160,7 +160,7 @@ const columns: ColumnConfig[] = [
     key: 'score-column',
     label: '评分（字段 Slot）',
     props: { minWidth: 220 },
-    children: [{
+    formItems: [{
       key: 'score-field',
       fieldKey: 'score',
       type: 'slot',
