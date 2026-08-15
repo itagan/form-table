@@ -30,7 +30,7 @@ describe('minimum peer package consumer', () => {
             rowKey: 'id',
             columns: [{
               label: '姓名',
-              children: [{
+              formItems: [{
                 fieldKey: 'name',
                 type: 'input',
                 formItemProps: {

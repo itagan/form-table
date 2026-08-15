@@ -128,8 +128,8 @@ const resolvedHeaderTargetProps = computed(() => {
   )
 })
 
-// 没有 children/cellSlot 的纯 Element Column 不挂载 FormTable 单元格 scoped slot。
-const isPlainColumn = computed(() => !('children' in props.column) && !('cellSlot' in props.column))
+// 没有 formItems/cellSlot 的纯 Element Column 不挂载 FormTable 单元格 scoped slot。
+const isPlainColumn = computed(() => !('formItems' in props.column) && !('cellSlot' in props.column))
 
 /** cellSlot 列不经过 Row/Item 字段渲染链路。 */
 const cellSlotFn = computed(() => {
@@ -137,13 +137,13 @@ const cellSlotFn = computed(() => {
   return slotName ? parentSlots[slotName] || null : null
 })
 
-/** 仅布局列具有字段 children；cellSlot 列缺失对应 Slot 时保持空单元格。 */
-const layoutItems = computed(() => 'children' in props.column
-  ? props.column.children || []
+/** 仅布局列具有 formItems；cellSlot 列缺失对应 Slot 时保持空单元格。 */
+const layoutItems = computed(() => 'formItems' in props.column
+  ? props.column.formItems || []
   : [])
 
 /** 唯一字段布局行使用列级 rowProps。 */
-const layoutRowProps = computed(() => 'children' in props.column
+const layoutRowProps = computed(() => 'formItems' in props.column
   ? props.column.rowProps
   : undefined)
 

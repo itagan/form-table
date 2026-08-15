@@ -113,7 +113,7 @@ describe('FormTable data updates and row identity', () => {
           key: 'name-column',
           label: '姓名',
           rowProps: rowPropsResolver,
-          children: [{
+          formItems: [{
             key: 'name-item',
             fieldKey: 'name',
             type: 'input',
@@ -143,7 +143,7 @@ describe('FormTable data updates and row identity', () => {
       tableData: [{ profile: { city: '杭州' } }],
       columns: [{
         label: '城市',
-        children: [{ fieldKey: 'profile.city', type: 'input' }]
+        formItems: [{ fieldKey: 'profile.city', type: 'input' }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -161,7 +161,7 @@ describe('FormTable data updates and row identity', () => {
       tableData: original,
       columns: [{
         label: '批量更新',
-        children: [{
+        formItems: [{
           fieldKey: 'name',
           type: 'slot',
           component: { renderer: 'batch-update' }
@@ -210,7 +210,7 @@ describe('FormTable data updates and row identity', () => {
       tableData: original,
       columns: [{
         label: '连续更新',
-        children: [{
+        formItems: [{
           fieldKey: 'name',
           type: 'slot',
           component: { renderer: 'compose-update' }
@@ -248,7 +248,7 @@ describe('FormTable data updates and row identity', () => {
       rowKey,
       columns: [{
         label: '连续更新',
-        children: [{
+        formItems: [{
           fieldKey: 'name',
           type: 'slot',
           component: { renderer: 'indexed-compose-update' }
@@ -292,7 +292,7 @@ describe('FormTable data updates and row identity', () => {
       tableData: [{ name: 'Old row' }],
       columns: [{
         label: '姓名',
-        children: [{
+        formItems: [{
           fieldKey: 'name',
           type: 'component',
           component: {
@@ -341,7 +341,7 @@ describe('FormTable data updates and row identity', () => {
       rowKey: 'id',
       columns: [{
         label: '姓名',
-        children: [{
+        formItems: [{
           fieldKey: 'name',
           type: 'component',
           component: {
@@ -386,7 +386,7 @@ describe('FormTable data updates and row identity', () => {
       rowKey: 'id',
       columns: [{
         label: '姓名',
-        children: [{
+        formItems: [{
           fieldKey: 'name',
           type: 'component',
           component: {
@@ -440,7 +440,7 @@ describe('FormTable data updates and row identity', () => {
       tableData: [first, second],
       columns: [{
         label: '姓名',
-        children: [{
+        formItems: [{
           fieldKey: 'name',
           type: 'component',
           component: {
@@ -482,7 +482,7 @@ describe('FormTable data updates and row identity', () => {
       rowKey,
       columns: [{
         label: '姓名',
-        children: [{
+        formItems: [{
           fieldKey: 'name',
           type: 'component',
           component: {
@@ -523,7 +523,7 @@ describe('FormTable data updates and row identity', () => {
     const createColumns = (key: string, fieldKey: string): ColumnConfig[] => [{
       key: 'identity-column',
       label: '身份',
-      children: [{
+      formItems: [{
         key,
         fieldKey,
         type: 'component',
@@ -568,7 +568,7 @@ describe('FormTable data updates and row identity', () => {
       rowKey: 'id',
       columns: [{
         label: '姓名',
-        children: [{
+        formItems: [{
           fieldKey: 'name',
           type: 'component',
           component: {

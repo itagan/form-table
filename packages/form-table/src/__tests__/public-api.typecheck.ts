@@ -108,7 +108,7 @@ const typedColumns = defineFormTableColumns<PurchaseRow>([{
     tableData[0]?.name.toFixed(2)
     return true
   },
-  children: [{
+  formItems: [{
       fieldKey: 'amount',
       type: 'input',
       component: {
@@ -227,7 +227,7 @@ const columns: ColumnConfig[] = [{
   headerHint: ({ tableData, columnConfig }) => `${columnConfig.label}：${tableData.length} 条`,
   headerProps: ({ columnConfig }) => ({ 'aria-label': columnConfig.label }),
   rowProps: { gutter: 8 },
-  children: [
+  formItems: [
       {
         fieldKey: 'name',
         type: 'input',
@@ -266,7 +266,7 @@ const cellSlotColumn: CellSlotColumnConfig = {
 }
 const layoutColumn: LayoutColumnConfig = {
   label: '姓名',
-  children: [{ fieldKey: 'name', type: 'input' }]
+  formItems: [{ fieldKey: 'name', type: 'input' }]
 }
 const nativeColumns: NativeColumnConfig[] = [
   { props: { type: 'selection', width: 48 } },
@@ -280,24 +280,40 @@ const expandSlotColumn: CellSlotColumnConfig = {
 // @ts-expect-error native columns require props to explicitly select passthrough mode.
 const emptyNativeColumn: NativeColumnConfig = {}
 // @ts-expect-error native columns do not enter the Row/Item rendering chain.
-const nativeColumnWithChildren: NativeColumnConfig = { props: { type: 'index' }, children: [] }
+const nativeColumnWithFormItems: NativeColumnConfig = { props: { type: 'index' }, formItems: [] }
 // @ts-expect-error native Element column props stay inside props.
 const topLevelNativeType: ColumnConfig = { type: 'selection', props: { width: 48 } }
-// @ts-expect-error cellSlot columns do not accept Row/Item children.
+// @ts-expect-error cellSlot columns do not accept formItems.
 const mixedColumnModes: ColumnConfig = {
   label: '错误列模式',
   cellSlot: 'row-actions',
-  children: []
+  formItems: []
 }
 
 const legacyNestedRows: ColumnConfig = {
   label: '旧嵌套布局',
-  children: [
-    // @ts-expect-error children 直接接收 FormItemConfig，不再接收 RowConfig。
-    { children: [{ fieldKey: 'name', type: 'input' }] }
+  formItems: [
+    // @ts-expect-error formItems 直接接收 FormItemConfig，不再接收 RowConfig。
+    { formItems: [{ fieldKey: 'name', type: 'input' }] }
   ]
 }
 void legacyNestedRows
+
+const legacyChildrenColumn: ColumnConfig = {
+  label: '旧字段列表名称',
+  // @ts-expect-error 未发布 API 已将 children 破坏性改名为 formItems。
+  children: [{ fieldKey: 'name', type: 'input' }]
+}
+void legacyChildrenColumn
+
+const mixedLegacyColumn = {
+  label: '混合新旧字段列表名称',
+  formItems: [{ fieldKey: 'name', type: 'input' as const }],
+  children: [{ fieldKey: 'name', type: 'input' as const }]
+}
+// @ts-expect-error 经变量传递的旧 children 也必须被明确拒绝。
+const invalidMixedLegacyColumn: ColumnConfig = mixedLegacyColumn
+void invalidMixedLegacyColumn
 
 const customModel: FieldModelConfig = {
   prop: 'selectedId',
@@ -313,7 +329,7 @@ void invalidTrueModelConfig
 
 const modelVariants: ColumnConfig[] = [{
   label: '组件绑定协议',
-  children: [{
+  formItems: [{
         fieldKey: 'ownerId',
         type: 'component',
         component: { renderer: CustomInput, model: customModel }
@@ -332,7 +348,7 @@ const modelVariants: ColumnConfig[] = [{
 
 const dynamicRendererVariants: ColumnConfig[] = [{
   label: '按行解析组件',
-  children: [{
+  formItems: [{
         fieldKey: 'profile',
         type: 'component',
         component: {
@@ -411,7 +427,7 @@ const managedNestedProps: FormTableProps = {
   tableData: rows,
   columns: [{
     label: '姓名',
-    children: [{
+    formItems: [{
       fieldKey: 'name',
       type: 'input',
       formItemProps: {
@@ -486,7 +502,7 @@ async function useExpose(expose: FormTableExpose) {
 
 const invalid: ColumnConfig[] = [{
   label: '错误配置',
-  children: [{
+  formItems: [{
       fieldKey: 'bad',
       // @ts-expect-error unknown type aliases are rejected.
       type: 'unknown'
@@ -495,7 +511,7 @@ const invalid: ColumnConfig[] = [{
 
 const invalidModes: ColumnConfig[] = [{
   label: '渲染模式约束',
-  children: [// @ts-expect-error builtin modes resolve their own renderer.
+  formItems: [// @ts-expect-error builtin modes resolve their own renderer.
       { fieldKey: 'name', type: 'input', component: { renderer: CustomInput } },
       // @ts-expect-error component mode requires renderer or resolveRenderer.
       { fieldKey: 'custom', type: 'component', component: { props: {} } },
@@ -513,29 +529,29 @@ const renamedColumn: ColumnConfig = {
   label: '新字段名',
   // @ts-expect-error ColumnConfig uses label; legacy name is not accepted.
   name: '旧字段名',
-  children: []
+  formItems: []
 }
 
 const renamedItem: ColumnConfig = {
   label: '字段路径',
-  children: [// @ts-expect-error key is only the render identity; fieldKey remains required.
+  formItems: [// @ts-expect-error key is only the render identity; fieldKey remains required.
       { key: 'name', type: 'input' }]
 }
 
 const keyedItem: ColumnConfig = {
   label: '稳定字段身份',
-  children: [{ key: 'primary-name', fieldKey: 'name', type: 'input' }]
+  formItems: [{ key: 'primary-name', fieldKey: 'name', type: 'input' }]
 }
 
 const legacySlotString: ColumnConfig = {
   label: '旧 slot 写法',
-  children: [// @ts-expect-error standalone slot field was replaced by type: 'slot' + component.renderer.
+  formItems: [// @ts-expect-error standalone slot field was replaced by type: 'slot' + component.renderer.
       { fieldKey: 'actions', slot: 'actions' }]
 }
 
 const legacyComponentIs: ColumnConfig = {
   label: '旧组件写法',
-  children: [// @ts-expect-error component mode requires type: 'component' + component.renderer.
+  formItems: [// @ts-expect-error component mode requires type: 'component' + component.renderer.
       { fieldKey: 'custom', component: { is: CustomInput } }]
 }
 
@@ -558,7 +574,7 @@ const contextBoundaries: ColumnConfig[] = [{
     void rowContext.fieldKey
     return { gutter: 8 }
   },
-  children: [{
+  formItems: [{
       fieldKey: 'name',
       type: 'input',
       visible: (fieldContext) => {
@@ -626,7 +642,7 @@ void layoutColumn
 void nativeColumns
 void expandSlotColumn
 void emptyNativeColumn
-void nativeColumnWithChildren
+void nativeColumnWithFormItems
 void topLevelNativeType
 void mixedColumnModes
 void modelVariants

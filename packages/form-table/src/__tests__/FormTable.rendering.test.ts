@@ -51,7 +51,7 @@ describe('FormTable rendering and configuration', () => {
       columns: [{
         label: '分组字段',
         rowProps,
-        children: [
+        formItems: [
           { fieldKey: 'first', type: 'input', colProps: { span: 8 } },
           { fieldKey: 'second', type: 'input', colProps: { span: 16 } },
           { fieldKey: 'third', type: 'input', colProps: { span: 12 } },
@@ -95,7 +95,7 @@ describe('FormTable rendering and configuration', () => {
         label: '姓名',
         headerProps,
         headerHint,
-        children: [{ fieldKey: 'name', type: 'input' }]
+        formItems: [{ fieldKey: 'name', type: 'input' }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -122,7 +122,7 @@ describe('FormTable rendering and configuration', () => {
         props: {
           renderHeader: (h: any) => h('strong', { class: 'native-render-header' }, ['自定义表头'])
         },
-        children: [{ fieldKey: 'name', type: 'input' }]
+        formItems: [{ fieldKey: 'name', type: 'input' }]
       }]
     })
     await wrapper.vm.$nextTick()
@@ -138,7 +138,7 @@ describe('FormTable rendering and configuration', () => {
       tableData: [{ summary: '完整说明' }],
       columns: [{
         label: '摘要',
-        children: [{
+        formItems: [{
           fieldKey: 'summary',
           type: 'text',
           component: {
@@ -164,7 +164,7 @@ describe('FormTable rendering and configuration', () => {
       tableData: [{ summary: '只读摘要' }],
       columns: [{
         label: '摘要',
-        children: [{
+        formItems: [{
           fieldKey: 'summary',
           type: 'text',
           component: {
@@ -198,7 +198,7 @@ describe('FormTable rendering and configuration', () => {
       tableData: [{ name: 'Alice' }],
       columns: [{
         label: '姓名',
-        children: [{
+        formItems: [{
           fieldKey: 'name',
           type: 'input',
           hint
@@ -225,7 +225,7 @@ describe('FormTable rendering and configuration', () => {
       columns: [{
         label: '姓名',
         headerProps: { title: '底层表头提示' },
-        children: [{
+        formItems: [{
           fieldKey: 'name',
           type: 'input',
           formItemProps: { title: '底层字段提示' },
@@ -246,7 +246,7 @@ describe('FormTable rendering and configuration', () => {
       tableData: [{ name: 'Alice' }],
       columns: [{
         label: '姓名',
-        children: [{
+        formItems: [{
           fieldKey: 'name',
           type: 'input',
           component: {
@@ -290,7 +290,7 @@ describe('FormTable rendering and configuration', () => {
       tableData: [{ status: 'enabled' }],
       columns: [{
         label: '状态',
-        children: [{
+        formItems: [{
             fieldKey: 'status',
             type: 'component',
             hint: '状态字段说明',
@@ -367,7 +367,7 @@ describe('FormTable rendering and configuration', () => {
       ],
       columns: [{
         label: '需求说明',
-        children: [{
+        formItems: [{
           fieldKey: 'detail',
           type: 'component',
           component: { resolveRenderer }
@@ -405,7 +405,7 @@ describe('FormTable rendering and configuration', () => {
       tableData: [{ detail: '默认需求' }],
       columns: [{
         label: '需求说明',
-        children: [{
+        formItems: [{
           fieldKey: 'detail',
           type: 'component',
           component: {
@@ -426,7 +426,7 @@ describe('FormTable rendering and configuration', () => {
       tableData: [{ detail: '未支持的需求' }],
       columns: [{
         label: '需求说明',
-        children: [{
+        formItems: [{
           fieldKey: 'detail',
           type: 'component',
           component: { resolveRenderer: () => undefined }
@@ -456,7 +456,7 @@ describe('FormTable rendering and configuration', () => {
       tableData: [{ enabled: true }],
       columns: [{
         label: '启用',
-        children: [{
+        formItems: [{
           fieldKey: 'enabled',
           type: 'component',
           component: { renderer: DeclaredModelSwitch }
@@ -489,7 +489,7 @@ describe('FormTable rendering and configuration', () => {
       tableData: [{ ownerId: 'user-1' }],
       columns: [{
         label: '负责人',
-        children: [{
+        formItems: [{
           fieldKey: 'ownerId',
           type: 'component',
           component: {
@@ -541,7 +541,7 @@ describe('FormTable rendering and configuration', () => {
       tableData: [{ status: 'approved' }],
       columns: [{
         label: '状态',
-        children: [{
+        formItems: [{
           fieldKey: 'status',
           type: 'component',
           component: {
@@ -571,7 +571,7 @@ describe('FormTable rendering and configuration', () => {
       tableData: [{ choice: 'a', checked: ['b'] }],
       columns: [{
         label: '选项字段',
-        children: [{
+        formItems: [{
             fieldKey: 'choice',
             type: 'radio',
             component: { options }
@@ -611,9 +611,9 @@ describe('FormTable rendering and configuration', () => {
     })
     const first = createItem('first-name', 'A')
     const second = createItem('second-name', 'B')
-    const createColumns = (children: FormItemConfig[]): ColumnConfig[] => [{
+    const createColumns = (formItems: FormItemConfig[]): ColumnConfig[] => [{
       label: '稳定字段身份',
-      children
+      formItems
     }]
     const wrapper = mountFormTable({ columns: createColumns([first, second]) })
     await wrapper.vm.$nextTick()
@@ -646,12 +646,12 @@ describe('FormTable rendering and configuration', () => {
     const firstColumn: ColumnConfig = {
       key: 'first-column',
       label: '第一列',
-      children: [createItem('column-a', 'column-a')]
+      formItems: [createItem('column-a', 'column-a')]
     }
     const secondColumn: ColumnConfig = {
       key: 'second-column',
       label: '第二列',
-      children: [createItem('column-b', 'column-b')]
+      formItems: [createItem('column-b', 'column-b')]
     }
     const columnWrapper = mountFormTable({
       tableData: [{ 'column-a': '', 'column-b': '' }],
@@ -682,7 +682,7 @@ describe('FormTable rendering and configuration', () => {
     const createColumn = (key: string, marker: string): ColumnConfig => ({
       key,
       label: marker,
-      children: [{
+      formItems: [{
         key: `${key}-field`,
         fieldKey: marker,
         type: 'component',
@@ -760,7 +760,7 @@ describe('FormTable rendering and configuration', () => {
       key,
       label: key,
       visible,
-      children: [{ fieldKey: key, type: 'text' }]
+      formItems: [{ fieldKey: key, type: 'text' }]
     })
     const first = createColumn('first')
     const second = createColumn('second', () => visibility.showSecond)
@@ -802,7 +802,7 @@ describe('FormTable rendering and configuration', () => {
       key: 'dynamic-column',
       label: '动态列',
       visible: () => state.showColumn,
-      children: [{
+      formItems: [{
         key: 'dynamic-item',
         fieldKey: 'name',
         type: 'input',
@@ -834,7 +834,7 @@ describe('FormTable rendering and configuration', () => {
       label: '地区',
       visible: columnVisible,
       rowProps,
-      children: [
+      formItems: [
           {
             fieldKey: 'province',
             type: 'select',

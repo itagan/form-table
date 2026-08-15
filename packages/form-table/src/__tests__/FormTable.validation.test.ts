@@ -87,7 +87,7 @@ describe('FormTable validation and exposed API', () => {
       tableData: [{ profile: { phone: '' } }],
       columns: [{
         label: '手机号',
-        children: [{
+        formItems: [{
           fieldKey: 'profile.phone',
           type: 'input',
           formItemProps: {
@@ -116,7 +116,7 @@ describe('FormTable validation and exposed API', () => {
       tableData: [{ approval: '' }],
       columns: [{
         label: '审核',
-        children: [{
+        formItems: [{
           fieldKey: 'approval',
           type: 'slot',
           formItemProps: {
@@ -230,7 +230,7 @@ describe('FormTable validation and exposed API', () => {
       tableData: [{ name: '' }, secondRow],
       columns: [{
         label: '姓名',
-        children: [{
+        formItems: [{
           fieldKey: 'name',
           type: 'input',
           formItemProps: {

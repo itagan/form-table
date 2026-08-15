@@ -8,7 +8,7 @@ localVue.use(ElementUI)
 
 export const inputColumns: ColumnConfig[] = [{
   label: '姓名',
-  children: [{
+  formItems: [{
       fieldKey: 'name',
       type: 'input',
       component: {
