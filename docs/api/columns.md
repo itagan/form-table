@@ -12,7 +12,7 @@ columns[]                                  ColumnConfig
 
 `NativeColumnConfig`、`formItems[]` 和 `cellSlot` 是三条互斥路径。纯 Element Column 只提供 `props`；字段列使用 `formItems[]`；不需要字段路径和校验的自定义单元格可使用 [`cellSlot`](../features/cell-slot.md)。
 
-> **能力边界：**当前 FormTable 不支持嵌套 `el-table-column` 形成的多级表头。`columns[].formItems` 表示单元格内的表单字段，旧字段列表名 `children` 不再接受，并为未来子列语义保留；`headerSlot` 只能自定义单个表头单元格的内容，不提供跨列分组或多行层级能力。当前替代方案见 [Element UI 能力边界](../features/element-ui-boundaries.md#多级表头)。
+> **能力边界：**当前 FormTable 不支持嵌套 `el-table-column` 形成的多级表头。`columns[].formItems` 表示单元格内的表单字段；`headerSlot` 只能自定义单个表头单元格的内容，不提供跨列分组或多行层级能力。当前替代方案见 [Element UI 能力边界](../features/element-ui-boundaries.md#多级表头)。
 
 ## ColumnConfig
 
