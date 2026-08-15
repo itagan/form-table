@@ -121,7 +121,6 @@ export type FormItemConfig<TRow extends TableRow = TableRow> =
 interface BaseColumnConfig<TRow extends TableRow = TableRow> {
   key?: string
   label: string
-  children?: never
   headerSlot?: string
   headerProps?: DynamicValue<ComponentProps, FormTableColumnContext<TRow>>
   headerHint?: DynamicValue<FormTableHintValue, FormTableColumnContext<TRow>>
@@ -140,7 +139,6 @@ export interface NativeColumnConfig<TRow extends TableRow = TableRow> {
   label?: string
   visible?: DynamicValue<boolean, FormTableColumnContext<TRow>>
   props: DynamicValue<ComponentProps, FormTableColumnContext<TRow>>
-  children?: never
   formItems?: never
   cellSlot?: never
   headerSlot?: never
