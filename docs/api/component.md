@@ -51,28 +51,34 @@ columns[].formItems[].component
 
 ## 内置类型映射
 
-内置 `type` 只映射适合字段默认 v-model 协议的 Element UI 组件，不包含 Tree Select、Upload 等复杂组件：
+内置 `type` 只映射适合字段默认 v-model 协议的 Element UI 组件族，不包含 Tree Select、Upload 等复杂组件：
 
-| `type` | 实际组件 | 自动补充属性 |
-| --- | --- | --- |
-| `input` | `el-input` | — |
-| `select` | `el-select` | — |
-| `date` | `el-date-picker` | `{ type: 'date' }` |
-| `datetime` | `el-date-picker` | `{ type: 'datetime' }` |
-| `time` | `el-time-picker` | — |
-| `textarea` | `el-input` | `{ type: 'textarea' }` |
-| `number` | `el-input-number` | — |
-| `switch` | `el-switch` | — |
-| `radio` | `el-radio-group` | — |
-| `checkbox` | `el-checkbox-group` | — |
-| `text` | `span` | — |
-| `rate` | `el-rate` | — |
-| `slider` | `el-slider` | — |
-| `color` | `el-color-picker` | — |
-| `cascader` | `el-cascader` | — |
-| `autocomplete` | `el-autocomplete` | — |
+| `type` | 实际组件 |
+| --- | --- |
+| `input` | `el-input` |
+| `select` | `el-select` |
+| `date` | `el-date-picker` |
+| `time` | `el-time-picker` |
+| `number` | `el-input-number` |
+| `switch` | `el-switch` |
+| `radio` | `el-radio-group` |
+| `checkbox` | `el-checkbox-group` |
+| `text` | `span` |
+| `rate` | `el-rate` |
+| `slider` | `el-slider` |
+| `color` | `el-color-picker` |
+| `cascader` | `el-cascader` |
+| `autocomplete` | `el-autocomplete` |
 
-`component.props` 会在自动补充属性之后合并，因此可以覆盖或扩展这些最小默认值。需要其他组件时使用 `type: 'component'`。
+具体组件模式继续使用 Element UI 原生 Prop。多行文本使用 `type: 'input'` 配合 `component.props.type: 'textarea'`；日期时间、范围或月份等使用 `type: 'date'` 配合 DatePicker 的 `type` Prop：
+
+```ts
+{ type: 'input', component: { props: { type: 'textarea', rows: 3 } } }
+{ type: 'date', component: { props: { type: 'datetime' } } }
+{ type: 'date', component: { props: { type: 'daterange' } } }
+```
+
+需要其他组件时使用 `type: 'component'`。
 
 ## 复杂 Option 接入
 
