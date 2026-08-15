@@ -121,6 +121,33 @@ describe('FormTable rendering and configuration', () => {
     wrapper.destroy()
   })
 
+  it('renders time-select as the independent Element TimeSelect component', async () => {
+    const pickerOptions = { start: '08:00', step: '00:30', end: '18:00' }
+    const wrapper = mountFormTable({
+      tableData: [{ appointmentTime: '09:00' }],
+      columns: [{
+        label: '预约时间',
+        formItems: [{
+          fieldKey: 'appointmentTime',
+          type: 'time-select',
+          component: { props: { pickerOptions, placeholder: '选择时间' } }
+        }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    const timeSelect = wrapper.findComponent({ name: 'ElTimeSelect' })
+    expect(timeSelect.exists()).toBe(true)
+    expect((timeSelect.vm as any).pickerOptions).toEqual(pickerOptions)
+
+    timeSelect.vm.$emit('input', '10:30')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{
+      appointmentTime: '10:30'
+    }])
+    wrapper.destroy()
+  })
+
   it('applies headerHint and other properties to the default header text node', async () => {
     const headerProps = vi.fn(({ tableData, columnConfig }: FormTableColumnContext) => ({
       class: `records-${tableData.length}`,

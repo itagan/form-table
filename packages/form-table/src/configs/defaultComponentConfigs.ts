@@ -6,6 +6,7 @@ const componentTypeMap: Record<BuiltinFormItemType, string> = {
   select: 'el-select',
   date: 'el-date-picker',
   time: 'el-time-picker',
+  'time-select': 'el-time-select',
   number: 'el-input-number',
   switch: 'el-switch',
   radio: 'el-radio-group',

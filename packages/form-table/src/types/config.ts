@@ -77,7 +77,7 @@ export interface FieldComponentConfig<TRow extends TableRow = TableRow> {
 }
 
 export type BuiltinFormItemType =
-  | 'input' | 'select' | 'date' | 'time'
+  | 'input' | 'select' | 'date' | 'time' | 'time-select'
   | 'number' | 'switch' | 'radio' | 'checkbox' | 'text' | 'rate'
   | 'slider' | 'color' | 'cascader' | 'autocomplete'
 

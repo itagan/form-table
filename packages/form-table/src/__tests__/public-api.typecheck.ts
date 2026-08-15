@@ -101,7 +101,12 @@ const componentVariantColumns: ColumnConfig[] = [{
   label: '组件模式',
   formItems: [
     { fieldKey: 'description', type: 'input', component: { props: { type: 'textarea' } } },
-    { fieldKey: 'startedAt', type: 'date', component: { props: { type: 'datetime' } } }
+    { fieldKey: 'startedAt', type: 'date', component: { props: { type: 'datetime' } } },
+    {
+      fieldKey: 'appointmentTime',
+      type: 'time-select',
+      component: { props: { pickerOptions: { start: '08:00', step: '00:30', end: '18:00' } } }
+    }
   ]
 }]
 void componentVariantColumns
