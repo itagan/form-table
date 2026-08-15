@@ -37,6 +37,7 @@
 - 修复 Tooltip 模式下输入框已聚焦时，鼠标移出字段后仍因焦点兜底导致提示常驻的问题；纯键盘焦点访问保持可用。
 - 内置字段类型只保留 Element UI 默认提供的组件映射；移除非 Element UI 内置的 `tree-select`，此类组件统一通过 `type: 'component'` 接入。
 - 移除重复的 `tag-input` 快捷别名；可创建多标签选择统一使用 `type: 'select'` 并通过 `component.props` 配置。
+- 移除仅表示组件 Prop 变体的 `textarea/datetime` 快捷别名；分别使用 `type: 'input'/'date'` 并通过 `component.props.type` 配置。
 
 ## 首发前仓库节点 - 2026-07-04
 

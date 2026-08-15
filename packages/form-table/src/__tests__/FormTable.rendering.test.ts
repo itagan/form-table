@@ -80,6 +80,47 @@ describe('FormTable rendering and configuration', () => {
     wrapper.destroy()
   })
 
+  it('uses component props for Input and DatePicker variants', async () => {
+    const wrapper = mountFormTable({
+      tableData: [{ description: '初始内容', startedAt: '', birthday: '' }],
+      columns: [{
+        label: '组件模式',
+        formItems: [
+          {
+            fieldKey: 'description',
+            type: 'input',
+            component: { props: { type: 'textarea', rows: 3 } }
+          },
+          {
+            fieldKey: 'startedAt',
+            type: 'date',
+            component: { props: { type: 'datetime' } }
+          },
+          { fieldKey: 'birthday', type: 'date' }
+        ]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    const input = wrapper.findComponent({ name: 'ElInput' })
+    expect((input.vm as any).type).toBe('textarea')
+    expect(input.find('textarea').attributes('rows')).toBe('3')
+
+    const datePickers = wrapper.findAllComponents({ name: 'ElDatePicker' })
+    expect(datePickers).toHaveLength(2)
+    expect((datePickers.at(0).vm as any).type).toBe('datetime')
+    expect((datePickers.at(1).vm as any).type).toBe('date')
+
+    input.vm.$emit('input', '更新内容')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{
+      description: '更新内容',
+      startedAt: '',
+      birthday: ''
+    }])
+    wrapper.destroy()
+  })
+
   it('applies headerHint and other properties to the default header text node', async () => {
     const headerProps = vi.fn(({ tableData, columnConfig }: FormTableColumnContext) => ({
       class: `records-${tableData.length}`,

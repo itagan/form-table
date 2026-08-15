@@ -14,10 +14,13 @@ const columns: ColumnConfig[] = [{
   formItems: [{
     key: 'detail-field',
     fieldKey: 'detail',
-    type: 'textarea',
+    type: 'input',
     visible: ({ row }) => row.showExtra === true,
     component: {
-      props: ({ row }) => ({ disabled: row.detailType === 'none' })
+      props: ({ row }) => ({
+        type: 'textarea',
+        disabled: row.detailType === 'none'
+      })
     }
   }]
 }]
