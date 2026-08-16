@@ -55,7 +55,7 @@ const columns = enhanceFormTableColumns(remoteColumns, {
       ...layout,
       type: 'component',
       component: {
-        renderer: PhoneInput,
+        is: PhoneInput,
         props: remoteComponent?.props,
         listeners: {
           change(context, value) {

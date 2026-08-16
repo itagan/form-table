@@ -3,7 +3,7 @@
 包入口导出：
 
 - `ColumnConfig`、`LayoutColumnConfig`、`CellSlotColumnConfig`、`NativeColumnConfig`、`FormItemConfig`
-- `FieldComponentConfig`、`FieldModelConfig`、`FieldRendererResolver`、`BuiltinFormItemType`
+- `FieldComponentConfig`、`FieldModelConfig`、`FieldComponentResolver`、`BuiltinFormItemType`
 - `FormItemOption`、`OptionPropsConfig`
 - `FormTableHintValue`、`FormTableHintMode`、`FormTableHintTargets`、`FormTableFieldHintFormatter`、`FormTableHintOptions`
 - `TableRow`、`FormTableRecord`、`FormTableRowPatch`、`FormTableProps`、`FormTableRowKey`
@@ -93,41 +93,41 @@ type FormItemConfig =
   | {
       type: 'component'
       component: FieldComponentConfig & (
-        | { renderer: string | Component; resolveRenderer?: FieldRendererResolver }
-        | { renderer?: never; resolveRenderer: FieldRendererResolver }
+        | { is: string | Component; resolveComponent?: FieldComponentResolver }
+        | { is?: never; resolveComponent: FieldComponentResolver }
       )
     }
-  | { type: 'slot'; component: FieldComponentConfig & { renderer: string } }
+  | { type: 'slot'; component: FieldComponentConfig & { slot: string } }
 ```
 
 三种 Item 都支持可选 `key` 作为稳定渲染身份，并要求 `fieldKey` 指向行数据路径。`key` 不参与取值、更新或表单校验路径计算。Item 还可通过 `labelSlot/errorSlot` 引用 FormTable 上的具名 Slot；两者都获得字段操作上下文和完整 `propPath`，Error Slot 额外获得 `error`。
 
-`type` 明确决定模式。component 模式要求静态 `renderer` 或动态 `resolveRenderer` 至少存在一个；slot 模式只接受静态字符串名称：
+`type` 明确决定模式。component 模式要求静态 `is` 或动态 `resolveComponent` 至少存在一个；slot 模式要求 `component.slot` 提供静态字符串名称：
 
 ```ts
 interface ComponentItemShape {
   type: 'component'
   component: FieldComponentConfig & (
-    | { renderer: string | Component; resolveRenderer?: FieldRendererResolver }
-    | { renderer?: never; resolveRenderer: FieldRendererResolver }
+    | { is: string | Component; resolveComponent?: FieldComponentResolver }
+    | { is?: never; resolveComponent: FieldComponentResolver }
   )
 }
 
 interface SlotItemShape {
   type: 'slot'
   component: FieldComponentConfig & {
-    renderer: string
+    slot: string
   }
 }
 ```
 
 ```ts
-type FieldRendererResolver = (
+type FieldComponentResolver = (
   context: FormTableFieldRenderContext
 ) => string | Component | undefined
 ```
 
-`resolveRenderer` 返回 `undefined` 时回退到静态 `renderer`。它只在 component 模式使用，避免与 Vue 函数组件及具名 slot 解析产生歧义。
+`resolveComponent` 返回 `undefined` 时回退到静态 `is`。它只在 component 模式使用，避免与 Vue 函数组件及具名 slot 解析产生歧义。
 
 动态配置上下文按层级收敛：
 

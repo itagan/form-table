@@ -14,7 +14,7 @@ FormTable 的自定义 Slot 都引用父组件的具名 scoped Slot。配置项�
 | Table 末尾 | `#append` | 可选 | 不渲染末尾内容 |
 | 表头 | `columns[].headerSlot` | 可选 | 回退最终解析后的列标题 |
 | 整格单元格 | `columns[].cellSlot` | 配置后应提供 | 当前列单元格为空 |
-| 字段内容 | `type: 'slot'` + `component.renderer` | 配置后必须提供 | 保留 FormItem，字段内容为空 |
+| 字段内容 | `type: 'slot'` + `component.slot` | 配置后必须提供 | 保留 FormItem，字段内容为空 |
 | FormItem Label | `formItems[].labelSlot` | 可选 | 回退 `formItemProps.label` |
 | FormItem Error | `formItems[].errorSlot` | 可选 | 回退 Element 默认错误内容 |
 
@@ -44,7 +44,7 @@ const columns = [{
     type: 'slot',
     labelSlot: 'amount-label',
     errorSlot: 'amount-error',
-    component: { renderer: 'amount-editor' }
+    component: { slot: 'amount-editor' }
   }]
 }, {
   key: 'actions-column',
@@ -79,7 +79,7 @@ Slot 名称应保持稳定，不拼接行下标或当前字段值。需要区分
 | `columns[].visible/props/headerProps/headerHint` | `FormTableColumnContext` |
 | `columns[].rowProps` | `FormTableRowContext` |
 | `columns[].formItems[].visible/colProps/formItemProps/hint` | `FormTableFieldRenderContext` |
-| `...component.resolveRenderer/props/options/optionProps` | `FormTableFieldRenderContext` |
+| `...component.resolveComponent/props/options/optionProps` | `FormTableFieldRenderContext` |
 | `...component.listeners[event]` | `FormTableFieldContext, ...原始事件参数` |
 
 `cellSlot` 和表头 Slot 是 Vue scoped Slot，不是 `DynamicValue` 配置回调。

@@ -93,7 +93,7 @@ Tooltip 模式内部默认使用 `placement: 'top'`、`effect: 'dark'` 和 `open
 
 ## 自定义提示
 
-Hint 不再作为业务元数据传播到 renderer、组件 props/listener 或 Slot 上下文。需要富文本、独立触发点或字段与表头使用不同 Tooltip 参数时，关闭对应自动 Hint 并由 Slot 直接根据业务数据实现：
+Hint 不再作为业务元数据传播到 `component.is`、组件 props/listener 或 Slot 上下文。需要富文本、独立触发点或字段与表头使用不同 Tooltip 参数时，关闭对应自动 Hint 并由 Slot 直接根据业务数据实现：
 
 ```vue
 <template #amount-header="{ label }">

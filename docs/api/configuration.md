@@ -27,7 +27,7 @@ FormTable
       ├─ colProps / formItemProps / hint
       ├─ labelSlot / errorSlot
       └─ component
-         ├─ renderer / resolveRenderer
+         ├─ is / resolveComponent / slot
          ├─ model
          │  ├─ prop
          │  ├─ event
