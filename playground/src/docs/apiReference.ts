@@ -71,10 +71,10 @@ export const apiGroups: ApiGroup[] = [
     title: '…formItems[].component · ComponentConfig',
     description: '以下 … 代表 columns[].formItems[]，页面展示仍保留完整可复制路径。',
     entries: [
-      { path: 'columns[].formItems[].component.is', type: 'Component | string', defaultValue: '按 type', target: '字段组件', description: '仅 component 模式；静态 Vue 组件目标。' },
-      { path: 'columns[].formItems[].component.resolveComponent', type: '(context) => Component | string', defaultValue: '—', target: '动态字段组件', description: '仅 component 模式，undefined 时回退 is。', context: 'ItemContext' },
+      { path: 'columns[].formItems[].component.is', type: 'Component | string', defaultValue: '按 type', target: '字段组件', description: '对应 Vue 动态组件 is；推荐组件对象或全局注册名，原生标签属于低层能力。' },
+      { path: 'columns[].formItems[].component.resolveComponent', type: '(context) => Component | string', defaultValue: '—', target: '动态字段组件', description: '同步选择与 is 相同类型的目标，undefined 时回退 is。', context: 'ItemContext' },
       { path: 'columns[].formItems[].component.slot', type: 'string', defaultValue: '—', target: '字段 Slot', description: '仅 slot 模式；引用父 FormTable 的静态具名 Slot。' },
-      { path: 'columns[].formItems[].component.model', type: 'false | ModelConfig', defaultValue: '省略', target: '值绑定协议', description: '省略时使用原生 v-model；也可自定义 prop/event 或关闭自动绑定。' },
+      { path: 'columns[].formItems[].component.model', type: 'false | ModelConfig', defaultValue: '省略', target: '值绑定协议', description: '省略时按 Vue 2 组件 model 选项绑定；也可自定义 prop/event 或关闭自动绑定。' },
       { path: 'columns[].formItems[].component.props', type: 'Object | (context) => Object', defaultValue: '{}', target: '字段组件', description: '按当前字段上下文动态生成组件属性；Input、DatePicker 的具体模式也通过 type Prop 配置。', context: 'ItemContext' },
       { path: 'columns[].formItems[].component.listeners', type: 'Record<string, Function>', defaultValue: '{}', target: '字段组件事件', description: '首参为 ActionContext，之后保持组件原始参数。', context: 'ActionContext + event args' },
       { path: 'columns[].formItems[].component.options', type: 'Option[] | (context) => Option[]', defaultValue: '[]', target: '选项型组件', description: 'select、radio、checkbox 等选项。', context: 'ItemContext' },

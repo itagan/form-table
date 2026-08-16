@@ -127,7 +127,7 @@ type FieldComponentResolver = (
 ) => string | Component | undefined
 ```
 
-`resolveComponent` 返回 `undefined` 时回退到静态 `is`。它只在 component 模式使用，避免与 Vue 函数组件及具名 slot 解析产生歧义。
+`is` 对应 Vue 动态组件目标，推荐使用组件对象或全局注册名；原生标签字符串的低层能力与限制见 [Component 配置](./component.md#is-目标与原生标签边界)。`resolveComponent` 返回 `undefined` 时回退到静态 `is`。它只在 component 模式使用，避免与 Vue 函数组件及具名 slot 解析产生歧义。
 
 动态配置上下文按层级收敛：
 
