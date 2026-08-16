@@ -23,23 +23,43 @@ describe('FormTable rendering and configuration', () => {
     const wrapper = mountFormTable({
       columns: [
         { props: { type: 'selection', width: 48 } },
-        { label: '序号', visible: ({ tableData }) => tableData.length > 0, props: { type: 'index', width: 64 } }
+        { label: '序号', visible: ({ tableData }) => tableData.length > 0, props: { type: 'index', width: 64 } },
+        { props: { label: '姓名', prop: 'name', width: 120 } }
       ]
     })
     await wrapper.vm.$nextTick()
 
     const columns = wrapper.findAllComponents({ name: 'ElTableColumn' })
-    expect(columns).toHaveLength(2)
+    expect(columns).toHaveLength(3)
     expect((columns.at(0).vm as any).type).toBe('selection')
     expect((columns.at(1).vm as any).type).toBe('index')
     expect((columns.at(1).vm as any).label).toBe('序号')
+    expect((columns.at(2).vm as any).label).toBe('姓名')
+    expect((columns.at(2).vm as any).prop).toBe('name')
     expect(wrapper.find('.el-form-item').exists()).toBe(false)
     wrapper.destroy()
   })
 
-  it('renders one wrapping Flex row per field cell and lets rowProps configure it except type', async () => {
+  it('lets column props override the default label and preserves an explicit empty label', async () => {
+    const overridingProps = Object.freeze({ label: '员工姓名', minWidth: 160 })
+    const wrapper = mountFormTable({
+      columns: [
+        { label: '姓名', props: overridingProps, formItems: [] },
+        { label: '操作', props: { label: '' }, formItems: [] }
+      ]
+    })
+    await wrapper.vm.$nextTick()
+
+    const columns = wrapper.findAllComponents({ name: 'ElTableColumn' })
+    expect((columns.at(0).vm as any).label).toBe('员工姓名')
+    expect((columns.at(0).vm as any).minWidth).toBe(160)
+    expect((columns.at(1).vm as any).label).toBe('')
+    expect(overridingProps).toEqual({ label: '员工姓名', minWidth: 160 })
+    wrapper.destroy()
+  })
+
+  it('renders one wrapping Flex row per field cell by default and applies rowProps', async () => {
     const rowProps = vi.fn((_context: FormTableRowContext) => ({
-      type: 'block',
       gutter: 12,
       justify: 'space-between',
       align: 'middle',
@@ -77,6 +97,26 @@ describe('FormTable rendering and configuration', () => {
     expect(rows.at(0).attributes('style')).toContain('min-height: 40px')
     expect(rows.at(0).findAllComponents({ name: 'ElCol' }).wrappers.map(col => (col.vm as any).span))
       .toEqual([8, 16, 12, 12, 24])
+    wrapper.destroy()
+  })
+
+  it('lets rowProps override the default Flex row without mutating the source object', async () => {
+    const rowProps = Object.freeze({ type: undefined, gutter: 6 })
+    const wrapper = mountFormTable({
+      tableData: [{ name: '' }],
+      columns: [{
+        label: '姓名',
+        rowProps,
+        formItems: [{ fieldKey: 'name', type: 'input' }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    const row = wrapper.findComponent({ name: 'ElRow' })
+    expect((row.vm as any).type).toBeUndefined()
+    expect((row.vm as any).gutter).toBe(6)
+    expect(row.classes()).not.toContain('el-row--flex')
+    expect(rowProps).toEqual({ type: undefined, gutter: 6 })
     wrapper.destroy()
   })
 

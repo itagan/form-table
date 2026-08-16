@@ -1,13 +1,13 @@
 <template>
   <el-table-column
     v-if="isPlainColumn"
-    :label="column.label"
+    :label="resolvedColumnLabel"
     v-bind="columnProps"
   />
 
   <el-table-column
     v-else
-    :label="column.label"
+    :label="resolvedColumnLabel"
     v-bind="columnProps"
   >
     <template v-if="shouldRenderHeader" v-slot:header>
@@ -20,7 +20,7 @@
           :slot-fn="headerSlotFn"
           :slot-props="headerSlotProps"
         />
-        <template v-else>{{ column.label }}</template>
+        <template v-else>{{ resolvedColumnLabel }}</template>
       </span>
     </template>
 
@@ -105,6 +105,9 @@ const columnContext = computed<FormTableColumnContext>(() => createColumnContext
 /** 解析静态或函数形式的 el-table-column 透传属性。 */
 const columnProps = computed(() => resolveDynamicValue(props.column.props, columnContext.value) || {})
 
+/** 顶层 label 提供默认标题，Element Column props 中的显式值可以覆盖。 */
+const resolvedColumnLabel = computed(() => columnProps.value.label ?? props.column.label)
+
 /** 表头属性保持独立解析，不向 Slot 暴露 Hint 内部状态。 */
 const resolvedHeaderProps = computed(() => (
   resolveDynamicValue(props.column.headerProps, columnContext.value) || {}
@@ -172,7 +175,7 @@ const headerSlotProps = computed<FormTableHeaderSlotContext>(() => extendLazyCon
   columnContext.value,
   {
     columnIndex: props.columnIndex,
-    label: props.column.label || ''
+    label: resolvedColumnLabel.value ?? ''
   }
 ))
 </script>

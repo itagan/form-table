@@ -388,7 +388,7 @@ describe('FormTable slot rendering', () => {
     wrapper.destroy()
   })
 
-  it('exposes columnConfig to the header slot without a column alias', async () => {
+  it('exposes the resolved dynamic label and raw columnConfig to the header slot', async () => {
     const headerProps = vi.fn(({ tableData }: FormTableColumnContext) => ({
       class: `resolved-header-${tableData.length}`,
       'aria-label': '学校说明'
@@ -400,6 +400,7 @@ describe('FormTable slot rendering', () => {
       columns: [{
         key: 'school-column',
         label: '学校',
+        props: ({ tableData }) => ({ label: `学校（${tableData.length}）` }),
         headerSlot: 'school-header',
         headerHint,
         headerProps,
@@ -408,7 +409,7 @@ describe('FormTable slot rendering', () => {
       scopedSlots: {
         'school-header': `
           <span class="school-header">
-            {{ props.columnConfig.key }}|{{ props.column === undefined }}|{{ props.header === undefined }}
+            {{ props.label }}|{{ props.columnConfig.label }}|{{ props.columnConfig.key }}|{{ props.column === undefined }}|{{ props.header === undefined }}
           </span>
         `
       }
@@ -416,7 +417,8 @@ describe('FormTable slot rendering', () => {
     await wrapper.vm.$nextTick()
 
     const header = wrapper.find('.form-table-column-header')
-    expect(wrapper.find('.school-header').text()).toBe('school-column|true|true')
+    expect((wrapper.findComponent({ name: 'ElTableColumn' }).vm as any).label).toBe('学校（1）')
+    expect(wrapper.find('.school-header').text()).toBe('学校（1）|学校|school-column|true|true')
     expect(wrapper.find('.school-header').classes()).not.toContain('resolved-header-1')
     expect(wrapper.find('.school-header').attributes('aria-label')).toBeUndefined()
     expect(wrapper.find('.school-header').attributes('title')).toBeUndefined()
@@ -428,6 +430,8 @@ describe('FormTable slot rendering', () => {
 
     await wrapper.setProps({ tableData: [{ name: 'Alice' }, { name: 'Bob' }] })
     await wrapper.vm.$nextTick()
+    expect((wrapper.findComponent({ name: 'ElTableColumn' }).vm as any).label).toBe('学校（2）')
+    expect(wrapper.find('.school-header').text()).toBe('学校（2）|学校|school-column|true|true')
     expect(header.attributes('title')).toBeUndefined()
     expect(headerHint).not.toHaveBeenCalled()
     wrapper.destroy()
