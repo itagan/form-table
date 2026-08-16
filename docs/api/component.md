@@ -4,8 +4,9 @@
 
 ```text
 columns[].formItems[].component
-├─ renderer
-├─ resolveRenderer
+├─ is
+├─ resolveComponent
+├─ slot
 ├─ model
 │  ├─ prop
 │  ├─ event
@@ -24,8 +25,9 @@ columns[].formItems[].component
 
 | 配置路径 | 类型 | 模式 | 动态上下文 | 目标 / 作用 |
 | --- | --- | --- | --- | --- |
-| `columns[].formItems[].component.renderer` | `string \| Component` | `component` / `slot` | — | component 为组件；slot 为具名 Slot |
-| `...component.resolveRenderer` | `(ItemContext) => string \| Component \| undefined` | 仅 `component` | ItemContext | 按当前行同步选择组件 |
+| `columns[].formItems[].component.is` | `string \| Component` | 仅 `component` | — | 静态 Vue 组件目标，可使用全局注册名或组件对象 |
+| `...component.resolveComponent` | `(ItemContext) => string \| Component \| undefined` | 仅 `component` | ItemContext | 按当前行同步选择组件 |
+| `...component.slot` | `string` | 仅 `slot` | — | 父 FormTable 上的静态具名 Slot |
 | `...component.model` | `false \| FieldModelConfig` | 内置 / `component` | — | 省略时使用原生 v-model；也可自定义或关闭绑定 |
 | `...component.model.prop` | `string` | 自定义 model | — | 接收字段值的 prop，默认 `value` |
 | `...component.model.event` | `string` | 自定义 model | — | 通知字段变化的事件，默认 `input` |
@@ -43,11 +45,11 @@ columns[].formItems[].component
 
 ## 渲染模式约束
 
-| `type` | renderer 约束 | model 行为 |
+| `type` | 渲染入口约束 | model 行为 |
 | --- | --- | --- |
-| 内置类型 | 由 FormTable 映射，不接受自定义 renderer | 默认双向绑定 |
-| `component` | 必须提供 `renderer` 或 `resolveRenderer` | 默认 Vue 2 v-model，可自定义 |
-| `slot` | `renderer` 必须是静态 Slot 名称 | FormTable 不为 Slot 内组件自动绑定 |
+| 内置类型 | 由 FormTable 映射，不接受 `is/resolveComponent/slot` | 默认双向绑定 |
+| `component` | 必须提供 `is` 或 `resolveComponent` | 默认 Vue 2 v-model，可自定义 |
+| `slot` | `slot` 必须是静态 Slot 名称 | FormTable 不为 Slot 内组件自动绑定 |
 
 ## 内置类型映射
 
@@ -121,7 +123,7 @@ columns[].formItems[].component
   fieldKey: 'cityCode',
   type: 'slot',
   component: {
-    renderer: 'city-select',
+    slot: 'city-select',
     props: { clearable: true, filterable: true },
     listeners: {
       change({ row }, value) {
@@ -174,7 +176,7 @@ columns[].formItems[].component
   fieldKey: 'attachmentIds',
   type: 'component',
   component: {
-    renderer: BusinessAttachmentUploader,
+    is: BusinessAttachmentUploader,
     model: {
       prop: 'fileIds',
       event: 'files-change'

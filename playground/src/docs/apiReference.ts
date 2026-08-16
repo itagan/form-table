@@ -71,8 +71,9 @@ export const apiGroups: ApiGroup[] = [
     title: '…formItems[].component · ComponentConfig',
     description: '以下 … 代表 columns[].formItems[]，页面展示仍保留完整可复制路径。',
     entries: [
-      { path: 'columns[].formItems[].component.renderer', type: 'Component | string', defaultValue: '按 type', target: '字段组件 / Slot 名', description: 'component 模式为组件，slot 模式为具名 Slot。' },
-      { path: 'columns[].formItems[].component.resolveRenderer', type: '(context) => Component | string', defaultValue: '—', target: '动态字段组件', description: '仅 component 模式，undefined 时回退 renderer。', context: 'ItemContext' },
+      { path: 'columns[].formItems[].component.is', type: 'Component | string', defaultValue: '按 type', target: '字段组件', description: '仅 component 模式；静态 Vue 组件目标。' },
+      { path: 'columns[].formItems[].component.resolveComponent', type: '(context) => Component | string', defaultValue: '—', target: '动态字段组件', description: '仅 component 模式，undefined 时回退 is。', context: 'ItemContext' },
+      { path: 'columns[].formItems[].component.slot', type: 'string', defaultValue: '—', target: '字段 Slot', description: '仅 slot 模式；引用父 FormTable 的静态具名 Slot。' },
       { path: 'columns[].formItems[].component.model', type: 'false | ModelConfig', defaultValue: '省略', target: '值绑定协议', description: '省略时使用原生 v-model；也可自定义 prop/event 或关闭自动绑定。' },
       { path: 'columns[].formItems[].component.props', type: 'Object | (context) => Object', defaultValue: '{}', target: '字段组件', description: '按当前字段上下文动态生成组件属性；Input、DatePicker 的具体模式也通过 type Prop 配置。', context: 'ItemContext' },
       { path: 'columns[].formItems[].component.listeners', type: 'Record<string, Function>', defaultValue: '{}', target: '字段组件事件', description: '首参为 ActionContext，之后保持组件原始参数。', context: 'ActionContext + event args' },
@@ -88,7 +89,7 @@ export const contextRows = [
   { location: 'columns[].cellSlot', context: 'FormTableCellSlotContext', fields: 'row, index, columnConfig, updateRow' },
   { location: 'columns[].rowProps', context: 'RowContext', fields: 'ColumnContext + row, index' },
   { location: '…formItems[].visible / colProps / formItemProps / hint', context: 'ItemContext', fields: 'RowContext + fieldKey, value, itemConfig' },
-  { location: '…component.props / options / optionProps / resolveRenderer', context: 'ItemContext', fields: 'RowContext + fieldKey, value, itemConfig' },
+  { location: '…component.props / options / optionProps / resolveComponent', context: 'ItemContext', fields: 'RowContext + fieldKey, value, itemConfig' },
   { location: '…component.listeners[event]', context: 'ActionContext', fields: 'ItemContext + setValue, updateRow；后接原始事件参数' },
   { location: '…formItems[].labelSlot', context: 'FormTableFormItemSlotContext', fields: 'ActionContext + propPath' },
   { location: '…formItems[].errorSlot', context: 'FormTableFormItemErrorSlotContext', fields: 'ActionContext + propPath, error' },
@@ -97,8 +98,8 @@ export const contextRows = [
 
 export const renderModes = [
   { mode: '内置 type', config: "type: 'input' / 'select' / …", fieldKey: '需要', validation: '支持', scope: '—', usage: '常规表单字段' },
-  { mode: 'component', config: "type: 'component' + component.renderer", fieldKey: '需要', validation: '支持', scope: 'ItemContext', usage: '自定义字段组件' },
-  { mode: '字段 Slot', config: "type: 'slot' + component.renderer", fieldKey: '需要', validation: '支持', scope: 'FormTableSlotContext', usage: '字段交互与完全自定义模板' },
+  { mode: 'component', config: "type: 'component' + component.is", fieldKey: '需要', validation: '支持', scope: 'ItemContext', usage: '自定义字段组件' },
+  { mode: '字段 Slot', config: "type: 'slot' + component.slot", fieldKey: '需要', validation: '支持', scope: 'FormTableSlotContext', usage: '字段交互与完全自定义模板' },
   { mode: 'cellSlot', config: 'columns[].cellSlot', fieldKey: '不需要', validation: '不提供', scope: 'FormTableCellSlotContext', usage: '组合展示、状态、派生值、操作列' },
   { mode: 'headerSlot', config: 'columns[].headerSlot', fieldKey: '不需要', validation: '不涉及', scope: 'HeaderSlotContext', usage: '图标、提示和交互表头' }
 ]

@@ -206,8 +206,8 @@ const columns: ColumnConfig[] = [
           rules: [{ validator: (_rule: unknown, value: DemandDetail, callback: ValidationCallback) => validateDetail(asDemandRow(row).type, value, callback), trigger: 'change' }]
         }),
         component: {
-          renderer: UnsupportedDemandEditor,
-          resolveRenderer: ({ row }) => {
+          is: UnsupportedDemandEditor,
+          resolveComponent: ({ row }) => {
             const type = asDemandRow(row).type
             return isComplexType(type) ? descriptionEditors[type] : undefined
           },
@@ -269,7 +269,7 @@ const columns: ColumnConfig[] = [
         rules: [{ validator: (_rule: unknown, value: DemandSchedule, callback: ValidationCallback) => validateSchedule(asDemandRow(row).type, value, callback), trigger: 'change' }]
       }),
       component: {
-        renderer: DemandScheduleEditor,
+        is: DemandScheduleEditor,
         props: ({ row }) => ({ demandType: asDemandRow(row).type, readonly: readonlyMode.value }),
         model: { prop: 'value', event: 'change' }
       }
@@ -284,7 +284,7 @@ const columns: ColumnConfig[] = [
       fieldKey: 'pricing',
       type: 'component',
       component: {
-        renderer: DemandPricingEditor,
+        is: DemandPricingEditor,
         props: ({ row }) => ({ demandType: asDemandRow(row).type, readonly: readonlyMode.value }),
         model: { prop: 'value', event: 'change' }
       }

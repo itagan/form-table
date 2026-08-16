@@ -185,11 +185,11 @@ const tableProps = computed(() => ({ border: true, spanMethod }))
 const columns: ColumnConfig[] = [
   {
     key: 'date-column', label: '议程日期', props: { prop: 'dateLabel', width: 150, align: 'center' },
-    formItems: [{ key: 'date-field', fieldKey: 'dateLabel', type: 'slot', component: { renderer: 'day-date' } }]
+    formItems: [{ key: 'date-field', fieldKey: 'dateLabel', type: 'slot', component: { slot: 'day-date' } }]
   },
   {
     key: 'topic-column', label: '议程主题', props: { prop: 'topic', minWidth: 200 },
-    formItems: [{ key: 'topic-field', fieldKey: 'topic', type: 'slot', component: { renderer: 'day-topic' } }]
+    formItems: [{ key: 'topic-field', fieldKey: 'topic', type: 'slot', component: { slot: 'day-topic' } }]
   },
   {
     key: 'sequence-column', label: '议程', props: { width: 82, align: 'center' },
@@ -197,11 +197,11 @@ const columns: ColumnConfig[] = [
   },
   {
     key: 'time-column', label: '时间计划', props: { minWidth: 230 },
-    formItems: [{ key: 'time-field', fieldKey: 'timeRange', type: 'slot', component: { renderer: 'time-plan' } }]
+    formItems: [{ key: 'time-field', fieldKey: 'timeRange', type: 'slot', component: { slot: 'time-plan' } }]
   },
   {
     key: 'name-column', label: '议程名称', props: { minWidth: 280 },
-    formItems: [{ key: 'name-field', fieldKey: 'name', type: 'slot', component: { renderer: 'itinerary-name' } }]
+    formItems: [{ key: 'name-field', fieldKey: 'name', type: 'slot', component: { slot: 'itinerary-name' } }]
   },
   {
     key: 'city-column', label: '议程城市', props: { minWidth: 150 },

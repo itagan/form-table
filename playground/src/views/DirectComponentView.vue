@@ -2,7 +2,7 @@
   <main class="demo-page">
     <router-link to="/">← 返回</router-link>
     <h1>组件对象直传与原生 Ref</h1>
-    <p>使用 type: 'component' 和 component.renderer 直接传入组件对象，不经过业务注册表。</p>
+    <p>使用 type: 'component' 和 component.is 直接传入组件对象，不经过业务注册表。</p>
 
     <section class="demo-card">
       <FormTable
@@ -44,7 +44,7 @@ const columns: ColumnConfig[] = [
       fieldKey: 'phone',
       type: 'component',
       component: {
-        renderer: PhoneInput,
+        is: PhoneInput,
         props: { size: 'small' },
         listeners: { change: ({ value }) => console.log('change', value) }
       }
@@ -56,7 +56,7 @@ const columns: ColumnConfig[] = [
       fieldKey: 'status',
       type: 'component',
       component: {
-        renderer: StatusTag,
+        is: StatusTag,
         props: {
           options: [
             { label: '启用', value: 'enabled', type: 'success' },

@@ -208,7 +208,7 @@ describe('FormTable lightweight hint behavior', () => {
         { label: 'Switch', formItems: [{ fieldKey: 'switch', type: 'switch', hint: 'Switch hint' }] },
         { label: 'Rate', formItems: [{ fieldKey: 'rate', type: 'rate', hint: 'Rate hint' }] },
         { label: 'Slot', formItems: [{
-          fieldKey: 'slot', type: 'slot', hint: 'Slot hint', component: { renderer: 'single' }
+          fieldKey: 'slot', type: 'slot', hint: 'Slot hint', component: { slot: 'single' }
         }] }
       ],
       scopedSlots: { single: '<button class="single-slot">Slot</button>' }
@@ -234,11 +234,11 @@ describe('FormTable lightweight hint behavior', () => {
         rows: [{ multiple: 'M', empty: '', single: 'S' }],
         columns: [
           { label: 'Multiple', formItems: [{
-            fieldKey: 'multiple', type: 'slot', hint: 'Multiple hint', component: { renderer: 'multiple' }
+            fieldKey: 'multiple', type: 'slot', hint: 'Multiple hint', component: { slot: 'multiple' }
           }] },
           { label: 'Empty', formItems: [{ fieldKey: 'empty', type: 'input', hint: 'Empty hint' }] },
           { label: 'Single', formItems: [{
-            fieldKey: 'single', type: 'slot', hint: 'Single hint', component: { renderer: 'single' }
+            fieldKey: 'single', type: 'slot', hint: 'Single hint', component: { slot: 'single' }
           }] }
         ]
       }),
@@ -325,7 +325,7 @@ describe('FormTable lightweight hint behavior', () => {
     const wrapper = mountFormTable({
       hintOptions: { mode: 'tooltip' },
       columns: [{ label: '字段', formItems: [{
-        fieldKey: 'name', type: 'slot', hint: '字段说明', component: { renderer: 'content' }
+        fieldKey: 'name', type: 'slot', hint: '字段说明', component: { slot: 'content' }
       }] }],
       scopedSlots: { content: '<button class="target">字段</button>' }
     })

@@ -131,7 +131,7 @@ columns[].formItems[].key
 - 在 `visible` 中清空字段：渲染期间产生副作用，容易触发重复更新。
 - 直接修改 `itemConfig.component.props`：破坏调用方配置的单向数据流。
 - 用数组下标作为动态列 key：插入或排序后会复用错误身份。
-- 在 `resolveRenderer` 中动态 import Promise：解析器只支持同步组件结果。
+- 在 `resolveComponent` 中动态 import Promise：解析器只支持同步组件结果。
 
 ## 相关 API
 

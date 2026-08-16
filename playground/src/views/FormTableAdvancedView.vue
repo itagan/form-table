@@ -132,7 +132,7 @@ const columns: ColumnConfig[] = [
         colProps: { span: 16 },
         formItemProps: { label: '手机', labelWidth: '52px' },
         component: {
-          renderer: PhoneInput,
+          is: PhoneInput,
           props: { size: 'small', clearable: true },
           listeners: { change: ({ value }) => console.log('phone changed', value) }
         }
@@ -172,7 +172,7 @@ const columns: ColumnConfig[] = [
       fieldKey: 'status',
       type: 'slot',
       component: {
-        renderer: 'status',
+        slot: 'status',
         props: ({ row }) => ({ type: row.status === 'enabled' ? 'success' : 'info' })
       }
     }]
@@ -185,7 +185,7 @@ const columns: ColumnConfig[] = [
       fieldKey: 'active',
       type: 'component',
       component: {
-        renderer: ActiveRenderer,
+        is: ActiveRenderer,
         props: { effect: 'plain' },
         listeners: {
           commit({ setValue }, nextValue) {

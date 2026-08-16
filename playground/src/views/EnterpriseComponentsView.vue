@@ -3,7 +3,7 @@
     <router-link to="/">← 返回调试台</router-link>
     <h1>企业复杂组件接入</h1>
     <p class="page-description">
-      模拟采购明细：全局组件使用字符串 renderer，局部业务组件直接传组件对象，
+      模拟采购明细：全局组件使用字符串 <code>is</code>，局部业务组件直接传组件对象，
       并通过 component.model 适配非标准 prop、事件和复杂载荷。
     </p>
 
@@ -164,7 +164,7 @@ const columns: ColumnConfig[] = [
             rules: [{ required: true, message: '请选择物料', trigger: 'change' }]
           },
           component: {
-            renderer: BusinessSkuSelector,
+            is: BusinessSkuSelector,
             // 关闭自动 model，由 props 传值、listeners 处理事件并写回当前行。
             model: false,
             props: ({ value, row }) => ({
@@ -213,7 +213,7 @@ const columns: ColumnConfig[] = [
           },
           component: {
             // main.ts 模拟公司组件库进行全局注册，此处只传字符串名称。
-            renderer: 'corp-org-selector',
+            is: 'corp-org-selector',
             model: {
               prop: 'selectedCode',
               event: 'node-select',
@@ -244,7 +244,7 @@ const columns: ColumnConfig[] = [
             rules: [{ required: true, message: '请选择供应商', trigger: 'change' }]
           },
           component: {
-            renderer: 'corp-supplier-picker',
+            is: 'corp-supplier-picker',
             model: {
               prop: 'supplierId',
               event: 'supplier-change',
@@ -293,7 +293,7 @@ const columns: ColumnConfig[] = [
           type: 'component',
           colProps: { span: 14 },
           component: {
-            renderer: MoneyInput,
+            is: MoneyInput,
             model: {
               prop: 'amount',
               event: 'amount-change'
@@ -316,7 +316,7 @@ const columns: ColumnConfig[] = [
       fieldKey: 'attachmentIds',
       type: 'component',
       component: {
-        renderer: BusinessAttachmentUploader,
+        is: BusinessAttachmentUploader,
         model: {
           prop: 'fileIds',
           event: 'files-change',
@@ -343,7 +343,7 @@ const columns: ColumnConfig[] = [
       fieldKey: 'approvalStatus',
       type: 'component',
       component: {
-        renderer: 'biz-approval-status',
+        is: 'biz-approval-status',
         // 纯展示组件只接收 status，不注入或监听任何 model 协议。
         model: false,
         props: ({ value }) => ({ status: value })
@@ -358,7 +358,7 @@ const columns: ColumnConfig[] = [
       fieldKey: '__actions',
       type: 'slot',
       component: {
-        renderer: 'row-actions',
+        slot: 'row-actions',
         props: ({ row }) => ({
           removable: editable.value && !asPurchaseRow(row).locked
         })

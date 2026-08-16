@@ -5,11 +5,11 @@
     v-on="component.listeners"
   >{{ value }}</span>
 
-  <span v-else-if="!component.renderer" />
+  <span v-else-if="!component.is" />
 
   <DynamicFieldRenderer
     v-else
-    :renderer="component.renderer"
+    :renderer="component.is"
     :value="value"
     :component-props="component.props"
     :component-listeners="component.listeners"

@@ -34,7 +34,7 @@ interface DemandRow {
 
 示例按差异程度使用三种处理方式：
 
-- 会场、酒店、用餐、交通使用独立业务组件，并通过 `component.resolveRenderer` 和组件注册表按 `row.type` 选择。
+- 会场、酒店、用餐、交通使用独立业务组件，并通过 `component.resolveComponent` 和组件注册表按 `row.type` 选择。
 - “其他”和“嘉宾”的结构简单，直接使用 FormTable Item 的 `visible` 和嵌套 `fieldKey`。
 - 使用时间与数量/单价结构稳定，分别使用固定的 `DemandScheduleEditor` 和 `DemandPricingEditor`，通过动态 props 获取需求类型和只读状态。
 - 需求类型、总预算和操作按钮都不参与表单字段绑定，使用列级 `cellSlot`，避免虚拟 `fieldKey` 和多余的表单包装节点。
@@ -56,8 +56,8 @@ interface DemandEditorProps<T> {
   fieldKey: 'detail',
   type: 'component',
   component: {
-    renderer: UnsupportedDemandEditor,
-    resolveRenderer: ({ row }) => demandEditors[row.type],
+    is: UnsupportedDemandEditor,
+    resolveComponent: ({ row }) => demandEditors[row.type],
     props: ({ row }) => ({
       demandType: row.type,
       readonly: readonlyMode.value
@@ -74,7 +74,7 @@ interface DemandEditorProps<T> {
   fieldKey: 'pricing',
   type: 'component',
   component: {
-    renderer: DemandPricingEditor,
+    is: DemandPricingEditor,
     props: ({ row }) => ({
       demandType: row.type,
       readonly: readonlyMode.value

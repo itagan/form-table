@@ -40,7 +40,7 @@
     </DemoCollapsiblePanel>
 
     <DemoCollapsiblePanel class="demo-card docs-section" title="Slot 如何绑定">
-      <p><code>component.renderer</code> 是具名 Slot 的 key。配置中的 props、listeners 和 options 会先解析，再通过 Slot 上下文的 <code>component</code> 返回。</p>
+      <p><code>component.slot</code> 是具名 Slot 的 key。配置中的 props、listeners 和 options 会先解析，再通过 Slot 上下文的 <code>component</code> 返回。</p>
       <pre>{{ slotCode }}</pre>
       <ul>
         <li><code>value / setValue</code> 负责当前字段的读取与更新。</li>
@@ -92,7 +92,7 @@ const columns: ColumnConfig[] = [
         fieldKey: 'detail',
         type: 'slot',
         component: {
-          renderer: 'detail',
+          slot: 'detail',
           props: ({ row }) => ({
             type: 'textarea',
             rows: 2,
@@ -110,7 +110,7 @@ const columns: ColumnConfig[] = [
     formItems: [{
       fieldKey: 'score',
       type: 'slot',
-      component: { renderer: 'score', props: { showScore: true } }
+      component: { slot: 'score', props: { showScore: true } }
     }]
   },
   {
@@ -119,7 +119,7 @@ const columns: ColumnConfig[] = [
     formItems: [{
       fieldKey: '__actions',
       type: 'slot',
-      component: { renderer: 'actions', props: { label: '删除' } }
+      component: { slot: 'actions', props: { label: '删除' } }
     }]
   }
 ]
@@ -140,7 +140,7 @@ const visibleCode = `{
   formItems: [{
     fieldKey: 'detail',
     type: 'slot',
-    component: { renderer: 'detail' },
+    component: { slot: 'detail' },
     visible: ({ row }) => row.showDetail === true // Item
   }]
 }`

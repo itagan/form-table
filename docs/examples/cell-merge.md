@@ -136,7 +136,7 @@ const setGroupDepartment = (
 }
 
 const departmentComponent = {
-  renderer: DepartmentSelector,
+  is: DepartmentSelector,
   model: false,
   props: ({ value }) => ({
     selectedCode: value

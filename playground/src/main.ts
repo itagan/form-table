@@ -11,7 +11,7 @@ import ApprovalStatusDisplay from './components/EnterpriseComponents/ApprovalSta
 
 Vue.use(ElementUI)
 
-// 模拟公司组件库通过插件完成的全局注册，示例中使用字符串 renderer 解析。
+// 模拟公司组件库通过插件完成的全局注册，示例中使用字符串 `is` 解析。
 Vue.component('corp-org-selector', CompanyOrgSelector)
 Vue.component('corp-supplier-picker', CompanySupplierPicker)
 Vue.component('biz-approval-status', ApprovalStatusDisplay)

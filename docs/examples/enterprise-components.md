@@ -11,8 +11,8 @@
 | 字段 | 组件来源 | 接入方式 |
 | --- | --- | --- |
 | 物料 | 页面手动引入 `BusinessSkuSelector` | `model: false` + props + listeners 手动同步 |
-| 采购组织 | 公司组件库全局注册 | 字符串 renderer + 自定义 model |
-| 供应商 | 公司组件库全局注册 | 字符串 renderer + 复杂事件载荷 |
+| 采购组织 | 公司组件库全局注册 | 字符串 `is` + 自定义 model |
+| 供应商 | 公司组件库全局注册 | 字符串 `is` + 复杂事件载荷 |
 | 数量 | Element UI | 省略 `model`，使用默认双向绑定 |
 | 含税单价 | 页面手动引入 `MoneyInput` | 组件对象 + 自定义 model |
 | 附件 | 页面手动引入 `BusinessAttachmentUploader` | 文件列表 model + 动态 props |
@@ -96,7 +96,7 @@ export interface UploadFile {
 
 ## 页面手动引入的组件
 
-局部业务组件不需要注册到页面 `components`，直接将导入的组件对象传给 `renderer`：
+局部业务组件不需要注册到页面 `components`，直接将导入的组件对象传给 `is`：
 
 ```ts
 import BusinessSkuSelector from '@/components/EnterpriseComponents/BusinessSkuSelector.vue'
@@ -117,7 +117,7 @@ import BusinessAttachmentUploader from '@/components/EnterpriseComponents/Busine
 - 业务附件上传（`playground/src/components/EnterpriseComponents/BusinessAttachmentUploader.vue`）：读取本地文件，校验数量和大小，并模拟上传后的文件 ID。
 - 审批状态展示（`playground/src/components/EnterpriseComponents/ApprovalStatusDisplay.vue`）：纯展示组件，不参与 model 写回。
 
-这些 Mock 用于演示接入协议。实际项目中可以保持 columns 配置不变，将 renderer 替换为公司组件库或业务模块中的真实组件。
+这些 Mock 用于演示接入协议。实际项目中可以保持 columns 配置不变，将 `is` 替换为公司组件库或业务模块中的真实组件。
 
 ## 完整 columns 工厂
 
@@ -165,7 +165,7 @@ export function createPurchaseColumns(
             },
             component: {
               // 手动引入的局部业务组件直接传组件对象。
-              renderer: BusinessSkuSelector,
+              is: BusinessSkuSelector,
               // 不使用 FormTable 自动 model，改由下面的 props/listeners 手动同步。
               model: false,
               props: ({ value, row }) => ({
@@ -222,7 +222,7 @@ export function createPurchaseColumns(
             },
             component: {
               // 公司组件库已经全局注册，直接使用注册名称。
-              renderer: 'corp-org-selector',
+              is: 'corp-org-selector',
               model: {
                 prop: 'selectedCode',
                 event: 'node-select',
@@ -257,7 +257,7 @@ export function createPurchaseColumns(
               rules: [{ required: true, message: '请选择供应商', trigger: 'change' }]
             },
             component: {
-              renderer: 'corp-supplier-picker',
+              is: 'corp-supplier-picker',
               model: {
                 prop: 'supplierId',
                 event: 'supplier-change',
@@ -327,7 +327,7 @@ export function createPurchaseColumns(
               rules: [{ required: true, type: 'number', min: 0, message: '请输入有效单价' }]
             },
             component: {
-              renderer: MoneyInput,
+              is: MoneyInput,
               model: {
                 prop: 'amount',
                 event: 'amount-change'
@@ -360,7 +360,7 @@ export function createPurchaseColumns(
             }]
           },
           component: {
-            renderer: BusinessAttachmentUploader,
+            is: BusinessAttachmentUploader,
             model: {
               prop: 'fileIds',
               event: 'files-change',
@@ -393,7 +393,7 @@ export function createPurchaseColumns(
           fieldKey: 'approvalStatus',
           type: 'component',
           component: {
-            renderer: 'biz-approval-status',
+            is: 'biz-approval-status',
             // 完全关闭双向绑定；只通过 props 向展示组件传入状态。
             model: false,
             props: ({ value }) => ({
@@ -412,7 +412,7 @@ export function createPurchaseColumns(
           fieldKey: '__actions',
           type: 'slot',
           component: {
-            renderer: 'row-actions',
+            slot: 'row-actions',
             props: ({ row }) => ({
               removable: options.editable && !asPurchaseRow(row).locked
             })
@@ -580,7 +580,7 @@ const submit = async () => {
 
 ```ts
 component: {
-  renderer: LocalStandardInput
+  is: LocalStandardInput
 }
 ```
 
@@ -592,7 +592,7 @@ FormTable 会把模型信息留给 Vue 2 在解析真实组件后处理，因此
 
 ```ts
 component: {
-  renderer: 'corp-user-selector',
+  is: 'corp-user-selector',
   model: {
     prop: 'selected-user-id',
     event: 'select-user',
@@ -609,7 +609,7 @@ component: {
 
 ```ts
 component: {
-  renderer: 'biz-status-display',
+  is: 'biz-status-display',
   model: false,
   props: ({ value }) => ({ status: value })
 }
@@ -619,7 +619,7 @@ component: {
 
 ```ts
 component: {
-  renderer: 'biz-risk-check-button',
+  is: 'biz-risk-check-button',
   model: false,
   props: ({ row }) => ({ orderId: row.id }),
   listeners: {
@@ -636,7 +636,7 @@ component: {
 
 ```ts
 component: {
-  renderer: BusinessSkuSelector,
+  is: BusinessSkuSelector,
   model: false,
   props: ({ value }) => ({
     selectedSkuId: value
@@ -691,7 +691,7 @@ Adapter 负责技术协议归一化，columns listener 负责当前采购页面�
 - `columns` 使用工厂创建一次，不要直接写在模板表达式中。
 - 为表格配置唯一稳定的 `rowKey`；异步组件回调后仍可正确定位原行。
 - 动态 `visible/props/options` 保持纯函数，不在求值过程中修改行数据。
-- 全局组件使用字符串 renderer；局部组件直接传组件对象，避免为了 FormTable 扩大全局注册范围。
+- 全局组件使用字符串 `is`；局部组件直接传组件对象，避免为了 FormTable 扩大全局注册范围。
 - `component.model` 只描述稳定的技术协议，业务字段联动放在 `component.listeners`。
 - 复杂事件使用 `valueFromEvent` 只提取当前字段值，其余事件参数仍会完整传给同名 listener。
 - 需要手动适配时使用 `model: false + props + listeners`，并优先用一次 `updateRow()` 完成主字段和关联字段更新。

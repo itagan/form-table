@@ -78,16 +78,16 @@ FormTable 会生成 `tableData.{rowIndex}.{fieldKey}` 作为 Element Form 校验
 
 ### 按当前行解析组件
 
-同一字段在不同行需要不同组件时使用同步 `resolveRenderer`：
+同一字段在不同行需要不同组件时使用同步 `resolveComponent`：
 
 ```ts
 component: {
-  renderer: DefaultEditor,
-  resolveRenderer: ({ row }) => editorMap[row.type]
+  slot: DefaultEditor,
+  resolveComponent: ({ row }) => editorMap[row.type]
 }
 ```
 
-返回 `undefined` 时回退到静态 `renderer`。完整页面模式见[自定义字段组件](../features/custom-component.md)。
+返回 `undefined` 时回退到静态 `is`。完整页面模式见[自定义字段组件](../features/custom-component.md)。
 
 ### 外层提示模式
 
@@ -99,7 +99,7 @@ component: {
 
 ```ts
 component: {
-  renderer: MoneyInput,
+  is: MoneyInput,
   model: {
     prop: 'amount',
     event: 'amount-change',
@@ -112,7 +112,7 @@ component: {
 
 ### 使用 Vue Render Function
 
-`component.renderer` 可以直接接收 Vue 组件对象，包括函数组件。Render Function 仍应封装为组件，不要让 columns 配置承担 VNode 拼装和业务状态管理。
+`component.is` 可以直接接收 Vue 组件对象，包括函数组件。Render Function 仍应封装为组件，不要让 columns 配置承担 VNode 拼装和业务状态管理。
 
 ### 列级 cellSlot
 
@@ -136,7 +136,7 @@ component: {
 {
   fieldKey: 'score',
   type: 'slot',
-  component: { renderer: 'score-editor' }
+  component: { slot: 'score-editor' }
 }
 ```
 
@@ -207,7 +207,7 @@ const columns = createColumns({
 
 ```ts
 const columns = remoteColumns.map(column => enhanceColumn(column, {
-  amount: { renderer: MoneyInput },
+  amount: { is: MoneyInput },
   actions: { slot: 'row-actions' }
 }))
 ```

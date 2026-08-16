@@ -20,7 +20,7 @@ const columns: ColumnConfig[] = [{
       rules: [{ required: true, message: '请选择负责人' }]
     },
     component: {
-      renderer: UserSelector,
+      is: UserSelector,
       props: ({ row }) => ({
         departmentId: row.departmentId,
         clearable: true
@@ -53,7 +53,7 @@ const columns: ColumnConfig[] = [{
 
 ```ts
 component: {
-  renderer: UserSelector,
+  is: UserSelector,
   model: {
     prop: 'selectedId',
     event: 'select-user',
@@ -71,7 +71,7 @@ component: {
 
 ## 按行选择组件
 
-同一字段在不同行使用不同组件时，使用同步 `resolveRenderer`：
+同一字段在不同行使用不同组件时，使用同步 `resolveComponent`：
 
 ```ts
 const editors = {
@@ -81,13 +81,13 @@ const editors = {
 }
 
 component: {
-  renderer: DefaultDemandEditor,
-  resolveRenderer: ({ row }) => editors[row.type],
+  is: DefaultDemandEditor,
+  resolveComponent: ({ row }) => editors[row.type],
   props: ({ row }) => ({ readonly: row.locked })
 }
 ```
 
-解析器返回 `undefined` 时回退到静态 `renderer`。它应保持同步和无副作用，不在其中请求接口、修改数据或创建新的组件定义。
+解析器返回 `undefined` 时回退到静态 `is`。它应保持同步和无副作用，不在其中请求接口、修改数据或创建新的组件定义。
 
 ## 关闭自动绑定
 
@@ -95,7 +95,7 @@ component: {
 
 ```ts
 component: {
-  renderer: StatusDisplay,
+  is: StatusDisplay,
   model: false,
   props: ({ value }) => ({ status: value })
 }
@@ -105,7 +105,7 @@ component: {
 
 ```ts
 component: {
-  renderer: SkuSelector,
+  is: SkuSelector,
   model: false,
   props: ({ value }) => ({ selectedSkuId: value }),
   listeners: {

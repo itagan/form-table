@@ -15,7 +15,7 @@
     "name": "hint-scenarios",
     "view": "HintScenariosView",
     "type": "success",
-    "tags": ["hintOptions", "headerSlot", "custom renderer"]
+    "tags": ["hintOptions", "headerSlot", "custom component"]
   },
   {
     "title": "高级示例",
@@ -24,7 +24,7 @@
     "name": "form-table-advanced",
     "view": "FormTableAdvancedView",
     "type": "success",
-    "tags": ["NativeColumnConfig", "selection", "index", "slot", "component.renderer"]
+    "tags": ["NativeColumnConfig", "selection", "index", "slot", "component.is"]
   },
   {
     "title": "Element 功能列透传",
@@ -132,6 +132,6 @@
     "name": "debug",
     "view": "DirectComponentView",
     "type": "danger",
-    "tags": ["component.renderer", "field context", "native ref"]
+    "tags": ["component.is", "field context", "native ref"]
   }
 ]

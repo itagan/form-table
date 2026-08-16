@@ -69,7 +69,7 @@
   fieldKey: 'score',
   type: 'slot',
   component: {
-    renderer: 'score-editor',
+    slot: 'score-editor',
     listeners: {
       async commit({ row, setValue }, draftValue) {
         await confirmScore(row, draftValue)

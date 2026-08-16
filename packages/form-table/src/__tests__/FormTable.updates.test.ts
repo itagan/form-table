@@ -164,7 +164,7 @@ describe('FormTable data updates and row identity', () => {
         formItems: [{
           fieldKey: 'name',
           type: 'slot',
-          component: { renderer: 'batch-update' }
+          component: { slot: 'batch-update' }
         }]
       }],
       scopedSlots: {
@@ -213,7 +213,7 @@ describe('FormTable data updates and row identity', () => {
         formItems: [{
           fieldKey: 'name',
           type: 'slot',
-          component: { renderer: 'compose-update' }
+          component: { slot: 'compose-update' }
         }]
       }],
       scopedSlots: {
@@ -251,7 +251,7 @@ describe('FormTable data updates and row identity', () => {
         formItems: [{
           fieldKey: 'name',
           type: 'slot',
-          component: { renderer: 'indexed-compose-update' }
+          component: { slot: 'indexed-compose-update' }
         }]
       }],
       scopedSlots: {
@@ -296,7 +296,7 @@ describe('FormTable data updates and row identity', () => {
           fieldKey: 'name',
           type: 'component',
           component: {
-            renderer: CaptureField,
+            is: CaptureField,
             listeners: { capture: context => contexts.push(context) }
           }
         }]
@@ -345,7 +345,7 @@ describe('FormTable data updates and row identity', () => {
           fieldKey: 'name',
           type: 'component',
           component: {
-            renderer: CaptureField,
+            is: CaptureField,
             listeners: { capture: context => { savedContext = context } }
           }
         }]
@@ -390,7 +390,7 @@ describe('FormTable data updates and row identity', () => {
           fieldKey: 'name',
           type: 'component',
           component: {
-            renderer: CaptureField,
+            is: CaptureField,
             listeners: { capture: captureContext }
           }
         }]
@@ -444,7 +444,7 @@ describe('FormTable data updates and row identity', () => {
           fieldKey: 'name',
           type: 'component',
           component: {
-            renderer: CaptureField,
+            is: CaptureField,
             listeners: { capture: context => { savedContext = context } }
           }
         }]
@@ -486,7 +486,7 @@ describe('FormTable data updates and row identity', () => {
           fieldKey: 'name',
           type: 'component',
           component: {
-            renderer: CaptureField,
+            is: CaptureField,
             listeners: { capture: context => { savedContext = context } }
           }
         }]
@@ -528,7 +528,7 @@ describe('FormTable data updates and row identity', () => {
         fieldKey,
         type: 'component',
         component: {
-          renderer: CaptureField,
+          is: CaptureField,
           listeners: { capture: context => { savedContext = context } }
         }
       }]
@@ -572,7 +572,7 @@ describe('FormTable data updates and row identity', () => {
           fieldKey: 'name',
           type: 'component',
           component: {
-            renderer: CaptureField,
+            is: CaptureField,
             listeners: { capture: context => { savedContext = context } }
           }
         }]
