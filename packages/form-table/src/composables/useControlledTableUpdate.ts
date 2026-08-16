@@ -1,4 +1,4 @@
-import type { FormTableValue, TableRow } from '../types/base'
+import type { FormTableRowPatch, FormTableValue, TableRow } from '../types/base'
 import type { FormTableFieldChangePayload, FormTableRowKey } from '../types/config'
 import type { FormTableUpdateApi } from '../types/context'
 import { getValueByPath, setValueByPath } from '../utils/path'
@@ -47,7 +47,7 @@ const isConfiguredRowKey = <TRow extends TableRow>(
  */
 const applyRowPatch = <TRow extends TableRow>(
   currentRow: TRow,
-  patch: Partial<TRow>
+  patch: FormTableRowPatch<TRow>
 ): { nextRow: TRow, changes: PendingFieldChange[] } => {
   let nextRow = currentRow
   const changes: PendingFieldChange[] = []
@@ -138,7 +138,7 @@ export function useControlledTableUpdate<TRow extends TableRow = TableRow>(
     return synchronousRowIndexes.get(targetRow) ?? -1
   }
 
-  const updateRow = (targetRow: TRow, patch: Partial<TRow>) => {
+  const updateRow = (targetRow: TRow, patch: FormTableRowPatch<TRow>) => {
     // 一次更新事务严格按：定位 -> 计算 -> 身份校验 -> 提交 -> 发事件执行。
     const sourceTableData = synchronousUpdateBase || options.getTableData()
     const rowKey = options.getRowKey()
@@ -190,7 +190,10 @@ export function useControlledTableUpdate<TRow extends TableRow = TableRow>(
   }
 
   return {
-    setValue: (row, fieldKey, value) => updateRow(row, { [fieldKey]: value } as Partial<TRow>),
+    setValue: (row, fieldKey, value) => updateRow(
+      row,
+      { [fieldKey]: value } as FormTableRowPatch<TRow>
+    ),
     updateRow
   }
 }

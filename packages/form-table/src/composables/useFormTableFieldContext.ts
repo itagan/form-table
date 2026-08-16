@@ -3,6 +3,7 @@ import type {
   FormItemConfig,
   FormTableFieldContext,
   FormTableHintContext,
+  FormTableRowPatch,
   FormTableRowContext,
   FormTableUpdateApi,
   FormTableValue,
@@ -90,7 +91,7 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
         targetFieldKey,
         nextValue
       ),
-      updateRow: (patch: Partial<TRow>) => updateApi?.updateRow(targetRow, patch)
+      updateRow: (patch: FormTableRowPatch<TRow>) => updateApi?.updateRow(targetRow, patch)
     })
   })
 

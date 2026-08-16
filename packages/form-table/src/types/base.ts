@@ -20,6 +20,15 @@ export type FormTableFormItemProps = ComponentProps & { prop?: never }
 /** 单条表格行数据。 */
 export interface TableRow extends FormTableRecord {}
 
+/**
+ * 当前行的不可变更新内容。
+ * 已声明的顶层字段保留原类型，同时允许运行时支持的点路径和数组下标路径。
+ */
+export type FormTableRowPatch<TRow extends TableRow = TableRow> = Partial<TRow> & Partial<Record<
+  `${string}.${string}` | `${string}[${number}]${string}`,
+  FormTableValue
+>>
+
 /** 支持直接值或根据运行时上下文计算的动态值。 */
 export type DynamicValue<T, Context> = T | ((context: Context) => T)
 

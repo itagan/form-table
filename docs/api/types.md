@@ -6,7 +6,7 @@
 - `FieldComponentConfig`、`FieldModelConfig`、`FieldRendererResolver`、`BuiltinFormItemType`
 - `FormItemOption`、`OptionPropsConfig`
 - `FormTableHintValue`、`FormTableHintMode`、`FormTableHintTargets`、`FormTableFieldHintFormatter`、`FormTableHintOptions`
-- `TableRow`、`FormTableRecord`、`FormTableProps`、`FormTableRowKey`
+- `TableRow`、`FormTableRecord`、`FormTableRowPatch`、`FormTableProps`、`FormTableRowKey`
 - `FormTableTableProps`、`FormTableFormProps`、`FormTableFormItemProps`
 - `FormTableColumnContext`、`FormTableRowContext`、`FormTableFieldRenderContext`
 - `FormTableFieldContext`、`FormTableFormItemSlotContext`、`FormTableFormItemErrorSlotContext`
@@ -77,11 +77,13 @@ interface FormTableCellSlotContext {
   row: Readonly<TableRow>
   index: number
   columnConfig: Readonly<CellSlotColumnConfig>
-  updateRow: (patch: Partial<TableRow>) => void
+  updateRow: (patch: FormTableRowPatch<TableRow>) => void
 }
 ```
 
 `BaseColumnConfig` 是内部的共用结构，不单独从包入口导出；它表示两种列共用的 `key/label/headerSlot/headerProps/headerHint/visible/props`。`FormTableCellSlotContext` 不继承字段上下文，因此不包含 `fieldKey/value/setValue/propPath/component`，也不会为不存在的字段语义提供空占位值。
+
+`FormTableRowPatch<TRow>` 用于所有 `updateRow` 入口：已声明的顶层字段沿用 `Partial<TRow>` 的类型和拼写检查，同时额外接受 `profile.city`、`items[0].name` 等运行时字段路径。它不递归枚举业务类型，避免让动态 Schema 和深层数组类型显著增加 TypeScript 计算量。
 
 三种字段配置通过联合类型互斥：
 

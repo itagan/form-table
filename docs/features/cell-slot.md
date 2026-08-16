@@ -55,7 +55,7 @@ interface FormTableCellSlotContext {
   row: Readonly<TableRow>
   index: number
   columnConfig: Readonly<CellSlotColumnConfig>
-  updateRow: (patch: Partial<TableRow>) => void
+  updateRow: (patch: FormTableRowPatch<TableRow>) => void
 }
 ```
 

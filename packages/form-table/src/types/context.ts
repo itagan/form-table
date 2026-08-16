@@ -2,7 +2,7 @@ import type {
   ColumnConfig,
   FormItemConfig
 } from './config'
-import type { FormTableValue, TableRow } from './base'
+import type { FormTableRowPatch, FormTableValue, TableRow } from './base'
 
 export interface FormTableTableContext<TRow extends TableRow = TableRow> {
   /** 当前受控表格数据，只读以避免动态配置直接修改 props。 */
@@ -34,11 +34,11 @@ export interface FormTableFieldContext<TRow extends TableRow = TableRow> extends
   /** 不可变地更新当前字段。 */
   setValue: (value: FormTableValue) => void
   /** 不可变地批量更新当前行，patch 的 key 支持字段路径。 */
-  updateRow: (patch: Partial<TRow>) => void
+  updateRow: (patch: FormTableRowPatch<TRow>) => void
 }
 
 export interface FormTableUpdateApi<TRow extends TableRow = TableRow> {
   /** 组件内部更新入口；通过行身份重新定位，不依赖可能过期的渲染下标。 */
   setValue: (row: TRow, fieldKey: string, value: FormTableValue) => void
-  updateRow: (row: TRow, patch: Partial<TRow>) => void
+  updateRow: (row: TRow, patch: FormTableRowPatch<TRow>) => void
 }

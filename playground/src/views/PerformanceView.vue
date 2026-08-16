@@ -129,7 +129,7 @@
 import { computed, nextTick, onMounted, ref, shallowRef } from 'vue'
 import { Message } from 'element-ui'
 import FormTable from '@itagan/form-table'
-import type { ColumnConfig, TableRow } from '@itagan/form-table'
+import type { ColumnConfig, FormTableRowPatch, TableRow } from '@itagan/form-table'
 
 // 大量动态 Slot 表达式会触发旧版 vue-tsc 的递归深度上限；运行时仍使用同一个公开组件。
 const PerformanceFormTable: any = FormTable
@@ -370,7 +370,7 @@ const measureInputUpdate = async () => {
   })
 }
 
-const runRowPatch = async (updateRow: (patch: Partial<TableRow>) => void) => {
+const runRowPatch = async (updateRow: (patch: FormTableRowPatch<TableRow>) => void) => {
   await measure('rowPatch', () => {
     updateRow({
       field0: `patched-${Date.now()}`,

@@ -36,7 +36,7 @@
 | `row` | `Readonly<TableRow>` | 渲染快照 | 当前业务数据行 |
 | `index` | `number` | 渲染快照 | 当前渲染下标，不是异步结束后的实时下标 |
 | `columnConfig` | `Readonly<CellSlotColumnConfig>` | 配置快照 | 当前列原始配置 |
-| `updateRow` | `(patch: Partial<TableRow>) => void` | 绑定当前行 | 不可变更新当前行，patch key 支持嵌套路径 |
+| `updateRow` | `(patch: FormTableRowPatch<TableRow>) => void` | 绑定当前行 | 不可变更新当前行，patch key 支持嵌套路径 |
 
 不提供：`tableData/columnIndex/fieldKey/value/setValue/itemConfig/propPath/component`。完整用法见 [`cellSlot` 专题](../features/cell-slot.md)。
 
