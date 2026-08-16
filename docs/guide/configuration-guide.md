@@ -82,7 +82,7 @@ FormTable 会生成 `tableData.{rowIndex}.{fieldKey}` 作为 Element Form 校验
 
 ```ts
 component: {
-  slot: DefaultEditor,
+  is: DefaultEditor,
   resolveComponent: ({ row }) => editorMap[row.type]
 }
 ```
@@ -112,7 +112,7 @@ component: {
 
 ### 使用 Vue Render Function
 
-`component.is` 可以直接接收 Vue 组件对象，包括函数组件。Render Function 仍应封装为组件，不要让 columns 配置承担 VNode 拼装和业务状态管理。
+`component.is` 对应 Vue 动态组件的 `is`，可以直接接收 Vue 组件对象、函数组件或全局注册组件名。Render Function 仍应封装为组件，不要让 columns 配置承担 VNode 拼装和业务状态管理。字符串在 Vue 运行时也可能解析为原生标签，但 FormTable 不为原生节点补齐子内容、DOM Property 或指令级 v-model；标准表单控件使用内置 `type`，完全自定义的原生结构使用字段 Slot。完整边界见 [Component 配置](../api/component.md#is-目标与原生标签边界)。
 
 ### 列级 cellSlot
 

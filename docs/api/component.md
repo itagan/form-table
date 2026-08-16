@@ -25,10 +25,10 @@ columns[].formItems[].component
 
 | 配置路径 | 类型 | 模式 | 动态上下文 | 目标 / 作用 |
 | --- | --- | --- | --- | --- |
-| `columns[].formItems[].component.is` | `string \| Component` | 仅 `component` | — | 静态 Vue 组件目标，可使用全局注册名或组件对象 |
-| `...component.resolveComponent` | `(ItemContext) => string \| Component \| undefined` | 仅 `component` | ItemContext | 按当前行同步选择组件 |
+| `columns[].formItems[].component.is` | `string \| Component` | 仅 `component` | — | 对应 Vue 动态组件 `is` 的静态目标；推荐组件对象或全局注册名 |
+| `...component.resolveComponent` | `(ItemContext) => string \| Component \| undefined` | 仅 `component` | ItemContext | 按当前行同步选择与 `is` 相同类型的目标 |
 | `...component.slot` | `string` | 仅 `slot` | — | 父 FormTable 上的静态具名 Slot |
-| `...component.model` | `false \| FieldModelConfig` | 内置 / `component` | — | 省略时使用原生 v-model；也可自定义或关闭绑定 |
+| `...component.model` | `false \| FieldModelConfig` | 内置 / `component` | — | 省略时按 Vue 2 组件 model 选项绑定；也可自定义或关闭绑定 |
 | `...component.model.prop` | `string` | 自定义 model | — | 接收字段值的 prop，默认 `value` |
 | `...component.model.event` | `string` | 自定义 model | — | 通知字段变化的事件，默认 `input` |
 | `...component.model.valueFromEvent` | `(...args) => FormTableValue` | 自定义 model | 原始事件参数 | 从事件参数提取写回值 |
@@ -50,6 +50,26 @@ columns[].formItems[].component
 | 内置类型 | 由 FormTable 映射，不接受 `is/resolveComponent/slot` | 默认双向绑定 |
 | `component` | 必须提供 `is` 或 `resolveComponent` | 默认 Vue 2 v-model，可自定义 |
 | `slot` | `slot` 必须是静态 Slot 名称 | FormTable 不为 Slot 内组件自动绑定 |
+
+## `is` 目标与原生标签边界
+
+`component.is` 对应 Vue 动态组件的 `is`，最终目标可以使用两种推荐形式：
+
+```ts
+// 页面直接引入的组件对象，包括函数组件
+component: { is: UserSelector }
+
+// 已通过 Vue.component 或组件库插件完成全局注册的名称
+component: { is: 'corp-user-selector' }
+```
+
+字符串目标由 Vue 运行时解析，因此 `input`、`button` 等原生 HTML 标签名也可能创建对应节点。但 `type: 'component'` 的自动绑定面向 Vue 组件协议，不负责原生节点的子内容、`domProps`、不同控件的事件取值或指令级 v-model 编译；原生表单标签不作为完整字段接入方式承诺。
+
+- 标准输入、选择和开关等字段使用内置 `type`。
+- 第三方或业务组件使用组件对象或全局注册名。
+- 需要原生标签、自定义子内容或复杂 DOM 事件时，使用 `type: 'slot'` 并在模板中显式绑定 `value/setValue`。
+
+`resolveComponent` 返回相同类型的动态目标，并且必须保持同步；返回 `undefined` 时回退到静态 `is`。
 
 ## 内置类型映射
 

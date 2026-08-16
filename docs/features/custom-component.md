@@ -4,6 +4,19 @@
 
 Element UI 内置组件之外的日期范围、人员选择器、组织树和业务选择器，通过 `type: 'component'` 接入。FormTable 只适配数据绑定和事件上下文，不维护业务组件注册表。
 
+## `is` 的两种推荐形式
+
+页面直接引入的局部组件使用组件对象；已经由组件库插件或 `Vue.component` 注册的全局组件使用字符串名称：
+
+```ts
+import UserSelector from './UserSelector.vue'
+
+component: { is: UserSelector }
+component: { is: 'corp-user-selector' }
+```
+
+`is` 与 Vue 动态组件语义一致，字符串也可能被 Vue 解析为原生 HTML 标签。但 FormTable 的自动 model 面向 Vue 组件协议，原生表单节点应改用内置 `type` 或字段 Slot。具体限制见 [Component 配置](../api/component.md#is-目标与原生标签边界)。
+
 ## 标准 v-model
 
 ### 配置
@@ -45,7 +58,7 @@ const columns: ColumnConfig[] = [{
 />
 ```
 
-省略 `component.model` 时使用组件原生 Vue 2 v-model，包括组件自身声明的 `model.prop/model.event`。
+省略 `component.model` 时按 Vue 2 组件的 v-model/model 选项绑定，包括组件自身声明的 `model.prop/model.event`。
 
 ## 非标准绑定协议
 
