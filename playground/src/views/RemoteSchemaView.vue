@@ -65,7 +65,7 @@ const remoteSchemaJson = `[
         "fieldKey": "actions",
         "type": "slot",
         "component": {
-          "renderer": "actions",
+          "slot": "actions",
           "props": { "activeLabel": "停用", "inactiveLabel": "启用" }
         },
         "colProps": { "span": 5 }
@@ -82,7 +82,7 @@ const columns = enhanceFormTableColumns(remoteColumns, {
       ...layout,
       type: 'component',
       component: {
-        renderer: PhoneInput,
+        is: PhoneInput,
         props: remoteComponent?.props,
         listeners: {
           change(context, value) {

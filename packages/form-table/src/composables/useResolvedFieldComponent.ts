@@ -20,20 +20,20 @@ interface ResolvedFieldComponentOptions<TRow extends TableRow> {
 
 /**
  * 将公开的字段配置归一化为 ComponentWrapper 可直接消费的渲染配置。
- * 动态 renderer、props 和 options 都集中在同一个 computed 中求值一次。
+ * 动态组件、props 和 options 都集中在同一个 computed 中求值一次。
  */
 export function useResolvedFieldComponent<TRow extends TableRow = TableRow>(
   options: ResolvedFieldComponentOptions<TRow>
 ) {
-  const resolveRenderer = (
+  const resolveComponentTarget = (
     config: FormItemConfig<TRow>,
     context: FormTableFieldRenderContext<TRow>
   ) => {
     if (config.type === 'component') {
-      return config.component.resolveRenderer?.(context)
-        ?? config.component.renderer
+      return config.component.resolveComponent?.(context)
+        ?? config.component.is
     }
-    if (config.type === 'slot') return config.component.renderer
+    if (config.type === 'slot') return undefined
     return getComponentType(config.type)
   }
 
@@ -50,7 +50,8 @@ export function useResolvedFieldComponent<TRow extends TableRow = TableRow>(
     }, {})
 
     return {
-      renderer: resolveRenderer(config, context),
+      is: resolveComponentTarget(config, context),
+      slot: config.type === 'slot' ? config.component.slot : undefined,
       props: resolveDynamicValue(component?.props, context) || {},
       listeners: resolvedListeners,
       options: resolveDynamicValue(component?.options, context) as FormItemOption[] || [],

@@ -82,9 +82,9 @@ const { resolvedComponent } = useResolvedFieldComponent({
   fieldContext
 })
 
-/** 仅 slot 模式按 renderer 名称查找插槽；未找到时返回 null。 */
+/** 仅 slot 模式按 slot 名称查找插槽；未找到时返回 null。 */
 const slotFn = computed(() => props.config.type === 'slot'
-  ? parentSlots[props.config.component.renderer] || null
+  ? parentSlots[props.config.component.slot] || null
   : null)
 
 /** Label/Error 共用字段更新能力和当前响应式校验路径。 */

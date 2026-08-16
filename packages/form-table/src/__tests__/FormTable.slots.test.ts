@@ -210,7 +210,7 @@ describe('FormTable slot rendering', () => {
           fieldKey: 'school',
           type: 'slot',
           component: {
-            renderer: 'school',
+            slot: 'school',
             props: componentPropsResolver,
             options: [{ label: '校区配置', value: 'campus' }],
             listeners: { commit: slotListener }
@@ -222,11 +222,11 @@ describe('FormTable slot rendering', () => {
           type="button"
           class="slot-setter"
           @click="props.setValue('二中'); props.component.listeners.commit('saved')"
-        >{{ props.value }}{{ props.component.props.suffix }}{{ props.component.options[0].label }}</button>`
+        >{{ props.value }}{{ props.component.props.suffix }}{{ props.component.options[0].label }}{{ props.component.slot }}</button>`
       }
     })
     await wrapper.vm.$nextTick()
-    expect(wrapper.find('.slot-setter').text()).toBe('一中（当前）校区配置')
+    expect(wrapper.find('.slot-setter').text()).toBe('一中（当前）校区配置school')
     expect(componentPropsResolver).toHaveBeenCalledTimes(1)
     expect(Object.keys(componentPropsResolver.mock.calls[0][0]).sort()).toEqual([
       'columnConfig',
@@ -318,22 +318,22 @@ describe('FormTable slot rendering', () => {
         formItems: [{
             fieldKey: 'native',
             type: 'slot',
-            component: { renderer: 'native-slot' }
+            component: { slot: 'native-slot' }
           },
           {
             fieldKey: 'component',
             type: 'slot',
-            component: { renderer: 'component-slot' }
+            component: { slot: 'component-slot' }
           },
           {
             fieldKey: 'empty',
             type: 'slot',
-            component: { renderer: 'empty-slot' }
+            component: { slot: 'empty-slot' }
           },
           {
             fieldKey: 'missing',
             type: 'slot',
-            component: { renderer: 'missing-slot' }
+            component: { slot: 'missing-slot' }
           }]
       }],
       scopedSlots: {
@@ -364,7 +364,7 @@ describe('FormTable slot rendering', () => {
               fieldKey: 'multiple',
               type: 'slot',
               hint: '多根内容',
-              component: { renderer: 'multiple-slot' }
+              component: { slot: 'multiple-slot' }
             }]
           }]
         }

@@ -63,13 +63,14 @@ export interface FieldModelConfig {
 }
 
 /** 根据当前字段所在行同步选择实际渲染组件。 */
-export type FieldRendererResolver<TRow extends TableRow = TableRow> = (
+export type FieldComponentResolver<TRow extends TableRow = TableRow> = (
   context: FormTableFieldRenderContext<TRow>
 ) => string | Component | undefined
 
 export interface FieldComponentConfig<TRow extends TableRow = TableRow> {
-  renderer?: string | Component
-  resolveRenderer?: FieldRendererResolver<TRow>
+  is?: string | Component
+  resolveComponent?: FieldComponentResolver<TRow>
+  slot?: string
   props?: DynamicValue<ComponentProps, FormTableFieldRenderContext<TRow>>
   listeners?: Record<string, FormTableFieldListener<TRow>>
   options?: DynamicValue<FormItemOption[], FormTableFieldRenderContext<TRow>>
@@ -97,21 +98,21 @@ interface BaseFormItemConfig<TRow extends TableRow = TableRow> {
 
 export interface BuiltinFormItemConfig<TRow extends TableRow = TableRow> extends BaseFormItemConfig<TRow> {
   type: BuiltinFormItemType
-  component?: FieldComponentConfig<TRow> & { renderer?: never, resolveRenderer?: never }
+  component?: FieldComponentConfig<TRow> & { is?: never, resolveComponent?: never, slot?: never }
 }
 
-type ComponentRendererConfig<TRow extends TableRow = TableRow> =
-  | { renderer: string | Component, resolveRenderer?: FieldRendererResolver<TRow> }
-  | { renderer?: never, resolveRenderer: FieldRendererResolver<TRow> }
+type ComponentTargetConfig<TRow extends TableRow = TableRow> =
+  | { is: string | Component, resolveComponent?: FieldComponentResolver<TRow>, slot?: never }
+  | { is?: never, resolveComponent: FieldComponentResolver<TRow>, slot?: never }
 
 export interface ComponentFormItemConfig<TRow extends TableRow = TableRow> extends BaseFormItemConfig<TRow> {
   type: 'component'
-  component: FieldComponentConfig<TRow> & ComponentRendererConfig<TRow>
+  component: FieldComponentConfig<TRow> & ComponentTargetConfig<TRow>
 }
 
 export interface SlotFormItemConfig<TRow extends TableRow = TableRow> extends BaseFormItemConfig<TRow> {
   type: 'slot'
-  component: FieldComponentConfig<TRow> & { renderer: string, resolveRenderer?: never }
+  component: FieldComponentConfig<TRow> & { slot: string, is?: never, resolveComponent?: never }
 }
 
 export type FormItemConfig<TRow extends TableRow = TableRow> =

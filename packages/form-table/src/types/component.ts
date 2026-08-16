@@ -16,7 +16,8 @@ import type {
 } from './context'
 
 export interface ResolvedComponentConfig {
-  renderer?: string | Component
+  is?: string | Component
+  slot?: string
   props: ComponentProps
   listeners: Record<string, (...args: unknown[]) => void>
   options: FormItemOption[]

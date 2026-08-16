@@ -122,7 +122,7 @@ describe('FormTable validation and exposed API', () => {
           formItemProps: {
             rules: [{ required: true, message: '请选择审核结果', trigger: 'change' }]
           },
-          component: { renderer: 'approval' }
+          component: { slot: 'approval' }
         }]
       }],
       scopedSlots: {

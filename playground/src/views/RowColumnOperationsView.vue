@@ -121,7 +121,7 @@ const scoreColumn: ColumnConfig = {
     fieldKey: 'score',
     type: 'slot',
     component: {
-      renderer: 'score-editor',
+      slot: 'score-editor',
       listeners: {
         async commit({ row, setValue }, draftValue) {
           const rowKey = String(row._rowKey)

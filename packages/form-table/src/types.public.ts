@@ -6,7 +6,7 @@ export type {
   DynamicValue,
   FieldComponentConfig,
   FieldModelConfig,
-  FieldRendererResolver,
+  FieldComponentResolver,
   FormItemConfig,
   FormItemOption,
   FormTableElementFormRef,

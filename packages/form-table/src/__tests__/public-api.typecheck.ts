@@ -7,6 +7,7 @@ import FormTable, {
   type CellSlotColumnConfig,
   type ColumnConfig,
   type FieldComponentConfig,
+  type FieldComponentResolver,
   type FieldModelConfig,
   type FormTableCellSlotContext,
   type FormTableElementColumn,
@@ -274,14 +275,14 @@ const columns: ColumnConfig[] = [{
       {
         fieldKey: 'profile.city',
         type: 'component',
-        component: { renderer: CustomInput }
+        component: { is: CustomInput }
       },
       {
         fieldKey: 'actions',
         type: 'slot',
         hint: ({ row }) => String(row.name || ''),
         component: {
-          renderer: 'actions',
+          slot: 'actions',
           props: ({ row }) => ({ disabled: Boolean(row.locked) })
         }
       }
@@ -349,42 +350,45 @@ const modelVariants: ColumnConfig[] = [{
   formItems: [{
         fieldKey: 'ownerId',
         type: 'component',
-        component: { renderer: CustomInput, model: customModel }
+        component: { is: CustomInput, model: customModel }
       },
       {
         fieldKey: 'enabled',
         type: 'component',
-        component: { renderer: CustomInput }
+        component: { is: CustomInput }
       },
       {
         fieldKey: 'summary',
         type: 'component',
-        component: { renderer: CustomInput, model: false }
+        component: { is: CustomInput, model: false }
       }]
 }]
 
-const dynamicRendererVariants: ColumnConfig[] = [{
+const componentResolver: FieldComponentResolver = ({ row, fieldKey, value }) => {
+  void fieldKey
+  void value
+  return row.kind === 'alternative' ? AlternativeInput : CustomInput
+}
+
+const dynamicComponentVariants: ColumnConfig[] = [{
   label: '按行解析组件',
   formItems: [{
         fieldKey: 'profile',
         type: 'component',
         component: {
-          resolveRenderer: ({ row, fieldKey, value }) => {
-            void fieldKey
-            void value
-            return row.kind === 'alternative' ? AlternativeInput : CustomInput
-          }
+          resolveComponent: componentResolver
         }
       },
       {
         fieldKey: 'name',
         type: 'component',
         component: {
-          renderer: CustomInput,
-          resolveRenderer: ({ row }) => row.useDefault ? undefined : AlternativeInput
+          is: CustomInput,
+          resolveComponent: ({ row }) => row.useDefault ? undefined : AlternativeInput
         }
       }]
 }]
+void dynamicComponentVariants
 
 const props: FormTableProps = {
   tableData: rows,
@@ -528,18 +532,26 @@ const invalid: ColumnConfig[] = [{
 
 const invalidModes: ColumnConfig[] = [{
   label: '渲染模式约束',
-  formItems: [// @ts-expect-error builtin modes resolve their own renderer.
-      { fieldKey: 'name', type: 'input', component: { renderer: CustomInput } },
-      // @ts-expect-error component mode requires renderer or resolveRenderer.
+  formItems: [// @ts-expect-error builtin modes resolve their own component target.
+      { fieldKey: 'name', type: 'input', component: { is: CustomInput } },
+      // @ts-expect-error component mode requires is or resolveComponent.
       { fieldKey: 'custom', type: 'component', component: { props: {} } },
-      // @ts-expect-error builtin modes cannot dynamically replace their renderer.
-      { fieldKey: 'dynamic-input', type: 'input', component: { resolveRenderer: () => CustomInput } },
-      // @ts-expect-error slot renderer must be a string name.
-      { fieldKey: 'actions', type: 'slot', component: { renderer: CustomInput } },
+      // @ts-expect-error builtin modes cannot dynamically replace their component target.
+      { fieldKey: 'dynamic-input', type: 'input', component: { resolveComponent: () => CustomInput } },
+      // @ts-expect-error slot must be a string name.
+      { fieldKey: 'actions', type: 'slot', component: { slot: CustomInput } },
+      // @ts-expect-error slot mode does not accept a component target.
+      { fieldKey: 'legacy-slot-target', type: 'slot', component: { is: 'actions' } },
       // @ts-expect-error slot names remain static and do not use component resolution.
-      { fieldKey: 'dynamic-slot', type: 'slot', component: { renderer: 'actions', resolveRenderer: () => CustomInput } },
+      { fieldKey: 'dynamic-slot', type: 'slot', component: { slot: 'actions', resolveComponent: () => CustomInput } },
+      // @ts-expect-error component mode does not accept a slot target.
+      { fieldKey: 'component-slot', type: 'component', component: { slot: 'actions' } },
+      // @ts-expect-error renderer was replaced by is.
+      { fieldKey: 'legacy-renderer', type: 'component', component: { renderer: CustomInput } },
+      // @ts-expect-error resolveRenderer was replaced by resolveComponent.
+      { fieldKey: 'legacy-resolver', type: 'component', component: { resolveRenderer: () => CustomInput } },
       // @ts-expect-error component resolution is synchronous and does not accept Promise results.
-      { fieldKey: 'async-renderer', type: 'component', component: { resolveRenderer: async () => CustomInput } }]
+      { fieldKey: 'async-is', type: 'component', component: { resolveComponent: async () => CustomInput } }]
 }]
 
 const renamedColumn: ColumnConfig = {
@@ -562,13 +574,13 @@ const keyedItem: ColumnConfig = {
 
 const legacySlotString: ColumnConfig = {
   label: '旧 slot 写法',
-  formItems: [// @ts-expect-error standalone slot field was replaced by type: 'slot' + component.renderer.
+  formItems: [// @ts-expect-error standalone slot field was replaced by type: 'slot' + component.slot.
       { fieldKey: 'actions', slot: 'actions' }]
 }
 
 const legacyComponentIs: ColumnConfig = {
   label: '旧组件写法',
-  formItems: [// @ts-expect-error component mode requires type: 'component' + component.renderer.
+  formItems: [// @ts-expect-error component mode requires type: 'component' + component.is.
       { fieldKey: 'custom', component: { is: CustomInput } }]
 }
 
@@ -663,7 +675,6 @@ void nativeColumnWithFormItems
 void topLevelNativeType
 void mixedColumnModes
 void modelVariants
-void dynamicRendererVariants
 void component
 void named
 void useExpose

@@ -165,7 +165,7 @@ const columns: ColumnConfig[] = [
       fieldKey: 'score',
       type: 'slot',
       formItemProps: { rules: [{ required: true, message: '请输入评分' }] },
-      component: { renderer: 'score-editor' }
+      component: { slot: 'score-editor' }
     }]
   },
   {
@@ -240,7 +240,7 @@ const configurationExample = `// 列级 cellSlot：无 fieldKey，直接使用 r
   fieldKey: 'score',
   type: 'slot',
   formItemProps: { rules: [{ required: true }] },
-  component: { renderer: 'score-editor' }
+  component: { slot: 'score-editor' }
 }`
 </script>
 

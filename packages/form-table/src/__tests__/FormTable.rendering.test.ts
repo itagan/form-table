@@ -403,7 +403,7 @@ describe('FormTable rendering and configuration', () => {
             type: 'component',
             hint: '状态字段说明',
             component: {
-              renderer: StatusInput,
+              is: StatusInput,
               props: componentProps,
               listeners: { commit: listener }
             }
@@ -465,7 +465,7 @@ describe('FormTable rendering and configuration', () => {
         }, this.selected)
       }
     }
-    const resolveRenderer = vi.fn((context: FormTableFieldRenderContext) => (
+    const resolveComponent = vi.fn((context: FormTableFieldRenderContext) => (
       context.row.type === 'hotel' ? HotelEditor : VenueEditor
     ))
     const wrapper = mountFormTable({
@@ -478,7 +478,7 @@ describe('FormTable rendering and configuration', () => {
         formItems: [{
           fieldKey: 'detail',
           type: 'component',
-          component: { resolveRenderer }
+          component: { resolveComponent }
         }]
       }]
     })
@@ -486,8 +486,8 @@ describe('FormTable rendering and configuration', () => {
 
     expect(wrapper.find('.venue-editor').text()).toBe('会场需求')
     expect(wrapper.find('.hotel-editor').text()).toBe('酒店需求')
-    expect(resolveRenderer).toHaveBeenCalledTimes(2)
-    expect(resolveRenderer.mock.calls[1][0]).toMatchObject({
+    expect(resolveComponent).toHaveBeenCalledTimes(2)
+    expect(resolveComponent.mock.calls[1][0]).toMatchObject({
       row: { type: 'hotel', detail: '酒店需求' },
       index: 1,
       fieldKey: 'detail',
@@ -502,7 +502,7 @@ describe('FormTable rendering and configuration', () => {
     wrapper.destroy()
   })
 
-  it('falls back to the static renderer when resolveRenderer returns undefined', async () => {
+  it('falls back to the static component target when resolveComponent returns undefined', async () => {
     const DefaultEditor = {
       props: ['value'],
       render(this: any, h: any) {
@@ -517,8 +517,8 @@ describe('FormTable rendering and configuration', () => {
           fieldKey: 'detail',
           type: 'component',
           component: {
-            renderer: DefaultEditor,
-            resolveRenderer: () => undefined
+            is: DefaultEditor,
+            resolveComponent: () => undefined
           }
         }]
       }]
@@ -537,7 +537,7 @@ describe('FormTable rendering and configuration', () => {
         formItems: [{
           fieldKey: 'detail',
           type: 'component',
-          component: { resolveRenderer: () => undefined }
+          component: { resolveComponent: () => undefined }
         }]
       }]
     })
@@ -567,7 +567,7 @@ describe('FormTable rendering and configuration', () => {
         formItems: [{
           fieldKey: 'enabled',
           type: 'component',
-          component: { renderer: DeclaredModelSwitch }
+          component: { is: DeclaredModelSwitch }
         }]
       }]
     })
@@ -601,7 +601,7 @@ describe('FormTable rendering and configuration', () => {
           fieldKey: 'ownerId',
           type: 'component',
           component: {
-            renderer: UserSelector,
+            is: UserSelector,
             model: {
               prop: 'selectedId',
               event: 'select',
@@ -653,7 +653,7 @@ describe('FormTable rendering and configuration', () => {
           fieldKey: 'status',
           type: 'component',
           component: {
-            renderer: DisplayOnlyField,
+            is: DisplayOnlyField,
             model: false,
             props: ({ value }) => ({ status: value })
           }
@@ -715,7 +715,7 @@ describe('FormTable rendering and configuration', () => {
       key,
       fieldKey: 'name',
       type: 'component' as const,
-      component: { renderer: StatefulField, props: { marker } }
+      component: { is: StatefulField, props: { marker } }
     })
     const first = createItem('first-name', 'A')
     const second = createItem('second-name', 'B')
@@ -749,7 +749,7 @@ describe('FormTable rendering and configuration', () => {
       key,
       fieldKey: marker,
       type: 'component',
-      component: { renderer: StatefulField, props: { marker } }
+      component: { is: StatefulField, props: { marker } }
     })
     const firstColumn: ColumnConfig = {
       key: 'first-column',
@@ -794,7 +794,7 @@ describe('FormTable rendering and configuration', () => {
         key: `${key}-field`,
         fieldKey: marker,
         type: 'component',
-        component: { renderer: StatefulColumnField, props: { marker } }
+        component: { is: StatefulColumnField, props: { marker } }
       }]
     })
     const first = createColumn('column-a', 'a')

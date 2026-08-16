@@ -8,7 +8,7 @@
     >
       <template #prepend>业务组件</template>
     </el-input>
-    <el-tag size="mini" type="success">component.renderer</el-tag>
+    <el-tag size="mini" type="success">component.is</el-tag>
     <small v-if="hintUsage" class="hint-usage">{{ hintUsage }}</small>
   </div>
 </template>
