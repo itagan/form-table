@@ -5,6 +5,7 @@ import type {
   FormTableFormItemProps,
   FormTableFormProps,
   FormTableHintValue,
+  FormTableRowPatch,
   FormTableTableProps,
   FormTableValue,
   TableRow
@@ -157,7 +158,7 @@ export interface FormTableCellSlotContext<TRow extends TableRow = TableRow> {
   row: Readonly<TRow>
   index: number
   columnConfig: Readonly<CellSlotColumnConfig<TRow>>
-  updateRow: (patch: Partial<TRow>) => void
+  updateRow: (patch: FormTableRowPatch<TRow>) => void
 }
 
 export type ColumnConfig<TRow extends TableRow = TableRow> =

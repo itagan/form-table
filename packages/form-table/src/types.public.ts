@@ -33,6 +33,7 @@ export type {
   FormTableHintOptions,
   FormTableProps,
   FormTableRecord,
+  FormTableRowPatch,
   FormTableRowContext,
   FormTableSlotContext,
   FormTableSortChangePayload,

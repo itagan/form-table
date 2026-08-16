@@ -24,6 +24,7 @@ import FormTable, {
   type FormTableHintTargets,
   type FormTableHintOptions,
   type FormTableProps,
+  type FormTableRowPatch,
   type FormTableSortChangePayload,
   type FormTableTableProps,
   type LayoutColumnConfig,
@@ -138,13 +139,23 @@ const typedColumns = defineFormTableColumns<PurchaseRow>([{
         listeners: {
           change(context) {
             context.updateRow({ amount: 100 })
+            context.updateRow({ 'profile.city': '杭州' })
+            context.updateRow({ 'items[0].name': '采购项' })
             // @ts-expect-error updateRow preserves known business field value types.
             context.updateRow({ amount: 'invalid' })
+            // @ts-expect-error unknown top-level keys remain rejected for typed rows.
+            context.updateRow({ ammount: 100 })
           }
         }
       }
     }]
 }])
+const typedRowPatch: FormTableRowPatch<PurchaseRow> = {
+  amount: 20,
+  'profile.city': '上海',
+  'items[0].name': '物料'
+}
+void typedRowPatch
 const TypedFormTable = createFormTable<PurchaseRow>()
 const typedComponent: Component = TypedFormTable
 void typedComponent
