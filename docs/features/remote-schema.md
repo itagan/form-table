@@ -16,6 +16,7 @@
       {
         "fieldKey": "name",
         "type": "input",
+        "meta": { "source": "crm", "permission": "contact:edit" },
         "component": {
           "props": { "placeholder": "请输入姓名" }
         }
@@ -36,6 +37,7 @@
 
 - Column / Item 布局和稳定 key。
 - 内置 `type`、静态 props、options、optionProps。
+- Item 静态 `meta`，用于业务角色、权限、埋点或 Schema 标识。
 - 由前端约定并实现的 Slot 名称。
 
 不应包含可执行函数字符串、Vue 组件对象或服务端下发的任意 HTML。
@@ -115,7 +117,7 @@ function enhanceFormTableColumns(columns, enhancements) {
 | 页面或业务适配层 | 组件映射、事件函数、Slot 实现、权限和数据联动 |
 | FormTable | 渲染增强后的 columns、字段绑定、上下文和受控回写 |
 
-远程 Schema 应做版本和结构校验。TypeScript 的 `as ColumnConfig[]` 只影响编译期，不能替代运行时校验；来自不可信来源的配置应先经过白名单解析。字段路径还应明确拒绝 `__proto__`、`prototype` 和 `constructor` 片段；FormTable 核心也会在读取或写入这些路径时立即抛错，作为最后一道安全边界。
+远程 Schema 应做版本和结构校验。TypeScript 的 `as ColumnConfig[]` 只影响编译期，不能替代运行时校验；来自不可信来源的配置应先经过白名单解析，`meta` 也只保留业务允许的键和值。字段路径还应明确拒绝 `__proto__`、`prototype` 和 `constructor` 片段；FormTable 核心也会在读取或写入这些路径时立即抛错，作为最后一道安全边界。
 
 ## 相关 API
 

@@ -58,6 +58,7 @@ columns[]                                  ColumnConfig
 | --- | --- | --- | --- | --- |
 | `columns[].formItems[].key` | `string` | 可选 | — | Item 稳定渲染身份 |
 | `columns[].formItems[].fieldKey` | `string` | 必填 | — | 行数据路径，支持 `profile.city`、`items[0].name` |
+| `columns[].formItems[].meta` | `FormTableRecord` | 可选 | — | 使用方挂载的静态业务元数据；FormTable 不解析、复制或消费 |
 | `columns[].formItems[].type` | `BuiltinFormItemType \| 'component' \| 'slot'` | 必填 | — | 字段渲染模式 |
 | `columns[].formItems[].labelSlot` | `string` | 可选 | FormItem Slot scope | 自定义 `el-form-item` Label |
 | `columns[].formItems[].errorSlot` | `string` | 可选 | Error Slot scope | 自定义校验错误内容 |
@@ -67,6 +68,8 @@ columns[]                                  ColumnConfig
 | `columns[].formItems[].formItemProps.rules` | Element UI Rule(s) | 可选 | Element UI | 字段校验规则 |
 | `columns[].formItems[].hint` | `DynamicValue<FormTableHintValue, ItemContext>` | 可选 | ItemContext | 未声明或空值继承全局，`false` 关闭，非空字符串覆盖 |
 | `columns[].formItems[].component` | `FieldComponentConfig` | 按 `type` 决定 | ItemContext | 字段组件、Slot 和绑定配置 |
+
+`meta` 是 Item 的静态扩展点，适合权限、埋点、业务角色和远程 Schema 标识。它不是 `DynamicValue`，不会自动进入实际组件 Props，也不影响字段值、校验、显隐、model 或渲染身份。所有字段上下文均可通过原始配置 `itemConfig.meta` 读取；行级差异继续直接读取 `row/value`。
 
 每个字段单元格固定只渲染一个 `el-row`，其 `type` 默认为 `flex`。可通过 `rowProps.type` 显式覆盖，例如 `{ type: undefined }` 使用 Element UI 普通 Row。每个 Item 对应一个 `el-col`，`span` 默认为 24；多个 Item 可按 24 栅格总和自然换行。非规则的多 Row 布局使用 [`cellSlot`](../features/cell-slot.md) 手写。
 

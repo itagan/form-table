@@ -108,6 +108,37 @@ Slot 名称应保持稳定，不拼接行下标或当前字段值。需要区分
 
 `itemConfig.component` 是未解析的原始配置；`component` 是当前行已解析的 `props/listeners/options/optionProps/model`。组件动态配置使用 `FormTableFieldRenderContext`，listener 在此基础上增加 `setValue/updateRow`。
 
+`itemConfig.meta` 是使用方声明的静态业务元数据，所有字段上下文都会保留同一个原始对象。多个字段可以复用同一个 Slot，并用 `meta` 表达业务角色而不是判断数据路径：
+
+```ts
+formItems: [
+  {
+    fieldKey: 'purchasePrice',
+    type: 'slot',
+    meta: { role: 'purchase', currency: 'CNY' },
+    component: { slot: 'money-editor' }
+  },
+  {
+    fieldKey: 'salePrice',
+    type: 'slot',
+    meta: { role: 'sale', currency: 'USD' },
+    component: { slot: 'money-editor' }
+  }
+]
+```
+
+```vue
+<template #money-editor="{ value, setValue, itemConfig }">
+  <MoneyInput
+    :value="value"
+    :currency="itemConfig.meta.currency"
+    @input="setValue"
+  />
+</template>
+```
+
+`meta` 不会复制到 Slot scope 顶层或 `component.props`；未配置时保持 `undefined`。
+
 Item Hint 及 `hintOptions.field` formatter 都使用 `FormTableFieldRenderContext`。解析后的提示内容只由 FormTable 内部展示，不向组件动态配置、listener 或 Slot 传播。
 
 ## FormItem Label / Error Slot 上下文

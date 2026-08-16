@@ -56,6 +56,7 @@ export const apiGroups: ApiGroup[] = [
     entries: [
       { path: 'columns[].formItems[].key', type: 'string', defaultValue: '—', target: '字段渲染身份', description: '动态字段或重复 fieldKey 时建议配置。' },
       { path: 'columns[].formItems[].fieldKey', type: 'string', defaultValue: '必填', target: 'row 数据路径', description: '支持 profile.city、items[0].name 等嵌套路径。' },
+      { path: 'columns[].formItems[].meta', type: 'FormTableRecord', defaultValue: '—', target: '字段业务元数据', description: '静态扩展点；通过 itemConfig.meta 读取，不解析或自动透传。' },
       { path: 'columns[].formItems[].type', type: 'BuiltinType | component | slot', defaultValue: '必填', target: '字段渲染策略', description: '内置别名、直接组件或字段 Slot。' },
       { path: 'columns[].formItems[].visible', type: 'boolean | (context) => boolean', defaultValue: 'true', target: '字段显隐', description: '按字段上下文控制渲染。', context: 'ItemContext' },
       { path: 'columns[].formItems[].colProps', type: 'Object | (context) => Object', defaultValue: '{ span: 24 }', target: 'el-col', description: 'span、offset 等栅格属性。', context: 'ItemContext' },

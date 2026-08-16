@@ -102,6 +102,8 @@ type FormItemConfig =
 
 三种 Item 都支持可选 `key` 作为稳定渲染身份，并要求 `fieldKey` 指向行数据路径。`key` 不参与取值、更新或表单校验路径计算。Item 还可通过 `labelSlot/errorSlot` 引用 FormTable 上的具名 Slot；两者都获得字段操作上下文和完整 `propPath`，Error Slot 额外获得 `error`。
 
+三种 Item 也共享可选的静态 `meta: FormTableRecord`。FormTable 原样保留该对象但不解析或自动透传，动态配置、listener 和 Slot 通过 `itemConfig.meta` 读取。需要动态差异时应读取当前 `row/value` 或提供另一份 Item 配置，而不是把 `meta` 配置为函数。
+
 `type` 明确决定模式。component 模式要求静态 `is` 或动态 `resolveComponent` 至少存在一个；slot 模式要求 `component.slot` 提供静态字符串名称：
 
 ```ts
