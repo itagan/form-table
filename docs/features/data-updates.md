@@ -93,6 +93,16 @@ component: {
 
 patch 的 key 支持嵌套路径。相同值会跳过；所有字段都未变化时，不发出 `update:tableData` 或 `field-change`。
 
+TypeScript 项目中的 `updateRow` 使用公开类型 `FormTableRowPatch<TRow>`。已声明的顶层字段继续检查字段名和值类型，点路径和数组下标路径则按 FormTable 的运行时路径协议接收业务值：
+
+```ts
+const patch: FormTableRowPatch<PurchaseRow> = {
+  amount: 100,
+  'profile.city': '杭州',
+  'items[0].name': '采购项'
+}
+```
+
 字段路径不允许包含 `__proto__`、`prototype` 或 `constructor` 片段；组件会立即抛出包含完整路径的错误，避免配置穿透对象原型链。缺失的嵌套结构会按路径创建，`items[0].name` 中的 `items` 会创建为数组。
 
 `cellSlot` 只提供 `updateRow`，因为它没有明确的 `fieldKey`：
