@@ -249,6 +249,54 @@ describe('FormTable slot rendering', () => {
     wrapper.destroy()
   })
 
+  it('preserves static item metadata when fields reuse the same slot', async () => {
+    const wrapper = mountFormTable({
+      tableData: [{ purchasePrice: 10, salePrice: 20, remark: '无' }],
+      columns: [{
+        label: '复用字段 Slot',
+        formItems: [
+          {
+            fieldKey: 'purchasePrice',
+            type: 'slot',
+            meta: { role: 'purchase', currency: 'CNY' },
+            component: { slot: 'shared-editor' }
+          },
+          {
+            fieldKey: 'salePrice',
+            type: 'slot',
+            meta: { role: 'sale', currency: 'USD' },
+            component: { slot: 'shared-editor' }
+          },
+          {
+            fieldKey: 'remark',
+            type: 'slot',
+            component: { slot: 'shared-editor' }
+          }
+        ]
+      }],
+      scopedSlots: {
+        'shared-editor': `<span
+          class="meta-field"
+          :data-role="props.itemConfig.meta && props.itemConfig.meta.role"
+          :data-component-meta="props.component.props.meta"
+        >{{ props.itemConfig.meta ? props.itemConfig.meta.currency : 'none' }}:{{ props.value }}</span>`
+      }
+    })
+    await wrapper.vm.$nextTick()
+
+    const fields = wrapper.findAll('.meta-field')
+    expect(fields.wrappers.map(field => field.text())).toEqual([
+      'CNY:10',
+      'USD:20',
+      'none:无'
+    ])
+    expect(fields.at(0).attributes('data-role')).toBe('purchase')
+    expect(fields.at(1).attributes('data-role')).toBe('sale')
+    expect(fields.at(2).attributes('data-role')).toBeUndefined()
+    expect(fields.wrappers.every(field => field.attributes('data-component-meta') === undefined)).toBe(true)
+    wrapper.destroy()
+  })
+
   it('renders a cellSlot column without field wrappers or a virtual fieldKey', async () => {
     const original = [{ id: 1, name: 'Alice', enabled: true }]
     const wrapper = mountFormTable({

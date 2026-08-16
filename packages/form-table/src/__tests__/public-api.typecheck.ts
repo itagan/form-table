@@ -572,6 +572,44 @@ const keyedItem: ColumnConfig = {
   formItems: [{ key: 'primary-name', fieldKey: 'name', type: 'input' }]
 }
 
+const itemMetaVariants: ColumnConfig[] = [{
+  label: '静态字段元数据',
+  formItems: [
+    { fieldKey: 'name', type: 'input', meta: { role: 'builtin' } },
+    {
+      fieldKey: 'custom',
+      type: 'component',
+      meta: { role: 'component' },
+      visible: ({ itemConfig }) => itemConfig.meta?.role === 'component',
+      component: {
+        is: CustomInput,
+        props: ({ itemConfig }) => ({ role: itemConfig.meta?.role }),
+        listeners: {
+          change({ itemConfig }) {
+            void itemConfig.meta?.role
+          }
+        }
+      }
+    },
+    {
+      fieldKey: 'actions',
+      type: 'slot',
+      meta: { role: 'slot', permission: 'row:update' },
+      component: { slot: 'actions' }
+    }
+  ]
+}]
+
+const invalidDynamicItemMeta: ColumnConfig = {
+  label: '动态字段元数据',
+  formItems: [{
+    fieldKey: 'name',
+    type: 'input',
+    // @ts-expect-error meta is static metadata and does not accept a resolver.
+    meta: () => ({ role: 'dynamic' })
+  }]
+}
+
 const legacySlotString: ColumnConfig = {
   label: '旧 slot 写法',
   formItems: [// @ts-expect-error standalone slot field was replaced by type: 'slot' + component.slot.
@@ -683,6 +721,8 @@ void invalidModes
 void renamedColumn
 void renamedItem
 void keyedItem
+void itemMetaVariants
+void invalidDynamicItemMeta
 void legacySlotString
 void legacyComponentIs
 void contextBoundaries

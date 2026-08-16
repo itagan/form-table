@@ -7,6 +7,7 @@
 ### Changed
 
 - 字段渲染入口由 `component.renderer/resolveRenderer` 更名为 Vue 语义更明确的 `component.is/resolveComponent`；字段 Slot 改用专用的 `component.slot` 静态名称，不再与组件目标共用字段。
+- `formItems[]` 新增静态 `meta` 扩展点，允许业务通过 `itemConfig.meta` 挂载和读取权限、埋点、角色及远程 Schema 标识；FormTable 不解析或自动透传该数据。
 
 ## 0.1.0 - 2026-08-15
 

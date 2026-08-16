@@ -5,6 +5,7 @@ import type {
   FormTableFormItemProps,
   FormTableFormProps,
   FormTableHintValue,
+  FormTableRecord,
   FormTableRowPatch,
   FormTableTableProps,
   FormTableValue,
@@ -85,9 +86,14 @@ export type BuiltinFormItemType =
 
 export type FormItemType = BuiltinFormItemType | 'component' | 'slot'
 
+/** 保留 FormTableRecord 的灵活值类型，同时排除把 meta 根节点配置为函数。 */
+type StaticFormItemMeta = FormTableRecord & Record<string, unknown>
+
 interface BaseFormItemConfig<TRow extends TableRow = TableRow> {
   key?: string
   fieldKey: string
+  /** 使用方挂载的静态业务元数据；FormTable 不解析或消费。 */
+  meta?: StaticFormItemMeta
   labelSlot?: string
   errorSlot?: string
   visible?: DynamicValue<boolean, FormTableFieldRenderContext<TRow>>
