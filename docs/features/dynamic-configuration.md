@@ -29,7 +29,7 @@ const columns: ColumnConfig[] = [{
 | 层级 | 完整配置路径 | 影响范围 | 上下文 |
 | --- | --- | --- | --- |
 | Column | `columns[].visible` | 整列 | `tableData, columnConfig` |
-| Row props | `columns[].rowProps` | 当前单元格内唯一 Flex Row | ColumnContext + `row, index` |
+| Row props | `columns[].rowProps` | 当前单元格内唯一 Row，默认 `type: 'flex'` | ColumnContext + `row, index` |
 | Item | `columns[].formItems[].visible` | 当前字段和 `el-col` | RowContext + `fieldKey, value, itemConfig` |
 
 隐藏只影响渲染，不会自动删除 `tableData` 中的字段值。需要清空值时，在业务事件中显式更新。

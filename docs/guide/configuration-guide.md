@@ -25,7 +25,7 @@ FormTable 的顶层输入包括：
 
 ```text
 columns[]                              ColumnConfig
-├─ rowProps                           唯一 Flex el-row
+├─ rowProps                           唯一 el-row，默认 type: flex
 └─ formItems[]                        FormItemConfig / el-col + el-form-item
 ```
 
@@ -46,7 +46,7 @@ const columns: ColumnConfig[] = [{
 }]
 ```
 
-Column 负责表格列及单元格内唯一 Flex Row，Item 负责 `el-col`、字段路径、校验和实际组件。完整属性见 [Column / Item](../api/columns.md)。不需要字段语义的操作列或展示单元格使用列级 [`cellSlot`](../features/cell-slot.md)。
+Column 负责表格列及单元格内唯一 Row（默认 `type: 'flex'`，可由 `rowProps.type` 覆盖），Item 负责 `el-col`、字段路径、校验和实际组件。完整属性见 [Column / Item](../api/columns.md)。不需要字段语义的操作列或展示单元格使用列级 [`cellSlot`](../features/cell-slot.md)。
 
 ## 校验规则
 
