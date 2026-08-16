@@ -21,7 +21,7 @@ FormTable
    ├─ key / label / visible / props
    ├─ headerSlot / headerProps / headerHint
    ├─ cellSlot
-   ├─ rowProps                            唯一 Flex el-row
+   ├─ rowProps                            唯一 el-row，默认 type: flex
    └─ formItems[]                        FormItemConfig
       ├─ key / fieldKey / visible / type
       ├─ colProps / formItemProps / hint

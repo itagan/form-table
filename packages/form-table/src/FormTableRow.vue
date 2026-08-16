@@ -50,10 +50,10 @@ const rowContext = computed<FormTableRowContext>(() => createRowContext(
   props.rowIndex
 ))
 
-/** 解析列级布局属性，并固定使用支持换行的 Flex Row。 */
+/** 默认使用支持换行的 Flex Row，调用方仍可通过 rowProps 显式覆盖。 */
 const resolvedRowProps = computed(() => ({
-  ...(resolveDynamicValue(props.rowProps, rowContext.value) || {}),
-  type: 'flex'
+  type: 'flex',
+  ...(resolveDynamicValue(props.rowProps, rowContext.value) || {})
 }))
 
 // 在一次遍历中完成显隐过滤和栅格属性解析，模板不再重复执行动态回调。

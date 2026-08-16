@@ -38,14 +38,14 @@ export const apiGroups: ApiGroup[] = [
     description: '表格列。展示型整格内容使用 cellSlot，字段表单继续配置 formItems。',
     entries: [
       { path: 'columns[].key', type: 'string', defaultValue: '—', target: '列渲染身份', description: '动态增删、替换列时建议使用稳定唯一值。' },
-      { path: 'columns[].label', type: 'string', defaultValue: "''", target: 'el-table-column.label', description: '默认表头文本。' },
+      { path: 'columns[].label', type: 'string', defaultValue: "''", target: 'el-table-column.label', description: '默认表头文本；解析后的 props.label 可覆盖。' },
       { path: 'columns[].props', type: 'Object | (context) => Object', defaultValue: '{}', target: 'el-table-column', description: '宽度、对齐、fixed、type 等原生列属性；单独使用时为 NativeColumnConfig。', context: 'ColumnContext' },
       { path: 'columns[].headerProps', type: 'Object | (context) => Object', defaultValue: '{}', target: '默认/Slot 表头包装节点', description: 'title、class、style、aria-*；renderHeader 接管时不自动应用。', context: 'ColumnContext' },
       { path: 'columns[].headerHint', type: 'FormTableHintValue | (context) => FormTableHintValue', defaultValue: '—', target: '默认/Slot 表头包装节点', description: "动态字符串或 false；仅 targets: 'header'/'all' 时求值。", context: 'ColumnContext' },
       { path: 'columns[].headerSlot', type: 'string', defaultValue: '—', target: '表头 scoped Slot', description: '复杂表头、图标和交互内容。' },
       { path: 'columns[].visible', type: 'boolean | (context) => boolean', defaultValue: 'true', target: '列显隐', description: '控制当前列是否渲染。', context: 'ColumnContext' },
       { path: 'columns[].cellSlot', type: 'string', defaultValue: '—', target: '整格 scoped Slot', description: '直接渲染当前单元格，与 formItems 互斥且不要求 fieldKey。' },
-      { path: 'columns[].rowProps', type: 'Object | (context) => Object', defaultValue: '{}', target: '唯一 Flex el-row', description: 'gutter、justify、align、class、style 等；type 始终为 flex。', context: 'RowContext' },
+      { path: 'columns[].rowProps', type: 'Object | (context) => Object', defaultValue: "{ type: 'flex' }", target: '唯一 el-row', description: 'gutter、justify、align、class、style 等；显式 type 可覆盖默认值。', context: 'RowContext' },
       { path: 'columns[].formItems', type: 'FormItemConfig[]', defaultValue: '[]', target: '单元格字段布局', description: '每个 Item 对应一个 el-col，按 24 栅格自然换行。' }
     ]
   },

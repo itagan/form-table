@@ -19,13 +19,13 @@ columns[]                                  ColumnConfig
 | 配置路径 | 类型 | 必填 / 默认值 | 动态上下文 | 目标 / 作用 |
 | --- | --- | --- | --- | --- |
 | `columns[].key` | `string` | 可选 | — | 列的稳定渲染身份 |
-| `columns[].label` | `string` | 必填 | — | `el-table-column.label` |
+| `columns[].label` | `string` | 必填 | — | 默认列标题；可由解析后的 `columns[].props.label` 覆盖 |
 | `columns[].visible` | `DynamicValue<boolean, ColumnContext>` | `true` | `tableData, columnConfig` | 是否渲染列 |
 | `columns[].props` | `DynamicValue<ComponentProps, ColumnContext>` | `{}` | `tableData, columnConfig` | 透传 `el-table-column` |
 | `columns[].headerSlot` | `string` | 可选 | Slot scope | 表头具名 Slot |
 | `columns[].headerProps` | `DynamicValue<ComponentProps, ColumnContext>` | `{}` | `tableData, columnConfig` | 默认或 Slot 表头包装节点属性 |
 | `columns[].headerHint` | `DynamicValue<FormTableHintValue, ColumnContext>` | 可选 | `tableData, columnConfig` | 表头 Hint；仅在 `targets: 'header'/'all'` 时求值和展示 |
-| `columns[].rowProps` | `DynamicValue<ComponentProps, RowContext>` | `{}` | ColumnContext + `row, index` | 透传单元格内唯一 `el-row`；`type` 始终为 `flex` |
+| `columns[].rowProps` | `DynamicValue<ComponentProps, RowContext>` | `{ type: 'flex' }` | ColumnContext + `row, index` | 透传单元格内唯一 `el-row`；显式 `type` 可覆盖默认值 |
 | `columns[].formItems` | `FormItemConfig[]` | 与 `cellSlot` 互斥 | — | 进入 Item 字段链路 |
 | `columns[].cellSlot` | `string` | 与 `formItems` 互斥 | `row, index, columnConfig, updateRow` | 直接渲染单元格 |
 
@@ -37,6 +37,20 @@ columns[]                                  ColumnConfig
 ```
 
 纯透传列的 `props` 必填、`label` 可选，且不接受 `formItems/cellSlot/headerSlot/headerProps/headerHint`。选择事件、序号函数和动态配置见[Element 功能列透传](../features/native-columns.md)。
+
+`columns[].label` 是静态默认标题；`columns[].props.label` 按 ColumnContext 解析后非 `null/undefined` 时覆盖它。最终标题同时用于 Element Column、默认表头文本和 `headerSlot.label`，原始 `columnConfig.label` 保持不变：
+
+```ts
+{
+  label: '金额',
+  props: ({ tableData }) => ({
+    label: `金额（${tableData.length} 项）`
+  }),
+  formItems: [{ fieldKey: 'amount', type: 'number' }]
+}
+
+{ props: { label: '姓名', prop: 'name' } }
+```
 
 ## FormItemConfig
 
@@ -54,7 +68,7 @@ columns[]                                  ColumnConfig
 | `columns[].formItems[].hint` | `DynamicValue<FormTableHintValue, ItemContext>` | 可选 | ItemContext | 未声明或空值继承全局，`false` 关闭，非空字符串覆盖 |
 | `columns[].formItems[].component` | `FieldComponentConfig` | 按 `type` 决定 | ItemContext | 字段组件、Slot 和绑定配置 |
 
-每个字段单元格固定只渲染一个可换行的 Flex `el-row`。每个 Item 对应一个 `el-col`，`span` 默认为 24；多个 Item 可按 24 栅格总和自然换行。非规则的多 Row 布局使用 [`cellSlot`](../features/cell-slot.md) 手写。
+每个字段单元格固定只渲染一个 `el-row`，其 `type` 默认为 `flex`。可通过 `rowProps.type` 显式覆盖，例如 `{ type: undefined }` 使用 Element UI 普通 Row。每个 Item 对应一个 `el-col`，`span` 默认为 24；多个 Item 可按 24 栅格总和自然换行。非规则的多 Row 布局使用 [`cellSlot`](../features/cell-slot.md) 手写。
 
 ## 校验路径
 

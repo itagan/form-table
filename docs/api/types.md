@@ -65,7 +65,7 @@ const columns = defineFormTableColumns<PurchaseRow>([{
 type ColumnConfig = LayoutColumnConfig | CellSlotColumnConfig | NativeColumnConfig
 ```
 
-`LayoutColumnConfig` 使用 `formItems` 进入 Item 字段渲染链路，并可用 `rowProps` 配置单元格内唯一 Flex Row；`CellSlotColumnConfig` 使用 `cellSlot` 直接渲染单元格；`NativeColumnConfig` 只透传 `el-table-column` props。三种列模式互斥。
+`LayoutColumnConfig` 使用 `formItems` 进入 Item 字段渲染链路，并可用 `rowProps` 配置单元格内默认采用 Flex 的唯一 Row；`CellSlotColumnConfig` 使用 `cellSlot` 直接渲染单元格；`NativeColumnConfig` 只透传 `el-table-column` props。三种列模式互斥。
 
 ```ts
 interface CellSlotColumnConfig extends BaseColumnConfig {
