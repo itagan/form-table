@@ -2,6 +2,61 @@
 
 上下文按渲染层级提供，不使用空对象或无效下标补齐不存在的字段。
 
+## Slot 提供与命名约定
+
+FormTable 的自定义 Slot 都引用父组件的具名 scoped Slot。配置项保存 Slot 名称，模板使用同名 `#name` 提供实现；TypeScript 可以约束配置结构，但不能检查模板中是否真的存在对应名称。
+
+### 缺失时的行为
+
+| Slot | 配置入口 | 提供要求 | 未提供同名模板时 |
+| --- | --- | --- | --- |
+| Table 空状态 | `#empty` | 可选 | 使用 Element Table 默认空状态 |
+| Table 末尾 | `#append` | 可选 | 不渲染末尾内容 |
+| 表头 | `columns[].headerSlot` | 可选 | 回退最终解析后的列标题 |
+| 整格单元格 | `columns[].cellSlot` | 配置后应提供 | 当前列单元格为空 |
+| 字段内容 | `type: 'slot'` + `component.renderer` | 配置后必须提供 | 保留 FormItem，字段内容为空 |
+| FormItem Label | `formItems[].labelSlot` | 可选 | 回退 `formItemProps.label` |
+| FormItem Error | `formItems[].errorSlot` | 可选 | 回退 Element 默认错误内容 |
+
+`cellSlot` 和字段 Slot 承担主体内容，配置后应始终提供同名模板。表头、Label 和 Error Slot 具有明确回退，可以按页面能力选择性提供。
+
+### 推荐命名
+
+Slot 名称统一推荐使用 kebab-case，并采用“业务标识 + 角色”的完整后缀，不使用 `head-*`、`column-*` 等缩写或仅描述结构的名称：
+
+| 场景 | 推荐格式 | 示例 |
+| --- | --- | --- |
+| 表头 | `<column>-header` | `amount-header`、`contact-header` |
+| 整格内容 | `<column>-cell` | `status-cell`、`summary-cell` |
+| 行或业务操作 | `<business>-actions` | `row-actions`、`order-actions` |
+| 字段编辑器 | `<field>-editor` | `score-editor`、`time-range-editor` |
+| 字段选择器 | `<field>-select` / `<field>-picker` | `city-select`、`owner-picker` |
+| FormItem Label | `<field>-label` | `amount-label` |
+| FormItem Error | `<field>-error` | `amount-error` |
+
+```ts
+const columns = [{
+  key: 'amount-column',
+  label: '金额',
+  headerSlot: 'amount-header',
+  formItems: [{
+    fieldKey: 'amount',
+    type: 'slot',
+    labelSlot: 'amount-label',
+    errorSlot: 'amount-error',
+    component: { renderer: 'amount-editor' }
+  }]
+}, {
+  key: 'actions-column',
+  label: '操作',
+  cellSlot: 'row-actions'
+}]
+```
+
+所有自定义 Slot 共享 FormTable 的同一个具名 Slot 命名空间。相同上下文的多个字段可以有意复用 `money-editor` 等模板；表头、单元格、字段、Label 和 Error 上下文不同，不应意外使用同一个名称。`default`、`empty` 和 `append` 保留给 Vue/FormTable 根级语义，不用于自定义配置引用。
+
+Slot 名称应保持稳定，不拼接行下标或当前字段值。需要区分动态列或重复字段时，继续使用 Column/Item 的稳定 `key` 管理渲染身份，Slot 名只描述模板职责。
+
 ## 上下文矩阵
 
 | 使用位置 | 业务数据 | 原始配置 | 更新能力 | 解析结果 |

@@ -49,7 +49,7 @@ FormTable
 | [FormTable Props](./form-table.md) | `tableData`、`columns`、`formProps`、`tableProps`、`hintOptions` | 顶层 props、受控数据和 Element UI 透传 |
 | [Column / Item](./columns.md) | `columns[]...` | 列、字段布局、校验和提示 |
 | [Component 配置](./component.md) | `columns[].formItems[].component...` | 渲染器、model、props、listeners 和 options |
-| [Slot 与上下文](./contexts.md) | 动态回调和 scoped Slot | 上下文矩阵、快照语义和更新能力 |
+| [Slot 与上下文](./contexts.md) | 动态回调和 scoped Slot | 提供要求、命名约定、上下文矩阵、快照语义和更新能力 |
 | [事件与 Ref](./events-and-ref.md) | `update:tableData`、`field-change`、Ref | 受控回写、原生事件和实例方法 |
 | [公开类型](./types.md) | 包入口导出 | TypeScript 联合类型和公开接口 |
 
