@@ -68,6 +68,9 @@ const errorSlotFn = computed(() => props.config.errorSlot
 const {
   propPath,
   runtimeContext,
+  resolvedHint,
+  hintMode,
+  hintTrigger,
   resolvedFormItemProps,
   fieldContext
 } = useFormTableFieldContext({
@@ -79,7 +82,10 @@ const {
 const { resolvedComponent } = useResolvedFieldComponent({
   getConfig: () => props.config,
   runtimeContext,
-  fieldContext
+  fieldContext,
+  resolvedHint,
+  hintMode,
+  hintTrigger
 })
 
 /** 仅 slot 模式按 slot 名称查找插槽；未找到时返回 null。 */

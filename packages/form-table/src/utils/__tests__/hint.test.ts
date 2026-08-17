@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
   FORM_TABLE_HINT_ATTRIBUTE,
+  FORM_TABLE_HINT_FIELD_ATTRIBUTE,
+  FORM_TABLE_HINT_TRIGGER_ATTRIBUTE,
+  applyHintComponentProps,
   applyHintTargetProps,
   resolveFormTableFieldHint,
   resolveFormTableHint
@@ -30,7 +33,30 @@ describe('FormTable hint utilities', () => {
     expect(applyHintTargetProps(source, '托管说明', 'tooltip', { focusable: true })).toEqual({
       class: 'target', [FORM_TABLE_HINT_ATTRIBUTE]: '托管说明', tabindex: 0
     })
+    expect(applyHintTargetProps(source, '托管说明', 'tooltip', {
+      trigger: 'content', fieldKey: 'name'
+    })).toEqual({
+      class: 'target',
+      [FORM_TABLE_HINT_ATTRIBUTE]: '托管说明',
+      [FORM_TABLE_HINT_TRIGGER_ATTRIBUTE]: 'content',
+      [FORM_TABLE_HINT_FIELD_ATTRIBUTE]: 'name'
+    })
+    expect(applyHintTargetProps(source, '托管说明', 'title', {
+      trigger: 'content'
+    })).toEqual({ class: 'target' })
     expect(source).toEqual({ title: '底层说明', class: 'target' })
+  })
+
+  it('adds native titles to content props without overriding explicit component titles', () => {
+    const source = { class: 'target' }
+    expect(applyHintComponentProps(source, '组件说明', 'title', 'content')).toEqual({
+      class: 'target', title: '组件说明'
+    })
+    expect(applyHintComponentProps({ title: '显式说明' }, '组件说明', 'title', 'content')).toEqual({
+      title: '显式说明'
+    })
+    expect(applyHintComponentProps(source, '组件说明', 'tooltip', 'content')).toBe(source)
+    expect(applyHintComponentProps(source, '组件说明', 'title', 'item')).toBe(source)
   })
 
   it('uses explicit values and falls back to the table formatter', () => {

@@ -6,16 +6,22 @@ import type {
   FormItemOption,
   FormTableFieldContext,
   FormTableFieldRenderContext,
+  FormTableHintMode,
+  FormTableHintTrigger,
   OptionPropsConfig,
   ResolvedComponentConfig,
   TableRow
 } from '../types'
 import { resolveDynamicValue } from '../utils/dynamic'
+import { applyHintComponentProps } from '../utils/hint'
 
 interface ResolvedFieldComponentOptions<TRow extends TableRow> {
   getConfig: () => FormItemConfig<TRow>
   runtimeContext: ComputedRef<FormTableFieldRenderContext<TRow>>
   fieldContext: ComputedRef<FormTableFieldContext<TRow>>
+  resolvedHint: ComputedRef<string | null>
+  hintMode: ComputedRef<FormTableHintMode>
+  hintTrigger: ComputedRef<FormTableHintTrigger>
 }
 
 /**
@@ -42,6 +48,7 @@ export function useResolvedFieldComponent<TRow extends TableRow = TableRow>(
     const context = options.runtimeContext.value
     const component = config.component
     const listeners = component?.listeners || {}
+    const componentProps = resolveDynamicValue(component?.props, context) || {}
 
     /** 保留原始事件参数，并在首位注入带安全更新助手的字段上下文。 */
     const resolvedListeners = Object.keys(listeners).reduce<Record<string, (...args: unknown[]) => void>>((result, name) => {
@@ -52,7 +59,12 @@ export function useResolvedFieldComponent<TRow extends TableRow = TableRow>(
     return {
       is: resolveComponentTarget(config, context),
       slot: config.type === 'slot' ? config.component.slot : undefined,
-      props: resolveDynamicValue(component?.props, context) || {},
+      props: applyHintComponentProps(
+        componentProps,
+        options.resolvedHint.value,
+        options.hintMode.value,
+        options.hintTrigger.value
+      ),
       listeners: resolvedListeners,
       options: resolveDynamicValue(component?.options, context) as FormItemOption[] || [],
       optionProps: resolveDynamicValue(
