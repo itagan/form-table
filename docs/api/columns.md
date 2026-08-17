@@ -67,6 +67,7 @@ columns[]                                  ColumnConfig
 | `columns[].formItems[].formItemProps` | `DynamicValue<FormTableFormItemProps, ItemContext>` | `{}` | ItemContext | 透传 `el-form-item`；不接受内部管理的 `prop` |
 | `columns[].formItems[].formItemProps.rules` | Element UI Rule(s) | 可选 | Element UI | 字段校验规则 |
 | `columns[].formItems[].hint` | `DynamicValue<FormTableHintValue, ItemContext>` | 可选 | ItemContext | 未声明或空值继承全局，`false` 关闭，非空字符串覆盖 |
+| `columns[].formItems[].hintTrigger` | `'item' \| 'content'` | `'item'` | — | 使用整个 FormItem 或唯一可见内容根节点触发 Hint |
 | `columns[].formItems[].component` | `FieldComponentConfig` | 按 `type` 决定 | ItemContext | 字段组件、Slot 和绑定配置 |
 
 `meta` 是 Item 的静态扩展点，适合权限、埋点、业务角色和远程 Schema 标识。它不是 `DynamicValue`，不会自动进入实际组件 Props，也不影响字段值、校验、显隐、model 或渲染身份。所有字段上下文均可通过原始配置 `itemConfig.meta` 读取；行级差异继续直接读取 `row/value`。
