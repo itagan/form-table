@@ -145,7 +145,7 @@ function handleTableDataUpdate(nextTableData) {
 | 更新能力 | `setValue`、`updateRow` |
 | 解析结果 / Slot 专属 | `propPath`、`component` |
 
-其中 `itemConfig.component` 是原始配置，可能仍包含动态函数；`component` 是解析后的 `slot/props/listeners/options/optionProps/model`。Hint 解析结果仅供 FormTable 内部展示，不进入 Slot。
+其中 `itemConfig.component` 是原始配置，可能仍包含动态函数；`component` 是解析后的 `slot/props/listeners/options/optionProps/model`。Hint 解析结果通常只供 FormTable 内部展示；`hintTrigger: 'content'` 的 title 模式会在未显式配置组件 title 时通过 `component.props.title` 提供给 Slot。
 
 因此两者不是替代关系：`itemConfig` 用于读取当前字段的原始配置来源，`component` 用于在 Slot 模板中直接绑定。不要把 `itemConfig.component.props` 直接传给组件，因为它可能仍是一个动态函数。
 

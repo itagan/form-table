@@ -5,7 +5,7 @@
 - `ColumnConfig`、`LayoutColumnConfig`、`CellSlotColumnConfig`、`NativeColumnConfig`、`FormItemConfig`
 - `FieldComponentConfig`、`FieldModelConfig`、`FieldComponentResolver`、`BuiltinFormItemType`
 - `FormItemOption`、`OptionPropsConfig`
-- `FormTableHintValue`、`FormTableHintMode`、`FormTableHintTargets`、`FormTableFieldHintFormatter`、`FormTableHintOptions`
+- `FormTableHintValue`、`FormTableHintMode`、`FormTableHintTargets`、`FormTableHintTrigger`、`FormTableFieldHintFormatter`、`FormTableHintOptions`
 - `TableRow`、`FormTableRecord`、`FormTableRowPatch`、`FormTableProps`、`FormTableRowKey`
 - `FormTableTableProps`、`FormTableFormProps`、`FormTableFormItemProps`
 - `FormTableColumnContext`、`FormTableRowContext`、`FormTableFieldRenderContext`
@@ -163,4 +163,4 @@ interface FieldModelConfig {
 
 `ColumnConfig.headerProps` 传给默认或 Slot 表头的 `.form-table-column-header`，可配置原生 `title`、class、style 和 aria 属性。存在 `column.props.renderHeader` 时由 Element UI 完全接管，FormTable 不包装也不应用 `headerProps/headerHint`。
 
-`ColumnConfig.headerHint` 与 Item 的 `hint` 都只接受动态字符串或 `false/null/undefined`。Item 未声明、返回 `null` 或空字符串时继承 `FormTableHintOptions.field`，`false` 关闭，非空字符串覆盖；表头不继承字段 formatter。`targets` 排除的目标不会求值，解析后的 Hint 只由 FormTable 内部展示，不进入组件回调、listener 或 Slot 上下文。
+`ColumnConfig.headerHint` 与 Item 的 `hint` 都只接受动态字符串或 `false/null/undefined`。Item 未声明、返回 `null` 或空字符串时继承 `FormTableHintOptions.field`，`false` 关闭，非空字符串覆盖；表头不继承字段 formatter。`targets` 排除的目标不会求值。解析后的 Hint 不进入组件回调或 listener；仅 `hintTrigger: 'content'` 的 title 模式会将其作为缺省 `component.props.title` 提供给实际组件或字段 Slot。

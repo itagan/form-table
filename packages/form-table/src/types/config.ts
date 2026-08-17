@@ -4,6 +4,7 @@ import type {
   DynamicValue,
   FormTableFormItemProps,
   FormTableFormProps,
+  FormTableHintTrigger,
   FormTableHintValue,
   FormTableRecord,
   FormTableRowPatch,
@@ -100,6 +101,8 @@ interface BaseFormItemConfig<TRow extends TableRow = TableRow> {
   colProps?: DynamicValue<ComponentProps, FormTableFieldRenderContext<TRow>>
   formItemProps?: DynamicValue<FormTableFormItemProps, FormTableFieldRenderContext<TRow>>
   hint?: DynamicValue<FormTableHintValue, FormTableFieldRenderContext<TRow>>
+  /** item 使用整个 FormItem；content 使用其中唯一可见的内容根节点。 */
+  hintTrigger?: FormTableHintTrigger
 }
 
 export interface BuiltinFormItemConfig<TRow extends TableRow = TableRow> extends BaseFormItemConfig<TRow> {

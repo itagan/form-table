@@ -87,13 +87,36 @@ const hintOptions: FormTableHintOptions<OrderRow> = {
 - `mode: 'title'`：只向有效目标添加原生 `title`，不挂载 Tooltip 控制器。
 - `mode: 'tooltip'`：每个 FormTable 仅挂载一个 Tooltip，通过根节点事件委托服务所有有效目标。
 
-Tooltip 模式内部默认使用 `placement: 'top'`、`effect: 'dark'` 和 `openDelay: 100`，减少鼠标快速扫过字段时的闪烁；同名 `tooltipProps` 会覆盖这些展示默认值。字段仍由整个 `el-form-item` 统一触发，但浮层会优先定位到唯一且可见的实际组件根节点，使 InputNumber、Switch、Rate 等未铺满字段区域的组件保持自然的视觉位置；多根 Slot、空内容或零尺寸节点会回退到 `el-form-item`。嵌套 FormTable 隔离、键盘焦点、Escape 关闭和 `aria-describedby` 保持有效。`content/reference/popper/manual/value/enterable` 由内部控制，其余属性透传。
+Tooltip 模式内部默认使用 `placement: 'top'`、`effect: 'dark'` 和 `openDelay: 100`，减少鼠标快速扫过字段时的闪烁；同名 `tooltipProps` 会覆盖这些展示默认值。字段默认仍由整个 `el-form-item` 统一触发，但浮层会优先定位到唯一且可见的实际组件根节点，使 InputNumber、Switch、Rate 等未铺满字段区域的组件保持自然的视觉位置；多根 Slot、空内容或零尺寸节点会回退到 `el-form-item`。嵌套 FormTable 隔离、键盘焦点、Escape 关闭和 `aria-describedby` 保持有效。`content/reference/popper/manual/value/enterable` 由内部控制，其余属性透传。
+
+## 字段触发区域
+
+Item `hintTrigger` 可以把紧凑字段的触发区域收敛到实际内容：
+
+```ts
+{
+  fieldKey: 'enabled',
+  type: 'switch',
+  hint: '是否启用',
+  hintTrigger: 'content'
+}
+```
+
+`item` 是默认值，整个 `el-form-item` 都可触发；`content` 使用 `.el-form-item__content` 中唯一可见、非零尺寸的直接根节点。Tooltip 模式下该节点同时作为触发区域和定位锚点；找不到或存在多个有效根节点时回退到 `el-form-item`，并在开发环境按字段和失败原因去重警告。内容结构变化后会重新解析。
+
+Title 模式下，`content` 不再向 FormItem 添加自动 title，而是在 `component.props.title` 未声明时注入 Hint；显式组件 title 优先。内置组件和 `type: 'text'` 会直接应用，自定义组件需要让 title 落到实际 DOM。字段 Slot 需要把解析后的 props 绑定到单根节点：
+
+```vue
+<template #enabled="{ component }">
+  <el-switch v-bind="component.props" />
+</template>
+```
 
 有效 Hint 会覆盖同层 `headerProps.title` 或 `formItemProps.title`；没有有效 Hint、被作用范围排除或整个系统关闭时，原始 title 保持不变。
 
 ## 自定义提示
 
-Hint 不再作为业务元数据传播到 `component.is`、组件 props/listener 或 Slot 上下文。需要富文本、独立触发点或字段与表头使用不同 Tooltip 参数时，关闭对应自动 Hint 并由 Slot 直接根据业务数据实现：
+Hint 不作为业务元数据传播到 `component.is`、listener 或动态配置回调；仅 `hintTrigger: 'content'` 的 title 模式会把自动 title 合并进解析后的 `component.props`。需要富文本、独立图标或字段与表头使用不同 Tooltip 参数时，关闭对应自动 Hint 并由 Slot 直接根据业务数据实现：
 
 ```vue
 <template #amount-header="{ label }">

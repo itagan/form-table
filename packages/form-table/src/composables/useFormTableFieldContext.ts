@@ -40,6 +40,7 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
   const hintMode = computed(() => hintContext?.mode.value ?? 'title')
   const hintTargets = computed(() => hintContext?.targets.value ?? 'field')
   const defaultFieldHint = computed(() => hintContext?.defaultFieldHint.value)
+  const hintTrigger = computed(() => options.getConfig().hintTrigger ?? 'item')
 
   /**
    * Element UI 以数组下标组织表单校验路径；行排序后 computed 会生成新路径，
@@ -72,7 +73,10 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
     const config = options.getConfig()
     const formItemProps = resolveDynamicValue(config.formItemProps, runtimeContext.value) || {}
     return {
-      ...applyHintTargetProps(formItemProps, resolvedHint.value, hintMode.value),
+      ...applyHintTargetProps(formItemProps, resolvedHint.value, hintMode.value, {
+        trigger: hintTrigger.value,
+        fieldKey: config.fieldKey
+      }),
       prop: propPath.value
     }
   })
@@ -98,6 +102,9 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
   return {
     propPath,
     runtimeContext,
+    resolvedHint,
+    hintMode,
+    hintTrigger,
     resolvedFormItemProps,
     fieldContext
   }

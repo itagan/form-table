@@ -96,6 +96,54 @@ describe('FormTable lightweight hint behavior', () => {
     wrapper.destroy()
   })
 
+  it('passes content-triggered native titles to component props without overriding explicit titles', async () => {
+    const hint = vi.fn(() => '开关说明')
+    const CustomTitle = localVue.extend({
+      inheritAttrs: false,
+      render(createElement) {
+        return createElement('button', {
+          class: 'content-title-custom',
+          attrs: this.$attrs
+        }, ['Custom'])
+      }
+    })
+    const wrapper = mountFormTable({
+      tableData: [{ enabled: true, amount: 1, summary: 'Text', custom: 'C', slot: 'S' }],
+      columns: [{
+        label: '内容区域 title',
+        formItems: [
+          { fieldKey: 'enabled', type: 'switch', hint, hintTrigger: 'content' },
+          {
+            fieldKey: 'amount', type: 'number', hint: '自动金额说明', hintTrigger: 'content',
+            component: { props: { title: '组件自有说明' } }
+          },
+          { fieldKey: 'summary', type: 'text', hint: '文本说明', hintTrigger: 'content' },
+          {
+            fieldKey: 'custom', type: 'component', hint: '自定义组件说明', hintTrigger: 'content',
+            component: { is: CustomTitle }
+          },
+          {
+            fieldKey: 'slot', type: 'slot', hint: 'Slot 说明', hintTrigger: 'content',
+            component: { slot: 'content-title' }
+          }
+        ]
+      }],
+      scopedSlots: {
+        'content-title': '<button class="content-title-slot" v-bind="props.component.props">Slot</button>'
+      }
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.findAll('.el-form-item').wrappers.every(item => item.attributes('title') === undefined)).toBe(true)
+    expect(wrapper.find('.el-switch').attributes('title')).toBe('开关说明')
+    expect(wrapper.find('.el-input-number').attributes('title')).toBe('组件自有说明')
+    expect(wrapper.find('.el-form-item__content > span').attributes('title')).toBe('文本说明')
+    expect(wrapper.find('.content-title-custom').attributes('title')).toBe('自定义组件说明')
+    expect(wrapper.find('.content-title-slot').attributes('title')).toBe('Slot 说明')
+    expect(hint).toHaveBeenCalledTimes(1)
+    wrapper.destroy()
+  })
+
   it.each([
     ['field', true, false],
     ['header', false, true],
@@ -203,12 +251,12 @@ describe('FormTable lightweight hint behavior', () => {
       hintOptions: { mode: 'tooltip' },
       tableData: [{ input: 'A', number: 1, switch: true, rate: 3, slot: 'S' }],
       columns: [
-        { label: 'Input', formItems: [{ fieldKey: 'input', type: 'input', hint: 'Input hint' }] },
-        { label: 'Number', formItems: [{ fieldKey: 'number', type: 'number', hint: 'Number hint' }] },
-        { label: 'Switch', formItems: [{ fieldKey: 'switch', type: 'switch', hint: 'Switch hint' }] },
-        { label: 'Rate', formItems: [{ fieldKey: 'rate', type: 'rate', hint: 'Rate hint' }] },
+        { label: 'Input', formItems: [{ fieldKey: 'input', type: 'input', hint: 'Input hint', hintTrigger: 'content' }] },
+        { label: 'Number', formItems: [{ fieldKey: 'number', type: 'number', hint: 'Number hint', hintTrigger: 'content' }] },
+        { label: 'Switch', formItems: [{ fieldKey: 'switch', type: 'switch', hint: 'Switch hint', hintTrigger: 'content' }] },
+        { label: 'Rate', formItems: [{ fieldKey: 'rate', type: 'rate', hint: 'Rate hint', hintTrigger: 'content' }] },
         { label: 'Slot', formItems: [{
-          fieldKey: 'slot', type: 'slot', hint: 'Slot hint', component: { slot: 'single' }
+          fieldKey: 'slot', type: 'slot', hint: 'Slot hint', hintTrigger: 'content', component: { slot: 'single' }
         }] }
       ],
       scopedSlots: { single: '<button class="single-slot">Slot</button>' }
@@ -227,6 +275,32 @@ describe('FormTable lightweight hint behavior', () => {
     wrapper.destroy()
   })
 
+  it('does not trigger a content hint from FormItem padding', async () => {
+    const wrapper = mountFormTable({
+      hintOptions: { mode: 'tooltip' },
+      tableData: [{ enabled: true }],
+      columns: [{ label: 'Switch', formItems: [{
+        fieldKey: 'enabled', type: 'switch', hint: 'Switch hint', hintTrigger: 'content'
+      }] }]
+    })
+    await wrapper.vm.$nextTick()
+    const tooltip = getHintTooltip(wrapper)
+    const show = vi.spyOn(tooltip, 'handleShowPopper').mockImplementation(() => undefined)
+    const item = wrapper.find('.el-form-item')
+    const content = wrapper.find('.el-switch')
+    setElementRect(content.element)
+
+    await item.trigger('mouseover')
+    await flushTooltip(wrapper)
+    expect(show).not.toHaveBeenCalled()
+
+    await content.trigger('mouseover')
+    await flushTooltip(wrapper)
+    expect(show).toHaveBeenCalledTimes(1)
+    expect(tooltip.referenceElm).toBe(content.element)
+    wrapper.destroy()
+  })
+
   it('falls back for multi-root or zero-size fields and ignores validation errors', async () => {
     const Host = localVue.extend({
       components: { FormTable },
@@ -234,11 +308,11 @@ describe('FormTable lightweight hint behavior', () => {
         rows: [{ multiple: 'M', empty: '', single: 'S' }],
         columns: [
           { label: 'Multiple', formItems: [{
-            fieldKey: 'multiple', type: 'slot', hint: 'Multiple hint', component: { slot: 'multiple' }
+            fieldKey: 'multiple', type: 'slot', hint: 'Multiple hint', hintTrigger: 'content', component: { slot: 'multiple' }
           }] },
-          { label: 'Empty', formItems: [{ fieldKey: 'empty', type: 'input', hint: 'Empty hint' }] },
+          { label: 'Empty', formItems: [{ fieldKey: 'empty', type: 'input', hint: 'Empty hint', hintTrigger: 'content' }] },
           { label: 'Single', formItems: [{
-            fieldKey: 'single', type: 'slot', hint: 'Single hint', component: { slot: 'single' }
+            fieldKey: 'single', type: 'slot', hint: 'Single hint', hintTrigger: 'content', component: { slot: 'single' }
           }] }
         ]
       }),
@@ -257,6 +331,7 @@ describe('FormTable lightweight hint behavior', () => {
     const formTable = wrapper.findComponent(FormTable as any) as Wrapper<Vue>
     const tooltip = getHintTooltip(formTable)
     vi.spyOn(tooltip, 'handleShowPopper').mockImplementation(() => undefined)
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
     const items = wrapper.findAll('.el-form-item')
     const firstRoot = wrapper.find('.first-root')
     const secondRoot = wrapper.find('.second-root')
@@ -281,6 +356,12 @@ describe('FormTable lightweight hint behavior', () => {
     await validRoot.trigger('mouseover')
     await flushTooltip(wrapper)
     expect(tooltip.referenceElm).toBe(validRoot.element)
+    await firstRoot.trigger('mouseover')
+    await zeroSizeInput.trigger('mouseover')
+    expect(warn).toHaveBeenCalledTimes(2)
+    expect(warn.mock.calls[0][0]).toContain('Field "multiple"')
+    expect(warn.mock.calls[1][0]).toContain('Field "empty"')
+    warn.mockRestore()
     wrapper.destroy()
   })
 
@@ -292,7 +373,9 @@ describe('FormTable lightweight hint behavior', () => {
     const createColumns = (type: 'input' | 'number') => [{
       key: 'value-column',
       label: 'Value',
-      formItems: [{ key: 'value-field', fieldKey: 'value', type, hint: 'Value hint' }]
+      formItems: [{
+        key: 'value-field', fieldKey: 'value', type, hint: 'Value hint', hintTrigger: 'content' as const
+      }]
     }]
     const wrapper = mountFormTable({
       hintOptions: { mode: 'tooltip' },
@@ -325,7 +408,7 @@ describe('FormTable lightweight hint behavior', () => {
     const wrapper = mountFormTable({
       hintOptions: { mode: 'tooltip' },
       columns: [{ label: '字段', formItems: [{
-        fieldKey: 'name', type: 'slot', hint: '字段说明', component: { slot: 'content' }
+        fieldKey: 'name', type: 'slot', hint: '字段说明', hintTrigger: 'content', component: { slot: 'content' }
       }] }],
       scopedSlots: { content: '<button class="target">字段</button>' }
     })
@@ -334,6 +417,7 @@ describe('FormTable lightweight hint behavior', () => {
     const show = vi.spyOn(tooltip, 'handleShowPopper').mockImplementation(() => undefined)
     const close = vi.spyOn(tooltip, 'handleClosePopper').mockImplementation(() => undefined)
     const target = wrapper.find('.target')
+    setElementRect(target.element)
     target.element.setAttribute('aria-describedby', 'existing')
 
     await target.trigger('mouseover')

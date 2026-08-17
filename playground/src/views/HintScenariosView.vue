@@ -95,7 +95,9 @@ const columns: ColumnConfig[] = [{
 }, {
   label: '金额',
   headerHint: '含税金额说明',
-  formItems: [{ fieldKey: 'amount', type: 'number' }]
+  formItems: [{
+    fieldKey: 'amount', type: 'number', hint: '仅金额组件区域触发', hintTrigger: 'content'
+  }]
 }]
 
 const customHeaderColumns: ColumnConfig[] = [{

@@ -22,6 +22,7 @@ import FormTable, {
   type FormTableFormProps,
   type FormTableHeaderSlotContext,
   type FormTableHintMode,
+  type FormTableHintTrigger,
   type FormTableHintTargets,
   type FormTableHintOptions,
   type FormTableProps,
@@ -94,7 +95,9 @@ const completeValueHint: FormTableHintValue = '完整字段值'
 const disabledFieldHint: FormTableHintValue = false
 void disabledFieldHint
 const disabledHintMode: FormTableHintMode = false
+const contentHintTrigger: FormTableHintTrigger = 'content'
 const fieldHintTargets: FormTableHintTargets = 'field'
+void contentHintTrigger
 // @ts-expect-error Hint 不再接受配置对象。
 const invalidObjectHint: FormTableHintValue = { content: '自动展示' }
 const rows: TableRow[] = [{ name: 'Alice', profile: { city: '杭州' } }]
@@ -112,6 +115,21 @@ const componentVariantColumns: ColumnConfig[] = [{
   ]
 }]
 void componentVariantColumns
+
+const contentHintColumns: ColumnConfig[] = [{
+  label: '紧凑提示',
+  formItems: [{ fieldKey: 'enabled', type: 'switch', hint: '是否启用', hintTrigger: 'content' }]
+}]
+void contentHintColumns
+const invalidHintTriggerColumns: ColumnConfig[] = [{
+  label: '错误触发区域',
+  formItems: [{
+    fieldKey: 'enabled', type: 'switch', hint: '是否启用',
+    // @ts-expect-error Hint 触发区域只接受 item/content。
+    hintTrigger: 'component'
+  }]
+}]
+void invalidHintTriggerColumns
 
 interface PurchaseRow {
   name: string

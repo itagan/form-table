@@ -64,6 +64,7 @@ export const apiGroups: ApiGroup[] = [
       { path: 'columns[].formItems[].labelSlot', type: 'string', defaultValue: '—', target: 'el-form-item label Slot', description: '引用 FormTable 具名 Slot；未提供对应 Slot 时保留原生 label。', context: 'FormTableFormItemSlotContext' },
       { path: 'columns[].formItems[].errorSlot', type: 'string', defaultValue: '—', target: 'el-form-item error Slot', description: '引用 FormTable 具名 Slot；仅在校验错误展示时挂载。', context: 'FormTableFormItemErrorSlotContext' },
       { path: 'columns[].formItems[].hint', type: 'FormTableHintValue | (context) => FormTableHintValue', defaultValue: '继承 field', target: 'el-form-item / 字段配置', description: '空值继承、false 关闭、非空字符串覆盖。', context: 'ItemContext' },
+      { path: 'columns[].formItems[].hintTrigger', type: "'item' | 'content'", defaultValue: "'item'", target: '字段 Hint 触发区域', description: 'content 使用唯一可见内容根节点；无法唯一定位时回退并在开发环境警告。' },
       { path: 'columns[].formItems[].component', type: 'ComponentConfig', defaultValue: '{}', target: '实际字段组件', description: '组件、绑定协议、属性、事件和选项。' }
     ]
   },

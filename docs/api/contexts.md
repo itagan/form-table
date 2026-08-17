@@ -139,7 +139,7 @@ formItems: [
 
 `meta` 不会复制到 Slot scope 顶层或 `component.props`；未配置时保持 `undefined`。
 
-Item Hint 及 `hintOptions.field` formatter 都使用 `FormTableFieldRenderContext`。解析后的提示内容只由 FormTable 内部展示，不向组件动态配置、listener 或 Slot 传播。
+Item Hint 及 `hintOptions.field` formatter 都使用 `FormTableFieldRenderContext`。解析后的提示内容不进入组件动态配置回调或 listener；仅 `hintTrigger: 'content'` 的 title 模式会将其作为缺省 `component.props.title` 提供给实际组件或字段 Slot。
 
 ## FormItem Label / Error Slot 上下文
 

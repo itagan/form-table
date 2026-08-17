@@ -38,3 +38,5 @@ export type FormTableHintValue = string | false | null | undefined
 export type FormTableHintMode = false | 'title' | 'tooltip'
 /** 自动提示作用范围；默认仅处理字段。 */
 export type FormTableHintTargets = 'field' | 'header' | 'all'
+/** 字段 Hint 的触发区域；默认使用整个 FormItem。 */
+export type FormTableHintTrigger = 'item' | 'content'

@@ -2,6 +2,8 @@ import { nextTick, onBeforeUnmount, watch } from 'vue'
 import type { Ref } from 'vue'
 import {
   FORM_TABLE_HINT_ATTRIBUTE,
+  FORM_TABLE_HINT_FIELD_ATTRIBUTE,
+  FORM_TABLE_HINT_TRIGGER_ATTRIBUTE,
   FORM_TABLE_HINT_ROOT_ATTRIBUTE
 } from '../utils/hint'
 import { createElementTooltipAdapter } from '../utils/elementTooltipAdapter'
@@ -27,19 +29,15 @@ const FORM_ITEM_SELECTOR = '.el-form-item'
 const FORM_ITEM_CONTENT_SELECTOR = '.el-form-item__content'
 const FORM_ITEM_ERROR_SELECTOR = '.el-form-item__error'
 
-/**
- * 字段仍由 el-form-item 统一触发，但 Tooltip 优先贴近唯一的实际组件根节点。
- * 多根 Slot、空内容和零尺寸节点无法形成稳定锚点，因此保持原 form-item 定位。
- */
-function resolveReferenceTarget(target: HTMLElement): HTMLElement {
-  if (!target.matches(FORM_ITEM_SELECTOR)) return target
-
+/** 查找 FormItem 内容区中可用于触发和定位的直接根节点。 */
+function findVisibleContentRoots(target: HTMLElement): HTMLElement[] {
+  if (!target.matches(FORM_ITEM_SELECTOR)) return []
   const content = Array.from(target.children).find(element => (
     element instanceof HTMLElement && element.matches(FORM_ITEM_CONTENT_SELECTOR)
   ))
-  if (!(content instanceof HTMLElement)) return target
+  if (!(content instanceof HTMLElement)) return []
 
-  const candidates = Array.from(content.children).filter((element): element is HTMLElement => {
+  return Array.from(content.children).filter((element): element is HTMLElement => {
     if (!(element instanceof HTMLElement) || element.matches(FORM_ITEM_ERROR_SELECTOR)) return false
     const style = window.getComputedStyle(element)
     const rect = element.getBoundingClientRect()
@@ -49,7 +47,6 @@ function resolveReferenceTarget(target: HTMLElement): HTMLElement {
       && rect.width > 0
       && rect.height > 0
   })
-  return candidates.length === 1 ? candidates[0] : target
 }
 
 /** 在当前 FormTable 根节点委托提示事件，并维护唯一 Tooltip 的状态。 */
@@ -67,6 +64,7 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
   let focusSuppressedByPointer = false
   let observedContainer: HTMLElement | null = null
   let observer: MutationObserver | null = null
+  const warnedContentFallbacks = new Set<string>()
 
   const isOwnedByContainer = (element: HTMLElement | null): element is HTMLElement => {
     const container = options.containerRef.value
@@ -78,10 +76,42 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
     )
   }
 
+  const resolveContentTarget = (target: HTMLElement): HTMLElement => {
+    const candidates = findVisibleContentRoots(target)
+    if (candidates.length === 1) return candidates[0]
+
+    if (import.meta.env.DEV) {
+      const fieldKey = target.getAttribute(FORM_TABLE_HINT_FIELD_ATTRIBUTE) || '(unknown)'
+      const reason = candidates.length === 0 ? 'empty' : 'multiple'
+      const warningKey = `${fieldKey}\u0000${reason}`
+      if (!warnedContentFallbacks.has(warningKey)) {
+        warnedContentFallbacks.add(warningKey)
+        console.warn(
+          `[FormTable] Field "${fieldKey}" uses hintTrigger: "content", but ${candidates.length} visible content root elements were found. Falling back to el-form-item.`
+        )
+      }
+    }
+    return target
+  }
+
+  /** 默认字段只改变定位；content 字段同时使用唯一内容根节点限制触发区域。 */
+  const resolveReferenceTarget = (target: HTMLElement): HTMLElement => {
+    if (!target.matches(FORM_ITEM_SELECTOR)) return target
+    if (target.getAttribute(FORM_TABLE_HINT_TRIGGER_ATTRIBUTE) === 'content') {
+      return resolveContentTarget(target)
+    }
+    const candidates = findVisibleContentRoots(target)
+    return candidates.length === 1 ? candidates[0] : target
+  }
+
   const findHintTarget = (candidate: EventTarget | null): HTMLElement | null => {
     if (!(candidate instanceof Element)) return null
     const target = candidate.closest(HINT_SELECTOR)
-    return target instanceof HTMLElement && isOwnedByContainer(target) ? target : null
+    if (!(target instanceof HTMLElement) || !isOwnedByContainer(target)) return null
+    if (target.getAttribute(FORM_TABLE_HINT_TRIGGER_ATTRIBUTE) !== 'content') return target
+
+    const triggerTarget = resolveContentTarget(target)
+    return triggerTarget === target || triggerTarget.contains(candidate) ? target : null
   }
 
   const clearDescription = () => {
@@ -285,7 +315,13 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
     })
     observer.observe(container, {
       attributes: true,
-      attributeFilter: [FORM_TABLE_HINT_ATTRIBUTE],
+      attributeFilter: [
+        FORM_TABLE_HINT_ATTRIBUTE,
+        FORM_TABLE_HINT_TRIGGER_ATTRIBUTE,
+        'class',
+        'hidden',
+        'style'
+      ],
       childList: true,
       subtree: true
     })

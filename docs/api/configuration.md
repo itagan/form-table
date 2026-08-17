@@ -24,7 +24,7 @@ FormTable
    ├─ rowProps                            唯一 el-row，默认 type: flex
    └─ formItems[]                        FormItemConfig
       ├─ key / fieldKey / meta / visible / type
-      ├─ colProps / formItemProps / hint
+      ├─ colProps / formItemProps / hint / hintTrigger
       ├─ labelSlot / errorSlot
       └─ component
          ├─ is / resolveComponent / slot
