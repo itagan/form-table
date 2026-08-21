@@ -4,6 +4,21 @@
 
 > 可运行 Demo：[复合字段映射 ↗](http://localhost:5173/composite-binding)
 
+## 如何选择
+
+`binding.map` 是声明式的路径投影，不是通用的数据转换器。可以按下面的边界选择：
+
+| 场景 | 建议方式 |
+| --- | --- |
+| 对象属性分别对应多个行字段，如 `selection.id/name` | `binding.map` |
+| 固定数组项分别对应多个行字段，如 `[0]/[1]` | `binding.map` |
+| 远程 Schema 需要描述可序列化的路径对应关系 | `binding.map` |
+| 遍历数组并提取、拼接、过滤或去重，如 `users[].id → ids` | `model: false + listeners + updateRow` |
+| 条件计算、异步处理或额外业务副作用 | `model: false + listeners + updateRow` |
+| 一个字段区域需要自行组合多个控件或布局 | 字段 Slot；简单路径写回仍可调用 `setBindingValue` |
+
+映射中的每个 `valuePath` 都必须是明确路径，不支持通配符、数组遍历或多个来源聚合。组件返回结构与行字段只是“形状不同、路径固定”时使用映射；需要计算新值时使用事件回调。
+
 ## 数组值
 
 自定义日期范围组件通过 `range/range-change` 提供数组值，但行数据分别保存开始和结束日期：
@@ -85,16 +100,19 @@ binding: {
 
 ## 复杂转换
 
-映射数组只表达路径对应关系和静态 fallback，不提供格式化、条件或异步转换。此类场景使用已有回调：
+映射数组只表达路径对应关系和静态 fallback，不提供格式化、条件、数组遍历或异步转换。例如选择器返回多个用户，但业务字段还要保存拼接后的 `ids` 时，应主动处理组件事件：
 
 ```ts
 component: {
-  is: BusinessSelector,
+  is: UserSelector,
   model: false,
-  props: ({ row }) => ({ value: createBusinessValue(row) }),
+  props: ({ row }) => ({ value: row.users }),
   listeners: {
-    change({ updateRow }, value) {
-      updateRow(createBusinessPatch(value))
+    change({ updateRow }, users = []) {
+      updateRow({
+        users,
+        ids: users.map(user => user.id).join(',')
+      })
     }
   }
 }
