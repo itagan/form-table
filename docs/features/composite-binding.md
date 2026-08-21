@@ -6,25 +6,26 @@
 
 ## 数组值
 
-日期范围组件接收数组，但行数据分别保存开始和结束日期：
+自定义日期范围组件通过 `range/range-change` 提供数组值，但行数据分别保存开始和结束日期：
 
 ```ts
 {
   fieldKey: 'startDate',
   binding: {
     map: [
-      { fieldPath: 'startDate', valuePath: '[0]' },
-      { fieldPath: 'endDate', valuePath: '[1]' }
+      { fieldPath: 'startDate', valuePath: '[0]', fallbackValue: '' },
+      { fieldPath: 'endDate', valuePath: '[1]', fallbackValue: '' }
     ]
   },
-  type: 'date',
+  type: 'component',
   component: {
-    props: { type: 'daterange', valueFormat: 'yyyy-MM-dd' }
+    is: DateRangePicker,
+    model: { prop: 'range', event: 'range-change' }
   }
 }
 ```
 
-读取时 FormTable 生成 `[row.startDate, row.endDate]`；组件更新后生成一个包含两个字段路径的 patch，并只调用一次 `updateRow()`。
+FormTable 会向组件的 `range` Prop 注入 `[row.startDate, row.endDate]`，监听 `range-change` 后生成一个包含两个字段路径的 patch，并只调用一次 `updateRow()`。这与普通单字段自定义组件的 model 配置方式相同，区别只是注入和接收的值由 `binding.map` 负责拆装。
 
 ## 对象与嵌套路径
 

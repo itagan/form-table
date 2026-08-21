@@ -3,9 +3,9 @@
     <router-link to="/">← 返回调试台</router-link>
     <h1>复合字段映射</h1>
     <p>
-      <code>binding.map</code> 将一个组件值映射到多个行字段；数组范围使用自动 model，
-      清除时由 <code>fallbackValue</code> 写入空字符串；对象映射通过字段 Slot 的
-      <code>bindingValue/setBindingValue</code> 接入。
+      <code>binding.map</code> 将一个组件值映射到多个行字段；日期范围展示自定义组件及
+      自定义 model 协议，清除时由 <code>fallbackValue</code> 写入空字符串；对象映射通过
+      字段 Slot 的 <code>bindingValue/setBindingValue</code> 接入。
     </p>
 
     <FormTable
@@ -46,6 +46,7 @@
 import { ref } from 'vue'
 import { createFormTable, defineFormTableColumns } from '@itagan/form-table'
 import type { TableRow } from '@itagan/form-table'
+import DateRangePicker from '../components/CustomComponents/DateRangePicker.vue'
 import DemoCollapsiblePanel from '../components/DemoCollapsiblePanel.vue'
 
 interface CompositeRow extends TableRow {
@@ -66,7 +67,7 @@ const tableData = ref<CompositeRow[]>([{
 
 const columns = defineFormTableColumns<CompositeRow>([
   {
-    label: '日期范围（数组映射）',
+    label: '日期范围（自定义组件 + 数组映射）',
     props: { minWidth: 330 },
     formItems: [{
       fieldKey: 'startDate',
@@ -76,19 +77,14 @@ const columns = defineFormTableColumns<CompositeRow>([
           { fieldPath: 'endDate', valuePath: '[1]', fallbackValue: '' }
         ]
       },
-      type: 'date',
+      type: 'component',
       formItemProps: {
         label: '开始 / 结束日期',
         rules: [{ required: true, message: '请选择日期范围' }]
       },
       component: {
-        props: {
-          type: 'daterange',
-          valueFormat: 'yyyy-MM-dd',
-          rangeSeparator: '至',
-          startPlaceholder: '开始日期',
-          endPlaceholder: '结束日期'
-        }
+        is: DateRangePicker,
+        model: { prop: 'range', event: 'range-change' }
       }
     }]
   },
