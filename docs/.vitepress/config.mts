@@ -70,6 +70,7 @@ export default defineConfig({
             collapsed: false,
             items: [
               { text: '数据更新与受控回写', link: '/features/data-updates' },
+              { text: '复合字段映射', link: '/features/composite-binding' },
               { text: '校验、清理与重置', link: '/features/validation-reset' },
               { text: '动态显隐与配置更新', link: '/features/dynamic-configuration' },
               { text: '稳定身份与异步安全', link: '/features/stable-identity' },
