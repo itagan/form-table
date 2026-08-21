@@ -23,9 +23,9 @@
     <ComponentWrapper
       v-else
       :type="config.type"
-      :value="fieldContext.value"
+      :value="fieldContext.bindingValue"
       :component="resolvedComponent"
-      @input="fieldContext.setValue"
+      @input="fieldContext.setBindingValue"
     />
   </el-form-item>
 </template>

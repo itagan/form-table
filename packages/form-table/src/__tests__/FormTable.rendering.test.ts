@@ -425,11 +425,13 @@ describe('FormTable rendering and configuration', () => {
       itemConfig: { fieldKey: 'status', type: 'component' }
     })
     expect(Object.keys(listener.mock.calls[0][0]).sort()).toEqual([
+      'bindingValue',
       'columnConfig',
       'fieldKey',
       'index',
       'itemConfig',
       'row',
+      'setBindingValue',
       'setValue',
       'tableData',
       'updateRow',
@@ -627,6 +629,77 @@ describe('FormTable rendering and configuration', () => {
       { id: 'user-2', name: 'Bob' },
       'manual'
     ])
+    wrapper.destroy()
+  })
+
+  it('maps one component model value to multiple row fields in one update', async () => {
+    const selectionListener = vi.fn()
+    const UserSelector = {
+      props: ['selectedUser'],
+      render(this: any, h: any) {
+        return h('button', {
+          class: 'composite-model-selector',
+          attrs: {
+            type: 'button',
+            'data-selected-user': JSON.stringify(this.selectedUser)
+          },
+          on: {
+            click: () => this.$emit('select', {
+              payload: { id: 'user-2', profile: { name: 'Bob' } }
+            })
+          }
+        })
+      }
+    }
+    const wrapper = mountFormTable({
+      tableData: [{ ownerId: 'user-1', ownerName: 'Alice' }],
+      columns: [{
+        label: '负责人',
+        formItems: [{
+          fieldKey: 'ownerId',
+          binding: {
+            map: [
+              { fieldPath: 'ownerId', valuePath: 'id' },
+              { fieldPath: 'ownerName', valuePath: 'profile.name' }
+            ]
+          },
+          type: 'component',
+          component: {
+            is: UserSelector,
+            model: {
+              prop: 'selectedUser',
+              event: 'select',
+              valueFromEvent: (...args) => (args[0] as any).payload
+            },
+            listeners: { select: selectionListener }
+          }
+        }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    const selector = wrapper.find('.composite-model-selector')
+    expect((wrapper.findComponent({ name: 'ElFormItem' }).vm as any).prop).toBe('tableData.0.ownerId')
+    expect(selector.attributes('data-selected-user')).toBe(JSON.stringify({
+      id: 'user-1',
+      profile: { name: 'Alice' }
+    }))
+    await selector.trigger('click')
+
+    expect(wrapper.emitted('update:tableData')).toHaveLength(1)
+    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{
+      ownerId: 'user-2',
+      ownerName: 'Bob'
+    }])
+    expect(wrapper.emitted('field-change')?.map(event => event[0])).toEqual([
+      expect.objectContaining({ fieldKey: 'ownerId', value: 'user-2' }),
+      expect.objectContaining({ fieldKey: 'ownerName', value: 'Bob' })
+    ])
+    expect(selectionListener).toHaveBeenCalledTimes(1)
+    expect(selectionListener.mock.calls[0][0].bindingValue).toEqual({
+      id: 'user-1',
+      profile: { name: 'Alice' }
+    })
     wrapper.destroy()
   })
 
