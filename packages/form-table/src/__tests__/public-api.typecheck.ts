@@ -361,7 +361,8 @@ const customModel: FieldModelConfig = {
 
 const fieldBindingEntry: FieldBindingMapEntry = {
   fieldPath: 'profile.id',
-  valuePath: 'selection.id'
+  valuePath: 'selection.id',
+  fallbackValue: null
 }
 const fieldBinding: FieldBindingConfig = {
   map: [fieldBindingEntry]

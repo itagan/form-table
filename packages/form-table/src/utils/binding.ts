@@ -26,6 +26,23 @@ interface CompiledBinding {
 const ARRAY_INDEX_SEGMENT = /^(0|[1-9]\d*)$/
 const compiledBindingCache = new WeakMap<FieldBindingConfig, CompiledBinding>()
 
+function hasFallbackValue(entry: FieldBindingMapEntry) {
+  return Object.prototype.hasOwnProperty.call(entry, 'fallbackValue')
+}
+
+/** 避免多个字段或数据行直接共享配置中的可变容器根引用。 */
+function cloneFallbackValue(value: FormTableValue) {
+  if (Array.isArray(value)) return [...value]
+  if (
+    value !== null
+    && typeof value === 'object'
+    && (Object.getPrototypeOf(value) === Object.prototype || Object.getPrototypeOf(value) === null)
+  ) {
+    return { ...value }
+  }
+  return value
+}
+
 function isSameOrParentPath(left: readonly string[], right: readonly string[]) {
   if (left.length > right.length) return false
   return left.every((segment, index) => segment === right[index])
@@ -114,16 +131,15 @@ export function createBindingPatch<TRow extends TableRow>(
   const compiled = compileBinding(binding)
   const patch: FormTableRecord = {}
 
-  if (value === null) {
-    compiled.entries.forEach((entry) => {
-      patch[entry.fieldPath] = null
-    })
-    return patch as FormTableRowPatch<TRow>
-  }
-
   compiled.entries.forEach((entry) => {
     const resolved = resolveValueByPath(value, entry.valuePath)
-    if (resolved.exists) patch[entry.fieldPath] = resolved.value
+    if (resolved.exists) {
+      patch[entry.fieldPath] = resolved.value
+    } else if (hasFallbackValue(entry)) {
+      patch[entry.fieldPath] = cloneFallbackValue(entry.fallbackValue)
+    } else if (value === null) {
+      patch[entry.fieldPath] = null
+    }
   })
   return patch as FormTableRowPatch<TRow>
 }

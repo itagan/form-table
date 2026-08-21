@@ -49,16 +49,92 @@ describe('field binding utils', () => {
     })
   })
 
-  it('clears every mapped field when the root value is null', () => {
+  it('uses per-entry fallback values for missing object and nested paths', () => {
     const binding = {
       map: [
-        { fieldPath: 'startTime', valuePath: '[0]' },
+        { fieldPath: 'userId', valuePath: 'id', fallbackValue: '' },
+        { fieldPath: 'userName', valuePath: 'profile.name', fallbackValue: '未命名' },
+        { fieldPath: 'optionalCode', valuePath: 'optional.code', fallbackValue: undefined },
+        { fieldPath: 'phone', valuePath: 'phone' }
+      ]
+    }
+
+    expect(createBindingPatch(binding, { profile: null })).toEqual({
+      userId: '',
+      userName: '未命名',
+      optionalCode: undefined
+    })
+    expect(createBindingPatch(binding, {})).toEqual({
+      userId: '',
+      userName: '未命名',
+      optionalCode: undefined
+    })
+    expect(createBindingPatch(binding, undefined)).toEqual({
+      userId: '',
+      userName: '未命名',
+      optionalCode: undefined
+    })
+  })
+
+  it('uses fallback values for empty arrays without changing mapped read defaults', () => {
+    const binding = {
+      map: [
+        { fieldPath: 'startTime', valuePath: '[0]', fallbackValue: '' },
+        { fieldPath: 'endTime', valuePath: '[1]', fallbackValue: '' }
+      ]
+    }
+
+    expect(createBindingPatch(binding, [])).toEqual({
+      startTime: '',
+      endTime: ''
+    })
+    expect(resolveBindingValue({}, binding)).toEqual([undefined, undefined])
+  })
+
+  it('preserves explicit undefined and null values instead of replacing them with fallbacks', () => {
+    const binding = {
+      map: [
+        { fieldPath: 'userId', valuePath: 'id', fallbackValue: 'fallback-id' },
+        { fieldPath: 'userName', valuePath: 'name', fallbackValue: 'fallback-name' }
+      ]
+    }
+
+    expect(createBindingPatch(binding, { id: undefined, name: null })).toEqual({
+      userId: undefined,
+      userName: null
+    })
+  })
+
+  it('shallow-clones array and plain-object fallback containers for each patch', () => {
+    const fallbackList: string[] = []
+    const fallbackMeta = { source: 'fallback' }
+    const binding = {
+      map: [
+        { fieldPath: 'ids', valuePath: 'ids', fallbackValue: fallbackList },
+        { fieldPath: 'meta', valuePath: 'meta', fallbackValue: fallbackMeta }
+      ]
+    }
+
+    const firstPatch = createBindingPatch(binding, {}) as any
+    const secondPatch = createBindingPatch(binding, {}) as any
+
+    expect(firstPatch).toEqual({ ids: [], meta: { source: 'fallback' } })
+    expect(firstPatch.ids).not.toBe(fallbackList)
+    expect(firstPatch.meta).not.toBe(fallbackMeta)
+    expect(firstPatch.ids).not.toBe(secondPatch.ids)
+    expect(firstPatch.meta).not.toBe(secondPatch.meta)
+  })
+
+  it('prefers fallbacks while clearing and keeps null for entries without one', () => {
+    const binding = {
+      map: [
+        { fieldPath: 'startTime', valuePath: '[0]', fallbackValue: '' },
         { fieldPath: 'endTime', valuePath: '[1]' }
       ]
     }
 
     expect(createBindingPatch(binding, null)).toEqual({
-      startTime: null,
+      startTime: '',
       endTime: null
     })
   })
