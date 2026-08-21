@@ -163,6 +163,7 @@ interface FieldModelConfig {
 interface FieldBindingMapEntry {
   fieldPath: string
   valuePath: string
+  fallbackValue?: FormTableValue
 }
 
 interface FieldBindingConfig {
@@ -170,7 +171,7 @@ interface FieldBindingConfig {
 }
 ```
 
-`bindingValue/setBindingValue` 进入 `FormTableFieldContext` 及其 Slot 扩展上下文；主 `value/setValue` 始终保留单一 `fieldKey` 语义。完整规则见[复合字段映射](../features/composite-binding.md)。
+`fallbackValue` 仅在组件输出中无法解析 `valuePath` 时参与写回，不改变从 row 组装 `bindingValue` 的读取方向。`bindingValue/setBindingValue` 进入 `FormTableFieldContext` 及其 Slot 扩展上下文；主 `value/setValue` 始终保留单一 `fieldKey` 语义。完整规则见[复合字段映射](../features/composite-binding.md)。
 
 `row/tableData` 与 `columnConfig/itemConfig` 在回调类型中采用浅层只读约束；运行时不会冻结原对象。字段更新使用 `setValue` 或 `updateRow`，配置调整由调用方替换 `columns`。
 

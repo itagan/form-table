@@ -4,7 +4,8 @@
     <h1>复合字段映射</h1>
     <p>
       <code>binding.map</code> 将一个组件值映射到多个行字段；数组范围使用自动 model，
-      对象映射通过字段 Slot 的 <code>bindingValue/setBindingValue</code> 接入。
+      清除时由 <code>fallbackValue</code> 写入空字符串；对象映射通过字段 Slot 的
+      <code>bindingValue/setBindingValue</code> 接入。
     </p>
 
     <FormTable
@@ -71,8 +72,8 @@ const columns = defineFormTableColumns<CompositeRow>([
       fieldKey: 'startDate',
       binding: {
         map: [
-          { fieldPath: 'startDate', valuePath: '[0]' },
-          { fieldPath: 'endDate', valuePath: '[1]' }
+          { fieldPath: 'startDate', valuePath: '[0]', fallbackValue: '' },
+          { fieldPath: 'endDate', valuePath: '[1]', fallbackValue: '' }
         ]
       },
       type: 'date',
@@ -98,8 +99,8 @@ const columns = defineFormTableColumns<CompositeRow>([
       fieldKey: 'contactName',
       binding: {
         map: [
-          { fieldPath: 'contactName', valuePath: 'contact.name' },
-          { fieldPath: 'contactPhone', valuePath: 'contact.phone' }
+          { fieldPath: 'contactName', valuePath: 'contact.name', fallbackValue: '' },
+          { fieldPath: 'contactPhone', valuePath: 'contact.phone', fallbackValue: '' }
         ]
       },
       type: 'slot',

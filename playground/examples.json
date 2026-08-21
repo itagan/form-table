@@ -64,7 +64,7 @@
   },
   {
     "title": "复合字段映射",
-    "description": "演示 binding.map 对对象和数组组件值的多字段原子写回，以及字段 Slot 绑定助手。",
+    "description": "演示 binding.map 对对象和数组组件值的多字段原子写回、fallbackValue 及字段 Slot 绑定助手。",
     "path": "/composite-binding",
     "name": "composite-binding",
     "view": "CompositeBindingView",
