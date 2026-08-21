@@ -645,7 +645,7 @@ describe('FormTable rendering and configuration', () => {
           },
           on: {
             click: () => this.$emit('select', {
-              payload: { id: 'user-2', profile: { name: 'Bob' } }
+              payload: { id: 'user-2' }
             })
           }
         })
@@ -660,7 +660,7 @@ describe('FormTable rendering and configuration', () => {
           binding: {
             map: [
               { fieldPath: 'ownerId', valuePath: 'id' },
-              { fieldPath: 'ownerName', valuePath: 'profile.name' }
+              { fieldPath: 'ownerName', valuePath: 'profile.name', fallbackValue: '未命名' }
             ]
           },
           type: 'component',
@@ -689,11 +689,11 @@ describe('FormTable rendering and configuration', () => {
     expect(wrapper.emitted('update:tableData')).toHaveLength(1)
     expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{
       ownerId: 'user-2',
-      ownerName: 'Bob'
+      ownerName: '未命名'
     }])
     expect(wrapper.emitted('field-change')?.map(event => event[0])).toEqual([
       expect.objectContaining({ fieldKey: 'ownerId', value: 'user-2' }),
-      expect.objectContaining({ fieldKey: 'ownerName', value: 'Bob' })
+      expect.objectContaining({ fieldKey: 'ownerName', value: '未命名' })
     ])
     expect(selectionListener).toHaveBeenCalledTimes(1)
     expect(selectionListener.mock.calls[0][0].bindingValue).toEqual({

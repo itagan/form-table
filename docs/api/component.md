@@ -43,7 +43,7 @@ columns[].formItems[].component
 
 `...` 在表格中缩写了共同前缀 `columns[].formItems[]`。
 
-Item 级 `binding.map` 位于 `columns[].formItems[].binding`，不属于组件协议。它在 model 读取时将多个行字段组合为组件值，在 model 写回时生成一个行 patch；因此可以与本页的 `component.model/valueFromEvent` 组合。对象、数组、Slot 和校验规则见[复合字段映射](../features/composite-binding.md)。
+Item 级 `binding.map` 位于 `columns[].formItems[].binding`，不属于组件协议。它在 model 读取时将多个行字段组合为组件值，在 model 写回时生成一个行 patch；因此可以与本页的 `component.model/valueFromEvent` 组合。每个映射项还可通过 `fallbackValue` 声明组件值路径缺失时的静态写回值。对象、数组、Slot、清空和校验规则见[复合字段映射](../features/composite-binding.md)。
 
 ## 渲染模式约束
 

@@ -59,7 +59,10 @@ columns[]                                  ColumnConfig
 | `columns[].formItems[].key` | `string` | 可选 | — | Item 稳定渲染身份 |
 | `columns[].formItems[].fieldKey` | `string` | 必填 | — | 行数据路径，支持 `profile.city`、`items[0].name` |
 | `columns[].formItems[].binding` | `FieldBindingConfig` | 可选 | — | 将多个行字段映射为一个组件或字段 Slot 复合值 |
-| `columns[].formItems[].binding.map` | `FieldBindingMapEntry[]` | 至少一项 | — | `fieldPath/valuePath` 双向路径映射；支持点路径与数组下标 |
+| `columns[].formItems[].binding.map` | `FieldBindingMapEntry[]` | 至少一项 | — | 多字段双向路径映射 |
+| `columns[].formItems[].binding.map[].fieldPath` | `string` | 必填 | — | `tableData` 行中的目标字段路径 |
+| `columns[].formItems[].binding.map[].valuePath` | `string` | 必填 | — | 组件复合值中的取值路径 |
+| `columns[].formItems[].binding.map[].fallbackValue` | `FormTableValue` | 可选 | — | 组件值中无法解析 `valuePath` 时写入 `fieldPath` 的兜底值 |
 | `columns[].formItems[].meta` | `FormTableRecord` | 可选 | — | 使用方挂载的静态业务元数据；FormTable 不解析、复制或消费 |
 | `columns[].formItems[].type` | `BuiltinFormItemType \| 'component' \| 'slot'` | 必填 | — | 字段渲染模式 |
 | `columns[].formItems[].labelSlot` | `string` | 可选 | FormItem Slot scope | 自定义 `el-form-item` Label |

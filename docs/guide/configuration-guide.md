@@ -96,8 +96,8 @@ component: {
   fieldKey: 'startTime',
   binding: {
     map: [
-      { fieldPath: 'startTime', valuePath: '[0]' },
-      { fieldPath: 'endTime', valuePath: '[1]' }
+      { fieldPath: 'startTime', valuePath: '[0]', fallbackValue: '' },
+      { fieldPath: 'endTime', valuePath: '[1]', fallbackValue: '' }
     ]
   },
   type: 'date',
@@ -105,7 +105,7 @@ component: {
 }
 ```
 
-`fieldKey` 仍是唯一校验锚点。详细路径、Slot 助手和清空语义见[复合字段映射](../features/composite-binding.md)。
+`fallbackValue` 在组件值路径缺失、复合值为空或清除时提供按字段兜底；路径明确存在的 `null/undefined` 仍以组件值为准。`fieldKey` 仍是唯一校验锚点。详细路径、Slot 助手和清空语义见[复合字段映射](../features/composite-binding.md)。
 
 ### 外层提示模式
 

@@ -25,7 +25,7 @@ FormTable
    └─ formItems[]                        FormItemConfig
       ├─ key / fieldKey / meta / visible / type
       ├─ binding.map[]
-      │  └─ fieldPath / valuePath
+      │  └─ fieldPath / valuePath / fallbackValue
       ├─ colProps / formItemProps / hint / hintTrigger
       ├─ labelSlot / errorSlot
       └─ component

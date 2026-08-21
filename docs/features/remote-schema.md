@@ -117,7 +117,7 @@ function enhanceFormTableColumns(columns, enhancements) {
 | 页面或业务适配层 | 组件映射、事件函数、Slot 实现、权限和数据联动 |
 | FormTable | 渲染增强后的 columns、字段绑定、上下文和受控回写 |
 
-`binding.map` 是可序列化配置，可以由服务端描述多个行字段与组件值路径的对应关系；业务侧仍应校验映射非空、路径安全且不存在重复或父子重叠。格式化、异步和条件联动继续放在本地可信 listener 中。
+`binding.map` 是可序列化配置，可以由服务端描述多个行字段与组件值路径的对应关系，并为缺失路径提供 JSON 可序列化的 `fallbackValue`；业务侧仍应校验映射非空、路径安全且不存在重复或父子重叠。格式化、异步和条件联动继续放在本地可信 listener 中。
 
 远程 Schema 应做版本和结构校验。TypeScript 的 `as ColumnConfig[]` 只影响编译期，不能替代运行时校验；来自不可信来源的配置应先经过白名单解析，`meta` 也只保留业务允许的键和值。字段路径还应明确拒绝 `__proto__`、`prototype` 和 `constructor` 片段；FormTable 核心也会在读取或写入这些路径时立即抛错，作为最后一道安全边界。
 

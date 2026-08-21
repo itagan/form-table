@@ -68,6 +68,8 @@ export interface FieldModelConfig {
 export interface FieldBindingMapEntry {
   fieldPath: string
   valuePath: string
+  /** 组件值中无法解析 valuePath 时写入 fieldPath 的兜底值。 */
+  fallbackValue?: FormTableValue
 }
 
 /** 一个字段渲染项所使用的复合值映射。 */

@@ -267,8 +267,8 @@ describe('FormTable slot rendering', () => {
           fieldKey: 'startTime',
           binding: {
             map: [
-              { fieldPath: 'startTime', valuePath: '[0]' },
-              { fieldPath: 'endTime', valuePath: '[1]' }
+              { fieldPath: 'startTime', valuePath: '[0]', fallbackValue: '' },
+              { fieldPath: 'endTime', valuePath: '[1]', fallbackValue: '' }
             ]
           },
           type: 'slot',
@@ -280,7 +280,7 @@ describe('FormTable slot rendering', () => {
           type="button"
           class="period-setter"
           :data-primary="props.value"
-          @click="props.setBindingValue(['10:00', '11:00'])"
+          @click="props.setBindingValue([])"
         >{{ props.bindingValue.join('—') }}</button>`
       }
     })
@@ -293,8 +293,8 @@ describe('FormTable slot rendering', () => {
 
     expect(wrapper.emitted('update:tableData')).toHaveLength(1)
     expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{
-      startTime: '10:00',
-      endTime: '11:00'
+      startTime: '',
+      endTime: ''
     }])
     wrapper.destroy()
   })

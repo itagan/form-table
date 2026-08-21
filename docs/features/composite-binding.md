@@ -33,8 +33,8 @@
 ```ts
 binding: {
   map: [
-    { fieldPath: 'owner.id', valuePath: 'selection.code' },
-    { fieldPath: 'owner.name', valuePath: 'selection.label' }
+    { fieldPath: 'owner.id', valuePath: 'selection.code', fallbackValue: '' },
+    { fieldPath: 'owner.name', valuePath: 'selection.label', fallbackValue: '未命名' }
   ]
 }
 ```
@@ -59,9 +59,24 @@ binding: {
 ## 写回和清空语义
 
 - 一次 `setBindingValue()` 最多发出一次 `update:tableData`，每个实际变化字段分别发出 `field-change`。
-- 组件值中不存在的 `valuePath` 跳过；明确存在的 `undefined/null` 原样写回。
-- 组件根值为 `null` 时，所有映射字段统一写为 `null`；空数组或空对象按“路径不存在”处理。
+- 组件值中不存在的 `valuePath` 优先使用该映射项的 `fallbackValue`；未配置时跳过。
+- 明确存在的 `undefined/null` 是组件实际返回值，不会被 fallback 替换。
+- 组件根值为 `null` 时，有 fallback 的字段使用 fallback，未配置的字段写为 `null`；根 `undefined`、空数组或空对象只处理配置了 fallback 的字段。
+- 数组和普通对象 fallback 在每次写回前浅复制，避免不同字段或数据行共享同一个容器根引用。
 - 空路径、不安全路径、重复或父子重叠路径、混用对象根与数组根都会作为无效配置拒绝。
+
+```ts
+binding: {
+  map: [
+    { fieldPath: 'userId', valuePath: 'id', fallbackValue: '' },
+    { fieldPath: 'userName', valuePath: 'name', fallbackValue: '未命名' },
+    { fieldPath: 'departmentIds', valuePath: 'departments', fallbackValue: [] },
+    { fieldPath: 'phone', valuePath: 'phone' }
+  ]
+}
+```
+
+组件清空并发出 `null` 时，前三项分别写入 `''/'未命名'/[]`，未配置 fallback 的 `phone` 写入 `null`。组件发出 `{ id: null }` 时，`userId` 明确写入 `null`，其余缺失路径再分别采用 fallback 或跳过。
 
 ## 校验边界
 
@@ -69,7 +84,7 @@ binding: {
 
 ## 复杂转换
 
-映射数组只表达路径对应关系，不提供格式化、条件、默认值或异步转换。此类场景使用已有回调：
+映射数组只表达路径对应关系和静态 fallback，不提供格式化、条件或异步转换。此类场景使用已有回调：
 
 ```ts
 component: {
