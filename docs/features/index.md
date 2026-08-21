@@ -9,6 +9,7 @@
 | 功能点 | 配置入口 | 调用入口 | 结果 / 事件 |
 | --- | --- | --- | --- |
 | [数据更新与受控回写](./data-updates.md) | 根 `v-model`、`tableData`、`rowKey` | 自动字段绑定、`setValue`、`updateRow` | `update:tableData`、`field-change` |
+| [复合字段映射](./composite-binding.md) | Item `binding.map` | 自动 model、`bindingValue/setBindingValue` | 多字段原子写回 |
 | [校验、清理与重置](./validation-reset.md) | Item `formItemProps.rules` | `validate/clearValidate/getFormRef` | Element Form 校验状态 |
 | [动态显隐与配置更新](./dynamic-configuration.md) | 各层 `visible`、动态 props | 替换 `columns` | 响应式布局与组件配置 |
 | [稳定身份与异步安全](./stable-identity.md) | `rowKey`、Column/Row/Item `key` | 异步 `setValue/updateRow` | 正确定位数据与渲染节点 |

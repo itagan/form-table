@@ -6,6 +6,8 @@ import FormTable, {
   type BuiltinFormItemType,
   type CellSlotColumnConfig,
   type ColumnConfig,
+  type FieldBindingConfig,
+  type FieldBindingMapEntry,
   type FieldComponentConfig,
   type FieldComponentResolver,
   type FieldModelConfig,
@@ -357,6 +359,34 @@ const customModel: FieldModelConfig = {
   valueFromEvent: (...args) => (args[0] as { id: string }).id
 }
 
+const fieldBindingEntry: FieldBindingMapEntry = {
+  fieldPath: 'profile.id',
+  valuePath: 'selection.id'
+}
+const fieldBinding: FieldBindingConfig = {
+  map: [fieldBindingEntry]
+}
+
+const compositeBindingColumns: ColumnConfig[] = [{
+  label: '复合字段',
+  formItems: [{
+    fieldKey: 'profile.id',
+    binding: fieldBinding,
+    type: 'component',
+    component: { is: CustomInput }
+  }]
+}]
+void compositeBindingColumns
+
+const invalidFieldBinding: FieldBindingConfig = {
+  map: [{
+    // @ts-expect-error fieldPath must be a string path.
+    fieldPath: 1,
+    valuePath: 'id'
+  }]
+}
+void invalidFieldBinding
+
 const invalidTrueModelConfig: FieldComponentConfig = {
   // @ts-expect-error 原生 v-model 通过省略 model 表达，不再接受 true。
   model: true
@@ -681,6 +711,8 @@ const contextBoundaries: ColumnConfig[] = [{
             // @ts-expect-error callback rows are read-only; use updateRow instead.
             fieldContext.row.name = 'Bob'
             fieldContext.updateRow({ name: 'Bob' })
+            void fieldContext.bindingValue
+            fieldContext.setBindingValue({ name: 'Bob' })
           }
         }
       }
@@ -698,6 +730,8 @@ headerContext.columnConfig.label = '新表头'
 void headerContext.column
 
 declare const formItemSlotContext: FormTableFormItemSlotContext
+void formItemSlotContext.bindingValue
+formItemSlotContext.setBindingValue('Bob')
 void formItemSlotContext.propPath
 void formItemSlotContext.value
 formItemSlotContext.setValue('Bob')

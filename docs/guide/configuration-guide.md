@@ -89,6 +89,24 @@ component: {
 
 返回 `undefined` 时回退到静态 `is`。完整页面模式见[自定义字段组件](../features/custom-component.md)。
 
+一个组件值对应多个行字段且仅需路径转换时，使用可序列化的 `binding.map`；需要计算、异步或副作用时继续使用动态 props 和 listener：
+
+```ts
+{
+  fieldKey: 'startTime',
+  binding: {
+    map: [
+      { fieldPath: 'startTime', valuePath: '[0]' },
+      { fieldPath: 'endTime', valuePath: '[1]' }
+    ]
+  },
+  type: 'date',
+  component: { props: { type: 'daterange' } }
+}
+```
+
+`fieldKey` 仍是唯一校验锚点。详细路径、Slot 助手和清空语义见[复合字段映射](../features/composite-binding.md)。
+
 ### 外层提示模式
 
 默认或 Slot 表头提示使用 `column.headerHint`，字段提示使用 Item `hint`；紧凑组件可用 `hintTrigger: 'content'` 将触发区域收敛到唯一可见内容根节点。`hintOptions.field` 未配置或为 `false` 时无全局字段处理，`true` 默认字符串化，函数统一格式化；Item 不写或返回空值时继承、`false` 关闭、非空字符串覆盖。整张表通过 `hintOptions` 在原生 `title` 和单实例 `tooltip` 之间二选一。完整规则与场景示例见 [Hint 提示体系](../features/hint.md)。

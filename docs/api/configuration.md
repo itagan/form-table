@@ -24,6 +24,8 @@ FormTable
    ├─ rowProps                            唯一 el-row，默认 type: flex
    └─ formItems[]                        FormItemConfig
       ├─ key / fieldKey / meta / visible / type
+      ├─ binding.map[]
+      │  └─ fieldPath / valuePath
       ├─ colProps / formItemProps / hint / hintTrigger
       ├─ labelSlot / errorSlot
       └─ component
@@ -66,6 +68,7 @@ FormTable
 | FormItem Label / Error Slot | [能力边界与处理方案](../features/element-ui-boundaries.md#formitem-自定义-label-和-error) | [`/hint-scenarios`](http://localhost:5173/hint-scenarios) |
 | 列级单元格 Slot | [`cellSlot` 专题](../features/cell-slot.md) | [`/cell-slot`](http://localhost:5173/cell-slot) |
 | 自定义字段组件 | [配置与使用](../features/custom-component.md) | [`/enterprise-components`](http://localhost:5173/enterprise-components) |
+| 复合字段映射 | [配置与使用](../features/composite-binding.md) | [`/composite-binding`](http://localhost:5173/composite-binding) |
 | 复杂 Option / 分组选项 | [使用字段 Slot 接入](./component.md#复杂-option-接入) | — |
 | 远程 Schema | [配置与本地增强](../features/remote-schema.md) | [`/remote-schema`](http://localhost:5173/remote-schema) |
 | 行列动态操作 | [行列操作与异步提交](../features/row-column-operations.md) | [`/row-column-operations`](http://localhost:5173/row-column-operations) |

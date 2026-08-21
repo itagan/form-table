@@ -23,7 +23,7 @@ function assertSafePath(path: string, segments: readonly string[]) {
   }
 }
 
-function normalizePath(path: string): readonly string[] {
+export function normalizePath(path: string): readonly string[] {
   const cached = normalizedPathCache.get(path)
   if (cached) return cached
 
@@ -42,12 +42,11 @@ function normalizePath(path: string): readonly string[] {
   return segments
 }
 
-/**
- * 按路径读取对象值。
- *
- * 支持点路径和数组下标写法，如 `profile.city`、`items[0].name`。
- */
-export function getValueByPath(source: Readonly<FormTableRecord>, path: string): FormTableValue | undefined {
+/** 区分路径不存在与路径明确存在但值为 undefined。 */
+export function resolveValueByPath(
+  source: Readonly<FormTableRecord>,
+  path: string
+): { exists: boolean, value: FormTableValue | undefined } {
   const segments = normalizePath(path)
   let current: FormTableValue = source
 
@@ -56,16 +55,21 @@ export function getValueByPath(source: Readonly<FormTableRecord>, path: string):
       !isObjectLike(current)
       || !Object.prototype.hasOwnProperty.call(current, segment)
     ) {
-      return undefined
+      return { exists: false, value: undefined }
     }
-
     current = current[segment]
-    if (current === undefined) {
-      return undefined
-    }
   }
 
-  return current
+  return { exists: segments.length > 0, value: current }
+}
+
+/**
+ * 按路径读取对象值。
+ *
+ * 支持点路径和数组下标写法，如 `profile.city`、`items[0].name`。
+ */
+export function getValueByPath(source: Readonly<FormTableRecord>, path: string): FormTableValue | undefined {
+  return resolveValueByPath(source, path).value
 }
 
 /**

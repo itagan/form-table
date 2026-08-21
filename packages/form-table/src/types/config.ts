@@ -64,6 +64,17 @@ export interface FieldModelConfig {
   valueFromEvent?: (...args: unknown[]) => FormTableValue
 }
 
+/** 在行字段路径与组件受控值路径之间建立可序列化的双向映射。 */
+export interface FieldBindingMapEntry {
+  fieldPath: string
+  valuePath: string
+}
+
+/** 一个字段渲染项所使用的复合值映射。 */
+export interface FieldBindingConfig {
+  map: FieldBindingMapEntry[]
+}
+
 /** 根据当前字段所在行同步选择实际渲染组件。 */
 export type FieldComponentResolver<TRow extends TableRow = TableRow> = (
   context: FormTableFieldRenderContext<TRow>
@@ -93,6 +104,7 @@ type StaticFormItemMeta = FormTableRecord & Record<string, unknown>
 interface BaseFormItemConfig<TRow extends TableRow = TableRow> {
   key?: string
   fieldKey: string
+  binding?: FieldBindingConfig
   /** 使用方挂载的静态业务元数据；FormTable 不解析或消费。 */
   meta?: StaticFormItemMeta
   labelSlot?: string

@@ -4,6 +4,8 @@ export type {
   ColumnConfig,
   ComponentProps,
   DynamicValue,
+  FieldBindingConfig,
+  FieldBindingMapEntry,
   FieldComponentConfig,
   FieldModelConfig,
   FieldComponentResolver,

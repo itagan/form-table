@@ -56,6 +56,7 @@ export const apiGroups: ApiGroup[] = [
     entries: [
       { path: 'columns[].formItems[].key', type: 'string', defaultValue: '—', target: '字段渲染身份', description: '动态字段或重复 fieldKey 时建议配置。' },
       { path: 'columns[].formItems[].fieldKey', type: 'string', defaultValue: '必填', target: 'row 数据路径', description: '支持 profile.city、items[0].name 等嵌套路径。' },
+      { path: 'columns[].formItems[].binding.map', type: 'FieldBindingMapEntry[]', defaultValue: '—', target: '复合字段值', description: '按 fieldPath/valuePath 双向映射对象或数组，并通过一次 updateRow 原子写回。' },
       { path: 'columns[].formItems[].meta', type: 'FormTableRecord', defaultValue: '—', target: '字段业务元数据', description: '静态扩展点；通过 itemConfig.meta 读取，不解析或自动透传。' },
       { path: 'columns[].formItems[].type', type: 'BuiltinType | component | slot', defaultValue: '必填', target: '字段渲染策略', description: '内置别名、直接组件或字段 Slot。' },
       { path: 'columns[].formItems[].visible', type: 'boolean | (context) => boolean', defaultValue: 'true', target: '字段显隐', description: '按字段上下文控制渲染。', context: 'ItemContext' },
@@ -92,7 +93,7 @@ export const contextRows = [
   { location: 'columns[].rowProps', context: 'RowContext', fields: 'ColumnContext + row, index' },
   { location: '…formItems[].visible / colProps / formItemProps / hint', context: 'ItemContext', fields: 'RowContext + fieldKey, value, itemConfig' },
   { location: '…component.props / options / optionProps / resolveComponent', context: 'ItemContext', fields: 'RowContext + fieldKey, value, itemConfig' },
-  { location: '…component.listeners[event]', context: 'ActionContext', fields: 'ItemContext + setValue, updateRow；后接原始事件参数' },
+  { location: '…component.listeners[event]', context: 'ActionContext', fields: 'ItemContext + setValue, bindingValue, setBindingValue, updateRow；后接原始事件参数' },
   { location: '…formItems[].labelSlot', context: 'FormTableFormItemSlotContext', fields: 'ActionContext + propPath' },
   { location: '…formItems[].errorSlot', context: 'FormTableFormItemErrorSlotContext', fields: 'ActionContext + propPath, error' },
   { location: 'type: slot 字段 Slot', context: 'FormTableSlotContext', fields: 'ActionContext + propPath, component' }
@@ -123,6 +124,7 @@ export const refRows = [
 export const featureCards = [
   { title: '性能与大数据量', path: '/performance', description: '可调场景测量渲染、输入、updateRow、动态列和 DOM 规模。', tags: ['performance', 'large data', 'benchmark'] },
   { title: '数据更新与受控回写', path: '/cell-slot', description: '自动 model、setValue、updateRow、字段事件和异步更新。', tags: ['tableData', 'setValue', 'field-change'] },
+  { title: '复合字段映射', path: '/composite-binding', description: 'binding.map 对对象、数组和字段 Slot 的多字段原子写回。', tags: ['binding.map', 'bindingValue', 'setBindingValue'] },
   { title: '校验、清理与重置', path: '/form-table', description: '字段 rules、整表校验、清理状态和受控数据重置。', tags: ['rules', 'validate', 'clearValidate'] },
   { title: '动态显隐与配置', path: '/dynamic-slot-test', description: 'Column、Row、Item visible 与动态组件属性。', tags: ['visible', 'dynamic props'] },
   { title: '稳定身份与异步安全', path: '/row-column-operations', description: 'rowKey 与 Column、Row、Item key 的不同职责。', tags: ['rowKey', 'key', 'async'] },

@@ -3,7 +3,7 @@
 包入口导出：
 
 - `ColumnConfig`、`LayoutColumnConfig`、`CellSlotColumnConfig`、`NativeColumnConfig`、`FormItemConfig`
-- `FieldComponentConfig`、`FieldModelConfig`、`FieldComponentResolver`、`BuiltinFormItemType`
+- `FieldComponentConfig`、`FieldModelConfig`、`FieldComponentResolver`、`FieldBindingConfig`、`FieldBindingMapEntry`、`BuiltinFormItemType`
 - `FormItemOption`、`OptionPropsConfig`
 - `FormTableHintValue`、`FormTableHintMode`、`FormTableHintTargets`、`FormTableHintTrigger`、`FormTableFieldHintFormatter`、`FormTableHintOptions`
 - `TableRow`、`FormTableRecord`、`FormTableRowPatch`、`FormTableProps`、`FormTableRowKey`
@@ -138,7 +138,7 @@ Column visible/props/headerProps/headerHint → tableData, columnConfig
 Column rowProps          → Column 信息 + row, index
 Field 布局与 Hint 求值   → Row 信息 + fieldKey, value, itemConfig
 component 动态配置       → Field 信息
-component.listeners      → Field 信息 + setValue, updateRow
+component.listeners      → Field 信息 + setValue, bindingValue, setBindingValue, updateRow
 字段 slot                → Listener 信息 + propPath, component
 列级 cellSlot            → row, index, columnConfig, updateRow
 ```
@@ -156,6 +156,21 @@ interface FieldModelConfig {
 ```
 
 `FieldComponentConfig.model` 未配置时保留 Vue 2 原生 `v-model`；配置 `FieldModelConfig` 时使用指定 prop/event；配置 `false` 时不注入模型绑定。
+
+复合字段映射类型：
+
+```ts
+interface FieldBindingMapEntry {
+  fieldPath: string
+  valuePath: string
+}
+
+interface FieldBindingConfig {
+  map: FieldBindingMapEntry[]
+}
+```
+
+`bindingValue/setBindingValue` 进入 `FormTableFieldContext` 及其 Slot 扩展上下文；主 `value/setValue` 始终保留单一 `fieldKey` 语义。完整规则见[复合字段映射](../features/composite-binding.md)。
 
 `row/tableData` 与 `columnConfig/itemConfig` 在回调类型中采用浅层只读约束；运行时不会冻结原对象。字段更新使用 `setValue` 或 `updateRow`，配置调整由调用方替换 `columns`。
 

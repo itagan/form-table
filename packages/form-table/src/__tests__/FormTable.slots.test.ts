@@ -47,7 +47,14 @@ describe('FormTable slot rendering', () => {
         label: '金额',
         formItems: [{
           fieldKey: 'amount',
+          binding: {
+            map: [
+              { fieldPath: 'amount', valuePath: 'amount' },
+              { fieldPath: 'currency', valuePath: 'currency' }
+            ]
+          },
           type: 'number',
+          component: { model: false },
           labelSlot: 'amount-label',
           errorSlot: 'amount-error',
           formItemProps: {
@@ -60,13 +67,14 @@ describe('FormTable slot rendering', () => {
         'amount-label': `<span
           class="custom-item-label"
           :data-value="props.value"
+          :data-binding-currency="props.bindingValue.currency"
           :data-prop="props.propPath"
         >{{ props.row.currency }}|{{ props.itemConfig.fieldKey }}</span>`,
         'amount-error': `<button
           type="button"
           class="custom-item-error"
           :data-prop="props.propPath"
-          @click="props.setValue(10)"
+          @click="props.setBindingValue({ amount: 10, currency: 'USD' })"
         >{{ props.error }}</button>`
       }
     })
@@ -74,6 +82,7 @@ describe('FormTable slot rendering', () => {
 
     const label = wrapper.find('.custom-item-label')
     expect(label.text()).toBe('CNY|amount')
+    expect(label.attributes('data-binding-currency')).toBe('CNY')
     expect(label.attributes('data-prop')).toBe('tableData.0.amount')
     expect(wrapper.find('.el-form-item__label').text()).not.toContain('默认金额')
 
@@ -85,7 +94,7 @@ describe('FormTable slot rendering', () => {
 
     await error.trigger('click')
     const nextTableData = wrapper.emitted('update:tableData')?.at(-1)?.[0]
-    expect(nextTableData).toEqual([{ amount: 10, currency: 'CNY' }])
+    expect(nextTableData).toEqual([{ amount: 10, currency: 'USD' }])
     await wrapper.setProps({ tableData: nextTableData })
     await wrapper.vm.$nextTick()
     expect(wrapper.find('.custom-item-label').attributes('data-value')).toBe('10')
@@ -246,6 +255,47 @@ describe('FormTable slot rendering', () => {
     })
     expect(slotListener.mock.calls[0][1]).toBe('saved')
     expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{ school: '二中' }])
+    wrapper.destroy()
+  })
+
+  it('exposes composite binding values and atomic updates to field slots', async () => {
+    const wrapper = mountFormTable({
+      tableData: [{ startTime: '08:00', endTime: '09:00' }],
+      columns: [{
+        label: '时间范围',
+        formItems: [{
+          fieldKey: 'startTime',
+          binding: {
+            map: [
+              { fieldPath: 'startTime', valuePath: '[0]' },
+              { fieldPath: 'endTime', valuePath: '[1]' }
+            ]
+          },
+          type: 'slot',
+          component: { slot: 'period' }
+        }]
+      }],
+      scopedSlots: {
+        period: `<button
+          type="button"
+          class="period-setter"
+          :data-primary="props.value"
+          @click="props.setBindingValue(['10:00', '11:00'])"
+        >{{ props.bindingValue.join('—') }}</button>`
+      }
+    })
+    await wrapper.vm.$nextTick()
+
+    const setter = wrapper.find('.period-setter')
+    expect(setter.text()).toBe('08:00—09:00')
+    expect(setter.attributes('data-primary')).toBe('08:00')
+    await setter.trigger('click')
+
+    expect(wrapper.emitted('update:tableData')).toHaveLength(1)
+    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{
+      startTime: '10:00',
+      endTime: '11:00'
+    }])
     wrapper.destroy()
   })
 

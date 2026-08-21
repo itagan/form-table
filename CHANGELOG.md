@@ -6,6 +6,7 @@
 
 ### Changed
 
+- FormItem 新增可序列化的 `binding.map` 复合字段映射；组件与字段 Slot 可通过 `bindingValue/setBindingValue` 将对象或数组值一次写回多个行字段，`fieldKey` 继续作为唯一校验锚点。
 - 字段 Item 新增 `hintTrigger: 'item' | 'content'`；默认仍由整个 FormItem 触发，`content` 可将 Tooltip 触发区域和原生 title 收敛到唯一可见的内容根节点，无法唯一定位时回退并在开发环境警告。
 - 字段渲染入口由 `component.renderer/resolveRenderer` 更名为 Vue 语义更明确的 `component.is/resolveComponent`；字段 Slot 改用专用的 `component.slot` 静态名称，不再与组件目标共用字段。
 - `formItems[]` 新增静态 `meta` 扩展点，允许业务通过 `itemConfig.meta` 挂载和读取权限、埋点、角色及远程 Schema 标识；FormTable 不解析或自动透传该数据。

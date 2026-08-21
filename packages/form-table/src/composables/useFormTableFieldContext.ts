@@ -15,6 +15,7 @@ import {
   extendLazyContext,
   resolveDynamicValue
 } from '../utils/dynamic'
+import { createBindingPatch, resolveBindingValue } from '../utils/binding'
 import { applyHintTargetProps, resolveFormTableFieldHint } from '../utils/hint'
 
 interface FormTableFieldContextOptions<TRow extends TableRow> {
@@ -89,12 +90,25 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
     const context = runtimeContext.value
     const targetRow = context.row as TRow
     const targetFieldKey = context.fieldKey
+    const binding = options.getConfig().binding
+    const setValue = (nextValue: FormTableValue) => updateApi?.setValue(
+      targetRow,
+      targetFieldKey,
+      nextValue
+    )
     return extendLazyContext(context, {
-      setValue: (nextValue: FormTableValue) => updateApi?.setValue(
-        targetRow,
-        targetFieldKey,
-        nextValue
-      ),
+      setValue,
+      get bindingValue() {
+        return binding ? resolveBindingValue(targetRow, binding) : context.value
+      },
+      setBindingValue: (nextValue: FormTableValue) => {
+        if (!binding) {
+          setValue(nextValue)
+          return
+        }
+        const patch = createBindingPatch<TRow>(binding, nextValue)
+        if (Object.keys(patch).length > 0) updateApi?.updateRow(targetRow, patch)
+      },
       updateRow: (patch: FormTableRowPatch<TRow>) => updateApi?.updateRow(targetRow, patch)
     })
   })

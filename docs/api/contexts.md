@@ -65,10 +65,10 @@ Slot 名称应保持稳定，不拼接行下标或当前字段值。需要区分
 | `rowProps` 动态配置 | `tableData, row, index` | `columnConfig` | — | — |
 | Item 动态配置 | 增加 `fieldKey, value` | 增加 `itemConfig` | — | — |
 | component 动态配置 | Item 数据 | Item 配置 | — | — |
-| `component.listeners[event]` | Item 数据 | Item 配置 | `setValue, updateRow` | — |
-| 字段 Slot | Item 数据 | Item 配置 | `setValue, updateRow` | `propPath, component` |
-| FormItem Label Slot | Item 数据 | Item 配置 | `setValue, updateRow` | `propPath` |
-| FormItem Error Slot | Item 数据 | Item 配置 | `setValue, updateRow` | `propPath, error` |
+| `component.listeners[event]` | Item 数据 | Item 配置 | `setValue, setBindingValue, updateRow` | — |
+| 字段 Slot | Item 数据 | Item 配置 | `setValue, setBindingValue, updateRow` | `propPath, component` |
+| FormItem Label Slot | Item 数据 | Item 配置 | `setValue, setBindingValue, updateRow` | `propPath` |
+| FormItem Error Slot | Item 数据 | Item 配置 | `setValue, setBindingValue, updateRow` | `propPath, error` |
 | `cellSlot` | `row, index` | `columnConfig` | `updateRow` | — |
 | 表头 Slot | `tableData, label, columnIndex` | `columnConfig` | — | — |
 
@@ -101,12 +101,12 @@ Slot 名称应保持稳定，不拼接行下标或当前字段值。需要区分
 
 | 分类 | 字段 |
 | --- | --- |
-| 数据 | `tableData, row, index, fieldKey, value` |
+| 数据 | `tableData, row, index, fieldKey, value, bindingValue` |
 | 配置 | `columnConfig, itemConfig` |
-| 更新 | `setValue, updateRow` |
+| 更新 | `setValue, setBindingValue, updateRow` |
 | 校验 / 解析 | `propPath, component` |
 
-`itemConfig.component` 是未解析的原始配置；`component` 是当前行已解析的 `props/listeners/options/optionProps/model`。组件动态配置使用 `FormTableFieldRenderContext`，listener 在此基础上增加 `setValue/updateRow`。
+`itemConfig.component` 是未解析的原始配置；`component` 是当前行已解析的 `props/listeners/options/optionProps/model`。组件动态配置使用 `FormTableFieldRenderContext`，listener 在此基础上增加 `setValue/bindingValue/setBindingValue/updateRow`。未配置 `binding.map` 时，复合值助手等同于当前字段的 `value/setValue`；配置后按映射一次读写多个字段。
 
 `itemConfig.meta` 是使用方声明的静态业务元数据，所有字段上下文都会保留同一个原始对象。多个字段可以复用同一个 Slot，并用 `meta` 表达业务角色而不是判断数据路径：
 
