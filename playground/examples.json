@@ -63,6 +63,15 @@
     "tags": ["JSON", "local enhance", "registry-free"]
   },
   {
+    "title": "复合字段映射",
+    "description": "演示 binding.map 对对象和数组组件值的多字段原子写回，以及字段 Slot 绑定助手。",
+    "path": "/composite-binding",
+    "name": "composite-binding",
+    "view": "CompositeBindingView",
+    "type": "success",
+    "tags": ["binding.map", "composite value", "slot"]
+  },
+  {
     "title": "企业复杂组件接入",
     "description": "实际演示全局内部组件、局部业务组件、非标准绑定协议和复杂事件联动。",
     "path": "/enterprise-components",

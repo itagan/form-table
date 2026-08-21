@@ -20,7 +20,8 @@ const viewLoaders: Record<string, () => Promise<unknown>> = {
   HeterogeneousDemandView: () => import('../views/HeterogeneousDemandView.vue'),
   ItinerarySimpleView: () => import('../views/ItinerarySimpleView.vue'),
   EnterpriseComponentsView: () => import('../views/EnterpriseComponentsView.vue'),
-  DirectComponentView: () => import('../views/DirectComponentView.vue')
+  DirectComponentView: () => import('../views/DirectComponentView.vue'),
+  CompositeBindingView: () => import('../views/CompositeBindingView.vue')
 }
 
 const router = new VueRouter({
