@@ -121,6 +121,7 @@ export default defineConfig({
       {
         text: '维护者',
         items: [
+          { text: '自定义字段 Type 设计草案', link: '/design/custom-field-type-proposal' },
           { text: 'npm 包发布准备', link: '/migration/npm-package' }
         ]
       }

@@ -252,6 +252,8 @@ function enhanceRemoteField(schema: RemoteField): FormItemConfig {
 
 这会影响公开类型联合、名称冲突、注册机制、服务端白名单、多实例隔离和错误处理，属于核心协议设计。若未来采用，自定义 type 的注册定义应同时承担预设能力，不再保留另一套重复的 `component.preset` API。
 
+当前讨论形成的目标、数据流、性能边界和待决策问题集中维护在[自定义字段 Type 架构设计草案](../design/custom-field-type-proposal.md)。
+
 判断顺序始终是：先确认重复，再提取业务函数；函数模式在多个项目中稳定后，才把它提升为公共协议。
 
 ## 相关文档
