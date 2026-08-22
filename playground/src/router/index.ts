@@ -20,6 +20,7 @@ const viewLoaders: Record<string, () => Promise<unknown>> = {
   HeterogeneousDemandView: () => import('../views/HeterogeneousDemandView.vue'),
   ItinerarySimpleView: () => import('../views/ItinerarySimpleView.vue'),
   EnterpriseComponentsView: () => import('../views/EnterpriseComponentsView.vue'),
+  CustomFieldTypesView: () => import('../views/CustomFieldTypesView.vue'),
   DirectComponentView: () => import('../views/DirectComponentView.vue'),
   CompositeBindingView: () => import('../views/CompositeBindingView.vue')
 }

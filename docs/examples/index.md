@@ -39,6 +39,7 @@ pnpm site:preview
 | [`cellSlot` 列级单元格 ↗](http://localhost:5173/cell-slot) | `/cell-slot` | 组合展示、派生值、updateRow、异步 rowKey、字段 Slot 对照和 scope 检视 |
 | [远程 Schema ↗](http://localhost:5173/remote-schema) | `/remote-schema` | 远程纯 JSON 配置与页面本地组件、事件增强 |
 | [复合字段映射 ↗](http://localhost:5173/composite-binding) | `/composite-binding` | 对象、数组和字段 Slot 的多字段映射与原子写回 |
+| [实例级自定义字段 Type ↗](http://localhost:5173/custom-field-types) | `/custom-field-types` | 注册式业务 type、标准/非标准 model、事件、默认 props、binding.map 与未知名称保护 |
 | [企业复杂组件接入 ↗](http://localhost:5173/enterprise-components) | `/enterprise-components` | 企业全局组件、局部业务组件、自定义绑定协议与复杂事件联动 |
 | [字段 Slot 与动态显隐 ↗](http://localhost:5173/dynamic-slot-test) | `/dynamic-slot-test` | 字段 Slot、更新助手和三级动态显隐 |
 | [行列操作与异步提交 ↗](http://localhost:5173/row-column-operations) | `/row-column-operations` | 行增删复制移动、动态列和业务处理后异步提交 |

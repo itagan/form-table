@@ -82,6 +82,47 @@ function handleFilterChange(filters: FormTableFilterChangePayload) {
 
 需要让 Props、事件和动态配置回调共享业务行类型时，使用 `createFormTable<TRow>()` 和 `defineFormTableColumns<TRow>()`；两者都不会创建额外运行时实例。`fieldKey` 保持为字符串，以支持固定字段、嵌套路径和服务端动态字段。
 
+## 自定义字段 Type
+
+重复使用且组件/model 协议稳定的业务字段可以按 FormTable 实例注册，columns 中的使用习惯与内置 type 一致：
+
+```ts
+import {
+  createFormTable,
+  defineFormTableColumns,
+  defineFormTableTypes
+} from '@itagan/form-table'
+
+const fieldTypes = defineFormTableTypes<PurchaseRow>()({
+  employee: {
+    is: EmployeePicker,
+    model: {
+      prop: 'selected-user-id',
+      event: 'user-confirm',
+      valueFromEvent: (...args) =>
+        (args[0] as EmployeeSelection).id
+    },
+    props: { clearable: true }
+  }
+})
+
+const BusinessFormTable = createFormTable<PurchaseRow, typeof fieldTypes>()
+const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([{
+  label: '负责人',
+  formItems: [{ fieldKey: 'employeeId', type: 'employee' }]
+}])
+```
+
+```vue
+<BusinessFormTable
+  v-model="tableData"
+  :columns="columns"
+  :field-types="fieldTypes"
+/>
+```
+
+注册定义只包含稳定的 `is/model/props`；字段仍可提供自己的 `props/listeners/model`，现有 `binding.map` 可直接完成复合值的多字段写回。动态组件和一次性复杂协议继续使用 `type: 'component'`，多组件模板使用 `type: 'slot'`。详见[自定义字段 Type](https://gitee.com/itagan/form-table/blob/master/docs/features/custom-field-types.md)。
+
 ## 完整文档
 
 详细行为统一维护在 VitePress 文档中：
@@ -90,6 +131,7 @@ function handleFilterChange(filters: FormTableFilterChangePayload) {
 - [配置与 API 总览](https://gitee.com/itagan/form-table/blob/master/docs/api/configuration.md)
 - [事件与 Ref](https://gitee.com/itagan/form-table/blob/master/docs/api/events-and-ref.md)
 - [公开类型](https://gitee.com/itagan/form-table/blob/master/docs/api/types.md)
+- [自定义字段 Type](https://gitee.com/itagan/form-table/blob/master/docs/features/custom-field-types.md)
 - [功能专题](https://gitee.com/itagan/form-table/blob/master/docs/features/index.md)
 - [示例索引](https://gitee.com/itagan/form-table/blob/master/docs/examples/index.md)
 

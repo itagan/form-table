@@ -6,6 +6,7 @@
 | --- | --- | --- | --- | --- |
 | `tableData` | `TableRow[]` | 必填 | `[]` | 根组件 `v-model` 对应 prop；也是 `el-table.data` 的唯一数据源 |
 | `columns` | `ColumnConfig[]` | 必填 | `[]` | 表格列、布局和字段渲染配置 |
+| `fieldTypes` | `TFieldTypes` | 注册表泛型非空时必填；否则不可用 | — | 当前 FormTable 实例的自定义字段 type 注册表 |
 | `rowKey` | `string \| ((row: TRow) => FormTableValue)` | 可选 | — | FormTable 与 Element Table 共用的稳定行身份 |
 | `formProps` | `FormTableFormProps` | 可选 | `{}` | 透传给 `el-form`；不接受内部管理的 `model` |
 | `tableProps` | `FormTableTableProps` | 可选 | `{}` | 透传给 `el-table`；不接受内部管理的 `data/rowKey` |
@@ -13,6 +14,8 @@
 | `loading` | `boolean` | 可选 | `false` | `el-table` 的 `v-loading` |
 
 `tableData` 和 `columns` 在公开 `FormTableProps` 类型中是必填项；组件仍提供空数组作为运行时容错默认值。TypeScript 项目应显式传入两者，不依赖运行时默认值。
+
+`fieldTypes` 只在使用自定义字段 type 时提供。通过 `createFormTable<TRow, typeof fieldTypes>()` 绑定非空注册表后，该 Prop 在类型层必填；默认组件和未传第二泛型的现有 API 形状保持不变。注册表按实例隔离，可以整体替换新对象触发重新解析，不承诺原地深层修改。配置与名称规则见[自定义字段 Type](../features/custom-field-types.md)。
 
 `mode` 支持 `false/'title'/'tooltip'`：关闭、原生 `title` 或整表共享单个 Element Tooltip。`targets` 支持 `field/header/all`，默认仅字段；被排除的目标不会求值。`tooltipProps` 只在 Tooltip 模式生效。
 

@@ -28,7 +28,7 @@ columns[].formItems[].component
 | `columns[].formItems[].component.is` | `string \| Component` | 仅 `component` | — | 对应 Vue 动态组件 `is` 的静态目标；推荐组件对象或全局注册名 |
 | `...component.resolveComponent` | `(ItemContext) => string \| Component \| undefined` | 仅 `component` | ItemContext | 按当前行同步选择与 `is` 相同类型的目标 |
 | `...component.slot` | `string` | 仅 `slot` | — | 父 FormTable 上的静态具名 Slot |
-| `...component.model` | `false \| FieldModelConfig` | 内置 / `component` | — | 省略时按 Vue 2 组件 model 选项绑定；也可自定义或关闭绑定 |
+| `...component.model` | `false \| FieldModelConfig` | 内置 / `component` / 注册 type | — | 省略时按 Vue 2 组件 model 选项绑定；也可自定义或关闭绑定 |
 | `...component.model.prop` | `string` | 自定义 model | — | 接收字段值的 prop，默认 `value` |
 | `...component.model.event` | `string` | 自定义 model | — | 通知字段变化的事件，默认 `input` |
 | `...component.model.valueFromEvent` | `(...args) => FormTableValue` | 自定义 model | 原始事件参数 | 从事件参数提取写回值 |
@@ -52,6 +52,9 @@ Item 级 `binding.map` 位于 `columns[].formItems[].binding`，不属于组件�
 | 内置类型 | 由 FormTable 映射，不接受 `is/resolveComponent/slot` | 默认双向绑定 |
 | `component` | 必须提供 `is` 或 `resolveComponent` | 默认 Vue 2 v-model，可自定义 |
 | `slot` | `slot` 必须是静态 Slot 名称 | FormTable 不为 Slot 内组件自动绑定 |
+| 注册 type | `is` 来自 `fieldTypes`；Item 仅允许 `props/listeners/model` | 继承注册 model，Item 可整体覆盖 |
+
+注册 type 的默认 props 与字段 props 浅合并，字段优先；Item 不能覆盖 `is` 或使用 `resolveComponent/slot/options/optionProps`。完整注册方式见[自定义字段 Type](../features/custom-field-types.md)。
 
 ## `is` 目标与原生标签边界
 

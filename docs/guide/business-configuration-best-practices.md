@@ -1,6 +1,6 @@
 # 业务配置最佳实践
 
-FormTable 保持轻量运行时，只负责布局、字段渲染、校验路径和受控数据更新。业务组件协议、默认属性和跨字段联动应先在业务代码中组合；只有重复模式稳定后，才值得考虑增加新的核心扩展协议。
+FormTable 保持轻量运行时，只负责布局、字段渲染、校验路径和受控数据更新。业务组件协议、默认属性和跨字段联动应先在业务代码中组合；重复模式稳定后，可以用实例级自定义 type 把技术协议提升为可复用名称。
 
 ## 先选择最小的接入方式
 
@@ -11,10 +11,10 @@ FormTable 保持轻量运行时，只负责布局、字段渲染、校验路径�
 | 同类字段在多个 columns 中重复 | 配置工厂函数 | 否 |
 | 历史组件具有特殊 model 协议 | Adapter 组件 | 否 |
 | 服务端下发业务字段名称 | 本地白名单映射到配置工厂 | 否 |
-| 大量项目需要统一的具名组件配置 | 评估组件预设 | 未来能力 |
-| Schema 需要直接使用业务 `type` | 评估开放自定义 type 协议 | 未来能力 |
+| 多页面重复稳定的组件/model/默认 props | 实例级自定义 type | 是，已支持 |
+| Schema 需要直接使用已审核业务 `type` | 自定义 type + 本地白名单 | 是，已支持 |
 
-当前公开的 `type` 只有内置类型、`component` 和 `slot`。文中提到的组件预设和自定义 type 是演进判断，不是现有 API。
+自定义 type 是轻量注册层，不替代普通函数、Adapter、`component` 或 `slot`。选择依据是协议是否稳定且重复，而不是组件本身是否复杂。
 
 ## 单次接入直接使用 component
 
@@ -236,26 +236,22 @@ function enhanceRemoteField(schema: RemoteField): FormItemConfig {
 
 业务配置可以按三个层级演进：
 
-### 1. 函数和 Adapter：当前首选
+### 1. 函数和 Adapter：无核心改动
 
 不修改 FormTable。适合验证重复模式，并保持零额外运行时成本、完整类型检查和按需引入。
 
-### 2. 组件预设：较小扩展
+### 2. 组件预设：由自定义 type 覆盖
 
-当多个项目都在重复实现同一种配置工厂，可以评估为 `type: 'component'` 增加具名预设。预设只应复用 `is/model/props/listeners/options` 等组件配置，不介入字段路径、校验、布局和数据更新。
+首版没有增加独立的 `component.preset` API。实例级自定义 type 已覆盖“具名复用 `is/model/default props`”的核心需求，避免两套名称、注册和合并规则。只需要局部减少重复时，普通函数仍更直接。
 
-引入前需要确定注册作用域、覆盖优先级、动态 props 合并以及未注册名称的错误行为。没有稳定的合并需求时，普通函数更直接。
+### 3. 自定义 type：稳定业务字段协议
 
-### 3. 自定义 type：完整协议扩展
+当多个页面需要直接表达 `type: 'money'`、`type: 'employee'` 时，使用 `defineFormTableTypes` 注册稳定的 `is/model/default props`。Item 可按页面覆盖 `props/model` 并监听原始事件，复合值继续使用 `binding.map`；不增加注册级 listener、动态组件或 Option Renderer。
 
-只有业务目标明确升级为可扩展 Schema/DSL，并且大量配置需要直接表达 `type: 'money'`、`type: 'employee'` 时，才考虑开放自定义 type。
-
-这会影响公开类型联合、名称冲突、注册机制、服务端白名单、多实例隔离和错误处理，属于核心协议设计。若未来采用，自定义 type 的注册定义应同时承担预设能力，不再保留另一套重复的 `component.preset` API。
-
-当前讨论形成的目标、数据流、性能边界和待决策问题集中维护在[自定义字段 Type 架构设计草案](../design/custom-field-type-proposal.md)。
+注册表按实例隔离，内置名称受到保护，非空注册表泛型会约束 columns 和必传 Prop。具体 API 见[自定义字段 Type](../features/custom-field-types.md)，设计取舍见[架构设计](../design/custom-field-type-proposal.md)。
 
 判断顺序始终是：先确认重复，再提取业务函数；函数模式在多个项目中稳定后，才把它提升为公共协议。
 
 ## 相关文档
 
-[完整配置指南](./configuration-guide.md) · [自定义字段组件](../features/custom-component.md) · [企业复杂组件接入](../examples/enterprise-components.md) · [性能优化建议](../features/performance-optimization.md)
+[完整配置指南](./configuration-guide.md) · [自定义字段 Type](../features/custom-field-types.md) · [自定义字段组件](../features/custom-component.md) · [企业复杂组件接入](../examples/enterprise-components.md) · [性能优化建议](../features/performance-optimization.md)

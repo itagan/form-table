@@ -1,6 +1,6 @@
-# 自定义字段 Type 架构设计草案
+# 自定义字段 Type 架构设计
 
-> 状态：讨论中，尚未实现。本文用于收敛目标、边界和待决策问题，不代表当前公开 API。
+> 状态：首版已实现。本文记录已选定的公开 API、运行时规则、首版边界及后续不扩张原则。
 
 ## 背景
 
@@ -98,7 +98,7 @@ type 定义只描述跨页面稳定的技术协议。当前页面的权限、接
 
 自定义 type 是“使用方提供的业务内置 type”，不是新的渲染模式。
 
-## 公共 API 草案
+## 公共 API
 
 ### 注册定义
 
@@ -135,7 +135,7 @@ const fieldTypes = defineFormTableTypes<PurchaseRow>()({
 })
 ```
 
-`defineFormTableTypes` 主要用于保留名称字面量、提供字段上下文类型并检查保留名称。具体泛型形式仍属于待决策项。
+`defineFormTableTypes` 原样返回注册表，用于保留名称字面量、提供字段上下文类型，并在类型层和运行时检查保留名称。
 
 ### 实例注册
 
@@ -185,7 +185,7 @@ const fieldTypes = defineFormTableTypes<PurchaseRow>()({
 
 ## Type 定义能力
 
-第一版建议收敛为：
+第一版收敛为：
 
 ```ts
 interface FieldTypeDefinition<TRow extends TableRow = TableRow> {
@@ -415,7 +415,7 @@ radio, checkbox, text, rate, slider, color, cascader,
 autocomplete, component, slot
 ```
 
-建议解析顺序：
+解析顺序：
 
 ```text
 component / slot 特殊模式
@@ -435,14 +435,14 @@ component / slot 特殊模式
 - 警告说明注册入口和 `type: 'component'` 替代方式；
 - 远程 Schema 应在业务白名单转换层提前拒绝未知名称。
 
-建议警告：
+开发环境警告：
 
 ```text
 [FormTable] Unknown field type "employee". Register it through
 fieldTypes or use type: "component".
 ```
 
-## TypeScript 设计要求
+## TypeScript 设计
 
 不能把 `FormItemType` 简单放宽为 `string`，否则会失去现有拼写检查：
 
@@ -450,7 +450,7 @@ fieldTypes or use type: "component".
 { fieldKey: 'name', type: 'inptu' }
 ```
 
-目标是让注册表名称参与 Item type 联合：
+注册表名称参与 Item type 联合：
 
 ```ts
 type AvailableType =
@@ -460,39 +460,20 @@ type AvailableType =
   | keyof typeof fieldTypes
 ```
 
-需要进一步比较的方案：
-
-### 注册表泛型
+### 选定方案：注册表泛型
 
 ```ts
 const fieldTypes = defineFormTableTypes<PurchaseRow>()({ /* ... */ })
 
-const columns: ColumnConfig<
-  PurchaseRow,
-  typeof fieldTypes
->[] = [/* ... */]
+const FormTable = createFormTable<PurchaseRow, typeof fieldTypes>()
+const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([
+  /* ... */
+])
 ```
 
-优点是实例隔离和类型来源明确；缺点是泛型会沿 `FormItemConfig/ColumnConfig/FormTableProps` 传播。
+第二个注册表泛型沿 `FormItemConfig/ColumnConfig/FormTableProps/FormTableComponent` 传播，默认 `EmptyFieldTypeRegistry`，因此现有单泛型和无泛型 API 完全兼容。非空注册表下 `fieldTypes` Prop 必传，注册名称保持精确拼写检查。
 
-### 绑定式 Schema 工具
-
-```ts
-const schema = createFormTableSchema<PurchaseRow>({
-  fieldTypes
-})
-
-const columns = schema.defineColumns([/* ... */])
-const BusinessFormTable = schema.FormTable
-```
-
-优点是推断完整、页面使用简洁；缺点是增加新的公共概念，并可能与当前 `createFormTable` 定位重叠。
-
-### Module Augmentation
-
-适合公司组件库统一声明类型名称，但属于项目级全局类型，无法自然表达两个实例使用不同注册表，因此不建议作为唯一方案。
-
-类型方案是实施前必须解决的主要开放问题，不能依赖业务方普遍使用类型断言。
+首版不增加绑定式 Schema 工具或 Module Augmentation。前者会增加与 `createFormTable` 重叠的公共概念；后者是项目级全局状态，不能自然表达实例隔离。
 
 ## 性能设计
 
@@ -530,7 +511,7 @@ const BusinessFormTable = schema.FormTable
 
 ## 测试边界
 
-若进入实施，需要覆盖：
+首版回归覆盖：
 
 - 内置 type、`component` 和 `slot` 行为不变；
 - 注册类型的标准 v-model 和自定义 model；
@@ -544,18 +525,20 @@ const BusinessFormTable = schema.FormTable
 - 最低 Vue/Element UI peer 组合；
 - 大量单元格下不增加组件实例和明显解析开销。
 
-## 待决策问题
+## 首版最终决策
 
-1. TypeScript 采用注册表泛型、绑定式 Schema 工具，还是两者组合？
-2. `fieldTypes` 是否允许替换为新的对象以支持配置切换，还是初始化后固定？
-3. Item 是否允许显式覆盖注册定义的 `model`，以完全对齐内置 type 的使用习惯？
-4. 未知 type 在生产环境是静默空渲染、保留一次警告，还是抛出错误？
-5. 是否需要在开发环境提前扫描 columns，而不是等字段首次渲染时发现未知类型？
-6. 是否有足够真实场景要求自定义 type 复用内置 `select/radio/checkbox` 的 Option 子节点？
+| 问题 | 选定规则 |
+| --- | --- |
+| TypeScript 方案 | 显式注册表泛型；现有 API 增加可选第二泛型 |
+| 注册表更新 | 允许替换为新对象并重新解析；不承诺原地深层修改 |
+| Item model | 对象或 `false` 可整体覆盖注册 model，不做深合并 |
+| 未知 type | 开发环境按实例和名称警告一次，生产环境静默，字段内容为空 |
+| 发现时机 | 根组件在开发环境扫描 columns；字段渲染仍有未知目标保护 |
+| Option 子节点 | 首版不复用；通过组件 props 自行传入选项 |
 
-## 推荐的第一版范围
+## 已实现的第一版范围
 
-如果未来决定实施，建议首版只包含：
+首版包含：
 
 ```text
 实例级 fieldTypes

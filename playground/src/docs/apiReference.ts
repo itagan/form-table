@@ -22,6 +22,7 @@ export const apiGroups: ApiGroup[] = [
     entries: [
       { path: 'tableData', type: 'TableRow[]', defaultValue: '必填', target: '根 v-model / el-table.data', description: 'v-model 对应 prop，通过 update:tableData 回写。' },
       { path: 'columns', type: 'ColumnConfig[]', defaultValue: '必填', target: '布局与渲染配置', description: 'Column → Item 配置树。' },
+      { path: 'fieldTypes', type: 'FieldTypeRegistry', defaultValue: '按注册泛型', target: '当前 FormTable 实例', description: '自定义字段 type 的组件、model 与默认 props 注册表。' },
       { path: 'rowKey', type: 'string | ((row) => unknown)', defaultValue: '—', target: 'FormTable / el-table', description: '稳定行身份；异步更新期间用于重新定位原行。' },
       { path: 'formProps', type: 'Record<string, unknown>', defaultValue: '{}', target: 'el-form', description: '透传 Element Form 属性。' },
       { path: 'tableProps', type: 'Record<string, unknown>', defaultValue: '{}', target: 'el-table', description: '透传 Element Table 属性，不包含 rowKey。' },
@@ -58,7 +59,7 @@ export const apiGroups: ApiGroup[] = [
       { path: 'columns[].formItems[].fieldKey', type: 'string', defaultValue: '必填', target: 'row 数据路径', description: '支持 profile.city、items[0].name 等嵌套路径。' },
       { path: 'columns[].formItems[].binding.map', type: 'FieldBindingMapEntry[]', defaultValue: '—', target: '复合字段值', description: '按 fieldPath/valuePath 双向映射对象或数组；fallbackValue 处理组件值路径缺失。' },
       { path: 'columns[].formItems[].meta', type: 'FormTableRecord', defaultValue: '—', target: '字段业务元数据', description: '静态扩展点；通过 itemConfig.meta 读取，不解析或自动透传。' },
-      { path: 'columns[].formItems[].type', type: 'BuiltinType | component | slot', defaultValue: '必填', target: '字段渲染策略', description: '内置别名、直接组件或字段 Slot。' },
+      { path: 'columns[].formItems[].type', type: 'BuiltinType | RegisteredType | component | slot', defaultValue: '必填', target: '字段渲染策略', description: '内置别名、实例注册 type、直接组件或字段 Slot。' },
       { path: 'columns[].formItems[].visible', type: 'boolean | (context) => boolean', defaultValue: 'true', target: '字段显隐', description: '按字段上下文控制渲染。', context: 'ItemContext' },
       { path: 'columns[].formItems[].colProps', type: 'Object | (context) => Object', defaultValue: '{ span: 24 }', target: 'el-col', description: 'span、offset 等栅格属性。', context: 'ItemContext' },
       { path: 'columns[].formItems[].formItemProps', type: 'Object | (context) => Object', defaultValue: '{}', target: 'el-form-item', description: 'label、rules 等；校验 prop 自动生成。', context: 'ItemContext' },
@@ -101,6 +102,7 @@ export const contextRows = [
 
 export const renderModes = [
   { mode: '内置 type', config: "type: 'input' / 'select' / …", fieldKey: '需要', validation: '支持', scope: '—', usage: '常规表单字段' },
+  { mode: '注册 type', config: "fieldTypes + type: 'employee'", fieldKey: '需要', validation: '支持', scope: 'ItemContext', usage: '稳定、重复的业务组件协议' },
   { mode: 'component', config: "type: 'component' + component.is", fieldKey: '需要', validation: '支持', scope: 'ItemContext', usage: '自定义字段组件' },
   { mode: '字段 Slot', config: "type: 'slot' + component.slot", fieldKey: '需要', validation: '支持', scope: 'FormTableSlotContext', usage: '字段交互与完全自定义模板' },
   { mode: 'cellSlot', config: 'columns[].cellSlot', fieldKey: '不需要', validation: '不提供', scope: 'FormTableCellSlotContext', usage: '组合展示、状态、派生值、操作列' },
@@ -122,6 +124,7 @@ export const refRows = [
 ]
 
 export const featureCards = [
+  { title: '实例级自定义字段 Type', path: '/custom-field-types', description: '注册稳定的组件、model 与默认 props，像内置 type 一样复用业务字段。', tags: ['fieldTypes', 'custom model', 'binding.map'] },
   { title: '性能与大数据量', path: '/performance', description: '可调场景测量渲染、输入、updateRow、动态列和 DOM 规模。', tags: ['performance', 'large data', 'benchmark'] },
   { title: '数据更新与受控回写', path: '/cell-slot', description: '自动 model、setValue、updateRow、字段事件和异步更新。', tags: ['tableData', 'setValue', 'field-change'] },
   { title: '复合字段映射', path: '/composite-binding', description: '自定义组件 model、对象、数组和字段 Slot 的多字段原子写回。', tags: ['binding.map', 'component.model', 'bindingValue'] },
