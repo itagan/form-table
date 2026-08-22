@@ -142,6 +142,8 @@ component: {
 
 更完整的组件 Mock、类型声明、columns 工厂和提交示例见[企业复杂组件接入示例](../examples/enterprise-components.md)。
 
+同一种业务组件配置在多个页面重复时，优先提取配置工厂或 Adapter。何时继续保持业务封装、何时才值得评估组件预设或开放自定义 type，见[业务配置最佳实践](../guide/business-configuration-best-practices.md)。
+
 ## 相关 API
 
 [Component 配置](../api/component.md) · [复杂 Option 接入](../api/component.md#复杂-option-接入) · [Slot 与上下文](../api/contexts.md)

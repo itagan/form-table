@@ -219,6 +219,8 @@ const columns = createColumns({
 
 需要完整可运行实现时，从[示例索引](../examples/index.md)选择最接近的业务场景。
 
+同一个业务组件的 model、默认 props 或字段配置开始在多个页面重复时，先使用普通配置工厂或 Adapter 组件收敛，不需要修改 FormTable 的 `type` 协议。组件预设和开放自定义 type 的适用条件见[业务配置最佳实践](./business-configuration-best-practices.md)。
+
 ## 远程 JSON 与本地增强
 
 远程 Schema 只保存可序列化的布局、字段类型、静态 props 和 options。组件对象、函数、Slot 与权限判断在页面本地增强：

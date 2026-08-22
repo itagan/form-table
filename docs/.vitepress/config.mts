@@ -46,7 +46,8 @@ export default defineConfig({
         text: '指南',
         items: [
           { text: '快速开始', link: '/guide/quick-start' },
-          { text: '完整配置指南', link: '/guide/configuration-guide' }
+          { text: '完整配置指南', link: '/guide/configuration-guide' },
+          { text: '业务配置最佳实践', link: '/guide/business-configuration-best-practices' }
         ]
       },
       {

@@ -11,6 +11,7 @@ Vue 2.7 + Element UI 的轻量表格内表单组件。
 | 第一次接入 | [快速开始](./guide/quick-start.md) |
 | 按完整属性路径查配置 | [API 总览](./api/configuration.md) |
 | 连续理解布局和渲染模式 | [完整配置指南](./guide/configuration-guide.md) |
+| 复用业务组件和字段配置 | [业务配置最佳实践](./guide/business-configuration-best-practices.md) |
 | 查动态回调与 Slot 参数 | [Slot 与上下文](./api/contexts.md) |
 | 查事件、Ref 和公开类型 | [事件与 Ref](./api/events-and-ref.md) · [公开类型](./api/types.md) |
 | 查看独立功能和业务示例 | [功能专题](./features/) · [演示索引](./examples/) |
