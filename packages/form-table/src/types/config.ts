@@ -64,6 +64,22 @@ export interface FieldModelConfig {
   valueFromEvent?: (...args: unknown[]) => FormTableValue
 }
 
+/** 使用方注册的轻量字段类型，只描述稳定组件目标、model 和默认属性。 */
+export interface FieldTypeDefinition<TRow extends TableRow = TableRow> {
+  is: string | Component
+  model?: FieldModelConfig | false
+  props?: DynamicValue<ComponentProps, FormTableFieldRenderContext<TRow>>
+}
+
+/** 自定义字段类型名称到组件协议的实例级注册表。 */
+export type FieldTypeRegistry<TRow extends TableRow = TableRow> = Record<
+  string,
+  FieldTypeDefinition<TRow>
+>
+
+/** 未声明自定义字段类型时使用的严格空注册表。 */
+export type EmptyFieldTypeRegistry = Record<never, never>
+
 /** 在行字段路径与组件受控值路径之间建立可序列化的双向映射。 */
 export interface FieldBindingMapEntry {
   fieldPath: string
@@ -99,6 +115,8 @@ export type BuiltinFormItemType =
   | 'slider' | 'color' | 'cascader' | 'autocomplete'
 
 export type FormItemType = BuiltinFormItemType | 'component' | 'slot'
+export type ReservedFormItemType = FormItemType
+export type RegisteredFormItemType<TFieldTypes> = Extract<keyof TFieldTypes, string>
 
 /** 保留 FormTableRecord 的灵活值类型，同时排除把 meta 根节点配置为函数。 */
 type StaticFormItemMeta = FormTableRecord & Record<string, unknown>
@@ -138,10 +156,33 @@ export interface SlotFormItemConfig<TRow extends TableRow = TableRow> extends Ba
   component: FieldComponentConfig<TRow> & { slot: string, is?: never, resolveComponent?: never }
 }
 
-export type FormItemConfig<TRow extends TableRow = TableRow> =
+type CustomFieldComponentConfig<TRow extends TableRow = TableRow> = Pick<
+  FieldComponentConfig<TRow>,
+  'props' | 'listeners' | 'model'
+> & {
+  is?: never
+  resolveComponent?: never
+  slot?: never
+  options?: never
+  optionProps?: never
+}
+
+interface CustomFormItemConfig<
+  TRow extends TableRow,
+  TFieldTypes extends FieldTypeRegistry<TRow>
+> extends BaseFormItemConfig<TRow> {
+  type: RegisteredFormItemType<TFieldTypes>
+  component?: CustomFieldComponentConfig<TRow>
+}
+
+export type FormItemConfig<
+  TRow extends TableRow = TableRow,
+  TFieldTypes extends FieldTypeRegistry<TRow> = EmptyFieldTypeRegistry
+> =
   | BuiltinFormItemConfig<TRow>
   | ComponentFormItemConfig<TRow>
   | SlotFormItemConfig<TRow>
+  | CustomFormItemConfig<TRow, TFieldTypes>
 
 interface BaseColumnConfig<TRow extends TableRow = TableRow> {
   key?: string
@@ -153,9 +194,12 @@ interface BaseColumnConfig<TRow extends TableRow = TableRow> {
   props?: DynamicValue<ComponentProps, FormTableColumnContext<TRow>>
 }
 
-export interface LayoutColumnConfig<TRow extends TableRow = TableRow> extends BaseColumnConfig<TRow> {
+export interface LayoutColumnConfig<
+  TRow extends TableRow = TableRow,
+  TFieldTypes extends FieldTypeRegistry<TRow> = EmptyFieldTypeRegistry
+> extends BaseColumnConfig<TRow> {
   rowProps?: DynamicValue<ComponentProps, FormTableRowContext<TRow>>
-  formItems: FormItemConfig<TRow>[]
+  formItems: FormItemConfig<TRow, TFieldTypes>[]
   cellSlot?: never
 }
 
@@ -185,8 +229,11 @@ export interface FormTableCellSlotContext<TRow extends TableRow = TableRow> {
   updateRow: (patch: FormTableRowPatch<TRow>) => void
 }
 
-export type ColumnConfig<TRow extends TableRow = TableRow> =
-  | LayoutColumnConfig<TRow>
+export type ColumnConfig<
+  TRow extends TableRow = TableRow,
+  TFieldTypes extends FieldTypeRegistry<TRow> = EmptyFieldTypeRegistry
+> =
+  | LayoutColumnConfig<TRow, TFieldTypes>
   | CellSlotColumnConfig<TRow>
   | NativeColumnConfig<TRow>
 
@@ -194,15 +241,27 @@ export type FormTableRowKey<TRow extends TableRow = TableRow> =
   | string
   | ((row: TRow) => FormTableValue)
 
-export interface FormTableProps<TRow extends TableRow = TableRow> {
+interface BaseFormTableProps<
+  TRow extends TableRow,
+  TFieldTypes extends FieldTypeRegistry<TRow>
+> {
   tableData: TRow[]
-  columns: ColumnConfig<TRow>[]
+  columns: ColumnConfig<TRow, TFieldTypes>[]
   rowKey?: FormTableRowKey<TRow>
   formProps?: FormTableFormProps
   tableProps?: FormTableTableProps
   hintOptions?: FormTableHintOptions<TRow>
   loading?: boolean
 }
+
+type FormTableFieldTypesProp<TFieldTypes> = keyof TFieldTypes extends never
+  ? { fieldTypes?: never }
+  : { fieldTypes: TFieldTypes }
+
+export type FormTableProps<
+  TRow extends TableRow = TableRow,
+  TFieldTypes extends FieldTypeRegistry<TRow> = EmptyFieldTypeRegistry
+> = BaseFormTableProps<TRow, TFieldTypes> & FormTableFieldTypesProp<TFieldTypes>
 
 export interface FormTableFieldChangePayload<TRow extends TableRow = TableRow> {
   row: TRow

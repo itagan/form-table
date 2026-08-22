@@ -4,6 +4,8 @@ import type { ElTable } from 'element-ui/types/table'
 import type { ComponentProps, FormTableValue, TableRow } from './base'
 import type {
   FieldModelConfig,
+  EmptyFieldTypeRegistry,
+  FieldTypeRegistry,
   FormItemOption,
   FormTableEmits,
   FormTableProps,
@@ -68,8 +70,11 @@ export interface FormTableExpose<TRow extends TableRow = TableRow> {
   getTableRef: () => FormTableElementTableRef<TRow> | null
 }
 
-export type FormTableComponent<TRow extends TableRow = TableRow> = DefineComponent<
-Omit<FormTableProps<TRow>, 'tableData'> & (
+export type FormTableComponent<
+  TRow extends TableRow = TableRow,
+  TFieldTypes extends FieldTypeRegistry<TRow> = EmptyFieldTypeRegistry
+> = DefineComponent<
+Omit<FormTableProps<TRow, TFieldTypes>, 'tableData'> & (
   | { value: TRow[], tableData?: TRow[] }
   | { tableData: TRow[], value?: TRow[] }
 ),

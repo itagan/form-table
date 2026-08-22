@@ -3,6 +3,7 @@ import FormTable, {
   FormTable as NamedFormTable,
   createFormTable,
   defineFormTableColumns,
+  defineFormTableTypes,
   type BuiltinFormItemType,
   type CellSlotColumnConfig,
   type ColumnConfig,
@@ -11,6 +12,7 @@ import FormTable, {
   type FieldComponentConfig,
   type FieldComponentResolver,
   type FieldModelConfig,
+  type FieldTypeDefinition,
   type FormTableCellSlotContext,
   type FormTableElementColumn,
   type FormTableEmits,
@@ -103,6 +105,100 @@ void contentHintTrigger
 // @ts-expect-error Hint 不再接受配置对象。
 const invalidObjectHint: FormTableHintValue = { content: '自动展示' }
 const rows: TableRow[] = [{ name: 'Alice', profile: { city: '杭州' } }]
+
+interface BusinessRow extends TableRow {
+  employeeId: string
+  employeeName: string
+  departmentId: string
+}
+
+const employeeTypeDefinition: FieldTypeDefinition<BusinessRow> = {
+  is: CustomInput,
+  model: {
+    prop: 'selectedId',
+    event: 'user-confirm',
+    valueFromEvent: (...args) => (args[0] as { id: string }).id
+  },
+  props: ({ row }) => ({ departmentId: row.departmentId })
+}
+
+const businessFieldTypes = defineFormTableTypes<BusinessRow>()({
+  employee: employeeTypeDefinition,
+  statusDisplay: { is: CustomInput, model: false }
+})
+
+defineFormTableTypes<BusinessRow>()({
+  // @ts-expect-error 内置名称不能注册为自定义 type。
+  input: { is: CustomInput }
+})
+
+const businessColumns = defineFormTableColumns<BusinessRow, typeof businessFieldTypes>([{
+  label: '业务字段',
+  formItems: [{
+    fieldKey: 'employeeId',
+    type: 'employee',
+    component: {
+      props: ({ row }) => ({ disabled: !row.departmentId }),
+      listeners: {
+        'user-confirm'({ updateRow }, employee) {
+          updateRow({ employeeName: (employee as { name: string }).name })
+        }
+      },
+      model: { prop: 'selectedId', event: 'user-confirm' }
+    }
+  }, {
+    fieldKey: 'employeeName',
+    type: 'statusDisplay'
+  }]
+}])
+
+defineFormTableColumns<BusinessRow, typeof businessFieldTypes>([{
+  label: '拼写错误',
+  formItems: [{
+    fieldKey: 'employeeId',
+    // @ts-expect-error 自定义 type 必须来自当前注册表。
+    type: 'employe'
+  }]
+}])
+
+defineFormTableColumns<BusinessRow, typeof businessFieldTypes>([{
+  label: '禁止目标覆盖',
+  formItems: [
+    // @ts-expect-error 自定义 type 的 Item 不允许覆盖组件目标。
+    {
+      fieldKey: 'employeeId',
+      type: 'employee',
+      component: {
+        is: CustomInput
+      }
+    }]
+}])
+
+const BusinessFormTable = createFormTable<BusinessRow, typeof businessFieldTypes>()
+const businessProps: InstanceType<typeof BusinessFormTable>['$props'] = {
+  tableData: [{ employeeId: '', employeeName: '', departmentId: '' }],
+  columns: businessColumns,
+  fieldTypes: businessFieldTypes
+}
+void businessProps
+
+// @ts-expect-error 使用非空注册表泛型时 fieldTypes 是必填 Prop。
+const missingBusinessFieldTypes: InstanceType<typeof BusinessFormTable>['$props'] = {
+  tableData: [],
+  columns: businessColumns
+}
+void missingBusinessFieldTypes
+
+const otherFieldTypes = defineFormTableTypes<BusinessRow>()({
+  other: { is: CustomInput }
+})
+const mismatchedBusinessProps: InstanceType<typeof BusinessFormTable>['$props'] = {
+  tableData: [],
+  columns: businessColumns,
+  // @ts-expect-error fieldTypes 必须与组件和 columns 使用同一注册表类型。
+  fieldTypes: otherFieldTypes
+}
+void mismatchedBusinessProps
 
 const componentVariantColumns: ColumnConfig[] = [{
   label: '组件模式',

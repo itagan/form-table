@@ -38,13 +38,15 @@ import { useFormTableFieldContext } from './composables/useFormTableFieldContext
 import { useResolvedFieldComponent } from './composables/useResolvedFieldComponent'
 import type {
   FormItemConfig,
+  FieldTypeRegistry,
+  FormTableFieldTypesRef,
   FormTableFormItemErrorSlotContext,
   FormTableFormItemSlotContext,
   FormTableRowContext,
   FormTableSlotContext,
   FormTableSlots
 } from './types'
-import { FORM_TABLE_SLOTS_KEY } from './types'
+import { FORM_TABLE_FIELD_TYPES_KEY, FORM_TABLE_SLOTS_KEY } from './types'
 import { extendLazyContext } from './utils/dynamic'
 
 /** 当前字段配置及其所在行的完整动态上下文。 */
@@ -55,6 +57,10 @@ const props = defineProps<{
 
 /** 父组件具名插槽集合，用于字段 Slot 和 FormItem Label/Error Slot。 */
 const parentSlots = inject<FormTableSlots>(FORM_TABLE_SLOTS_KEY, {})
+const fieldTypes = inject<FormTableFieldTypesRef>(
+  FORM_TABLE_FIELD_TYPES_KEY,
+  computed<FieldTypeRegistry>(() => ({}))
+)
 
 /** 按 Item 配置名称解析 FormItem 的 Label 和 Error Slot；缺失时保留 Element 默认内容。 */
 const labelSlotFn = computed(() => props.config.labelSlot
@@ -85,7 +91,8 @@ const { resolvedComponent } = useResolvedFieldComponent({
   fieldContext,
   resolvedHint,
   hintMode,
-  hintTrigger
+  hintTrigger,
+  fieldTypes
 })
 
 /** 仅 slot 模式按 slot 名称查找插槽；未找到时返回 null。 */

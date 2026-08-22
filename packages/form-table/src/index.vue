@@ -55,7 +55,7 @@ export default defineComponent({
 </script>
 
 <script lang="ts" setup>
-import { computed, getCurrentInstance, provide, ref, useSlots } from 'vue'
+import { computed, getCurrentInstance, provide, ref, useSlots, watchEffect } from 'vue'
 import FormTableColumn from './FormTableColumn.vue'
 import FormTableHintTooltip from './FormTableHintTooltip.vue'
 import type {
@@ -64,6 +64,7 @@ import type {
   FormTableElementFormRef,
   FormTableElementTableRef,
   FormTableFieldChangePayload,
+  FieldTypeRegistry,
   FormTableFormProps,
   FormTableHintContext,
   FormTableHintMode,
@@ -79,10 +80,12 @@ import type {
 } from './types'
 import {
   FORM_TABLE_CONTEXT_KEY,
+  FORM_TABLE_FIELD_TYPES_KEY,
   FORM_TABLE_HINT_CONTEXT_KEY,
   FORM_TABLE_SLOTS_KEY,
   FORM_TABLE_UPDATE_KEY
 } from './types'
+import { isReservedFormItemType } from './configs/defaultComponentConfigs'
 import { useColumnIdentity } from './composables/useColumnIdentity'
 import { useControlledTableUpdate } from './composables/useControlledTableUpdate'
 import { createTableContext } from './utils/dynamic'
@@ -102,6 +105,7 @@ const props = withDefaults(defineProps<{
   rowKey?: FormTableRowKey
   hintOptions?: FormTableHintOptions
   loading?: boolean
+  fieldTypes?: FieldTypeRegistry
 }>(), {
   tableData: () => [],
   columns: () => [],
@@ -110,6 +114,39 @@ const props = withDefaults(defineProps<{
   hintOptions: () => ({ mode: 'title', targets: 'field' }),
   loading: false
 })
+
+/** 注册表通过新对象替换即可响应更新；不为原地深层修改建立额外协议。 */
+const resolvedFieldTypes = computed<FieldTypeRegistry>(() => props.fieldTypes || {})
+
+/** 未知名称按当前实例去重，避免同一 type 在每个单元格重复输出。 */
+if (import.meta.env.DEV) {
+  const warnedNames = new Set<string>()
+  watchEffect(() => {
+    const fieldTypes = resolvedFieldTypes.value
+    for (const name of Object.keys(fieldTypes)) {
+      if (isReservedFormItemType(name) && !warnedNames.has(`reserved:${name}`)) {
+        warnedNames.add(`reserved:${name}`)
+        console.warn(`[FormTable] Field type "${name}" is reserved; the registered definition is ignored.`)
+      }
+    }
+    for (const column of props.columns) {
+      if (!('formItems' in column)) continue
+      for (const item of column.formItems || []) {
+        const type = item.type
+        if (
+          !isReservedFormItemType(type)
+          && !Object.prototype.hasOwnProperty.call(fieldTypes, type)
+          && !warnedNames.has(type)
+        ) {
+          warnedNames.add(type)
+          console.warn(
+            `[FormTable] Unknown field type "${type}". Register it through fieldTypes or use type: "component".`
+          )
+        }
+      }
+    }
+  })
+}
 
 /** 数据更新和字段粒度变更是组件自身负责派发的两个业务事件。 */
 const emit = defineEmits<{
@@ -166,6 +203,7 @@ const updateApi: FormTableUpdateApi = useControlledTableUpdate({
 
 /** 后代组件共享表数据、更新入口和父级插槽，避免逐层透传无关参数。 */
 provide(FORM_TABLE_CONTEXT_KEY, formTableContext)
+provide(FORM_TABLE_FIELD_TYPES_KEY, resolvedFieldTypes)
 provide(FORM_TABLE_UPDATE_KEY, updateApi)
 provide(FORM_TABLE_SLOTS_KEY, slots as FormTableSlots)
 provide<FormTableHintContext>(FORM_TABLE_HINT_CONTEXT_KEY, {
