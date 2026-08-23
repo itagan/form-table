@@ -72,6 +72,15 @@
     "tags": ["binding.map", "custom component", "component.model", "slot"]
   },
   {
+    "title": "实例级自定义字段 Type",
+    "description": "演示注册式业务 type、标准与非标准 model、默认 props、原始事件、binding.map 和未知名称保护。",
+    "path": "/custom-field-types",
+    "name": "custom-field-types",
+    "view": "CustomFieldTypesView",
+    "type": "success",
+    "tags": ["fieldTypes", "defineFormTableTypes", "binding.map", "custom model"]
+  },
+  {
     "title": "企业复杂组件接入",
     "description": "实际演示全局内部组件、局部业务组件、非标准绑定协议和复杂事件联动。",
     "path": "/enterprise-components",

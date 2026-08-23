@@ -24,6 +24,7 @@
 | [自定义表头](./custom-header.md) | `columns[].headerSlot` | 父组件同名 scoped Slot | [`/hint-scenarios`](http://localhost:5173/hint-scenarios) |
 | [`cellSlot` 列级单元格](./cell-slot.md) | `columns[].cellSlot` | 父组件同名 scoped Slot | [`/cell-slot`](http://localhost:5173/cell-slot) |
 | [自定义字段组件](./custom-component.md) | Item `type: 'component'` | `component.is/model/props/listeners` | [`/enterprise-components`](http://localhost:5173/enterprise-components) |
+| [自定义字段 Type](./custom-field-types.md) | 根 `fieldTypes` + Item `type` | `defineFormTableTypes`、字段 props/listeners/model | [`/custom-field-types`](http://localhost:5173/custom-field-types) |
 
 ## 业务组合
 

@@ -60,7 +60,7 @@ const columns: ColumnConfig[] = [{
 
 省略 `component.model` 时按 Vue 2 组件的 v-model/model 选项绑定，包括组件自身声明的 `model.prop/model.event`。
 
-## 非标准绑定协议
+## 非标准与非对称绑定协议
 
 组件使用 `selectedId` 接收值并通过 `select-user` 发出整个用户对象时，可以声明适配协议：
 
@@ -81,6 +81,20 @@ component: {
 ```
 
 同一个事件同时承担 model 写回和业务 listener 时，FormTable 先更新 `ownerId`，再把 `ActionContext, user` 传给 listener。
+
+如果行字段只保存 ID，但组件 model prop 需要完整用户对象，可以增加同步输入转换：
+
+```ts
+model: {
+  prop: 'selectedUser',
+  event: 'select-user',
+  valueToProp: (ownerId, { row }) =>
+    findUser(ownerId, row.departmentId) || null,
+  valueFromEvent: user => user?.id || ''
+}
+```
+
+`valueToProp` 不执行异步查询或副作用；需要请求数据、缓存状态或更新其他字段时，继续使用 Adapter 或 listener。
 
 ## 按行选择组件
 

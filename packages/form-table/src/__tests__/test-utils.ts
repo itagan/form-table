@@ -1,7 +1,13 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import ElementUI from 'element-ui'
 import FormTable from '../index.vue'
-import type { ColumnConfig, FormTableHintOptions, FormTableRowKey, TableRow } from '../types.public'
+import type {
+  ColumnConfig,
+  FieldTypeRegistry,
+  FormTableHintOptions,
+  FormTableRowKey,
+  TableRow
+} from '../types.public'
 
 export const localVue = createLocalVue()
 localVue.use(ElementUI)
@@ -19,7 +25,8 @@ export const inputColumns: ColumnConfig[] = [{
 
 export function mountFormTable(options: {
   tableData?: TableRow[]
-  columns?: ColumnConfig[]
+  columns?: ColumnConfig[] | Record<string, any>[]
+  fieldTypes?: FieldTypeRegistry
   tableProps?: Record<string, any>
   rowKey?: FormTableRowKey
   hintOptions?: FormTableHintOptions
@@ -34,7 +41,8 @@ export function mountFormTable(options: {
       formProps: { size: 'small' },
       tableProps: { border: true, ...options.tableProps },
       rowKey: options.rowKey,
-      hintOptions: options.hintOptions
+      hintOptions: options.hintOptions,
+      fieldTypes: options.fieldTypes
     },
     scopedSlots: options.scopedSlots,
     listeners: options.listeners,

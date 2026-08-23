@@ -13,6 +13,7 @@ FormTable
 ├─ tableData
 ├─ formProps
 ├─ tableProps
+├─ fieldTypes                           实例级自定义字段 type 注册表
 ├─ hintOptions
 │  ├─ mode / props
 │  └─ field
@@ -33,6 +34,7 @@ FormTable
          ├─ model
          │  ├─ prop
          │  ├─ event
+         │  ├─ valueToProp
          │  └─ valueFromEvent
          ├─ props / listeners / options
          └─ optionProps
@@ -48,7 +50,7 @@ FormTable
 
 | 参考页 | 主要路径 | 内容 |
 | --- | --- | --- |
-| [FormTable Props](./form-table.md) | `tableData`、`columns`、`formProps`、`tableProps`、`hintOptions` | 顶层 props、受控数据和 Element UI 透传 |
+| [FormTable Props](./form-table.md) | `tableData`、`columns`、`fieldTypes`、`formProps`、`tableProps`、`hintOptions` | 顶层 props、受控数据和 Element UI 透传 |
 | [Column / Item](./columns.md) | `columns[]...` | 列、字段布局、校验和提示 |
 | [Component 配置](./component.md) | `columns[].formItems[].component...` | 渲染器、model、props、listeners 和 options |
 | [Slot 与上下文](./contexts.md) | 动态回调和 scoped Slot | 提供要求、命名约定、上下文矩阵、快照语义和更新能力 |
@@ -68,6 +70,7 @@ FormTable
 | FormItem Label / Error Slot | [能力边界与处理方案](../features/element-ui-boundaries.md#formitem-自定义-label-和-error) | [`/hint-scenarios`](http://localhost:5173/hint-scenarios) |
 | 列级单元格 Slot | [`cellSlot` 专题](../features/cell-slot.md) | [`/cell-slot`](http://localhost:5173/cell-slot) |
 | 自定义字段组件 | [配置与使用](../features/custom-component.md) | [`/enterprise-components`](http://localhost:5173/enterprise-components) |
+| 自定义字段 Type | [注册、覆盖与错误处理](../features/custom-field-types.md) | [`/custom-field-types`](http://localhost:5173/custom-field-types) |
 | 复合字段映射 | [配置与使用](../features/composite-binding.md) | [`/composite-binding`](http://localhost:5173/composite-binding) |
 | 复杂 Option / 分组选项 | [使用字段 Slot 接入](./component.md#复杂-option-接入) | — |
 | 远程 Schema | [配置与本地增强](../features/remote-schema.md) | [`/remote-schema`](http://localhost:5173/remote-schema) |

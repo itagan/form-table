@@ -86,7 +86,8 @@ export default defineConfig({
               { text: 'Element 功能列透传', link: '/features/native-columns' },
               { text: '自定义表头', link: '/features/custom-header' },
               { text: 'cellSlot 列级单元格', link: '/features/cell-slot' },
-              { text: '自定义字段组件', link: '/features/custom-component' }
+              { text: '自定义字段组件', link: '/features/custom-component' },
+              { text: '自定义字段 Type', link: '/features/custom-field-types' }
             ]
           },
           {
@@ -112,6 +113,7 @@ export default defineConfig({
         text: '示例',
         items: [
           { text: '示例索引', link: '/examples/' },
+          { text: '自定义字段 Type', link: '/features/custom-field-types' },
           { text: '企业复杂组件接入', link: '/examples/enterprise-components' },
           { text: '单元格合并', link: '/examples/cell-merge' },
           { text: '多需求费用明细', link: '/examples/heterogeneous-demands' },
@@ -121,7 +123,7 @@ export default defineConfig({
       {
         text: '维护者',
         items: [
-          { text: '自定义字段 Type 设计草案', link: '/design/custom-field-type-proposal' },
+          { text: '自定义字段 Type 架构设计', link: '/design/custom-field-type-proposal' },
           { text: 'npm 包发布准备', link: '/migration/npm-package' }
         ]
       }

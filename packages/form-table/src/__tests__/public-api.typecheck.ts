@@ -3,6 +3,8 @@ import FormTable, {
   FormTable as NamedFormTable,
   createFormTable,
   defineFormTableColumns,
+  defineFormTableType,
+  defineFormTableTypes,
   type BuiltinFormItemType,
   type CellSlotColumnConfig,
   type ColumnConfig,
@@ -11,6 +13,7 @@ import FormTable, {
   type FieldComponentConfig,
   type FieldComponentResolver,
   type FieldModelConfig,
+  type FormItemConfig,
   type FormTableCellSlotContext,
   type FormTableElementColumn,
   type FormTableEmits,
@@ -103,6 +106,180 @@ void contentHintTrigger
 // @ts-expect-error Hint 不再接受配置对象。
 const invalidObjectHint: FormTableHintValue = { content: '自动展示' }
 const rows: TableRow[] = [{ name: 'Alice', profile: { city: '杭州' } }]
+
+interface BusinessRow extends TableRow {
+  employeeId: string
+  employeeName: string
+  departmentId: string
+}
+
+interface EmployeeTypeProps {
+  clearable?: boolean
+  departmentId?: string
+  disabled?: boolean
+}
+
+interface EmployeeSelection {
+  id: string
+  name: string
+}
+
+type EmployeeTypeEvents = {
+  'user-confirm': [employee: EmployeeSelection, meta: { source: string }]
+  search: [keyword: string]
+}
+
+const employeeTypeDefinition = defineFormTableType<BusinessRow>()<
+  EmployeeTypeProps,
+  EmployeeTypeEvents
+>({
+  is: CustomInput,
+  model: {
+    prop: 'selectedId',
+    event: 'user-confirm',
+    valueToProp: (value, context) => ({
+      id: value,
+      departmentId: context.row.departmentId
+    }),
+    valueFromEvent: (...args) => (args[0] as { id: string }).id
+  },
+  props: ({ row }) => ({ departmentId: row.departmentId })
+})
+
+const directlyTypedEmployeeItem: FormItemConfig<BusinessRow, {
+  employee: typeof employeeTypeDefinition
+}> = {
+  fieldKey: 'employeeId',
+  type: 'employee',
+  component: {
+    props: {
+      // @ts-expect-error 显式协议不接受未声明属性。
+      directUnknownProp: true
+    },
+    listeners: {
+      // @ts-expect-error 已声明事件的原始参数类型来自显式协议。
+      search(_context, keyword: number) {
+        keyword.toFixed()
+      }
+    }
+  }
+}
+void directlyTypedEmployeeItem
+
+type DirectEmployeeItem = Extract<FormItemConfig<BusinessRow, {
+  employee: typeof employeeTypeDefinition
+}>, { type: 'employee' }>
+type DirectEmployeeListeners = NonNullable<NonNullable<DirectEmployeeItem['component']>['listeners']>
+// @ts-expect-error listener key 应仅包含显式协议事件。
+const invalidDirectEmployeeListenerKey: keyof DirectEmployeeListeners = 'direct-missing-event'
+void invalidDirectEmployeeListenerKey
+
+const businessModel: FieldModelConfig<BusinessRow> = {
+  valueToProp(value, context) {
+    const departmentId: string = context.row.departmentId
+    return { value, departmentId }
+  }
+}
+void businessModel
+
+const businessTypeRegistry = {
+  employee: employeeTypeDefinition,
+  statusDisplay: { is: CustomInput, model: false as const }
+}
+const businessFieldTypes = defineFormTableTypes<BusinessRow>()(businessTypeRegistry)
+
+defineFormTableTypes<BusinessRow>()({
+  // @ts-expect-error 内置名称不能注册为自定义 type。
+  input: { is: CustomInput }
+})
+
+const businessColumns = defineFormTableColumns<BusinessRow, typeof businessFieldTypes>([{
+  label: '业务字段',
+  formItems: [{
+    fieldKey: 'employeeId',
+    type: 'employee',
+    component: {
+      props: ({ row }) => ({ disabled: !row.departmentId }),
+      listeners: {
+        'user-confirm'({ updateRow }, employee, meta) {
+          updateRow({ employeeName: employee.name })
+          meta.source.toLowerCase()
+        },
+        search(_context, keyword) {
+          keyword.toLowerCase()
+        }
+      },
+      model: { prop: 'selectedId', event: 'user-confirm' }
+    }
+  }, {
+    fieldKey: 'employeeName',
+    type: 'statusDisplay'
+  }]
+}])
+
+defineFormTableColumns<BusinessRow, typeof businessFieldTypes>([{
+  label: '错误业务字段协议',
+  formItems: [{
+    fieldKey: 'employeeId',
+    type: 'employee',
+    component: {
+      listeners: {
+        // @ts-expect-error user-confirm 首个原始参数必须是 EmployeeSelection。
+        'user-confirm'(_context, employee: string) {
+          employee.toLowerCase()
+        }
+      }
+    }
+  }]
+}])
+
+defineFormTableColumns<BusinessRow, typeof businessFieldTypes>([{
+  label: '拼写错误',
+  formItems: [{
+    fieldKey: 'employeeId',
+    // @ts-expect-error 自定义 type 必须来自当前注册表。
+    type: 'employe'
+  }]
+}])
+
+defineFormTableColumns<BusinessRow, typeof businessFieldTypes>([{
+  label: '禁止目标覆盖',
+  formItems: [
+    // @ts-expect-error 自定义 type 的 Item 不允许覆盖组件目标。
+    {
+      fieldKey: 'employeeId',
+      type: 'employee',
+      component: {
+        is: CustomInput
+      }
+    }]
+}])
+
+const BusinessFormTable = createFormTable<BusinessRow, typeof businessFieldTypes>()
+const businessProps: InstanceType<typeof BusinessFormTable>['$props'] = {
+  tableData: [{ employeeId: '', employeeName: '', departmentId: '' }],
+  columns: businessColumns,
+  fieldTypes: businessFieldTypes
+}
+void businessProps
+
+// @ts-expect-error 使用非空注册表泛型时 fieldTypes 是必填 Prop。
+const missingBusinessFieldTypes: InstanceType<typeof BusinessFormTable>['$props'] = {
+  tableData: [],
+  columns: businessColumns
+}
+void missingBusinessFieldTypes
+
+const otherFieldTypes = defineFormTableTypes<BusinessRow>()({
+  other: { is: CustomInput }
+})
+const mismatchedBusinessProps: InstanceType<typeof BusinessFormTable>['$props'] = {
+  tableData: [],
+  columns: businessColumns,
+  // @ts-expect-error fieldTypes 必须与组件和 columns 使用同一注册表类型。
+  fieldTypes: otherFieldTypes
+}
+void mismatchedBusinessProps
 
 const componentVariantColumns: ColumnConfig[] = [{
   label: '组件模式',

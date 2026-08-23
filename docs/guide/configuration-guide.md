@@ -121,12 +121,13 @@ component: {
   model: {
     prop: 'amount',
     event: 'amount-change',
-    valueFromEvent: payload => payload.amount
+    valueToProp: cents => Number(cents || 0) / 100,
+    valueFromEvent: payload => Math.round(payload.amount * 100)
   }
 }
 ```
 
-只展示或由 listener 手动处理的组件可以设置 `model: false`。
+`valueToProp` 将字段或 `binding.map` 组合值同步转换为组件 prop，`valueFromEvent` 转换组件输出。只展示或由 listener 手动处理的组件可以设置 `model: false`。
 
 ### 使用 Vue Render Function
 

@@ -23,3 +23,13 @@ const componentTypeMap: Record<BuiltinFormItemType, string> = {
 export function getComponentType(type: BuiltinFormItemType) {
   return componentTypeMap[type]
 }
+
+/** 在运行时区分内置 type 与实例注册的业务 type。 */
+export function isBuiltinFormItemType(type: string): type is BuiltinFormItemType {
+  return Object.prototype.hasOwnProperty.call(componentTypeMap, type)
+}
+
+/** component/slot 与全部内置 type 均为不可覆盖的公开保留名称。 */
+export function isReservedFormItemType(type: string) {
+  return type === 'component' || type === 'slot' || isBuiltinFormItemType(type)
+}

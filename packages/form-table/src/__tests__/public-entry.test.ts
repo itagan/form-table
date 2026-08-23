@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 import FormTable, {
   FormTable as NamedFormTable,
   createFormTable,
-  defineFormTableColumns
+  defineFormTableColumns,
+  defineFormTableType,
+  defineFormTableTypes
 } from '../index'
 import * as publicEntry from '../index'
 
@@ -17,8 +19,21 @@ describe('public package entry', () => {
       'FormTable',
       'createFormTable',
       'default',
-      'defineFormTableColumns'
+      'defineFormTableColumns',
+      'defineFormTableType',
+      'defineFormTableTypes'
     ])
+  })
+
+  it('returns field type registries by identity and rejects reserved names', () => {
+    const employee = { is: 'employee-picker' }
+    expect(defineFormTableType()(employee)).toBe(employee)
+    const fieldTypes = { employee }
+    expect(defineFormTableTypes()(fieldTypes)).toBe(fieldTypes)
+    expect(() => defineFormTableTypes()({
+      // @ts-expect-error reserved names are rejected by the public helper.
+      input: { is: 'business-input' }
+    })).toThrow('[FormTable] Field type "input" is reserved')
   })
 
   it('returns typed column definitions without changing their runtime identity', () => {

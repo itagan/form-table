@@ -211,6 +211,7 @@ describe('FormTable slot rendering', () => {
       suffix: row.school === '一中' ? '（当前）' : ''
     }))
     const slotListener = vi.fn()
+    const valueToProp = vi.fn(() => '不应传入字段 Slot')
     const wrapper = mountFormTable({
       tableData: [{ school: '一中' }],
       columns: [{
@@ -220,6 +221,7 @@ describe('FormTable slot rendering', () => {
           type: 'slot',
           component: {
             slot: 'school',
+            model: { valueToProp },
             props: componentPropsResolver,
             options: [{ label: '校区配置', value: 'campus' }],
             listeners: { commit: slotListener }
@@ -237,6 +239,7 @@ describe('FormTable slot rendering', () => {
     await wrapper.vm.$nextTick()
     expect(wrapper.find('.slot-setter').text()).toBe('一中（当前）校区配置school')
     expect(componentPropsResolver).toHaveBeenCalledTimes(1)
+    expect(valueToProp).not.toHaveBeenCalled()
     expect(Object.keys(componentPropsResolver.mock.calls[0][0]).sort()).toEqual([
       'columnConfig',
       'fieldKey',

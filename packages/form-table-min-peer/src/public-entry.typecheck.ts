@@ -2,6 +2,8 @@ import FormTable, {
   FormTable as NamedFormTable,
   createFormTable,
   defineFormTableColumns,
+  defineFormTableType,
+  defineFormTableTypes,
   type FormTableExpose,
   type TableRow
 } from '@itagan/form-table'
@@ -74,6 +76,40 @@ typedInstance.$emit('field-change', {
 })
 void exposed.getFormRef()
 void exposed.getTableRef()
+
+const moneyType = defineFormTableType<PurchaseRow>()<
+  { disabled?: boolean },
+  { 'amount-change': [amount: number] }
+>({
+    is: 'minimum-money-input',
+    model: { prop: 'amount', event: 'amount-change' },
+    props: ({ row }) => ({ disabled: row.amount <= 0 })
+})
+const fieldTypes = defineFormTableTypes<PurchaseRow>()({
+  money: moneyType
+})
+const customColumns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([{
+  label: '自定义类型',
+  formItems: [{
+    fieldKey: 'amount',
+    type: 'money',
+    component: {
+      listeners: {
+        'amount-change'({ row }, value) {
+          void row.id
+          value.toFixed()
+        }
+      }
+    }
+  }]
+}])
+const CustomTypedFormTable = createFormTable<PurchaseRow, typeof fieldTypes>()
+const customTypedProps: InstanceType<typeof CustomTypedFormTable>['$props'] = {
+  tableData: [{ id: 'purchase-1', name: '采购单', amount: 100 }],
+  columns: customColumns,
+  fieldTypes
+}
+void customTypedProps
 
 // @ts-expect-error 泛型组件的数据行必须保留完整业务类型。
 typedInstance.$emit('update:tableData', [

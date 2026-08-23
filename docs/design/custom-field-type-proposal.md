@@ -1,6 +1,6 @@
-# 自定义字段 Type 架构设计草案
+# 自定义字段 Type 架构设计
 
-> 状态：讨论中，尚未实现。本文用于收敛目标、边界和待决策问题，不代表当前公开 API。
+> 状态：首版已实现。本文记录已选定的公开 API、运行时规则、首版边界及后续不扩张原则。
 
 ## 背景
 
@@ -93,12 +93,12 @@ type 定义只描述跨页面稳定的技术协议。当前页面的权限、接
 | --- | --- | --- |
 | 内置字段 | `type: 'input'` | Element UI 标准字段 |
 | 注册字段 | `type: 'employee'` | 协议稳定、重复使用的业务组件 |
-| 自定义组件 | `type: 'component'` | 动态组件、非对称数据、复杂事件和一次性接入 |
+| 自定义组件 | `type: 'component'` | 动态或异步状态组件、复杂事件和一次性接入 |
 | 字段 Slot | `type: 'slot'` | 多组件模板和完全自定义内容 |
 
 自定义 type 是“使用方提供的业务内置 type”，不是新的渲染模式。
 
-## 公共 API 草案
+## 公共 API
 
 ### 注册定义
 
@@ -135,7 +135,7 @@ const fieldTypes = defineFormTableTypes<PurchaseRow>()({
 })
 ```
 
-`defineFormTableTypes` 主要用于保留名称字面量、提供字段上下文类型并检查保留名称。具体泛型形式仍属于待决策项。
+`defineFormTableTypes` 原样返回注册表，用于保留名称字面量、提供字段上下文类型，并在类型层和运行时检查保留名称。
 
 ### 实例注册
 
@@ -185,12 +185,12 @@ const fieldTypes = defineFormTableTypes<PurchaseRow>()({
 
 ## Type 定义能力
 
-第一版建议收敛为：
+第一版收敛为：
 
 ```ts
 interface FieldTypeDefinition<TRow extends TableRow = TableRow> {
   is: string | Component
-  model?: FieldModelConfig | false
+  model?: FieldModelConfig<TRow> | false
   props?: DynamicValue<
     ComponentProps,
     FormTableFieldRenderContext<TRow>
@@ -207,15 +207,19 @@ interface FieldTypeDefinition<TRow extends TableRow = TableRow> {
 沿用现有 `FieldModelConfig`：
 
 ```ts
-interface FieldModelConfig {
+interface FieldModelConfig<TRow extends TableRow = TableRow> {
   prop?: string
   event?: string
+  valueToProp?: (
+    value: FormTableValue,
+    context: FormTableFieldRenderContext<TRow>
+  ) => FormTableValue
   valueFromEvent?: (...args: unknown[]) => FormTableValue
 }
 ```
 
 - 省略时使用组件真实的 Vue 2 v-model/model 选项；
-- 对象形式声明非标准 prop、事件和取值函数；
+- 对象形式声明非标准 prop、事件及同步输入/输出转换；
 - `false` 表示不注入 model，通常不适合注册为普通可编辑 type。
 
 ### `props`
@@ -281,6 +285,7 @@ component: {
 ```text
 读取
 row[fieldKey]
+  → valueToProp(value, context)
   → type.model.prop
   → 业务组件
 
@@ -369,13 +374,20 @@ user-confirm(EmployeeSelection)
 写回：EmployeeSelection → 多个字段
 ```
 
-则不能只用 `binding.map` 表达。此时选择：
+可以由通用 model 输入/输出转换表达：
 
-- Adapter 将组件统一为复合值 model；
-- type 的 `valueFromEvent` 写回主字段，Item listener 更新关联字段；
-- `type: 'component' + model: false + props/listeners` 手动同步。
+```ts
+model: {
+  prop: 'selection',
+  event: 'user-confirm',
+  valueToProp: (employeeId, context) =>
+    findEmployee(employeeId, context.row.departmentId),
+  valueFromEvent: (...args) =>
+    (args[0] as EmployeeSelection).id
+}
+```
 
-第一版不为自定义 type 增加独立的输入转换器和输出 patch 转换器，以免演变为新的状态管理协议。
+`valueToProp` 属于通用 `FieldModelConfig`，内置编辑 type、直接 component 和注册 type 共用，不是自定义 type 的独立协议。它只允许同步纯转换；异步查询、跨字段 patch 和副作用继续交给 Adapter、Item listener 或 Slot，避免演变为状态管理协议。
 
 ## 事件行为
 
@@ -415,7 +427,7 @@ radio, checkbox, text, rate, slider, color, cascader,
 autocomplete, component, slot
 ```
 
-建议解析顺序：
+解析顺序：
 
 ```text
 component / slot 特殊模式
@@ -435,14 +447,14 @@ component / slot 特殊模式
 - 警告说明注册入口和 `type: 'component'` 替代方式；
 - 远程 Schema 应在业务白名单转换层提前拒绝未知名称。
 
-建议警告：
+开发环境警告：
 
 ```text
 [FormTable] Unknown field type "employee". Register it through
 fieldTypes or use type: "component".
 ```
 
-## TypeScript 设计要求
+## TypeScript 设计
 
 不能把 `FormItemType` 简单放宽为 `string`，否则会失去现有拼写检查：
 
@@ -450,7 +462,7 @@ fieldTypes or use type: "component".
 { fieldKey: 'name', type: 'inptu' }
 ```
 
-目标是让注册表名称参与 Item type 联合：
+注册表名称参与 Item type 联合：
 
 ```ts
 type AvailableType =
@@ -460,39 +472,27 @@ type AvailableType =
   | keyof typeof fieldTypes
 ```
 
-需要进一步比较的方案：
-
-### 注册表泛型
+### 选定方案：注册表泛型
 
 ```ts
 const fieldTypes = defineFormTableTypes<PurchaseRow>()({ /* ... */ })
 
-const columns: ColumnConfig<
-  PurchaseRow,
-  typeof fieldTypes
->[] = [/* ... */]
+const FormTable = createFormTable<PurchaseRow, typeof fieldTypes>()
+const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([
+  /* ... */
+])
 ```
 
-优点是实例隔离和类型来源明确；缺点是泛型会沿 `FormItemConfig/ColumnConfig/FormTableProps` 传播。
+第二个注册表泛型沿 `FormItemConfig/ColumnConfig/FormTableProps/FormTableComponent` 传播，默认 `EmptyFieldTypeRegistry`，因此现有单泛型和无泛型 API 完全兼容。非空注册表下 `fieldTypes` Prop 必传，注册名称保持精确拼写检查。
 
-### 绑定式 Schema 工具
+不增加绑定式 Schema 工具或 Module Augmentation。前者会增加与 `createFormTable/defineFormTableColumns` 重叠的公共概念，只减少少量泛型书写却形成第二套入口；后者是项目级全局状态，不能自然表达实例隔离。
 
-```ts
-const schema = createFormTableSchema<PurchaseRow>({
-  fieldTypes
-})
+同样不增加内置 type 的 `base` 预设和 `mergeFormTableTypes()`：
 
-const columns = schema.defineColumns([/* ... */])
-const BusinessFormTable = schema.FormTable
-```
+- `base` 对单组件内置 type 的增量价值有限，选项型组件则会继续引出 options 子节点、继承和合并协议，偏离轻量自定义组件定位；固定参数优先使用普通注册定义、配置函数或业务 Adapter。
+- 注册表组合已经可以使用对象展开完成，覆盖顺序沿用 JavaScript 语义。只有合并动作本身不值得增加新的运行时助手；公司级冲突检查应放在业务配置治理层。
 
-优点是推断完整、页面使用简洁；缺点是增加新的公共概念，并可能与当前 `createFormTable` 定位重叠。
-
-### Module Augmentation
-
-适合公司组件库统一声明类型名称，但属于项目级全局类型，无法自然表达两个实例使用不同注册表，因此不建议作为唯一方案。
-
-类型方案是实施前必须解决的主要开放问题，不能依赖业务方普遍使用类型断言。
+因此公共 API 保持“一份实例注册表、两类现有泛型入口、一条组件渲染链”。组件核心提供组合能力，但不承担预设继承、注册表治理或 Schema 框架职责。
 
 ## 性能设计
 
@@ -522,6 +522,7 @@ const BusinessFormTable = schema.FormTable
 
 - 组件对象；
 - props 函数；
+- `valueToProp`；
 - `valueFromEvent`；
 - listeners；
 - 任意可执行代码。
@@ -530,10 +531,11 @@ const BusinessFormTable = schema.FormTable
 
 ## 测试边界
 
-若进入实施，需要覆盖：
+首版回归覆盖：
 
 - 内置 type、`component` 和 `slot` 行为不变；
 - 注册类型的标准 v-model 和自定义 model；
+- `valueToProp` 的上下文、非对称值及 `binding.map` 执行顺序；
 - `valueFromEvent` 与同名 Item listener 的顺序和原始参数；
 - 静态及动态默认 props 与 Item props 的浅合并；
 - `binding.map` 的读取、原子写回、清空和 fallback；
@@ -541,21 +543,27 @@ const BusinessFormTable = schema.FormTable
 - 保留名称注册失败；
 - 两个 FormTable 实例的注册表隔离；
 - 自定义 type 名称的类型推断和拼写错误；
+- 可选 Props/事件协议的属性值与已声明事件参数类型；
+- 开发期注册结构、越界配置、未知名称的位置和可用名称诊断；
 - 最低 Vue/Element UI peer 组合；
 - 大量单元格下不增加组件实例和明显解析开销。
 
-## 待决策问题
+## 首版最终决策
 
-1. TypeScript 采用注册表泛型、绑定式 Schema 工具，还是两者组合？
-2. `fieldTypes` 是否允许替换为新的对象以支持配置切换，还是初始化后固定？
-3. Item 是否允许显式覆盖注册定义的 `model`，以完全对齐内置 type 的使用习惯？
-4. 未知 type 在生产环境是静默空渲染、保留一次警告，还是抛出错误？
-5. 是否需要在开发环境提前扫描 columns，而不是等字段首次渲染时发现未知类型？
-6. 是否有足够真实场景要求自定义 type 复用内置 `select/radio/checkbox` 的 Option 子节点？
+| 问题 | 选定规则 |
+| --- | --- |
+| TypeScript 方案 | 显式注册表泛型；现有 API 增加可选第二泛型 |
+| 注册表更新 | 允许替换为新对象并重新解析；不承诺原地深层修改 |
+| Item model | 对象或 `false` 可整体覆盖注册 model，不做深合并 |
+| 未知 type | 开发环境按实例和名称警告一次，生产环境静默，字段内容为空 |
+| 发现时机 | 根组件在开发环境扫描 columns；字段渲染仍有未知目标保护 |
+| Option 子节点 | 首版不复用；通过组件 props 自行传入选项 |
+| Props/事件类型 | 可选 `defineFormTableType` 显式协议；运行时保持对象身份 |
+| 开发期诊断 | 按实例与问题去重，包含列/字段位置；生产环境移除 |
 
-## 推荐的第一版范围
+## 已实现的第一版范围
 
-如果未来决定实施，建议首版只包含：
+首版包含：
 
 ```text
 实例级 fieldTypes
@@ -571,6 +579,8 @@ Item component.props / listeners
 保留名称保护与未知类型警告
   +
 注册表驱动的 TypeScript 联合
+  +
+可选 Props/事件协议与开发期定位诊断
 ```
 
 不包含注册级 listeners、动态组件、Option Renderer、全局注册、生命周期、自定义渲染和额外数据转换协议。

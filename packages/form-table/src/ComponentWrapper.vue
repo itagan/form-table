@@ -10,7 +10,7 @@
   <DynamicFieldRenderer
     v-else
     :renderer="component.is"
-    :value="value"
+    :value="modelValue"
     :component-props="component.props"
     :component-listeners="component.listeners"
     :model="component.model"
@@ -51,9 +51,11 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue'
 import DynamicFieldRenderer from './DynamicFieldRenderer'
 import type {
   FormItemType,
+  FormTableFieldRenderContext,
   FormTableValue,
   ResolvedComponentConfig
 } from './types'
@@ -65,11 +67,20 @@ import {
 } from './utils/display'
 
 /** 上层已完成动态解析，本组件只接收渲染所需的最小数据。 */
-defineProps<{
+const props = defineProps<{
   type: FormItemType
   value: FormTableValue
   component: ResolvedComponentConfig
+  modelContext: FormTableFieldRenderContext
 }>()
+
+/** 仅自动 model 渲染链执行同步输入转换；text 在模板分支中继续展示原值。 */
+const modelValue = computed(() => {
+  const model = props.component.model
+  return model && model.valueToProp
+    ? model.valueToProp(props.value, props.modelContext)
+    : props.value
+})
 
 /** 将字段组件的 input 事件交回 FormTableItem 执行不可变更新。 */
 const emit = defineEmits<{

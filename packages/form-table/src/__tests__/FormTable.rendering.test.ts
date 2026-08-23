@@ -242,6 +242,7 @@ describe('FormTable rendering and configuration', () => {
   })
 
   it('applies component props, including native title, to text fields', async () => {
+    const valueToProp = vi.fn(() => '不应展示')
     const wrapper = mountFormTable({
       tableData: [{ summary: '完整说明' }],
       columns: [{
@@ -250,6 +251,7 @@ describe('FormTable rendering and configuration', () => {
           fieldKey: 'summary',
           type: 'text',
           component: {
+            model: { valueToProp },
             props: ({ value }) => ({
               title: `查看：${value}`,
               class: 'summary-text'
@@ -263,6 +265,7 @@ describe('FormTable rendering and configuration', () => {
     const text = wrapper.find('.summary-text')
     expect(text.text()).toBe('完整说明')
     expect(text.attributes('title')).toBe('查看：完整说明')
+    expect(valueToProp).not.toHaveBeenCalled()
     wrapper.destroy()
   })
 
@@ -629,6 +632,140 @@ describe('FormTable rendering and configuration', () => {
       { id: 'user-2', name: 'Bob' },
       'manual'
     ])
+    wrapper.destroy()
+  })
+
+  it('transforms the binding value before passing it to a component model prop', async () => {
+    const amountListener = vi.fn()
+    const valueToProp = vi.fn((value: number, context: FormTableFieldRenderContext) => ({
+      amount: value / 100,
+      currency: context.row.currency
+    }))
+    const MoneyField = {
+      props: ['money'],
+      render(this: any, h: any) {
+        return h('button', {
+          class: 'input-transform-money',
+          attrs: { type: 'button', 'data-money': JSON.stringify(this.money) },
+          on: {
+            click: () => this.$emit('amount-change', { amount: 13.5 }, 'raw-meta')
+          }
+        })
+      }
+    }
+    const wrapper = mountFormTable({
+      tableData: [{ amountInCents: 1250, currency: 'CNY' }],
+      columns: [{
+        label: '金额',
+        formItems: [{
+          fieldKey: 'amountInCents',
+          type: 'component',
+          component: {
+            is: MoneyField,
+            model: {
+              prop: 'money',
+              event: 'amount-change',
+              valueToProp,
+              valueFromEvent: (...args) => (
+                Math.round((args[0] as { amount: number }).amount * 100)
+              )
+            },
+            listeners: { 'amount-change': amountListener }
+          }
+        }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    const field = wrapper.find('.input-transform-money')
+    expect(field.attributes('data-money')).toBe(JSON.stringify({ amount: 12.5, currency: 'CNY' }))
+    expect(valueToProp).toHaveBeenCalledWith(
+      1250,
+      expect.objectContaining({
+        fieldKey: 'amountInCents',
+        value: 1250,
+        row: { amountInCents: 1250, currency: 'CNY' }
+      })
+    )
+
+    await field.trigger('click')
+    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{
+      amountInCents: 1350,
+      currency: 'CNY'
+    }])
+    expect(amountListener.mock.calls[0][0].bindingValue).toBe(1250)
+    expect(amountListener.mock.calls[0].slice(1)).toEqual([{ amount: 13.5 }, 'raw-meta'])
+    wrapper.destroy()
+  })
+
+  it('supports input and output transforms on builtin editable types', async () => {
+    const wrapper = mountFormTable({
+      tableData: [{ code: 7 }],
+      columns: [{
+        label: '编码',
+        formItems: [{
+          fieldKey: 'code',
+          type: 'input',
+          component: {
+            model: {
+              valueToProp: value => `CODE-${String(value)}`,
+              valueFromEvent: value => Number(String(value).replace('CODE-', ''))
+            }
+          }
+        }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    const input = wrapper.findComponent({ name: 'ElInput' })
+    expect((input.vm as any).value).toBe('CODE-7')
+    input.vm.$emit('input', 'CODE-9')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{ code: 9 }])
+    wrapper.destroy()
+  })
+
+  it('passes nullish input transform results to the model prop without fallback', async () => {
+    const NullishField = {
+      props: ['converted'],
+      render(this: any, h: any) {
+        return h('span', {
+          class: 'nullish-model-field',
+          attrs: {
+            'data-is-null': String(this.converted === null),
+            'data-is-undefined': String(this.converted === undefined)
+          }
+        })
+      }
+    }
+    const wrapper = mountFormTable({
+      tableData: [{ source: 'first' }, { source: 'second' }],
+      columns: [{
+        label: '空值',
+        formItems: [{
+          fieldKey: 'source',
+          type: 'component',
+          component: {
+            is: NullishField,
+            model: {
+              prop: 'converted',
+              valueToProp: (_value, { index }) => index === 0 ? null : undefined
+            }
+          }
+        }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    const fields = wrapper.findAll('.nullish-model-field')
+    expect(fields.at(0).attributes()).toMatchObject({
+      'data-is-null': 'true',
+      'data-is-undefined': 'false'
+    })
+    expect(fields.at(1).attributes()).toMatchObject({
+      'data-is-null': 'false',
+      'data-is-undefined': 'true'
+    })
     wrapper.destroy()
   })
 

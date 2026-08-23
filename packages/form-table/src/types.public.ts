@@ -4,10 +4,15 @@ export type {
   ColumnConfig,
   ComponentProps,
   DynamicValue,
+  EmptyFieldTypeRegistry,
   FieldBindingConfig,
   FieldBindingMapEntry,
   FieldComponentConfig,
   FieldModelConfig,
+  FieldTypeDefinition,
+  FieldTypeEventMap,
+  FieldTypeListeners,
+  FieldTypeRegistry,
   FieldComponentResolver,
   FormItemConfig,
   FormItemOption,
@@ -46,5 +51,6 @@ export type {
   LayoutColumnConfig,
   NativeColumnConfig,
   OptionPropsConfig,
-  TableRow
+  TableRow,
+  TypedFieldTypeDefinition
 } from './types'

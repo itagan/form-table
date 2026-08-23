@@ -82,6 +82,53 @@ function handleFilterChange(filters: FormTableFilterChangePayload) {
 
 需要让 Props、事件和动态配置回调共享业务行类型时，使用 `createFormTable<TRow>()` 和 `defineFormTableColumns<TRow>()`；两者都不会创建额外运行时实例。`fieldKey` 保持为字符串，以支持固定字段、嵌套路径和服务端动态字段。
 
+## 自定义字段 Type
+
+重复使用且组件/model 协议稳定的业务字段可以按 FormTable 实例注册，columns 中的使用习惯与内置 type 一致：
+
+```ts
+import {
+  createFormTable,
+  defineFormTableColumns,
+  defineFormTableType,
+  defineFormTableTypes
+} from '@itagan/form-table'
+
+const employeeType = defineFormTableType<PurchaseRow>()<
+  { clearable?: boolean },
+  { 'user-confirm': [employee: EmployeeSelection] }
+>({
+  is: EmployeePicker,
+  model: {
+    prop: 'selected-user-id',
+    event: 'user-confirm',
+    valueFromEvent: (...args) =>
+      (args[0] as EmployeeSelection).id
+  },
+  props: { clearable: true }
+})
+
+const fieldTypes = defineFormTableTypes<PurchaseRow>()({
+  employee: employeeType
+})
+
+const BusinessFormTable = createFormTable<PurchaseRow, typeof fieldTypes>()
+const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([{
+  label: '负责人',
+  formItems: [{ fieldKey: 'employeeId', type: 'employee' }]
+}])
+```
+
+```vue
+<BusinessFormTable
+  v-model="tableData"
+  :columns="columns"
+  :field-types="fieldTypes"
+/>
+```
+
+注册定义只包含稳定的 `is/model/props`；字段仍可提供自己的 `props/listeners/model`，现有 `binding.map` 可直接完成复合值的多字段写回。`defineFormTableType` 是可选的零运行时包装，仅为字段 Props、事件名和原始事件参数提供精确提示；不使用时保持原有宽松类型。通用 model 还支持 `valueToProp/valueFromEvent`，用于“行内存分、组件显示元”或“行内存 ID、组件接收对象”等同步非对称转换。开发环境会定位未知 type 和非法协议配置，生产环境不执行额外诊断。动态组件和一次性复杂协议继续使用 `type: 'component'`，多组件模板使用 `type: 'slot'`。详见[自定义字段 Type](https://gitee.com/itagan/form-table/blob/master/docs/features/custom-field-types.md)。
+
 ## 完整文档
 
 详细行为统一维护在 VitePress 文档中：
@@ -90,6 +137,7 @@ function handleFilterChange(filters: FormTableFilterChangePayload) {
 - [配置与 API 总览](https://gitee.com/itagan/form-table/blob/master/docs/api/configuration.md)
 - [事件与 Ref](https://gitee.com/itagan/form-table/blob/master/docs/api/events-and-ref.md)
 - [公开类型](https://gitee.com/itagan/form-table/blob/master/docs/api/types.md)
+- [自定义字段 Type](https://gitee.com/itagan/form-table/blob/master/docs/features/custom-field-types.md)
 - [功能专题](https://gitee.com/itagan/form-table/blob/master/docs/features/index.md)
 - [示例索引](https://gitee.com/itagan/form-table/blob/master/docs/examples/index.md)
 

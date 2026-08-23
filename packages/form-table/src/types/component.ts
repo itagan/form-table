@@ -4,6 +4,8 @@ import type { ElTable } from 'element-ui/types/table'
 import type { ComponentProps, FormTableValue, TableRow } from './base'
 import type {
   FieldModelConfig,
+  EmptyFieldTypeRegistry,
+  FieldTypeRegistry,
   FormItemOption,
   FormTableEmits,
   FormTableProps,
@@ -15,14 +17,14 @@ import type {
   FormTableFieldContext
 } from './context'
 
-export interface ResolvedComponentConfig {
+export interface ResolvedComponentConfig<TRow extends TableRow = TableRow> {
   is?: string | Component
   slot?: string
   props: ComponentProps
   listeners: Record<string, (...args: unknown[]) => void>
   options: FormItemOption[]
   optionProps?: OptionPropsConfig
-  model?: FieldModelConfig | false
+  model?: FieldModelConfig<TRow> | false
 }
 
 export interface FormTableFormItemSlotContext<TRow extends TableRow = TableRow> extends FormTableFieldContext<TRow> {
@@ -34,7 +36,7 @@ export interface FormTableFormItemErrorSlotContext<TRow extends TableRow = Table
 }
 
 export interface FormTableSlotContext<TRow extends TableRow = TableRow> extends FormTableFormItemSlotContext<TRow> {
-  component: ResolvedComponentConfig
+  component: ResolvedComponentConfig<TRow>
 }
 
 export interface FormTableHeaderSlotContext<TRow extends TableRow = TableRow> extends FormTableColumnContext<TRow> {
@@ -68,8 +70,11 @@ export interface FormTableExpose<TRow extends TableRow = TableRow> {
   getTableRef: () => FormTableElementTableRef<TRow> | null
 }
 
-export type FormTableComponent<TRow extends TableRow = TableRow> = DefineComponent<
-Omit<FormTableProps<TRow>, 'tableData'> & (
+export type FormTableComponent<
+  TRow extends TableRow = TableRow,
+  TFieldTypes extends FieldTypeRegistry<TRow> = EmptyFieldTypeRegistry
+> = DefineComponent<
+Omit<FormTableProps<TRow, TFieldTypes>, 'tableData'> & (
   | { value: TRow[], tableData?: TRow[] }
   | { tableData: TRow[], value?: TRow[] }
 ),
