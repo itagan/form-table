@@ -402,6 +402,9 @@ describe('FormTable slot rendering', () => {
 
     expect(wrapper.text()).toContain('操作')
     expect(wrapper.text()).not.toContain('Alice')
+    expect(wrapper.findComponent({ name: 'FormTableRow' }).exists()).toBe(false)
+    expect(wrapper.find('.el-row').exists()).toBe(false)
+    expect(wrapper.find('.el-col').exists()).toBe(false)
     expect(wrapper.find('.el-form-item').exists()).toBe(false)
     wrapper.destroy()
   })

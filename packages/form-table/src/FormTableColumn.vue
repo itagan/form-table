@@ -30,7 +30,7 @@
         :slot-fn="cellSlotFn"
         :slot-props="createCellSlotContext(scope.row, scope.$index)"
       />
-      <template v-else>
+      <template v-else-if="isLayoutColumn">
         <FormTableRow
           :row="scope.row"
           :row-index="resolveRowIndex(scope.row, scope.$index)"
@@ -148,6 +148,9 @@ const cellSlotFn = computed(() => {
   const slotName = 'cellSlot' in props.column ? props.column.cellSlot : undefined
   return slotName ? parentSlots[slotName] || null : null
 })
+
+/** 只有字段布局列进入 Row/Item 渲染链路。 */
+const isLayoutColumn = computed(() => 'formItems' in props.column)
 
 /** 仅布局列具有 formItems；cellSlot 列缺失对应 Slot 时保持空单元格。 */
 const layoutItems = computed(() => 'formItems' in props.column
