@@ -1,6 +1,6 @@
 # 行列操作与异步提交
 
-> 可运行 Demo：[打开行列操作与异步提交调试页 ↗](http://localhost:5173/row-column-operations)
+> 可运行 Demo：[打开行列操作与异步提交示例 ↗](http://localhost:5173/row-column-operations)
 
 本页聚焦需要确认、校验或接口成功后才产生最终业务变更的组合模式。常规行增删复制见[常见操作列与行增删](./common-row-actions.md)，列显隐和配置替换见[动态显隐与配置更新](./dynamic-configuration.md)。
 

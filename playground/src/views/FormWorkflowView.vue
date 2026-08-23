@@ -1,6 +1,6 @@
 <template>
   <main class="workflow-page">
-    <router-link to="/">← 返回调试台</router-link>
+    <router-link to="/">← 返回示例中心</router-link>
     <header class="page-header">
       <div>
         <h1>完整编辑提交流程</h1>

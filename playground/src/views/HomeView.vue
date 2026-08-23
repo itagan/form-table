@@ -10,8 +10,7 @@ const categoryDefinitions = [
   { id: 'rendering', title: '常用渲染扩展', description: '按需使用组件、Slot、cellSlot、动态配置和 Hint。' },
   { id: 'advanced', title: '高级扩展', description: '处理稳定业务协议、复合字段、远程 Schema 和企业组件。' },
   { id: 'business', title: '业务场景', description: '组合行操作、单元格合并和完整业务数据流程。' },
-  { id: 'engineering', title: '工程验证', description: '在真实浏览器中测量性能和容量边界。' },
-  { id: 'tools', title: '内部工具', description: '维护 API 和兼容行为的调试入口，不属于推荐学习路径。' }
+  { id: 'engineering', title: '工程验证', description: '在真实浏览器中测量性能和容量边界。' }
 ]
 
 const exampleGroups = categoryDefinitions
@@ -33,9 +32,9 @@ const levelLabels: Record<string, string> = {
     <section class="home-hero">
       <div>
         <p class="eyebrow">FormTable Playground</p>
-        <h1>表格内表单组件调试台</h1>
+        <h1>FormTable 示例中心</h1>
         <p class="hero-copy">
-          这里验证精简后的 FormTable：布局归布局，组件归组件，业务数据操作由调用方维护。
+          按开发任务选择可运行示例：布局归布局，组件归组件，业务数据操作由调用方维护。
         </p>
       </div>
       <div class="hero-actions">

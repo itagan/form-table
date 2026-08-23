@@ -1,6 +1,6 @@
 <template>
   <main class="enterprise-page">
-    <router-link to="/">← 返回调试台</router-link>
+    <router-link to="/">← 返回示例中心</router-link>
     <h1>企业复杂组件接入</h1>
     <p class="page-description">
       模拟采购明细：全局组件使用字符串 <code>is</code>，局部业务组件直接传组件对象，
