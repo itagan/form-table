@@ -8,6 +8,7 @@ import type {
 import type {
   ComponentProps,
   FieldModelConfig,
+  FormTableFieldRenderContext,
   FormTableValue
 } from './types'
 
@@ -17,6 +18,7 @@ interface DynamicFieldRendererProps {
   componentProps: ComponentProps
   componentListeners: Record<string, (...args: unknown[]) => void>
   model?: FieldModelConfig | false
+  modelContext: FormTableFieldRenderContext
   onModelInput: (value: FormTableValue) => void
 }
 
@@ -59,6 +61,7 @@ export default {
     componentProps: { type: Object, required: true },
     componentListeners: { type: Object, required: true },
     model: { type: [Object, Boolean], default: undefined },
+    modelContext: { type: Object, required: true },
     onModelInput: { type: Function, required: true }
   },
   render(
@@ -71,6 +74,7 @@ export default {
       componentProps,
       componentListeners,
       model,
+      modelContext,
       onModelInput
     } = context.props
     const data = createRenderData(componentProps, componentListeners)
@@ -89,7 +93,7 @@ export default {
         // 与 Vue 原生 v-model 一致：先写回模型，再执行调用方配置的同名监听器。
         [event]: (...args: unknown[]) => {
           const nextValue = model.valueFromEvent
-            ? model.valueFromEvent(...args)
+            ? model.valueFromEvent(modelContext, ...args)
             : args[0]
           onModelInput(nextValue)
           configuredListener?.(...args)

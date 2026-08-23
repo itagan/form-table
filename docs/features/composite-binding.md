@@ -56,7 +56,7 @@ binding: {
 }
 ```
 
-自定义组件仍通过 `component.model` 声明 prop/event。读取时 `binding.map` 先组合值，`valueToProp` 再转换组件输入；写回时 `valueFromEvent` 先从原始事件参数提取组件值，随后 `binding.map` 将该值转换为行 patch。
+自定义组件仍通过 `component.model` 声明 prop/event。读取时 `binding.map` 先组合值，`valueToProp` 再转换组件输入；写回时 `valueFromEvent` 先接收只读字段上下文和原始事件参数并提取组件值，随后 `binding.map` 将该值转换为行 patch。
 
 ## 字段 Slot
 

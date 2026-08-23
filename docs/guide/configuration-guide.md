@@ -122,7 +122,8 @@ component: {
     prop: 'amount',
     event: 'amount-change',
     valueToProp: cents => Number(cents || 0) / 100,
-    valueFromEvent: payload => Math.round(payload.amount * 100)
+    valueFromEvent: (_context, ...args) =>
+      Math.round((args[0] as { amount: number }).amount * 100)
   }
 }
 ```

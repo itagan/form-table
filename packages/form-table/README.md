@@ -102,8 +102,7 @@ const employeeType = defineFormTableType<PurchaseRow>()<
   model: {
     prop: 'selected-user-id',
     event: 'user-confirm',
-    valueFromEvent: (...args) =>
-      (args[0] as EmployeeSelection).id
+    valueFromEvent: (_context, employee) => employee.id
   },
   props: { clearable: true }
 })
@@ -127,7 +126,7 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([{
 />
 ```
 
-注册定义只包含稳定的 `is/model/props`；字段仍可提供自己的 `props/listeners/model`，现有 `binding.map` 可直接完成复合值的多字段写回。`defineFormTableType` 是可选的零运行时包装，仅为字段 Props、事件名和原始事件参数提供精确提示；不使用时保持原有宽松类型。通用 model 还支持 `valueToProp/valueFromEvent`，用于“行内存分、组件显示元”或“行内存 ID、组件接收对象”等同步非对称转换。开发环境会定位未知 type 和非法协议配置，生产环境不执行额外诊断。动态组件和一次性复杂协议继续使用 `type: 'component'`，多组件模板使用 `type: 'slot'`。详见[自定义字段 Type](https://gitee.com/itagan/form-table/blob/master/docs/features/custom-field-types.md)。
+注册定义只包含稳定的 `is/model/props`；字段仍可提供自己的 `props/listeners/model`，现有 `binding.map` 可直接完成复合值的多字段写回。`defineFormTableType` 是可选的零运行时包装，可让 model 事件名、`valueFromEvent` 参数元组和 Item listener 一起获得精确提示；转换函数首参还会收到只读字段上下文。不使用时保持原有宽松类型。通用 model 还支持 `valueToProp/valueFromEvent`，用于“行内存分、组件显示元”或“行内存 ID、组件接收对象”等同步非对称转换。开发环境会定位未知 type 和非法协议配置，生产环境不执行额外诊断。动态组件和一次性复杂协议继续使用 `type: 'component'`，多组件模板使用 `type: 'slot'`。详见[自定义字段 Type](https://gitee.com/itagan/form-table/blob/master/docs/features/custom-field-types.md)。
 
 ## 完整文档
 

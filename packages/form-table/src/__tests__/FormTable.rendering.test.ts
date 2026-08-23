@@ -611,7 +611,7 @@ describe('FormTable rendering and configuration', () => {
             model: {
               prop: 'selectedId',
               event: 'select',
-              valueFromEvent: (...args) => (args[0] as { id: string }).id
+              valueFromEvent: (_context, ...args) => (args[0] as { id: string }).id
             },
             listeners: { select: selectionListener }
           }
@@ -667,7 +667,7 @@ describe('FormTable rendering and configuration', () => {
               prop: 'money',
               event: 'amount-change',
               valueToProp,
-              valueFromEvent: (...args) => (
+              valueFromEvent: (_context, ...args) => (
                 Math.round((args[0] as { amount: number }).amount * 100)
               )
             },
@@ -710,7 +710,7 @@ describe('FormTable rendering and configuration', () => {
           component: {
             model: {
               valueToProp: value => `CODE-${String(value)}`,
-              valueFromEvent: value => Number(String(value).replace('CODE-', ''))
+              valueFromEvent: (_context, value) => Number(String(value).replace('CODE-', ''))
             }
           }
         }]
@@ -807,7 +807,7 @@ describe('FormTable rendering and configuration', () => {
             model: {
               prop: 'selectedUser',
               event: 'select',
-              valueFromEvent: (...args) => (args[0] as any).payload
+              valueFromEvent: (_context, ...args) => (args[0] as any).payload
             },
             listeners: { select: selectionListener }
           }

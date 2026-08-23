@@ -41,7 +41,7 @@ const columns: ColumnConfig[] = [{
       model: {
         prop: 'employee-code',
         event: 'employee-confirm',
-        valueFromEvent: (...args) => (
+        valueFromEvent: (_context, ...args) => (
           args[0] as EmployeeSelection
         ).code
       },

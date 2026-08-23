@@ -33,7 +33,7 @@ columns[].formItems[].component
 | `...component.model.prop` | `string` | 自定义 model | — | 接收字段值的 prop，默认 `value` |
 | `...component.model.event` | `string` | 自定义 model | — | 通知字段变化的事件，默认 `input` |
 | `...component.model.valueToProp` | `(bindingValue, ItemContext) => FormTableValue` | 自定义 model | ItemContext | 将字段值或 `binding.map` 组合值同步转换为组件 model prop |
-| `...component.model.valueFromEvent` | `(...args) => FormTableValue` | 自定义 model | 原始事件参数 | 从事件参数提取写回值 |
+| `...component.model.valueFromEvent` | `(context, ...args) => FormTableValue` | 自定义 model | 只读字段上下文 + 原始事件参数 | 从事件参数提取写回值；注册 type 可关联事件参数元组 |
 | `...component.props` | `DynamicValue<ComponentProps, ItemContext>` | 全部 | ItemContext | 透传实际字段组件 |
 | `...component.listeners` | `Record<string, FormTableFieldListener>` | 全部 | ActionContext + 原始事件参数 | 配置式组件事件 |
 | `...component.options` | `DynamicValue<FormItemOption[], ItemContext>` | 选项型 | ItemContext | select / radio / checkbox 选项 |

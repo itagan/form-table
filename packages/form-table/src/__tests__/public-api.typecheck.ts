@@ -141,7 +141,16 @@ const employeeTypeDefinition = defineFormTableType<BusinessRow>()<
       id: value,
       departmentId: context.row.departmentId
     }),
-    valueFromEvent: (...args) => (args[0] as { id: string }).id
+    valueFromEvent: (context, employee, meta) => {
+      const departmentId: string = context.row.departmentId
+      const employeeId: string = employee.id
+      const source: string = meta.source
+      // @ts-expect-error model 转换上下文中的业务行只读。
+      context.row.departmentId = 'changed'
+      void departmentId
+      void source
+      return employeeId
+    }
   },
   props: ({ row }) => ({ departmentId: row.departmentId })
 })
@@ -152,6 +161,18 @@ const directlyTypedEmployeeItem: FormItemConfig<BusinessRow, {
   fieldKey: 'employeeId',
   type: 'employee',
   component: {
+    model: {
+      event: 'user-confirm',
+      valueFromEvent(context, employee, meta) {
+        const currentEmployeeId: unknown = context.value
+        const employeeName: string = employee.name
+        const source: string = meta.source
+        void currentEmployeeId
+        void employeeName
+        void source
+        return employee.id
+      }
+    },
     props: {
       // @ts-expect-error 显式协议不接受未声明属性。
       directUnknownProp: true
@@ -165,6 +186,46 @@ const directlyTypedEmployeeItem: FormItemConfig<BusinessRow, {
   }
 }
 void directlyTypedEmployeeItem
+
+const invalidEmployeeModel: FieldModelConfig<BusinessRow, EmployeeTypeEvents> = {
+  // @ts-expect-error model event 必须来自显式字段事件表。
+  event: 'missing-event'
+}
+void invalidEmployeeModel
+
+const employeeSearchModel: FieldModelConfig<BusinessRow, EmployeeTypeEvents> = {
+  event: 'search',
+  valueFromEvent(context, keyword) {
+    const sourceIndex: number = context.index
+    const normalizedKeyword: string = keyword.toUpperCase()
+    void sourceIndex
+    return normalizedKeyword
+  }
+}
+void employeeSearchModel
+
+const invalidEmployeeSearchModel: FieldModelConfig<BusinessRow, EmployeeTypeEvents> = {
+  event: 'search',
+  // @ts-expect-error search 事件参数由事件表约束为 string。
+  valueFromEvent(_context, keyword: number) {
+    return keyword
+  }
+}
+void invalidEmployeeSearchModel
+
+// @ts-expect-error Item 覆盖 model 时仍必须使用注册字段事件。
+const invalidEmployeeItemModel: FormItemConfig<BusinessRow, {
+  employee: typeof employeeTypeDefinition
+}> = {
+  fieldKey: 'employeeId',
+  type: 'employee',
+  component: {
+    model: {
+      event: 'missing-event'
+    }
+  }
+}
+void invalidEmployeeItemModel
 
 type DirectEmployeeItem = Extract<FormItemConfig<BusinessRow, {
   employee: typeof employeeTypeDefinition
@@ -529,7 +590,7 @@ void legacyNestedRows
 const customModel: FieldModelConfig = {
   prop: 'selectedId',
   event: 'select',
-  valueFromEvent: (...args) => (args[0] as { id: string }).id
+  valueFromEvent: (_context, ...args) => (args[0] as { id: string }).id
 }
 
 const fieldBindingEntry: FieldBindingMapEntry = {
