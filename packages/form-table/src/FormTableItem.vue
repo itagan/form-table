@@ -20,20 +20,20 @@
       :slot-props="slotContext"
     />
     <span v-else-if="config.type === 'slot'" />
-    <ComponentWrapper
+    <FieldRenderer
       v-else
       :type="config.type"
       :value="fieldContext.bindingValue"
       :model-context="runtimeContext"
       :component="resolvedComponent"
-      @input="fieldContext.setBindingValue"
+      :on-model-input="fieldContext.setBindingValue"
     />
   </el-form-item>
 </template>
 
 <script lang="ts" setup>
 import { computed, inject } from 'vue'
-import ComponentWrapper from './ComponentWrapper.vue'
+import FieldRenderer from './FieldRenderer'
 import SlotRenderer from './SlotRenderer'
 import { useFormTableFieldContext } from './composables/useFormTableFieldContext'
 import { useResolvedFieldComponent } from './composables/useResolvedFieldComponent'
@@ -85,7 +85,7 @@ const {
   getConfig: () => props.config
 })
 
-/** 组件选择、动态属性、选项和监听器统一归一化后再交给渲染层。 */
+/** 组件选择、动态属性、选项和监听器统一归一化后再交给无实例渲染层。 */
 const { resolvedComponent } = useResolvedFieldComponent({
   getConfig: () => props.config,
   runtimeContext,

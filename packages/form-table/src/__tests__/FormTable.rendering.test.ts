@@ -188,6 +188,24 @@ describe('FormTable rendering and configuration', () => {
     wrapper.destroy()
   })
 
+  it('renders fields without a stateful component adapter instance', async () => {
+    const wrapper = mountFormTable()
+    await wrapper.vm.$nextTick()
+
+    const input = wrapper.findComponent({ name: 'ElInput' })
+    const componentNames: string[] = []
+    let parent = input.vm.$parent
+    while (parent) {
+      const options = parent.$options as { name?: string; __name?: string }
+      componentNames.push(options.name || options.__name || '')
+      parent = parent.$parent
+    }
+
+    expect(componentNames.slice(0, 2)).toEqual(['ElFormItem', 'FormTableItem'])
+    expect(componentNames).not.toContain('ComponentWrapper')
+    wrapper.destroy()
+  })
+
   it('applies headerHint and other properties to the default header text node', async () => {
     const headerProps = vi.fn(({ tableData, columnConfig }: FormTableColumnContext) => ({
       class: `records-${tableData.length}`,
