@@ -485,7 +485,14 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([
 
 第二个注册表泛型沿 `FormItemConfig/ColumnConfig/FormTableProps/FormTableComponent` 传播，默认 `EmptyFieldTypeRegistry`，因此现有单泛型和无泛型 API 完全兼容。非空注册表下 `fieldTypes` Prop 必传，注册名称保持精确拼写检查。
 
-首版不增加绑定式 Schema 工具或 Module Augmentation。前者会增加与 `createFormTable` 重叠的公共概念；后者是项目级全局状态，不能自然表达实例隔离。
+不增加绑定式 Schema 工具或 Module Augmentation。前者会增加与 `createFormTable/defineFormTableColumns` 重叠的公共概念，只减少少量泛型书写却形成第二套入口；后者是项目级全局状态，不能自然表达实例隔离。
+
+同样不增加内置 type 的 `base` 预设和 `mergeFormTableTypes()`：
+
+- `base` 对单组件内置 type 的增量价值有限，选项型组件则会继续引出 options 子节点、继承和合并协议，偏离轻量自定义组件定位；固定参数优先使用普通注册定义、配置函数或业务 Adapter。
+- 注册表组合已经可以使用对象展开完成，覆盖顺序沿用 JavaScript 语义。只有合并动作本身不值得增加新的运行时助手；公司级冲突检查应放在业务配置治理层。
+
+因此公共 API 保持“一份实例注册表、两类现有泛型入口、一条组件渲染链”。组件核心提供组合能力，但不承担预设继承、注册表治理或 Schema 框架职责。
 
 ## 性能设计
 

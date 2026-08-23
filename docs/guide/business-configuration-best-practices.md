@@ -253,6 +253,16 @@ function enhanceRemoteField(schema: RemoteField): FormItemConfig {
 
 判断顺序始终是：先确认重复，再提取业务函数；函数模式在多个项目中稳定后，才把它提升为公共协议。
 
+### 4. 保持轻量的扩展边界
+
+当前不增加内置 type 预设、注册表合并助手或绑定式 Schema 工具：
+
+- 内置 type 的固定参数可以直接注册现有 Element UI 组件，或用普通配置函数复用；增加 `base` 会引入另一套继承、选项渲染和合并规则。
+- 公司级、模块级和页面级注册表使用对象展开组合，后面的定义按 JavaScript 语义覆盖前面的定义；暂不增加只包装对象合并的公共 API。
+- `createFormTable` 与 `defineFormTableColumns` 已显式完成行类型和注册表配对；绑定式 Schema 会形成第二套入口，仅为减少少量泛型书写，不值得扩大维护面。
+
+这些取舍让 FormTable 继续专注轻量字段渲染和高度自定义组件接入。若业务需要内置预设、复杂继承或配置治理，应在业务组件库或 Schema 转换层完成，而不是进入组件核心协议。
+
 ## 相关文档
 
 [完整配置指南](./configuration-guide.md) · [自定义字段 Type](../features/custom-field-types.md) · [自定义字段组件](../features/custom-component.md) · [企业复杂组件接入](../examples/enterprise-components.md) · [性能优化建议](../features/performance-optimization.md)

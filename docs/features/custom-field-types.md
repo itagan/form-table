@@ -264,4 +264,10 @@ MoneyEditor.money
 
 未知 type 在开发环境按实例和名称警告一次并留下空字段内容，警告会包含首次出现的列/字段位置以及当前实例可用的自定义名称。开发环境还会检查无效 `is/model/props`、注册级越界键，以及自定义 Item 对 `is/resolveComponent/slot/options/optionProps` 的越界使用；同一实例中的同类问题只提示一次。生产环境不执行这些诊断，未知内容仍静默留空。远程 Schema 仍应在业务白名单层提前校验，不能从服务端下发组件对象或函数。
 
+## 为什么不提供预设继承和 Schema 包装
+
+自定义 type 已能通过 `is/model/props` 表达稳定业务组件协议。内置字段的固定参数可直接注册对应组件或由配置函数生成；注册表分层可使用对象展开；行类型与注册表继续通过 `createFormTable` 和 `defineFormTableColumns` 显式配对。
+
+因此当前不提供 `base: 'number'`、`mergeFormTableTypes()` 或 `createFormTableSchema()`。这些 API 的主要收益是减少少量配置代码，却会增加内置预设继承、冲突覆盖和第二套 Schema 入口。复杂配置治理保留在业务层，FormTable 核心继续保持轻量、高性能，并优先服务高度自定义组件。
+
 完整运行示例见 [`/custom-field-types`](http://localhost:5173/custom-field-types)。架构取舍和首版边界见[自定义字段 Type 架构设计](../design/custom-field-type-proposal.md)。
