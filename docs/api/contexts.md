@@ -62,14 +62,14 @@ Slot 名称应保持稳定，不拼接行下标或当前字段值。需要区分
 | 使用位置 | 业务数据 | 原始配置 | 更新能力 | 解析结果 |
 | --- | --- | --- | --- | --- |
 | Column 动态配置 | `tableData` | `columnConfig` | — | — |
-| `rowProps` 动态配置 | `tableData, row, index` | `columnConfig` | — | — |
+| `rowProps` 动态配置 | `tableData, row, index, displayIndex` | `columnConfig` | — | — |
 | Item 动态配置 | 增加 `fieldKey, value` | 增加 `itemConfig` | — | — |
 | component 动态配置 | Item 数据 | Item 配置 | — | — |
 | `component.listeners[event]` | Item 数据 | Item 配置 | `setValue, setBindingValue, updateRow` | — |
 | 字段 Slot | Item 数据 | Item 配置 | `setValue, setBindingValue, updateRow` | `propPath, component` |
 | FormItem Label Slot | Item 数据 | Item 配置 | `setValue, setBindingValue, updateRow` | `propPath` |
 | FormItem Error Slot | Item 数据 | Item 配置 | `setValue, setBindingValue, updateRow` | `propPath, error` |
-| `cellSlot` | `row, index` | `columnConfig` | `updateRow` | — |
+| `cellSlot` | `row, index, displayIndex` | `columnConfig` | `updateRow` | — |
 | 表头 Slot | `tableData, label, columnIndex` | `columnConfig` | — | — |
 
 ## 动态配置回调
@@ -89,7 +89,8 @@ Slot 名称应保持稳定，不拼接行下标或当前字段值。需要区分
 | 字段 | 类型 | 时效 | 说明 |
 | --- | --- | --- | --- |
 | `row` | `Readonly<TableRow>` | 渲染快照 | 当前业务数据行 |
-| `index` | `number` | 渲染快照 | 当前渲染下标，不是异步结束后的实时下标 |
+| `index` | `number` | 渲染快照 | 当前行在受控 `tableData` 中的数据源下标 |
+| `displayIndex` | `number` | 渲染快照 | Element Table 排序或筛选后的显示下标 |
 | `columnConfig` | `Readonly<CellSlotColumnConfig>` | 配置快照 | 当前列原始配置 |
 | `updateRow` | `(patch: FormTableRowPatch<TableRow>) => void` | 绑定当前行 | 不可变更新当前行，patch key 支持嵌套路径 |
 
@@ -101,7 +102,7 @@ Slot 名称应保持稳定，不拼接行下标或当前字段值。需要区分
 
 | 分类 | 字段 |
 | --- | --- |
-| 数据 | `tableData, row, index, fieldKey, value, bindingValue` |
+| 数据 | `tableData, row, index, displayIndex, fieldKey, value, bindingValue` |
 | 配置 | `columnConfig, itemConfig` |
 | 更新 | `setValue, setBindingValue, updateRow` |
 | 校验 / 解析 | `propPath, component` |
@@ -143,7 +144,7 @@ Item Hint 及 `hintOptions.field` formatter 都使用 `FormTableFieldRenderConte
 
 ## FormItem Label / Error Slot 上下文
 
-`labelSlot` 使用 `FormTableFormItemSlotContext`，包含完整字段数据、配置、`setValue/updateRow` 和 `propPath`。`errorSlot` 使用 `FormTableFormItemErrorSlotContext`，并额外增加 Element FormItem 当前的 `error: string`。
+`labelSlot` 使用 `FormTableFormItemSlotContext`，包含完整字段数据、配置、`setValue/updateRow` 和 `propPath`。`errorSlot` 使用 `FormTableFormItemErrorSlotContext`，并额外增加 Element FormItem 当前的 `error: string`。正常数据行的 `propPath` 是完整字符串；同一行对象重复出现在 `tableData` 且排序后无法确定来源位置时为 `undefined`，FormTable 会停止为该字段绑定校验路径并在开发环境警告。
 
 ```vue
 <template #amount-label="{ row, propPath }">
@@ -168,6 +169,6 @@ Item Hint 及 `hintOptions.field` formatter 都使用 `FormTableFieldRenderConte
 
 ## 快照与异步更新
 
-`row/index/value` 表示触发或渲染当时的快照。`setValue/updateRow` 会绑定当时的数据行。配置唯一稳定的 `rowKey` 后，异步调用会在最新 `tableData` 中重新定位原行；目标行已删除、rowKey 缺失或重复时忽略更新。
+`row/index/displayIndex/value` 表示触发或渲染当时的快照。`index` 对应受控 `tableData`，`displayIndex` 只表示当前屏幕位置。`setValue/updateRow` 会绑定当时的数据行。配置唯一稳定的 `rowKey` 后，异步调用会在最新 `tableData` 中重新定位原行；目标行已删除、rowKey 缺失或重复时忽略更新。
 
 具体更新方式和事件结果见[数据更新与受控回写](../features/data-updates.md)，各类 key 的职责见[稳定身份与异步安全](../features/stable-identity.md)。

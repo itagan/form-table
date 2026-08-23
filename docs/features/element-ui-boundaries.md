@@ -57,72 +57,17 @@ const columns = [
 
 ## 内置排序、筛选与校验下标
 
-### 能力边界
-
-FormTable 使用当前单元格的显示下标生成校验路径：
+FormTable 使用当前行在受控 `tableData` 中的数据源下标生成校验路径：
 
 ```text
 tableData.{rowIndex}.{fieldKey}
 ```
 
-Element UI 内置排序或筛选会改变显示顺序，但不会同步重排父组件持有的原始 `tableData`。此时显示第 `0` 行可能实际是原数组第 `3` 行，字段回写仍可以借助行引用或 `rowKey` 定位，但 FormItem 的校验路径会指向错误行。
+Element UI 内置排序或筛选只改变显示顺序。FormTable 会按行引用映射回原始数据源位置，因此字段更新和 FormItem 校验仍指向同一行。字段、listener 和 Slot 上下文中的 `index` 表示数据源下标，`displayIndex` 表示当前显示下标。
 
-因此，带字段校验的编辑表格不应依赖 `sortable: true` 或 `filterMethod` 在 Element Table 内部重排显示数据。
+本地排序与筛选不会改变父组件持有的 `tableData` 顺序。如果提交结果必须按界面顺序排列，或筛选需要服务端参与，仍应使用 `sortable: 'custom'`、`sort-change/filter-change` 在业务层生成新的受控数据。父组件替换数据后，两个下标会随下一次渲染重新计算。
 
-### 当前处理方案
-
-排序使用 `sortable: 'custom'`，在 `sort-change` 后直接重排受控 `tableData`：
-
-```ts
-const columns = [{
-  label: '金额',
-  props: { prop: 'amount', sortable: 'custom' },
-  formItems: [{
-    fieldKey: 'amount',
-    type: 'number',
-    formItemProps: { rules: [{ required: true, message: '请输入金额' }] }
-  }]
-}]
-
-function handleSortChange({ prop, order }) {
-  if (!prop || !order) return
-  const direction = order === 'ascending' ? 1 : -1
-  tableData.value = [...tableData.value].sort((left, right) =>
-    direction * (Number(left[prop]) - Number(right[prop]))
-  )
-  formTableRef.value?.clearValidate()
-}
-```
-
-筛选由页面或服务端生成新的 `tableData`；如果页面需要同时保留全量数据和当前可见结果，应使用 `rowKey` 将 FormTable 回写合并回全量数据，不要让 Element Table 在内部隐藏行。
-
-```vue
-<FormTable
-  :table-data="tableData"
-  :columns="columns"
-  row-key="id"
-  @update:tableData="handleVisibleRowsUpdate"
-  @filter-change="applyFilter"
-/>
-```
-
-```ts
-const allRows = ref(loadAllRows())
-const tableData = ref([...allRows.value])
-const activeFilters = ref({})
-
-function applyFilter(filters) {
-  activeFilters.value = filters
-  tableData.value = createVisibleRows(allRows.value, activeFilters.value)
-  nextTick(() => formTableRef.value?.clearValidate())
-}
-
-function handleVisibleRowsUpdate(nextVisibleRows) {
-  const nextRowsById = new Map(nextVisibleRows.map(row => [row.id, row]))
-  allRows.value = allRows.value.map(row => nextRowsById.get(row.id) || row)
-  tableData.value = nextVisibleRows
-}
-```
+同一个行对象不应在 `tableData` 中重复出现。重复引用经过排序或筛选后可能无法唯一映射；FormTable 会在开发环境警告，并停止为无法定位的字段绑定校验路径，避免校验到错误行。
 
 ## 树形数据与懒加载
 
@@ -303,7 +248,7 @@ Label Slot 获得字段操作上下文和 `propPath`；Error Slot 再增加 Elem
 | Element 原始表头 `{ column, $index }` | `columns[].props.renderHeader` |
 | FormTable 表头配置上下文 | `columns[].headerSlot` |
 
-`cellSlot` 暴露 `row/index/columnConfig/updateRow`，不暴露 Element Table 内部 `store` 和运行时 Column 对象。业务操作应优先使用 Slot 上下文和 FormTable Ref，避免依赖 Element UI 内部状态。
+`cellSlot` 暴露 `row/index/displayIndex/columnConfig/updateRow`，不暴露 Element Table 内部 `store` 和运行时 Column 对象。业务操作应优先使用 Slot 上下文和 FormTable Ref，避免依赖 Element UI 内部状态。
 
 ## 事件和方法的类型边界
 

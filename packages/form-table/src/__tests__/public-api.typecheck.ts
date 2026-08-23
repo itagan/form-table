@@ -372,17 +372,13 @@ const invalidTypedComponentProps: TypedFormTableProps = {
   columns: typedColumns
 }
 void invalidTypedComponentProps
-const typedVModelProps: TypedFormTableProps = {
+const invalidValueAliasProps: TypedFormTableProps = {
+  tableData: [{ name: '模板模型', amount: 30 }],
+  // @ts-expect-error FormTable 运行时不声明 value Prop；v-model 使用 tableData。
   value: [{ name: '模板模型', amount: 30 }],
   columns: typedColumns
 }
-const invalidTypedVModelProps: TypedFormTableProps = {
-  // @ts-expect-error Vue 2 v-model value must use PurchaseRow.
-  value: [{ name: '缺少金额' }],
-  columns: typedColumns
-}
-void typedVModelProps
-void invalidTypedVModelProps
+void invalidValueAliasProps
 declare const typedFormTableInstance: InstanceType<typeof TypedFormTable>
 typedFormTableInstance.$emit('update:tableData', [{ name: '更新', amount: 20 }])
 typedFormTableInstance.$emit('field-change', {
@@ -911,8 +907,16 @@ declare const formItemSlotContext: FormTableFormItemSlotContext
 void formItemSlotContext.bindingValue
 formItemSlotContext.setBindingValue('Bob')
 void formItemSlotContext.propPath
+void formItemSlotContext.displayIndex
 void formItemSlotContext.value
 formItemSlotContext.setValue('Bob')
+// @ts-expect-error unresolved duplicate rows can omit the validation path.
+const requiredPropPath: string = formItemSlotContext.propPath
+void requiredPropPath
+if (formItemSlotContext.propPath) {
+  const resolvedPropPath: string = formItemSlotContext.propPath
+  void resolvedPropPath
+}
 
 declare const formItemErrorSlotContext: FormTableFormItemErrorSlotContext
 void formItemErrorSlotContext.error
@@ -921,6 +925,7 @@ void formItemErrorSlotContext.itemConfig.errorSlot
 declare const cellSlotContext: FormTableCellSlotContext
 void cellSlotContext.row
 void cellSlotContext.index
+void cellSlotContext.displayIndex
 void cellSlotContext.columnConfig.cellSlot
 cellSlotContext.updateRow({ name: 'Bob' })
 // @ts-expect-error cellSlot rows are read-only; use updateRow instead.

@@ -54,6 +54,7 @@ el-table-column → el-row → el-col → el-form-item → Component / Field Slo
 interface FormTableCellSlotContext {
   row: Readonly<TableRow>
   index: number
+  displayIndex: number
   columnConfig: Readonly<CellSlotColumnConfig>
   updateRow: (patch: FormTableRowPatch<TableRow>) => void
 }
@@ -62,7 +63,8 @@ interface FormTableCellSlotContext {
 | 字段 | 时效 | 说明 |
 | --- | --- | --- |
 | `row` | 渲染快照 | 当前行，不要直接修改 |
-| `index` | 渲染快照 | 适合同步 UI 操作，不作为异步行身份 |
+| `index` | 渲染快照 | 当前行在受控 `tableData` 中的数据源下标 |
+| `displayIndex` | 渲染快照 | 排序或筛选后的显示下标，仅用于界面位置 |
 | `columnConfig` | 配置快照 | 当前列原始配置 |
 | `updateRow` | 绑定当前行 | 不可变更新，patch key 支持嵌套路径 |
 

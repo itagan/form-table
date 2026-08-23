@@ -57,11 +57,13 @@ export function createColumnContext<TRow extends TableRow = TableRow>(
 export function createRowContext<TRow extends TableRow = TableRow>(
   columnContext: FormTableColumnContext<TRow>,
   row: Readonly<TRow>,
-  index: number
+  index: number,
+  displayIndex: number = index
 ): FormTableRowContext<TRow> {
   return extendLazyContext(columnContext, {
     row,
-    index
+    index,
+    displayIndex
   })
 }
 

@@ -17,8 +17,10 @@ export interface FormTableColumnContext<TRow extends TableRow = TableRow> extend
 export interface FormTableRowContext<TRow extends TableRow = TableRow> extends FormTableColumnContext<TRow> {
   /** 当前数据行。 */
   row: Readonly<TRow>
-  /** 当前数据行在 tableData 中的渲染下标。 */
+  /** 当前数据行在受控 tableData 中的数据源下标。 */
   index: number
+  /** 当前数据行经过 Element Table 排序或筛选后的显示下标。 */
+  displayIndex: number
 }
 
 export interface FormTableFieldRenderContext<TRow extends TableRow = TableRow> extends FormTableRowContext<TRow> {

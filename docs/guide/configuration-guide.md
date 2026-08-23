@@ -62,7 +62,7 @@ Column 负责表格列及单元格内唯一 Row（默认 `type: 'flex'`，可由
 }
 ```
 
-FormTable 会生成 `tableData.{rowIndex}.{fieldKey}` 作为 Element Form 校验路径。行增删或移动后，下标已经变化，应在 `nextTick` 后清理旧校验状态。提交、单字段校验、重置边界见[校验、清理与重置](../features/validation-reset.md)。
+FormTable 会按当前行在受控 `tableData` 中的数据源下标生成 `tableData.{rowIndex}.{fieldKey}`。Element Table 内部排序或筛选只改变 `displayIndex`，不会让校验路径偏离原行。父组件增删、移动数据后仍应在 `nextTick` 后清理旧校验状态。提交、单字段校验、重置边界见[校验、清理与重置](../features/validation-reset.md)。
 
 ## 渲染模式
 
@@ -145,7 +145,7 @@ component: {
 }
 ```
 
-它只提供 `row/index/columnConfig/updateRow`，不创建字段路径和校验。完整示例见 [`cellSlot` 列级单元格](../features/cell-slot.md)。
+它只提供 `row/index/displayIndex/columnConfig/updateRow`，不创建字段路径和校验。完整示例见 [`cellSlot` 列级单元格](../features/cell-slot.md)。
 
 ### Slot 模式
 
@@ -167,7 +167,7 @@ component: {
 
 ```text
 Column → tableData, columnConfig
-rowProps → Column 信息 + row, index
+rowProps → Column 信息 + row, index, displayIndex
 Item   → Row 信息 + fieldKey, value, itemConfig
 ```
 
@@ -182,11 +182,11 @@ Item   → Row 信息 + fieldKey, value, itemConfig
 | 入口 | 读取数据 | 更新能力 |
 | --- | --- | --- |
 | Column 动态配置 | `tableData` | — |
-| `rowProps` 动态配置 | `row/index` | — |
+| `rowProps` 动态配置 | `row/index/displayIndex` | — |
 | Item 动态配置 | `fieldKey/value` | — |
 | `component.listeners` | Item 全部数据 | `setValue/updateRow` |
 | 字段 Slot | Item 全部数据与已解析组件 | `setValue/updateRow` |
-| `cellSlot` | `row/index/columnConfig` | `updateRow` |
+| `cellSlot` | `row/index/displayIndex/columnConfig` | `updateRow` |
 
 完整类型和快照语义见 [Slot 与上下文](../api/contexts.md)及[事件与 Ref](../api/events-and-ref.md)。
 

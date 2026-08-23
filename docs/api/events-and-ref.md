@@ -68,7 +68,7 @@ function handleHeaderClick(column: FormTableElementColumn, event: MouseEvent) {
 | `@field-change="handler"` | `{ row, index, fieldKey, value, previousValue }` | 否 |
 | `@form-validate="handler"` | `propPath, valid, message` | 否 |
 | `component.listeners[event]` | `ActionContext, ...组件原始事件参数` | 是 |
-| `cellSlot` scoped Slot | `{ row, index, columnConfig, updateRow }` | 是 |
+| `cellSlot` scoped Slot | `{ row, index, displayIndex, columnConfig, updateRow }` | 是 |
 | Element Table 原生事件 | Element UI 原始事件参数 | 否 |
 
 ```ts
@@ -118,7 +118,8 @@ function handleTableDataUpdate(nextTableData) {
 | 字段 | 说明 |
 | --- | --- |
 | `row` | 当前行的浅只读业务数据 |
-| `index` | Slot 渲染时的行下标 |
+| `index` | 当前行在受控 `tableData` 中的数据源下标 |
+| `displayIndex` | Element Table 排序或筛选后的显示下标 |
 | `columnConfig` | 当前浅只读 `CellSlotColumnConfig` 原始引用 |
 | `updateRow(patch)` | 不可变地更新当前行，patch key 支持嵌套路径 |
 
@@ -130,7 +131,7 @@ function handleTableDataUpdate(nextTableData) {
 </template>
 ```
 
-`index` 是渲染快照，适合立即执行的页面操作；异步数据更新应使用已绑定当前行的 `updateRow`，并为表格配置唯一稳定的 `rowKey`。`updateRow` 发出 `update:tableData`，并为每个实际变化的 patch 字段发出 `field-change`。
+`index/displayIndex` 都是渲染快照。删除或修改受控数据应使用 `index`；显示序号使用 `displayIndex`。异步数据更新应使用已绑定当前行的 `updateRow`，并为表格配置唯一稳定的 `rowKey`。`updateRow` 发出 `update:tableData`，并为每个实际变化的 patch 字段发出 `field-change`。
 
 `cellSlot` 不提供 `tableData/columnIndex/fieldKey/value/setValue/itemConfig/propPath/component`。需要字段值、字段校验或已解析组件配置时，应改用 `type: 'slot'` 字段 Slot。
 
@@ -140,7 +141,7 @@ function handleTableDataUpdate(nextTableData) {
 
 | 内容 | 字段 |
 | --- | --- |
-| 数据定位 | `tableData`、`row`、`index`、`fieldKey`、`value` |
+| 数据定位 | `tableData`、`row`、`index`、`displayIndex`、`fieldKey`、`value` |
 | 原始配置 | `columnConfig`、`itemConfig` |
 | 更新能力 | `setValue`、`updateRow` |
 | 解析结果 / Slot 专属 | `propPath`、`component` |

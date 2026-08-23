@@ -28,7 +28,7 @@ export interface ResolvedComponentConfig<TRow extends TableRow = TableRow> {
 }
 
 export interface FormTableFormItemSlotContext<TRow extends TableRow = TableRow> extends FormTableFieldContext<TRow> {
-  propPath: string
+  propPath: string | undefined
 }
 
 export interface FormTableFormItemErrorSlotContext<TRow extends TableRow = TableRow> extends FormTableFormItemSlotContext<TRow> {
@@ -70,14 +70,24 @@ export interface FormTableExpose<TRow extends TableRow = TableRow> {
   getTableRef: () => FormTableElementTableRef<TRow> | null
 }
 
+/** vue-tsc 的 Vue 3 target 会把无参数 v-model 暂时表示为 modelValue。 */
+type FormTableTemplateProps<
+  TRow extends TableRow,
+  TFieldTypes extends FieldTypeRegistry<TRow>
+> = Omit<FormTableProps<TRow, TFieldTypes>, 'tableData'> & (
+  | { tableData: TRow[], modelValue?: never }
+  | { modelValue: TRow[], tableData?: TRow[] }
+)
+
+/**
+ * modelValue 分支只适配 vue-tsc 的模板中间表示，不对应运行时 Prop 或事件。
+ * 对外运行时 Props 以 FormTableProps 的 tableData 为唯一数据源。
+ */
 export type FormTableComponent<
   TRow extends TableRow = TableRow,
   TFieldTypes extends FieldTypeRegistry<TRow> = EmptyFieldTypeRegistry
 > = DefineComponent<
-Omit<FormTableProps<TRow, TFieldTypes>, 'tableData'> & (
-  | { value: TRow[], tableData?: TRow[] }
-  | { tableData: TRow[], value?: TRow[] }
-),
+FormTableTemplateProps<TRow, TFieldTypes>,
 FormTableExpose<TRow>,
 Record<string, never>,
 Record<string, never>,
@@ -86,4 +96,9 @@ Record<string, never>,
 Record<string, never>,
 FormTableEmits<TRow>,
 keyof FormTableEmits<TRow>
->
+> & {
+  model: {
+    prop: 'tableData'
+    event: 'update:tableData'
+  }
+}
