@@ -79,7 +79,7 @@ const props = defineProps<{
 const modelValue = computed(() => {
   const model = props.component.model
   return model && model.valueToProp
-    ? model.valueToProp(props.value, props.modelContext)
+    ? model.valueToProp(props.modelContext, props.value)
     : props.value
 })
 

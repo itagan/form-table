@@ -126,13 +126,13 @@ money: {
   model: {
     prop: 'amount',
     event: 'amount-change',
-    valueToProp: (cents, context) => Number(cents || 0) / 100,
+    valueToProp: (_context, cents) => Number(cents || 0) / 100,
     valueFromEvent: (_context, amount) => Math.round(Number(amount || 0) * 100)
   }
 }
 ```
 
-`valueToProp` 的首参是当前 `bindingValue`，第二个参数是只读字段渲染上下文；`valueFromEvent` 的首参使用同一种上下文，后续参数来自所选 model 事件。其中 `context.value` 始终保留主字段原值。员工 ID 转对象、ISO 字符串转 `Date`、枚举 code 转 Option 等同步转换也适用。异步查询、跨字段副作用或带内部状态的复杂转换继续使用 Adapter、listener 或 Slot。
+`valueToProp` 的首参是只读字段渲染上下文，第二个参数是当前 `bindingValue`；`valueFromEvent` 的首参使用同一种上下文，后续参数来自所选 model 事件。其中 `context.value` 始终保留主字段原值。员工 ID 转对象、ISO 字符串转 `Date`、枚举 code 转 Option 等同步转换也适用。异步查询、跨字段副作用或带内部状态的复杂转换继续使用 Adapter、listener 或 Slot。
 
 ## 与 binding.map 组合
 
@@ -183,7 +183,7 @@ const fieldTypes = defineFormTableTypes<PurchaseRow>()({
       prop: 'money',
       event: 'money-change',
 
-      valueToProp(value, context): MoneyEditorValue {
+      valueToProp(context, value): MoneyEditorValue {
         const stored = value as StoredMoney
 
         return {

@@ -99,7 +99,7 @@ const moneyType = defineFormTableType<PurchaseRow>()<{
   model: {
     prop: 'amount',
     event: 'amount-change',
-    valueToProp: value => Number(value || 0) / 100,
+    valueToProp: (_context, value) => Number(value || 0) / 100,
     valueFromEvent: (_context, amount) => Math.round(amount * 100)
   },
   props: ({ row }) => ({

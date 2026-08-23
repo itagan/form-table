@@ -638,7 +638,7 @@ describe('FormTable rendering and configuration', () => {
 
   it('transforms the binding value before passing it to a component model prop', async () => {
     const amountListener = vi.fn()
-    const valueToProp = vi.fn((value: number, context: FormTableFieldRenderContext) => ({
+    const valueToProp = vi.fn((context: FormTableFieldRenderContext, value: number) => ({
       amount: value / 100,
       currency: context.row.currency
     }))
@@ -681,12 +681,12 @@ describe('FormTable rendering and configuration', () => {
     const field = wrapper.find('.input-transform-money')
     expect(field.attributes('data-money')).toBe(JSON.stringify({ amount: 12.5, currency: 'CNY' }))
     expect(valueToProp).toHaveBeenCalledWith(
-      1250,
       expect.objectContaining({
         fieldKey: 'amountInCents',
         value: 1250,
         row: { amountInCents: 1250, currency: 'CNY' }
-      })
+      }),
+      1250
     )
 
     await field.trigger('click')
@@ -709,7 +709,7 @@ describe('FormTable rendering and configuration', () => {
           type: 'input',
           component: {
             model: {
-              valueToProp: value => `CODE-${String(value)}`,
+              valueToProp: (_context, value) => `CODE-${String(value)}`,
               valueFromEvent: (_context, value) => Number(String(value).replace('CODE-', ''))
             }
           }
@@ -750,7 +750,7 @@ describe('FormTable rendering and configuration', () => {
             is: NullishField,
             model: {
               prop: 'converted',
-              valueToProp: (_value, { index }) => index === 0 ? null : undefined
+              valueToProp: ({ index }, _value) => index === 0 ? null : undefined
             }
           }
         }]

@@ -211,8 +211,8 @@ interface FieldModelConfig<TRow extends TableRow = TableRow> {
   prop?: string
   event?: string
   valueToProp?: (
-    value: FormTableValue,
-    context: FormTableFieldRenderContext<TRow>
+    context: FormTableFieldRenderContext<TRow>,
+    bindingValue: FormTableValue
   ) => FormTableValue
   valueFromEvent?: (
     context: FormTableFieldRenderContext<TRow>,
@@ -289,7 +289,7 @@ component: {
 ```text
 读取
 row[fieldKey]
-  → valueToProp(value, context)
+  → valueToProp(context, value)
   → type.model.prop
   → 业务组件
 
@@ -384,7 +384,7 @@ user-confirm(EmployeeSelection)
 model: {
   prop: 'selection',
   event: 'user-confirm',
-  valueToProp: (employeeId, context) =>
+  valueToProp: (context, employeeId) =>
     findEmployee(employeeId, context.row.departmentId),
   valueFromEvent: (_context, ...args) =>
     (args[0] as EmployeeSelection).id

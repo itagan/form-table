@@ -46,7 +46,7 @@ describe('minimum peer package consumer', () => {
         model: {
           prop: 'selectedId',
           event: 'user-confirm',
-          valueToProp: (value: unknown) => ({ id: value }),
+          valueToProp: (_context, value: unknown) => ({ id: value }),
           valueFromEvent: (_context, ...args) => (args[0] as { id: string }).id
         }
       }

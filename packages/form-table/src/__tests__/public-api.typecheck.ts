@@ -18,6 +18,7 @@ import FormTable, {
   type FormTableElementColumn,
   type FormTableEmits,
   type FormTableExpose,
+  type FormTableFieldRenderContext,
   type FormTableFormItemErrorSlotContext,
   type FormTableFormItemSlotContext,
   type FormTableHintValue,
@@ -137,7 +138,7 @@ const employeeTypeDefinition = defineFormTableType<BusinessRow>()<
   model: {
     prop: 'selectedId',
     event: 'user-confirm',
-    valueToProp: (value, context) => ({
+    valueToProp: (context, value) => ({
       id: value,
       departmentId: context.row.departmentId
     }),
@@ -236,11 +237,15 @@ const invalidDirectEmployeeListenerKey: keyof DirectEmployeeListeners = 'direct-
 void invalidDirectEmployeeListenerKey
 
 const businessModel: FieldModelConfig<BusinessRow> = {
-  valueToProp(value, context) {
+  valueToProp(context, value) {
     const departmentId: string = context.row.departmentId
     return { value, departmentId }
   }
 }
+declare const businessRenderContext: FormTableFieldRenderContext<BusinessRow>
+businessModel.valueToProp?.(businessRenderContext, 'employee-1')
+// @ts-expect-error valueToProp 统一以只读字段上下文作为首参。
+businessModel.valueToProp?.('employee-1', businessRenderContext)
 void businessModel
 
 const businessTypeRegistry = {

@@ -61,8 +61,8 @@ interface BaseFieldModelConfig<TRow extends TableRow> {
   prop?: string
   /** 将行字段或 binding.map 组合值同步转换为组件 model prop。 */
   valueToProp?: (
-    value: FormTableValue,
-    context: FormTableFieldRenderContext<TRow>
+    context: FormTableFieldRenderContext<TRow>,
+    bindingValue: FormTableValue
   ) => FormTableValue
 }
 

@@ -89,7 +89,7 @@ component: {
 model: {
   prop: 'selectedUser',
   event: 'select-user',
-  valueToProp: (ownerId, { row }) =>
+  valueToProp: ({ row }, ownerId) =>
     findUser(ownerId, row.departmentId) || null,
   valueFromEvent: (_context, ...args) =>
     (args[0] as { id: string } | null)?.id || ''
