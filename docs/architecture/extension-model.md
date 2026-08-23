@@ -56,6 +56,15 @@ Element UI 标准字段？
 
 `defineFormTableType` 用于增强 Props 和事件的 TypeScript 提示；`defineFormTableTypes` 保存注册名称并拒绝保留名称；`createFormTable` 与 `defineFormTableColumns` 将注册表类型贯穿组件和配置。它们属于高级 TypeScript 接入，不应进入快速开始主流程。
 
+为保持协议可预测，自定义 Type 还遵循以下边界：
+
+- 注册表按 FormTable 实例隔离，不提供全局可变注册中心。
+- 默认 Props 与 Item Props 求值后浅合并，Item 配置优先。
+- model 可以由 Item 整体覆盖，不进行深层规则合并。
+- listener、字段路径和 `binding.map` 属于当前 Item，不进入注册定义。
+- 注册表可以整体替换；不承诺原对象的深层修改触发更新。
+- 公司级注册表组合使用普通对象展开，核心不增加继承或合并助手。
+
 ## 远程 Schema
 
 远程 Schema 只描述可序列化布局、静态 Props、options、业务 Type 名称和 `binding.map`。组件对象、函数、listener、Slot、权限与异步行为必须由可信前端白名单增强。
@@ -83,4 +92,3 @@ Element UI 标准字段？
 ## 相关文档
 
 [自定义字段组件](../features/custom-component.md) · [字段 Slot 与 cellSlot](../api/contexts.md) · [业务配置最佳实践](../guide/business-configuration-best-practices.md) · [自定义 Type（高级）](../features/custom-field-types.md)
-
