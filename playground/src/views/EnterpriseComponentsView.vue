@@ -246,7 +246,8 @@ const columns: ColumnConfig[] = [
                 updateRow({
                   orgName: organization?.name || '',
                   supplierId: '',
-                  supplierName: ''
+                  supplierName: '',
+                  supplierSource: undefined
                 })
               }
             }
