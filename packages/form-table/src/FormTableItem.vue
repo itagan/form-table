@@ -57,10 +57,11 @@ const props = defineProps<{
 }>()
 
 /** 父组件具名插槽集合，用于字段 Slot 和 FormItem Label/Error Slot。 */
-const parentSlots = inject<FormTableSlots>(FORM_TABLE_SLOTS_KEY, {})
+const parentSlots = inject<FormTableSlots>(FORM_TABLE_SLOTS_KEY, () => ({}), true)
 const fieldTypes = inject<FormTableFieldTypesRef>(
   FORM_TABLE_FIELD_TYPES_KEY,
-  computed<FieldTypeRegistry>(() => ({}))
+  () => computed<FieldTypeRegistry>(() => ({})),
+  true
 )
 
 /** 按 Item 配置名称解析 FormItem 的 Label 和 Error Slot；缺失时保留 Element 默认内容。 */
