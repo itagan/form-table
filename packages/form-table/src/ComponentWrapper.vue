@@ -14,6 +14,7 @@
     :component-props="component.props"
     :component-listeners="component.listeners"
     :model="component.model"
+    :model-context="modelContext"
     :on-model-input="handleModelInput"
   >
     <template v-if="type === 'select'">

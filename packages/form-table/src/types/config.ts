@@ -57,20 +57,54 @@ export interface OptionPropsConfig {
   key?: string
 }
 
-/** 自定义字段组件的受控值协议；未配置时使用组件原生 Vue 2 v-model。 */
-export interface FieldModelConfig<TRow extends TableRow = TableRow> {
+interface BaseFieldModelConfig<TRow extends TableRow> {
   prop?: string
-  event?: string
   /** 将行字段或 binding.map 组合值同步转换为组件 model prop。 */
   valueToProp?: (
     value: FormTableValue,
     context: FormTableFieldRenderContext<TRow>
   ) => FormTableValue
-  valueFromEvent?: (...args: unknown[]) => FormTableValue
 }
+
+/** 严格事件回调仍可存入运行时使用的宽松字段注册表。 */
+type FieldModelValueFromEvent<
+  TRow extends TableRow,
+  TArgs extends unknown[]
+> = {
+  bivarianceHack(
+    context: FormTableFieldRenderContext<TRow>,
+    ...args: TArgs
+  ): FormTableValue
+}['bivarianceHack']
 
 /** 自定义字段 type 可选的事件名到原始参数元组协议。 */
 export type FieldTypeEventMap = Record<string, unknown[]>
+
+type FieldModelForEvent<
+  TRow extends TableRow,
+  TEvents extends Record<keyof TEvents, unknown[]>,
+  TEvent extends Extract<keyof TEvents, string>
+> = BaseFieldModelConfig<TRow> & {
+  event: TEvent
+  /** 从只读字段上下文和当前 model 事件参数同步生成新的绑定值。 */
+  valueFromEvent?: FieldModelValueFromEvent<TRow, TEvents[TEvent]>
+}
+
+/**
+ * 自定义字段组件的受控值协议；未配置时使用组件原生 Vue 2 v-model。
+ * 显式传入事件表时，event 与 valueFromEvent 参数元组保持关联。
+ */
+export type FieldModelConfig<
+  TRow extends TableRow = TableRow,
+  TEvents extends Record<keyof TEvents, unknown[]> = FieldTypeEventMap
+> = string extends keyof TEvents
+  ? BaseFieldModelConfig<TRow> & {
+      event?: string
+      valueFromEvent?: FieldModelValueFromEvent<TRow, unknown[]>
+    }
+  : {
+      [TEvent in Extract<keyof TEvents, string>]: FieldModelForEvent<TRow, TEvents, TEvent>
+    }[Extract<keyof TEvents, string>]
 
 /** 只用于在结构类型中保留 Props/事件协议泛型，不产生运行时代码。 */
 declare const FIELD_TYPE_PROTOCOL: unique symbol
@@ -92,7 +126,7 @@ export interface FieldTypeDefinition<
   TEvents extends Record<keyof TEvents, unknown[]> = FieldTypeEventMap
 > {
   is: string | Component
-  model?: FieldModelConfig<TRow> | false
+  model?: FieldModelConfig<TRow, TEvents> | false
   props?: DynamicValue<Partial<TProps>, FormTableFieldRenderContext<TRow>>
 }
 
@@ -205,6 +239,14 @@ type RegisteredFieldTypeListeners<TRow extends TableRow, TDefinition> =
     ? TDefinition[typeof FIELD_TYPE_PROTOCOL]['listeners']
     : Record<string, FormTableFieldListener<TRow>>
 
+type RegisteredFieldTypeEvents<TDefinition> = TDefinition extends {
+  readonly [FIELD_TYPE_PROTOCOL]: { events: infer TEvents }
+}
+  ? TEvents extends Record<keyof TEvents, unknown[]>
+    ? TEvents
+    : FieldTypeEventMap
+  : FieldTypeEventMap
+
 type RegisteredFieldTypeDefinition<TFieldTypes, TType extends PropertyKey> =
   TFieldTypes extends Record<TType, infer TDefinition>
     ? TDefinition
@@ -219,7 +261,7 @@ type CustomFieldComponentConfig<
     FormTableFieldRenderContext<TRow>
   >
   listeners?: RegisteredFieldTypeListeners<TRow, TDefinition>
-  model?: FieldModelConfig<TRow> | false
+  model?: FieldModelConfig<TRow, RegisteredFieldTypeEvents<TDefinition>> | false
   is?: never
   resolveComponent?: never
   slot?: never

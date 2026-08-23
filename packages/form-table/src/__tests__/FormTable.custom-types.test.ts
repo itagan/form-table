@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import type { FieldTypeRegistry } from '../types.public'
+import type { FieldTypeRegistry, FormTableFieldRenderContext } from '../types.public'
 import { mountFormTable } from './test-utils'
 
 const createButtonField = (
@@ -47,6 +47,12 @@ describe('FormTable custom field types', () => {
   it('merges default and item props, adapts a custom model, and preserves raw listener args', async () => {
     const selectionListener = vi.fn()
     const valueToProp = vi.fn((value: string) => ({ id: value, source: 'row' }))
+    const valueFromEvent = vi.fn((
+      context: FormTableFieldRenderContext,
+      ...args: unknown[]
+    ) => context.row.employeeId === 'user-1'
+      ? (args[0] as { id: string }).id
+      : context.value)
     const EmployeeField = createButtonField(
       'registered-employee',
       'selectedId',
@@ -64,7 +70,7 @@ describe('FormTable custom field types', () => {
             prop: 'selectedId',
             event: 'user-confirm',
             valueToProp,
-            valueFromEvent: (...args) => (args[0] as { id: string }).id
+            valueFromEvent
           },
           props: defaultProps
         }
@@ -99,6 +105,15 @@ describe('FormTable custom field types', () => {
     expect(valueToProp).toHaveBeenCalledWith(
       'user-1',
       expect.objectContaining({ fieldKey: 'employeeId', value: 'user-1' })
+    )
+    expect(valueFromEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        row: { employeeId: 'user-1' },
+        fieldKey: 'employeeId',
+        value: 'user-1'
+      }),
+      { id: 'user-2', name: 'Bob' },
+      'raw-extra'
     )
     wrapper.destroy()
   })
@@ -204,7 +219,7 @@ describe('FormTable custom field types', () => {
             prop: 'selection',
             event: 'user-confirm',
             valueToProp,
-            valueFromEvent: (...args) => (args[0] as { payload: unknown }).payload
+            valueFromEvent: (_context, ...args) => (args[0] as { payload: unknown }).payload
           }
         }
       },

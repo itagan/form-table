@@ -217,7 +217,7 @@ const columns: ColumnConfig[] = [
             model: {
               prop: 'selectedCode',
               event: 'node-select',
-              valueFromEvent: (...args) => (args[0] as { code: string } | null)?.code || ''
+              valueFromEvent: (_context, ...args) => (args[0] as { code: string } | null)?.code || ''
             },
             props: ({ row }) => ({
               disabled: !editable.value || asPurchaseRow(row).locked
@@ -248,7 +248,7 @@ const columns: ColumnConfig[] = [
             model: {
               prop: 'supplierId',
               event: 'supplier-change',
-              valueFromEvent: (...args) => (args[0] as SupplierSelection | null)?.id || ''
+              valueFromEvent: (_context, ...args) => (args[0] as SupplierSelection | null)?.id || ''
             },
             props: ({ row }) => ({
               orgCode: asPurchaseRow(row).orgCode,
@@ -320,7 +320,7 @@ const columns: ColumnConfig[] = [
         model: {
           prop: 'fileIds',
           event: 'files-change',
-          valueFromEvent: (...args) => (args[0] as UploadFile[]).map(file => file.id)
+          valueFromEvent: (_context, ...args) => (args[0] as UploadFile[]).map(file => file.id)
         },
         props: ({ row }) => ({
           disabled: !editable.value || asPurchaseRow(row).locked,

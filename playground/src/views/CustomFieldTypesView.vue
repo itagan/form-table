@@ -100,7 +100,7 @@ const moneyType = defineFormTableType<PurchaseRow>()<{
     prop: 'amount',
     event: 'amount-change',
     valueToProp: value => Number(value || 0) / 100,
-    valueFromEvent: (...args) => Math.round(Number(args[0] || 0) * 100)
+    valueFromEvent: (_context, amount) => Math.round(amount * 100)
   },
   props: ({ row }) => ({
     currency: row.currency,
