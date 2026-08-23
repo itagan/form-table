@@ -46,7 +46,10 @@ describe('FormTable custom field types', () => {
 
   it('merges default and item props, adapts a custom model, and preserves raw listener args', async () => {
     const selectionListener = vi.fn()
-    const valueToProp = vi.fn((value: string) => ({ id: value, source: 'row' }))
+    const valueToProp = vi.fn((
+      _context: FormTableFieldRenderContext,
+      value: string
+    ) => ({ id: value, source: 'row' }))
     const valueFromEvent = vi.fn((
       context: FormTableFieldRenderContext,
       ...args: unknown[]
@@ -103,8 +106,8 @@ describe('FormTable custom field types', () => {
     expect(defaultProps).toHaveBeenCalledTimes(1)
     expect(itemProps).toHaveBeenCalledTimes(1)
     expect(valueToProp).toHaveBeenCalledWith(
-      'user-1',
-      expect.objectContaining({ fieldKey: 'employeeId', value: 'user-1' })
+      expect.objectContaining({ fieldKey: 'employeeId', value: 'user-1' }),
+      'user-1'
     )
     expect(valueFromEvent).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -119,8 +122,14 @@ describe('FormTable custom field types', () => {
   })
 
   it('lets an item replace the registered model as one complete protocol', async () => {
-    const registeredValueToProp = vi.fn((value: boolean) => !value)
-    const itemValueToProp = vi.fn((value: boolean) => value)
+    const registeredValueToProp = vi.fn((
+      _context: FormTableFieldRenderContext,
+      value: boolean
+    ) => !value)
+    const itemValueToProp = vi.fn((
+      _context: FormTableFieldRenderContext,
+      value: boolean
+    ) => value)
     const OverrideField = createButtonField('registered-override', 'checked', 'toggle', false)
     const wrapper = mountFormTable({
       tableData: [{ enabled: true }],
@@ -203,7 +212,10 @@ describe('FormTable custom field types', () => {
 
   it('combines binding.map with a registered composite model in one row update', async () => {
     const selectionListener = vi.fn()
-    const valueToProp = vi.fn((value: unknown) => ({ payload: value }))
+    const valueToProp = vi.fn((
+      _context: FormTableFieldRenderContext,
+      value: unknown
+    ) => ({ payload: value }))
     const EmployeeField = createButtonField(
       'registered-composite',
       'selection',
@@ -255,8 +267,8 @@ describe('FormTable custom field types', () => {
       expect.objectContaining({ fieldKey: 'employeeName', value: '未命名' })
     ])
     expect(valueToProp).toHaveBeenCalledWith(
-      { id: 'user-1', name: 'Alice' },
-      expect.objectContaining({ fieldKey: 'employeeId', value: 'user-1' })
+      expect.objectContaining({ fieldKey: 'employeeId', value: 'user-1' }),
+      { id: 'user-1', name: 'Alice' }
     )
     expect(selectionListener.mock.calls[0][0].bindingValue).toEqual({
       id: 'user-1',
