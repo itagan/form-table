@@ -226,7 +226,7 @@ export function createPurchaseColumns(
               model: {
                 prop: 'selectedCode',
                 event: 'node-select',
-                valueFromEvent: (...args: unknown[]) => {
+                valueFromEvent: (_context, ...args: unknown[]) => {
                   return (args[0] as { code: string } | null)?.code || ''
                 }
               },
@@ -262,7 +262,7 @@ export function createPurchaseColumns(
                 prop: 'supplierId',
                 event: 'supplier-change',
                 // 公司组件事件为 (supplier, source)，只取 supplier.id 写回。
-                valueFromEvent: (...args: unknown[]) => {
+                valueFromEvent: (_context, ...args: unknown[]) => {
                   return (args[0] as SupplierSelection).id
                 }
               },
@@ -364,7 +364,7 @@ export function createPurchaseColumns(
             model: {
               prop: 'fileIds',
               event: 'files-change',
-              valueFromEvent: (...args: unknown[]) => {
+              valueFromEvent: (_context, ...args: unknown[]) => {
                 return (args[0] as UploadFile[]).map(file => file.id)
               }
             },
@@ -596,7 +596,7 @@ component: {
   model: {
     prop: 'selected-user-id',
     event: 'select-user',
-    valueFromEvent: (...args) => (args[0] as { id: string }).id
+    valueFromEvent: (_context, ...args) => (args[0] as { id: string }).id
   }
 }
 ```

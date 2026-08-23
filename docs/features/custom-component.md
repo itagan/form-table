@@ -70,7 +70,8 @@ component: {
   model: {
     prop: 'selectedId',
     event: 'select-user',
-    valueFromEvent: user => user.id
+    valueFromEvent: (_context, ...args) =>
+      (args[0] as { id: string }).id
   },
   listeners: {
     'select-user'({ updateRow }, user) {
@@ -90,7 +91,8 @@ model: {
   event: 'select-user',
   valueToProp: (ownerId, { row }) =>
     findUser(ownerId, row.departmentId) || null,
-  valueFromEvent: user => user?.id || ''
+  valueFromEvent: (_context, ...args) =>
+    (args[0] as { id: string } | null)?.id || ''
 }
 ```
 

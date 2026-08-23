@@ -45,7 +45,7 @@ employee: {
   model: {
     prop: 'selected-user-id',
     event: 'user-confirm',
-    valueFromEvent: (...args) => (
+    valueFromEvent: (_context, ...args) => (
       args[0] as EmployeeSelection
     ).id
   }
@@ -109,7 +109,7 @@ const fieldTypes = defineFormTableTypes<PurchaseRow>()({
     model: {
       prop: 'selected-user-id',
       event: 'user-confirm',
-      valueFromEvent: (...args) => (
+      valueFromEvent: (_context, ...args) => (
         args[0] as EmployeeSelection
       ).id
     },
@@ -123,7 +123,7 @@ const fieldTypes = defineFormTableTypes<PurchaseRow>()({
     model: {
       prop: 'amount',
       event: 'amount-change',
-      valueFromEvent: (...args) => (
+      valueFromEvent: (_context, ...args) => (
         args[0] as MoneyChangePayload
       ).amount
     },
@@ -214,12 +214,16 @@ interface FieldModelConfig<TRow extends TableRow = TableRow> {
     value: FormTableValue,
     context: FormTableFieldRenderContext<TRow>
   ) => FormTableValue
-  valueFromEvent?: (...args: unknown[]) => FormTableValue
+  valueFromEvent?: (
+    context: FormTableFieldRenderContext<TRow>,
+    ...args: unknown[]
+  ) => FormTableValue
 }
 ```
 
 - 省略时使用组件真实的 Vue 2 v-model/model 选项；
 - 对象形式声明非标准 prop、事件及同步输入/输出转换；
+- 显式事件协议使 `event` 与 `valueFromEvent(context, ...args)` 参数元组联动；
 - `false` 表示不注入 model，通常不适合注册为普通可编辑 type。
 
 ### `props`
@@ -291,7 +295,7 @@ row[fieldKey]
 
 写回
 业务组件发出 type.model.event
-  → valueFromEvent(...args)
+  → valueFromEvent(context, ...args)
   → setValue(fieldKey)
   → Item 同名 listener(...原始参数)
 ```
@@ -382,7 +386,7 @@ model: {
   event: 'user-confirm',
   valueToProp: (employeeId, context) =>
     findEmployee(employeeId, context.row.departmentId),
-  valueFromEvent: (...args) =>
+  valueFromEvent: (_context, ...args) =>
     (args[0] as EmployeeSelection).id
 }
 ```
@@ -536,7 +540,7 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([
 - 内置 type、`component` 和 `slot` 行为不变；
 - 注册类型的标准 v-model 和自定义 model；
 - `valueToProp` 的上下文、非对称值及 `binding.map` 执行顺序；
-- `valueFromEvent` 与同名 Item listener 的顺序和原始参数；
+- `valueFromEvent` 的只读字段上下文、事件参数推导，以及与同名 Item listener 的执行顺序；
 - 静态及动态默认 props 与 Item props 的浅合并；
 - `binding.map` 的读取、原子写回、清空和 fallback；
 - 未知名称警告去重及空内容渲染；

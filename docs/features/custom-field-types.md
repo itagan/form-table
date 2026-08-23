@@ -41,8 +41,10 @@ const employeeType = defineFormTableType<PurchaseRow>()<
   model: {
     prop: 'selected-user-id',
     event: 'user-confirm',
-    valueFromEvent: (...args) =>
-      (args[0] as EmployeeSelection).id
+    valueFromEvent: (_context, employee, meta) => {
+      void meta.source
+      return employee.id
+    }
   },
   props: { clearable: true }
 })
@@ -76,7 +78,7 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([{
 
 `defineFormTableType` 不是运行时必需包装：它原样返回定义对象，只在类型层保存组件 Props 与事件参数元组。Vue 2 组件、全局字符串组件和部分声明文件无法稳定自动推导事件，因此需要精确提示时显式声明协议；省略它时保持原来的宽松配置，已有代码无需迁移。
 
-协议化定义进入注册表后，Item 的 `component.props` 会提示属性名和值类型，已声明 listener 会获得字段上下文及原始事件参数类型。例如上面的 `user-confirm` 中，`employee` 自动为 `EmployeeSelection`，`meta.source` 自动为 `string`。该辅助函数不创建组件、不复制对象，也不增加每个单元格的运行时逻辑。
+协议化定义进入注册表后，Item 的 `component.props` 会提示属性名和值类型；`model.event` 只能选择事件表中的名称，`valueFromEvent` 和 Item listener 都会获得对应的原始事件参数类型。例如上面的 `user-confirm` 中，`employee` 自动为 `EmployeeSelection`，`meta.source` 自动为 `string`。`valueFromEvent` 的首参是只读字段渲染上下文，可读取当前 `row/index/fieldKey/value`，但不提供更新助手。该辅助函数不创建组件、不复制对象，也不增加每个单元格的运行时逻辑。
 
 ## 定义与字段覆盖
 
@@ -125,12 +127,12 @@ money: {
     prop: 'amount',
     event: 'amount-change',
     valueToProp: (cents, context) => Number(cents || 0) / 100,
-    valueFromEvent: (...args) => Math.round(Number(args[0] || 0) * 100)
+    valueFromEvent: (_context, amount) => Math.round(Number(amount || 0) * 100)
   }
 }
 ```
 
-`valueToProp` 的首参是当前 `bindingValue`，第二个参数是只读字段渲染上下文；其中 `context.value` 始终保留主字段原值。员工 ID 转对象、ISO 字符串转 `Date`、枚举 code 转 Option 等同步转换也适用。异步查询、跨字段副作用或带内部状态的复杂转换继续使用 Adapter、listener 或 Slot。
+`valueToProp` 的首参是当前 `bindingValue`，第二个参数是只读字段渲染上下文；`valueFromEvent` 的首参使用同一种上下文，后续参数来自所选 model 事件。其中 `context.value` 始终保留主字段原值。员工 ID 转对象、ISO 字符串转 `Date`、枚举 code 转 Option 等同步转换也适用。异步查询、跨字段副作用或带内部状态的复杂转换继续使用 Adapter、listener 或 Slot。
 
 ## 与 binding.map 组合
 
@@ -190,9 +192,7 @@ const fieldTypes = defineFormTableTypes<PurchaseRow>()({
         }
       },
 
-      valueFromEvent(...args): StoredMoney | null {
-        const money = args[0] as MoneyEditorValue | null
-
+      valueFromEvent(_context, money): StoredMoney | null {
         if (!money) return null
 
         return {
@@ -254,7 +254,7 @@ valueToProp
 MoneyEditor.money
 ```
 
-组件发出 `money-change({ amount: 2000, currency: 'USD' }, meta)` 时，`valueFromEvent` 先得到 `{ amountInCents: 200000, currency: 'USD' }`，随后 `binding.map` 一次写回 `{ amountInCents: 200000, currencyCode: 'USD' }`。因此只产生一次 `update:tableData`，两个实际变化字段分别产生 `field-change`；同名 listener 仍收到完整原始参数，其 `context.bindingValue` 是转换前的旧业务绑定值。组件清空并发出 `null` 时，两个字段分别使用 `0` 和 `'CNY'`。
+组件发出 `money-change({ amount: 2000, currency: 'USD' }, meta)` 时，`valueFromEvent` 先收到只读字段上下文和已推导的事件参数，再得到 `{ amountInCents: 200000, currency: 'USD' }`；随后 `binding.map` 一次写回 `{ amountInCents: 200000, currencyCode: 'USD' }`。因此只产生一次 `update:tableData`，两个实际变化字段分别产生 `field-change`；同名 listener 仍收到完整原始参数，其 `context.bindingValue` 是转换前的旧业务绑定值。组件清空并发出 `null` 时，两个字段分别使用 `0` 和 `'CNY'`。
 
 ## 名称、替换与错误处理
 

@@ -172,21 +172,43 @@ component.listeners      → Field 信息 + setValue, bindingValue, setBindingVa
 
 `FormTableSlotContext.itemConfig.component` 保留调用方传入的原始配置；`FormTableSlotContext.component` 包含针对当前数据行解析并归一化后的 `props/listeners/options/optionProps/model`，用于直接绑定 Slot 内组件。该解析结果不再作为独立顶层类型导出。
 
-自定义组件绑定协议类型：
+自定义组件绑定协议的宽松形态如下；第二个泛型传入事件表时会收紧为按 `event` 区分的联合类型：
 
 ```ts
-interface FieldModelConfig<TRow extends TableRow = TableRow> {
+type FieldModelConfig<
+  TRow extends TableRow = TableRow,
+  TEvents extends Record<keyof TEvents, unknown[]> = FieldTypeEventMap
+> = {
   prop?: string
   event?: string
   valueToProp?: (
     value: FormTableValue,
     context: FormTableFieldRenderContext<TRow>
   ) => FormTableValue
-  valueFromEvent?: (...args: unknown[]) => FormTableValue
+  valueFromEvent?: (
+    context: FormTableFieldRenderContext<TRow>,
+    ...args: unknown[]
+  ) => FormTableValue
 }
 ```
 
-`FieldComponentConfig.model` 未配置时保留 Vue 2 原生 `v-model`；配置 `FieldModelConfig` 时使用指定 prop/event，并可通过 `valueToProp/valueFromEvent` 处理非对称值；配置 `false` 时不注入模型绑定。输入转换接收 `bindingValue` 和只读字段渲染上下文，保持同步且不承担副作用。
+`FieldComponentConfig.model` 未配置时保留 Vue 2 原生 `v-model`；配置 `FieldModelConfig` 时使用指定 prop/event，并可通过 `valueToProp/valueFromEvent` 处理非对称值；配置 `false` 时不注入模型绑定。两个转换都获得只读字段渲染上下文。为 `FieldModelConfig` 或 `defineFormTableType` 提供事件表后，`event` 只能使用声明过的名称，`valueFromEvent` 的剩余参数随该事件的参数元组推导。
+
+```ts
+type EmployeeModel = FieldModelConfig<PurchaseRow, {
+  'user-confirm': [employee: EmployeeSelection, meta: { source: string }]
+  search: [keyword: string]
+}>
+
+const model: EmployeeModel = {
+  event: 'user-confirm',
+  valueFromEvent(context, employee, meta) {
+    void context.row
+    void meta.source
+    return employee.id
+  }
+}
+```
 
 复合字段映射类型：
 
