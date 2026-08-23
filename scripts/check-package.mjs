@@ -23,6 +23,7 @@ const expectedRuntimeExports = [
   'createFormTable',
   'default',
   'defineFormTableColumns',
+  'defineFormTableType',
   'defineFormTableTypes'
 ]
 
@@ -72,6 +73,10 @@ for (const [format, entry] of [['ESM', esmEntry], ['CommonJS', cjsEntry]]) {
   if (entry.default !== entry.FormTable) errors.push(`${format} 默认导出与具名 FormTable 不一致`)
   if (entry.createFormTable() !== entry.FormTable) errors.push(`${format} createFormTable 未返回同一运行时组件`)
   const fieldTypes = { custom: { is: 'custom-field' } }
+  const fieldType = { is: 'custom-field' }
+  if (entry.defineFormTableType()(fieldType) !== fieldType) {
+    errors.push(`${format} defineFormTableType 未保留定义运行时引用`)
+  }
   if (entry.defineFormTableTypes()(fieldTypes) !== fieldTypes) {
     errors.push(`${format} defineFormTableTypes 未保留注册表运行时引用`)
   }

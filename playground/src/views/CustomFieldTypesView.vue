@@ -5,7 +5,8 @@
     <p>
       注册一次稳定的组件、model 和默认 props，columns 就可以像内置字段一样使用
       <code>type: 'employee'</code>。金额字段还通过 <code>valueToProp/valueFromEvent</code>
-      在“数据存分”和“组件显示元”之间同步转换；字段级 props 仍可覆盖默认值，listener 仍会收到完整原始事件参数。
+      在“数据存分”和“组件显示元”之间同步转换；可选的 <code>defineFormTableType</code>
+      为字段级 props 和 listener 原始参数提供精确类型，且不会增加运行时包装。
     </p>
 
     <FormTable
@@ -33,8 +34,8 @@
     <section class="unknown-type-demo">
       <h2>未知 Type 的开发期保护</h2>
       <p>
-        下表故意模拟绕过 TypeScript 的远程配置。未知名称会按实例和名称只警告一次，字段内容留空，
-        不影响其他列；生产环境静默留空。
+        下表故意模拟绕过 TypeScript 的远程配置。未知名称会按实例和名称只警告一次，并给出列、字段位置
+        与可用名称；非法注册协议也会得到开发期提示。字段内容留空且不影响其他列，生产环境静默留空。
       </p>
       <DefaultFormTable
         v-model="unknownTypeData"
@@ -50,6 +51,7 @@ import { ref } from 'vue'
 import DefaultFormTable, {
   createFormTable,
   defineFormTableColumns,
+  defineFormTableType,
   defineFormTableTypes
 } from '@itagan/form-table'
 import type { ColumnConfig, TableRow } from '@itagan/form-table'
@@ -76,36 +78,62 @@ const employees: EmployeeSelection[] = [
   { id: 'u-103', name: 'Carol', departmentId: 'd-pm', departmentName: '产品部' }
 ]
 
-const fieldTypes = defineFormTableTypes<PurchaseRow>()({
-  businessPhone: {
-    is: PhoneInput,
-    props: { clearable: true }
+const businessPhoneType = defineFormTableType<PurchaseRow>()<{
+  clearable?: boolean
+  placeholder?: string
+  disabled?: boolean
+}>({
+  is: PhoneInput,
+  props: { clearable: true }
+})
+
+const moneyType = defineFormTableType<PurchaseRow>()<{
+  currency?: string
+  precision?: number
+  min?: number
+  disabled?: boolean
+}, {
+  'amount-change': [amount: number, meta: { currency: string; formatted: string }]
+}>({
+  is: MoneyInput,
+  model: {
+    prop: 'amount',
+    event: 'amount-change',
+    valueToProp: value => Number(value || 0) / 100,
+    valueFromEvent: (...args) => Math.round(Number(args[0] || 0) * 100)
   },
-  money: {
-    is: MoneyInput,
-    model: {
-      prop: 'amount',
-      event: 'amount-change',
-      valueToProp: value => Number(value || 0) / 100,
-      valueFromEvent: (...args) => Math.round(Number(args[0] || 0) * 100)
-    },
-    props: ({ row }) => ({
-      currency: row.currency,
-      precision: 2,
-      min: 0
-    })
+  props: ({ row }) => ({
+    currency: row.currency,
+    precision: 2,
+    min: 0
+  })
+})
+
+const employeeType = defineFormTableType<PurchaseRow>()<{
+  employees?: EmployeeSelection[]
+  clearable?: boolean
+  disabled?: boolean
+}, {
+  'user-confirm': [
+    employee: EmployeeSelection | null,
+    meta: { source: 'custom-field-type' }
+  ]
+}>({
+  is: EmployeeSelectionInput,
+  model: {
+    prop: 'selection',
+    event: 'user-confirm'
   },
-  employee: {
-    is: EmployeeSelectionInput,
-    model: {
-      prop: 'selection',
-      event: 'user-confirm'
-    },
-    props: {
-      employees,
-      clearable: true
-    }
+  props: {
+    employees,
+    clearable: true
   }
+})
+
+const fieldTypes = defineFormTableTypes<PurchaseRow>()({
+  businessPhone: businessPhoneType,
+  money: moneyType,
+  employee: employeeType
 })
 
 const FormTable = createFormTable<PurchaseRow, typeof fieldTypes>()
@@ -169,7 +197,7 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([
       component: {
         listeners: {
           'user-confirm'(_context, employee, meta) {
-            const name = (employee as EmployeeSelection | null)?.name || '已清空'
+            const name = employee?.name || '已清空'
             lastBusinessEvent.value = `user-confirm(${name}, ${JSON.stringify(meta)})`
           }
         }

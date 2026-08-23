@@ -7,6 +7,7 @@ import type {
 
 export * from './types.public'
 export { defineFormTableColumns } from './defineFormTableColumns'
+export { defineFormTableType } from './defineFormTableType'
 export { defineFormTableTypes } from './defineFormTableTypes'
 
 export declare function createFormTable<

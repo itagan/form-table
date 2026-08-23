@@ -10,6 +10,8 @@ export type {
   FieldComponentConfig,
   FieldModelConfig,
   FieldTypeDefinition,
+  FieldTypeEventMap,
+  FieldTypeListeners,
   FieldTypeRegistry,
   FieldComponentResolver,
   FormItemConfig,
@@ -49,5 +51,6 @@ export type {
   LayoutColumnConfig,
   NativeColumnConfig,
   OptionPropsConfig,
-  TableRow
+  TableRow,
+  TypedFieldTypeDefinition
 } from './types'

@@ -247,7 +247,7 @@ function enhanceRemoteField(schema: RemoteField): FormItemConfig {
 
 ### 3. 自定义 type：稳定业务字段协议
 
-当多个页面需要直接表达 `type: 'money'`、`type: 'employee'` 时，使用 `defineFormTableTypes` 注册稳定的 `is/model/default props`。Item 可按页面覆盖 `props/model` 并监听原始事件，复合值继续使用 `binding.map`；不增加注册级 listener、动态组件或 Option Renderer。
+当多个页面需要直接表达 `type: 'money'`、`type: 'employee'` 时，使用 `defineFormTableTypes` 注册稳定的 `is/model/default props`。需要精确的字段 Props 和业务事件参数提示时，再用零运行时成本的 `defineFormTableType` 声明协议；它不是必需包装。Item 可按页面覆盖 `props/model` 并监听原始事件，复合值继续使用 `binding.map`；不增加注册级 listener、动态组件或 Option Renderer。
 
 注册表按实例隔离，内置名称受到保护，非空注册表泛型会约束 columns 和必传 Prop。具体 API 见[自定义字段 Type](../features/custom-field-types.md)，设计取舍见[架构设计](../design/custom-field-type-proposal.md)。
 

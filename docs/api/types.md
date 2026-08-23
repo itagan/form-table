@@ -4,7 +4,7 @@
 
 - `ColumnConfig`、`LayoutColumnConfig`、`CellSlotColumnConfig`、`NativeColumnConfig`、`FormItemConfig`
 - `FieldComponentConfig`、`FieldModelConfig`、`FieldComponentResolver`、`FieldBindingConfig`、`FieldBindingMapEntry`、`BuiltinFormItemType`
-- `FieldTypeDefinition`、`FieldTypeRegistry`、`EmptyFieldTypeRegistry`
+- `FieldTypeDefinition`、`TypedFieldTypeDefinition`、`FieldTypeRegistry`、`EmptyFieldTypeRegistry`、`FieldTypeEventMap`、`FieldTypeListeners`
 - `FormItemOption`、`OptionPropsConfig`
 - `FormTableHintValue`、`FormTableHintMode`、`FormTableHintTargets`、`FormTableHintTrigger`、`FormTableFieldHintFormatter`、`FormTableHintOptions`
 - `TableRow`、`FormTableRecord`、`FormTableRowPatch`、`FormTableProps`、`FormTableRowKey`
@@ -17,7 +17,7 @@
 - `FormTableExpose`、`FormTableElementFormRef`、`FormTableElementTableRef`
 - `FormTableComponent`、`FormTableEmits`
 
-运行时入口导出默认组件、具名 `FormTable`、泛型组件工厂 `createFormTable`、泛型配置助手 `defineFormTableColumns` 和注册助手 `defineFormTableTypes`。上下文注入 key、内部更新 API、动态解析和渲染模式工具都不属于公共入口。
+运行时入口导出默认组件、具名 `FormTable`、泛型组件工厂 `createFormTable`、泛型配置助手 `defineFormTableColumns`、单项协议助手 `defineFormTableType` 和注册助手 `defineFormTableTypes`。上下文注入 key、内部更新 API、动态解析和渲染模式工具都不属于公共入口。
 
 需要让组件 Props、事件和动态配置回调使用同一个业务行类型时，组合两个泛型入口：
 
@@ -70,6 +70,8 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([{
   formItems: [{ fieldKey: 'employeeId', type: 'employee' }]
 }])
 ```
+
+需要让 Item Props 和业务事件获得精确提示时，先用 `defineFormTableType<TRow>()<TProps, TEvents>(definition)` 声明可选协议，再把返回值放入注册表。它在运行时原样返回对象；不使用该助手时，注册及渲染行为不变，Props/listener 保持兼容的宽松类型。
 
 第二泛型默认 `EmptyFieldTypeRegistry`，因此旧代码无需修改。非空时 `FormTableProps<TRow, TFieldTypes>` 要求 `fieldTypes: TFieldTypes`，并让注册名称精确进入 Item 的 type 联合；错误名称或使用另一份注册表会在类型检查阶段被拒绝。
 

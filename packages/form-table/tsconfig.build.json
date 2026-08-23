@@ -3,6 +3,7 @@
   "include": [
     "src/public-types.ts",
     "src/defineFormTableColumns.ts",
+    "src/defineFormTableType.ts",
     "src/defineFormTableTypes.ts",
     "src/types.public.ts",
     "src/types.ts",

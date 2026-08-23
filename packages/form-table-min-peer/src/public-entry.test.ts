@@ -6,6 +6,7 @@ import FormTable, {
   FormTable as NamedFormTable,
   createFormTable,
   defineFormTableColumns,
+  defineFormTableType,
   defineFormTableTypes
 } from '@itagan/form-table'
 import '@itagan/form-table/style.css'
@@ -19,6 +20,8 @@ describe('minimum peer package consumer', () => {
     expect(NamedFormTable).toBe(FormTable)
     expect(createFormTable()).toBe(FormTable)
     expect(defineFormTableColumns([])).toEqual([])
+    const fieldType = { is: 'custom-field' }
+    expect(defineFormTableType()(fieldType)).toBe(fieldType)
     const fieldTypes = { custom: { is: 'custom-field' } }
     expect(defineFormTableTypes()(fieldTypes)).toBe(fieldTypes)
   })

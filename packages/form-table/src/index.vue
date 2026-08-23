@@ -85,10 +85,10 @@ import {
   FORM_TABLE_SLOTS_KEY,
   FORM_TABLE_UPDATE_KEY
 } from './types'
-import { isReservedFormItemType } from './configs/defaultComponentConfigs'
 import { useColumnIdentity } from './composables/useColumnIdentity'
 import { useControlledTableUpdate } from './composables/useControlledTableUpdate'
 import { createTableContext } from './utils/dynamic'
+import { collectFieldTypeDiagnostics } from './utils/fieldTypeDiagnostics'
 import {
   getVue2ComponentListeners,
   resolveTableListeners,
@@ -120,30 +120,16 @@ const resolvedFieldTypes = computed<FieldTypeRegistry>(() => props.fieldTypes ||
 
 /** 未知名称按当前实例去重，避免同一 type 在每个单元格重复输出。 */
 if (import.meta.env.DEV) {
-  const warnedNames = new Set<string>()
+  const warnedDiagnostics = new Set<string>()
   watchEffect(() => {
-    const fieldTypes = resolvedFieldTypes.value
-    for (const name of Object.keys(fieldTypes)) {
-      if (isReservedFormItemType(name) && !warnedNames.has(`reserved:${name}`)) {
-        warnedNames.add(`reserved:${name}`)
-        console.warn(`[FormTable] Field type "${name}" is reserved; the registered definition is ignored.`)
-      }
-    }
-    for (const column of props.columns) {
-      if (!('formItems' in column)) continue
-      for (const item of column.formItems || []) {
-        const type = item.type
-        if (
-          !isReservedFormItemType(type)
-          && !Object.prototype.hasOwnProperty.call(fieldTypes, type)
-          && !warnedNames.has(type)
-        ) {
-          warnedNames.add(type)
-          console.warn(
-            `[FormTable] Unknown field type "${type}". Register it through fieldTypes or use type: "component".`
-          )
-        }
-      }
+    const diagnostics = collectFieldTypeDiagnostics(
+      resolvedFieldTypes.value,
+      props.columns
+    )
+    for (const diagnostic of diagnostics) {
+      if (warnedDiagnostics.has(diagnostic.key)) continue
+      warnedDiagnostics.add(diagnostic.key)
+      console.warn(diagnostic.message)
     }
   })
 }

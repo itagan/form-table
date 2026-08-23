@@ -536,6 +536,8 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([
 - 保留名称注册失败；
 - 两个 FormTable 实例的注册表隔离；
 - 自定义 type 名称的类型推断和拼写错误；
+- 可选 Props/事件协议的属性值与已声明事件参数类型；
+- 开发期注册结构、越界配置、未知名称的位置和可用名称诊断；
 - 最低 Vue/Element UI peer 组合；
 - 大量单元格下不增加组件实例和明显解析开销。
 
@@ -549,6 +551,8 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([
 | 未知 type | 开发环境按实例和名称警告一次，生产环境静默，字段内容为空 |
 | 发现时机 | 根组件在开发环境扫描 columns；字段渲染仍有未知目标保护 |
 | Option 子节点 | 首版不复用；通过组件 props 自行传入选项 |
+| Props/事件类型 | 可选 `defineFormTableType` 显式协议；运行时保持对象身份 |
+| 开发期诊断 | 按实例与问题去重，包含列/字段位置；生产环境移除 |
 
 ## 已实现的第一版范围
 
@@ -568,6 +572,8 @@ Item component.props / listeners
 保留名称保护与未知类型警告
   +
 注册表驱动的 TypeScript 联合
+  +
+可选 Props/事件协议与开发期定位诊断
 ```
 
 不包含注册级 listeners、动态组件、Option Renderer、全局注册、生命周期、自定义渲染和额外数据转换协议。

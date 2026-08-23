@@ -8,6 +8,7 @@
 import {
   createFormTable,
   defineFormTableColumns,
+  defineFormTableType,
   defineFormTableTypes,
   type TableRow
 } from '@itagan/form-table'
@@ -22,17 +23,32 @@ interface EmployeeSelection {
   name: string
 }
 
+interface EmployeePickerProps {
+  clearable?: boolean
+  disabled?: boolean
+}
+
+type EmployeePickerEvents = {
+  'user-confirm': [employee: EmployeeSelection, meta: { source: string }]
+  search: [keyword: string]
+}
+
+const employeeType = defineFormTableType<PurchaseRow>()<
+  EmployeePickerProps,
+  EmployeePickerEvents
+>({
+  is: EmployeePicker,
+  model: {
+    prop: 'selected-user-id',
+    event: 'user-confirm',
+    valueFromEvent: (...args) =>
+      (args[0] as EmployeeSelection).id
+  },
+  props: { clearable: true }
+})
+
 const fieldTypes = defineFormTableTypes<PurchaseRow>()({
-  employee: {
-    is: EmployeePicker,
-    model: {
-      prop: 'selected-user-id',
-      event: 'user-confirm',
-      valueFromEvent: (...args) =>
-        (args[0] as EmployeeSelection).id
-    },
-    props: { clearable: true }
-  }
+  employee: employeeType
 })
 
 const FormTable = createFormTable<PurchaseRow, typeof fieldTypes>()
@@ -55,6 +71,12 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([{
 ```
 
 注册表泛型非空时，组件 Props 会要求传入对应的 `fieldTypes`；未使用注册类型时，现有 `createFormTable<TRow>()`、`defineFormTableColumns<TRow>()` 和默认组件写法不变。
+
+### 可选的 Props / 事件协议
+
+`defineFormTableType` 不是运行时必需包装：它原样返回定义对象，只在类型层保存组件 Props 与事件参数元组。Vue 2 组件、全局字符串组件和部分声明文件无法稳定自动推导事件，因此需要精确提示时显式声明协议；省略它时保持原来的宽松配置，已有代码无需迁移。
+
+协议化定义进入注册表后，Item 的 `component.props` 会提示属性名和值类型，已声明 listener 会获得字段上下文及原始事件参数类型。例如上面的 `user-confirm` 中，`employee` 自动为 `EmployeeSelection`，`meta.source` 自动为 `string`。该辅助函数不创建组件、不复制对象，也不增加每个单元格的运行时逻辑。
 
 ## 定义与字段覆盖
 
@@ -240,6 +262,6 @@ MoneyEditor.money
 
 注册表按 FormTable 实例提供，两个实例可以使用同名但不同的定义。可以把 `fieldTypes` 替换为一个新对象来重新解析；不承诺原对象的深层修改触发更新，业务代码应保持注册表引用稳定或整体替换。
 
-未知 type 在开发环境按实例和名称警告一次并留下空字段内容，生产环境静默留空。远程 Schema 仍应在业务白名单层提前校验，不能从服务端下发组件对象或函数。
+未知 type 在开发环境按实例和名称警告一次并留下空字段内容，警告会包含首次出现的列/字段位置以及当前实例可用的自定义名称。开发环境还会检查无效 `is/model/props`、注册级越界键，以及自定义 Item 对 `is/resolveComponent/slot/options/optionProps` 的越界使用；同一实例中的同类问题只提示一次。生产环境不执行这些诊断，未知内容仍静默留空。远程 Schema 仍应在业务白名单层提前校验，不能从服务端下发组件对象或函数。
 
 完整运行示例见 [`/custom-field-types`](http://localhost:5173/custom-field-types)。架构取舍和首版边界见[自定义字段 Type 架构设计](../design/custom-field-type-proposal.md)。

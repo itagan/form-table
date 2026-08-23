@@ -2,6 +2,7 @@ import FormTable, {
   FormTable as NamedFormTable,
   createFormTable,
   defineFormTableColumns,
+  defineFormTableType,
   defineFormTableTypes,
   type FormTableExpose,
   type TableRow
@@ -76,12 +77,16 @@ typedInstance.$emit('field-change', {
 void exposed.getFormRef()
 void exposed.getTableRef()
 
-const fieldTypes = defineFormTableTypes<PurchaseRow>()({
-  money: {
+const moneyType = defineFormTableType<PurchaseRow>()<
+  { disabled?: boolean },
+  { 'amount-change': [amount: number] }
+>({
     is: 'minimum-money-input',
     model: { prop: 'amount', event: 'amount-change' },
     props: ({ row }) => ({ disabled: row.amount <= 0 })
-  }
+})
+const fieldTypes = defineFormTableTypes<PurchaseRow>()({
+  money: moneyType
 })
 const customColumns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([{
   label: '自定义类型',
@@ -92,7 +97,7 @@ const customColumns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([{
       listeners: {
         'amount-change'({ row }, value) {
           void row.id
-          void value
+          value.toFixed()
         }
       }
     }

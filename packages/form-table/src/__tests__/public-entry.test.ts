@@ -3,6 +3,7 @@ import FormTable, {
   FormTable as NamedFormTable,
   createFormTable,
   defineFormTableColumns,
+  defineFormTableType,
   defineFormTableTypes
 } from '../index'
 import * as publicEntry from '../index'
@@ -19,12 +20,15 @@ describe('public package entry', () => {
       'createFormTable',
       'default',
       'defineFormTableColumns',
+      'defineFormTableType',
       'defineFormTableTypes'
     ])
   })
 
   it('returns field type registries by identity and rejects reserved names', () => {
-    const fieldTypes = { employee: { is: 'employee-picker' } }
+    const employee = { is: 'employee-picker' }
+    expect(defineFormTableType()(employee)).toBe(employee)
+    const fieldTypes = { employee }
     expect(defineFormTableTypes()(fieldTypes)).toBe(fieldTypes)
     expect(() => defineFormTableTypes()({
       // @ts-expect-error reserved names are rejected by the public helper.
