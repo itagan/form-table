@@ -4,7 +4,8 @@
     <h1>企业复杂组件接入</h1>
     <p class="page-description">
       模拟采购明细：全局组件使用字符串 <code>is</code>，局部业务组件直接传组件对象，
-      并通过 component.model 适配非标准 prop、事件和复杂载荷。
+      并通过 component.model 或 Adapter 适配非标准协议；listener 处理页面联动，
+      <code>meta</code> 保存静态业务注解。
     </p>
 
     <section class="demo-card">
@@ -38,6 +39,13 @@
       </FormTable>
       <!-- #endregion docs-enterprise-form-table -->
 
+      <el-alert
+        class="business-event"
+        type="info"
+        :closable="false"
+        :title="lastBusinessEvent"
+      />
+
       <div class="explanation-grid">
         <article>
           <h2>全局字符串组件</h2>
@@ -58,6 +66,14 @@
         <article>
           <h2>手动双向绑定</h2>
           <p>物料组件通过 <code>props</code> 接收当前值，再由 <code>listeners</code> 一次写回物料及其关联字段。</p>
+        </article>
+        <article>
+          <h2>Adapter 协议归一化</h2>
+          <p>供应商 Adapter 把历史组件的 <code>supplierId/supplier-change</code> 转为标准 <code>value/input</code>。</p>
+        </article>
+        <article>
+          <h2>静态业务 meta</h2>
+          <p>供应商字段用 <code>meta</code> 声明业务角色和埋点名，listener 从 <code>itemConfig.meta</code> 读取。</p>
         </article>
         <article>
           <h2>完全关闭双向绑定</h2>
@@ -82,6 +98,7 @@ import type { ColumnConfig, FormTableExpose, TableRow } from '@itagan/form-table
 import BusinessSkuSelector from '../components/EnterpriseComponents/BusinessSkuSelector.vue'
 import BusinessAttachmentUploader from '../components/EnterpriseComponents/BusinessAttachmentUploader.vue'
 import MoneyInput from '../components/EnterpriseComponents/MoneyInput.vue'
+import SupplierPickerAdapter from '../components/EnterpriseComponents/SupplierPickerAdapter.vue'
 import DemoCollapsiblePanel from '../components/DemoCollapsiblePanel.vue'
 
 interface PurchaseRow extends TableRow {
@@ -144,6 +161,7 @@ const createRow = (): PurchaseRow => ({
 const editable = ref(true)
 const tableData = ref<PurchaseRow[]>([createRow()])
 const formTableRef = ref<FormTableExpose>()
+const lastBusinessEvent = ref('选择供应商后，这里会显示 listener 读取到的 meta 与原始事件参数。')
 
 const asPurchaseRow = (row: Readonly<TableRow>) => row as Readonly<PurchaseRow>
 
@@ -238,24 +256,24 @@ const columns: ColumnConfig[] = [
           key: 'supplier-selector',
           fieldKey: 'supplierId',
           type: 'component',
+          meta: {
+            businessRole: 'purchase-supplier',
+            analyticsEvent: 'purchase_supplier_changed'
+          },
           colProps: { span: 12 },
           formItemProps: {
             label: '供应商',
             rules: [{ required: true, message: '请选择供应商', trigger: 'change' }]
           },
           component: {
-            is: 'corp-supplier-picker',
-            model: {
-              prop: 'supplierId',
-              event: 'supplier-change',
-              valueFromEvent: (_context, ...args) => (args[0] as SupplierSelection | null)?.id || ''
-            },
+            // Adapter 已归一化为 value/input，FormTable 使用默认 model 即可。
+            is: SupplierPickerAdapter,
             props: ({ row }) => ({
               orgCode: asPurchaseRow(row).orgCode,
               disabled: !editable.value || asPurchaseRow(row).locked
             }),
             listeners: {
-              'supplier-change'({ updateRow }, selected, selectedSource) {
+              'supplier-change'({ updateRow, itemConfig }, selected, selectedSource) {
                 const supplier = selected as SupplierSelection | null
                 const source = selectedSource as 'favorite' | 'search'
                 updateRow({
@@ -263,6 +281,9 @@ const columns: ColumnConfig[] = [
                   supplierSource: source,
                   ...(supplier ? { taxRate: supplier.taxRate } : {})
                 })
+                const eventName = String(itemConfig.meta?.analyticsEvent || 'supplier_changed')
+                const businessRole = String(itemConfig.meta?.businessRole || 'supplier')
+                lastBusinessEvent.value = `${eventName} · ${businessRole} · ${source}`
               }
             }
           }
@@ -454,6 +475,10 @@ const validate = async () => {
   color: #64748b;
 }
 .data-panel { margin-top: 20px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; }
+
+.business-event {
+  margin-top: 16px;
+}
 
 .danger-button {
   color: #f56c6c;

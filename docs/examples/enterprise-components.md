@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | 物料 | 页面局部业务组件 | `model: false` + props/listeners 批量写回 |
 | 采购组织 | 公司组件库全局注册 | 字符串 `is` + 自定义 model |
-| 供应商 | 公司组件库全局注册 | 字符串 `is` + 复杂事件载荷 |
+| 供应商 | 历史公司组件 + 页面 Adapter | 标准 model + listener + `meta` |
 | 数量 | Element UI 内置组件 | 内置 Type，使用默认 model |
 | 含税单价 | 页面局部业务组件 | 组件对象 + 自定义 model |
 | 附件 | 页面局部业务组件 | 文件列表 model + 动态 props |
@@ -153,6 +153,40 @@ props: ({ row }) => ({
 
 动态回调应保持同步和纯计算。搜索请求、上传状态和弹窗草稿由业务组件自己维护，不要在 props 回调中发起请求。
 
+## 用 meta 标注字段的业务身份
+
+`meta` 适合保存不参与渲染协议的静态业务注解，例如业务角色、权限标识、埋点事件或远程 Schema ID。企业示例的供应商字段同时声明 Adapter、listener 和 `meta`：
+
+```ts
+{
+  fieldKey: 'supplierId',
+  type: 'component',
+  meta: {
+    businessRole: 'purchase-supplier',
+    analyticsEvent: 'purchase_supplier_changed'
+  },
+  component: {
+    is: SupplierPickerAdapter,
+    props: ({ row }) => ({ orgCode: row.orgCode }),
+    listeners: {
+      'supplier-change'({ updateRow, itemConfig }, supplier, source) {
+        updateRow({
+          supplierName: supplier?.name || '',
+          supplierSource: source
+        })
+
+        track(String(itemConfig.meta?.analyticsEvent), {
+          role: itemConfig.meta?.businessRole,
+          supplierId: supplier?.id
+        })
+      }
+    }
+  }
+}
+```
+
+FormTable 原样保留 `meta`，但不会解析它，也不会自动传给实际组件。动态 Props、listener 和字段 Slot 都通过 `itemConfig.meta` 读取。`meta` 不是行数据：需要随行变化的值继续放在 `row` 中；需要传给组件的值仍应在 `component.props` 中明确映射。
+
 ## 页面如何组织配置
 
 完整采购页面把职责拆成三层：
@@ -197,6 +231,27 @@ const columns = createPurchaseColumns({
 
 Adapter 把底层组件统一成标准 Vue 2 model，再由 FormTable 按普通直接组件接入。页面 listener 只保留当前业务联动。
 
+可运行示例中的 `SupplierPickerAdapter.vue` 将历史组件的 `supplierId/supplier-change` 协议转换为 `value/input`，同时透传完整的 `supplier-change` 事件：
+
+```vue
+<template>
+  <CompanySupplierPicker
+    :supplier-id="value"
+    :org-code="orgCode"
+    @supplier-change="handleSupplierChange"
+  />
+</template>
+
+<script lang="ts" setup>
+const handleSupplierChange = (supplier, source) => {
+  emit('input', supplier?.id || '')
+  emit('supplier-change', supplier, source)
+}
+</script>
+```
+
+因此 columns 不再了解底层 Prop 名称，也不需要声明自定义 model；同名 listener 只负责供应商名称、来源和税率等当前页面联动。
+
 ## 什么时候升级为自定义 Type
 
 只有组件目标、model 和默认 Props 已经跨页面稳定重复，并且业务希望在 columns 中直接表达 `type: 'employee'` 等语义时，才使用实例级自定义 Type。
@@ -218,6 +273,7 @@ Playground 中的企业组件 Mock 覆盖组织级联、供应商联动、物料
 - 纯展示组件是否明确设置 `model: false`。
 - 动态 props 是否为同步纯计算。
 - 异步状态是否留在业务组件、Adapter 或页面。
+- `meta` 是否只保存静态业务注解，并通过 `itemConfig.meta` 显式读取。
 - 是否真的跨页面稳定后才注册自定义 Type。
 
-相关说明：[自定义字段组件](../features/custom-component.md) · [复合字段映射](../features/composite-binding.md) · [开发任务导航](../guide/development-workflows.md) · [排错指南](../guide/troubleshooting.md)
+相关说明：[自定义字段组件](../features/custom-component.md) · [Slot 与上下文](../api/contexts.md) · [复合字段映射](../features/composite-binding.md) · [开发任务导航](../guide/development-workflows.md) · [排错指南](../guide/troubleshooting.md)
