@@ -32,7 +32,7 @@ interface ResolvedFieldComponentOptions<TRow extends TableRow> {
 }
 
 /**
- * 将公开的字段配置归一化为 ComponentWrapper 可直接消费的渲染配置。
+ * 将公开的字段配置归一化为函数式字段渲染器可直接消费的渲染配置。
  * 动态组件、props 和 options 都集中在同一个 computed 中求值一次。
  */
 export function useResolvedFieldComponent<TRow extends TableRow = TableRow>(

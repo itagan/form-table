@@ -32,6 +32,7 @@ FormTable 基于 Element UI Table 和 Form，不包含虚拟滚动。数据规�
 | 新增 / 删除 | 父组件替换数组前 | 表格绘制后 |
 | 末列显隐 | 修改 visible 依赖前 | Element Table 列更新后 |
 | DOM 节点 | — | 当前 FormTable 实验容器全部后代节点 |
+| Vue 实例 | — | 当前 FormTable 及其 Element UI 子树中的有状态组件实例 |
 
 动态场景还累计 Column、Row、Item、Component 四层回调次数。计数用于发现一次局部编辑是否让大量无关动态配置重新求值。
 
@@ -63,9 +64,9 @@ pnpm preview
 
 ## 结果记录模板
 
-| 提交 | 浏览器 / 设备 | 场景 | 行 × 列 | 首次渲染 | 单字段 | updateRow | DOM 节点 |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| `commit` | Chrome / device | Input 编辑 | 300 × 4 | — | — | — | — |
+| 提交 | 浏览器 / 设备 | 场景 | 行 × 列 | 首次渲染 | 单字段 | updateRow | DOM 节点 | Vue 实例 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `commit` | Chrome / device | Input 编辑 | 300 × 4 | — | — | — | — | — |
 
 Performance Lab 展示的是当前浏览器单次测量。仓库不会把某个开发者机器上的绝对毫秒数写成组件容量承诺。
 
@@ -83,6 +84,8 @@ expect(renderTime).toBeLessThan(100)
 - 只替换目标行对象。
 - 相邻无关行继续保持原对象引用。
 - 原始数组与目标行不被直接修改。
+
+字段渲染结构测试还约束实际字段组件经 `el-form-item` 直接回到 `FormTableItem`，中间不再创建有状态适配器实例。这个断言比 jsdom 耗时稳定，可以防止后续重构无意恢复“每字段一个包装实例”。
 
 动态上下文另有 300 行结构回归测试。单字段编辑后：
 
@@ -102,10 +105,21 @@ expect(renderTime).toBeLessThan(100)
 编辑字段通常包含：
 
 ```text
-el-row → el-col → el-form-item → 实际字段组件
+FormTableRow → el-row → el-col → FormTableItem → el-form-item
+                                      └→ FieldRenderer（函数式）→ 实际字段组件
 ```
 
-固定表格高度只产生滚动区域，不会减少 Element UI 创建的行和组件。大量编辑字段的主要瓶颈通常首先来自 DOM、组件实例和校验监听，而不是数组路径工具。
+`FieldRenderer` 负责 text、选项和 model 协议，但不会创建 Vue 实例。相较于有状态字段包装器，它按“可见字段数”减少适配器实例；不会减少 `FormTableItem`、`el-form-item` 或实际 Element 字段组件，也不会改变 DOM 结构。因此预期收益主要体现在大量编辑字段的挂载、销毁和内存开销，具体耗时仍应通过相同环境下的前后数据判断。
+
+实例缩减量可以直接按当前渲染配置估算：
+
+```text
+减少的 Vue 实例 = 当前可见的非 slot FormItem 数
+```
+
+例如 100 行 × 4 个编辑字段会减少 400 个适配器实例；300 行 × 4 个字段会减少 1200 个。`slot` 字段原本就不经过该适配器，因此不计入。
+
+固定表格高度只产生滚动区域，不会减少 Element UI 创建的行和组件。Performance Lab 同时展示 DOM 与 Vue 实例数：前者说明页面结构规模，后者更适合观察无 DOM 包装组件的成本。大量编辑字段的主要瓶颈通常首先来自 DOM、组件实例和校验监听，而不是数组路径工具。
 
 ### 不可变数据更新
 

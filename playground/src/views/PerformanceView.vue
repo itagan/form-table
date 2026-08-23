@@ -64,6 +64,11 @@
         <strong>{{ domNodeCount.toLocaleString('zh-CN') }}</strong>
         <small>仅统计 FormTable 实验容器后代节点</small>
       </article>
+      <article class="metric-card">
+        <span>当前 Vue 实例</span>
+        <strong>{{ vueInstanceCount.toLocaleString('zh-CN') }}</strong>
+        <small>统计 FormTable 与 Element UI 的有状态组件；函数式渲染层不计入</small>
+      </article>
     </section>
 
     <section class="panel callback-panel">
@@ -90,6 +95,7 @@
 
       <div ref="tableHost" class="table-host">
         <PerformanceFormTable
+          ref="formTableRef"
           v-model="tableData"
           :columns="columns"
           :form-props="{ size: 'mini' }"
@@ -150,6 +156,10 @@ interface CallbackCounts {
   component: number
 }
 
+interface VueInstanceLike {
+  $children: VueInstanceLike[]
+}
+
 const rowCountOptions = [50, 100, 300, 500, 1000]
 const fieldCountOptions = [2, 4, 6]
 const scenarioLabels: Record<Scenario, string> = {
@@ -165,9 +175,11 @@ const currentConfig = ref<ScenarioConfig>({ scenario: 'edit', rowCount: 100, fie
 const tableData = ref<TableRow[]>([])
 const columns = shallowRef<ColumnConfig[]>([])
 const tableHost = ref<HTMLElement | null>(null)
+const formTableRef = ref<VueInstanceLike | null>(null)
 const hideLastColumn = ref(false)
 const isMeasuring = ref(false)
 const domNodeCount = ref(0)
+const vueInstanceCount = ref(0)
 const metrics = ref<Record<MetricKey, number | null>>({
   initialRender: null,
   inputUpdate: null,
@@ -204,7 +216,22 @@ const resetCallbackCounts = () => {
 
 const updateDiagnostics = () => {
   domNodeCount.value = tableHost.value?.querySelectorAll('*').length || 0
+  vueInstanceCount.value = countVueInstances(formTableRef.value)
   callbackSnapshot.value = { ...callbackCounts }
+}
+
+const countVueInstances = (root: VueInstanceLike | null) => {
+  if (!root) return 0
+
+  const visited = new Set<VueInstanceLike>()
+  const pending = [root]
+  while (pending.length > 0) {
+    const instance = pending.pop()
+    if (!instance || visited.has(instance)) continue
+    visited.add(instance)
+    pending.push(...instance.$children)
+  }
+  return visited.size
 }
 
 const waitForPaint = async () => {

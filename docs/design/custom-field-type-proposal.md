@@ -62,7 +62,7 @@ employee: {
 自定义 type 名称
   → 查找 FieldTypeDefinition
   → 归一化为现有组件配置
-  → DynamicFieldRenderer
+  → FieldRenderer（函数式）
   → 现有 model、binding、Hint、校验和受控更新
 ```
 
