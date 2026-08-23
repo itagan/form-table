@@ -899,33 +899,79 @@ describe('FormTable rendering and configuration', () => {
     wrapper.destroy()
   })
 
-  it('keeps radio and checkbox option children through the functional renderer', async () => {
-    const options = [
-      { label: '选项 A', value: 'a' },
-      { label: '选项 B', value: 'b' }
-    ]
+  it('resolves mapped options only for select, radio, and checkbox renderers', async () => {
+    const options = vi.fn(() => [
+      { name: '选项 A', code: 'a', locked: false },
+      { name: '选项 B', code: 'b', locked: true }
+    ])
+    const optionProps = vi.fn(() => ({
+      label: 'name', value: 'code', disabled: 'locked', key: 'code'
+    }))
     const wrapper = mountFormTable({
-      tableData: [{ choice: 'a', checked: ['b'] }],
+      tableData: [{ selected: 'a', choice: 'a', checked: ['b'] }],
       columns: [{
         label: '选项字段',
         formItems: [{
+            fieldKey: 'selected',
+            type: 'select',
+            component: { options, optionProps }
+          },
+          {
             fieldKey: 'choice',
             type: 'radio',
-            component: { options }
+            component: { options, optionProps }
           },
           {
             fieldKey: 'checked',
             type: 'checkbox',
-            component: { options }
+            component: { options, optionProps }
           }]
       }]
     })
     await wrapper.vm.$nextTick()
 
+    expect(wrapper.findAll('.el-select')).toHaveLength(1)
     expect(wrapper.findAll('.el-radio')).toHaveLength(2)
     expect(wrapper.findAll('.el-checkbox')).toHaveLength(2)
     expect(wrapper.text()).toContain('选项 A')
     expect(wrapper.text()).toContain('选项 B')
+    expect(options).toHaveBeenCalledTimes(3)
+    expect(optionProps).toHaveBeenCalledTimes(3)
+    wrapper.destroy()
+  })
+
+  it('skips options and optionProps callbacks for non-option field types', async () => {
+    const options = vi.fn(() => [{ label: '不应解析', value: 'unused' }])
+    const optionProps = vi.fn(() => ({ label: 'label', value: 'value' }))
+    const component = { options, optionProps }
+    const DisplayField = {
+      props: ['value'],
+      render(this: any, h: any) {
+        return h('span', { class: 'non-option-component' }, this.value)
+      }
+    }
+    const wrapper = mountFormTable({
+      tableData: [{ input: '', date: '', enabled: false, text: '只读', custom: '业务值' }],
+      columns: [{
+        label: '非选项字段',
+        formItems: [
+          { fieldKey: 'input', type: 'input', component },
+          { fieldKey: 'date', type: 'date', component },
+          { fieldKey: 'enabled', type: 'switch', component },
+          { fieldKey: 'text', type: 'text', component },
+          {
+            fieldKey: 'custom',
+            type: 'component',
+            component: { is: DisplayField, options, optionProps }
+          }
+        ]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.non-option-component').text()).toBe('业务值')
+    expect(options).not.toHaveBeenCalled()
+    expect(optionProps).not.toHaveBeenCalled()
     wrapper.destroy()
   })
 

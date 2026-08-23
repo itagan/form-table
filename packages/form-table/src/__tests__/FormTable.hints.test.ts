@@ -6,6 +6,7 @@ import FormTableColumn from '../FormTableColumn.vue'
 import FormTable from '../index.vue'
 import type { FormTableHintTooltipRef } from '../composables/useFormTableHintTooltip'
 import type { FormTableFieldRenderContext } from '../types.public'
+import * as hintUtils from '../utils/hint'
 import { localVue, mountFormTable } from './test-utils'
 
 const getHintTooltip = (wrapper: Wrapper<Vue>) => {
@@ -49,6 +50,26 @@ const setElementRect = (element: Element, width = 120, height = 32) => (
 )
 
 describe('FormTable lightweight hint behavior', () => {
+  it('skips field hint resolution when neither field nor table default hint is configured', async () => {
+    const resolveFieldHint = vi.spyOn(hintUtils, 'resolveFormTableFieldHint')
+    const wrapper = mountFormTable({
+      columns: [{
+        label: '姓名',
+        formItems: [{
+          fieldKey: 'name',
+          type: 'input',
+          formItemProps: { title: '原生标题' }
+        }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.el-form-item').attributes('title')).toBe('原生标题')
+    expect(resolveFieldHint).not.toHaveBeenCalled()
+    resolveFieldHint.mockRestore()
+    wrapper.destroy()
+  })
+
   it('keeps field-only title defaults when column and item render without a root provider', async () => {
     const headerHint = vi.fn(() => '表头说明')
     const Host = localVue.extend({
