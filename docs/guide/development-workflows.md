@@ -13,6 +13,7 @@
 | 一个组件同时编辑多个字段 | [复合字段映射](../features/composite-binding.md) | [`/composite-binding`](http://localhost:5173/composite-binding) |
 | 自定义整格展示或操作区 | [`cellSlot`](../features/cell-slot.md) | [`/cell-slot`](http://localhost:5173/cell-slot) |
 | 动态显示列、行或字段 | [动态显隐与配置更新](../features/dynamic-configuration.md) | [`/dynamic-slot-test`](http://localhost:5173/dynamic-slot-test) |
+| 处理查看、编辑权限和行锁定 | [权限、只读与编辑模式](../features/permissions-and-editing.md) | [`/heterogeneous-demands`](http://localhost:5173/heterogeneous-demands) |
 | 异步返回后仍要更新原行 | [稳定身份与异步安全](../features/stable-identity.md) | [`/cell-slot`](http://localhost:5173/cell-slot) |
 | 接收服务端布局配置 | [远程 Schema](../features/remote-schema.md) | [`/remote-schema`](http://localhost:5173/remote-schema) |
 | 排查渲染、更新或校验异常 | [排错指南](./troubleshooting.md) | 按症状选择示例 |

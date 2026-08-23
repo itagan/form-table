@@ -13,6 +13,7 @@
 | [数据更新与受控回写](./data-updates.md) | 根 `v-model`、`tableData`、`rowKey` | 自动字段绑定、`setValue`、`updateRow` | `update:tableData`、`field-change` |
 | [校验、清理与重置](./validation-reset.md) | Item `formItemProps.rules` | `validate/clearValidate/getFormRef` | Element Form 校验状态 |
 | [动态显隐与配置更新](./dynamic-configuration.md) | 各层 `visible`、动态 props | 替换 `columns` | 响应式布局与组件配置 |
+| [权限、只读与编辑模式](./permissions-and-editing.md) | `visible`、动态组件 Props、Item `meta`、操作 Slot | 页面或 Store 权限策略 | 隐藏、浏览、禁用和行锁定边界 |
 | [稳定身份与异步安全](./stable-identity.md) | `rowKey`、Column/Row/Item `key` | 异步 `setValue/updateRow` | 正确定位数据与渲染节点 |
 | [Element UI 能力边界与处理方案](./element-ui-boundaries.md) | `tableProps`、`formProps`、Column props | 排序筛选、树形数据、Form Ref 与 Slot | 透传边界和当前可用替代方案 |
 | [Hint 提示体系](./hint.md) | `hintOptions`、`columns[].headerHint`、Item `hint` | 全局默认、字段覆盖、title/Tooltip 与自定义展示 | [`/hint-scenarios`](http://localhost:5173/hint-scenarios) |
