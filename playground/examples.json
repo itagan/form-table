@@ -8,10 +8,24 @@
     "category": "basics",
     "level": "beginner",
     "status": "featured",
-    "relatedDocs": ["/guide/quick-start", "/features/validation-reset"],
+    "relatedDocs": ["/examples/basic-editing", "/guide/quick-start"],
     "source": "playground/src/views/FormTableView.vue",
     "type": "primary",
     "tags": ["formItems", "type", "formItemProps"]
+  },
+  {
+    "title": "完整编辑提交流程",
+    "description": "演示接口加载、受控编辑、行操作、校验保存、脏状态和撤销恢复。",
+    "path": "/form-workflow",
+    "name": "form-workflow",
+    "view": "FormWorkflowView",
+    "category": "business",
+    "level": "intermediate",
+    "status": "featured",
+    "relatedDocs": ["/examples/form-workflow", "/guide/development-workflows"],
+    "source": "playground/src/views/FormWorkflowView.vue",
+    "type": "primary",
+    "tags": ["load", "validate", "save", "reset", "dirty state"]
   },
   {
     "title": "Hint 多场景",

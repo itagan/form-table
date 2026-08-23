@@ -47,8 +47,10 @@ export default defineConfig({
         text: '指南',
         items: [
           { text: '快速开始', link: '/guide/quick-start' },
+          { text: '开发任务导航', link: '/guide/development-workflows' },
           { text: '完整配置指南', link: '/guide/configuration-guide' },
-          { text: '业务配置最佳实践', link: '/guide/business-configuration-best-practices' }
+          { text: '业务配置最佳实践', link: '/guide/business-configuration-best-practices' },
+          { text: '排错指南', link: '/guide/troubleshooting' }
         ]
       },
       {
@@ -129,6 +131,13 @@ export default defineConfig({
         text: '示例',
         items: [
           { text: '示例索引', link: '/examples/' },
+          {
+            text: '基础流程',
+            items: [
+              { text: '基础编辑', link: '/examples/basic-editing' },
+              { text: '完整编辑提交流程', link: '/examples/form-workflow' }
+            ]
+          },
           {
             text: '业务接入',
             items: [

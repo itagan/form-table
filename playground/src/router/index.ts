@@ -7,6 +7,7 @@ Vue.use(VueRouter)
 
 const viewLoaders: Record<string, () => Promise<unknown>> = {
   FormTableView: () => import('../views/FormTableView.vue'),
+  FormWorkflowView: () => import('../views/FormWorkflowView.vue'),
   HintScenariosView: () => import('../views/HintScenariosView.vue'),
   FormTableAdvancedView: () => import('../views/FormTableAdvancedView.vue'),
   ElementColumnsView: () => import('../views/ElementColumnsView.vue'),
