@@ -36,6 +36,7 @@ export default defineConfig({
     logo: '/logo.svg',
     nav: [
       { text: '快速开始', link: '/guide/quick-start' },
+      { text: '架构', link: '/architecture/overview' },
       { text: 'API', link: '/api/configuration' },
       { text: '示例', link: '/examples/' },
       { text: 'Playground', link: `${playgroundSiteUrl}/` },
@@ -48,6 +49,15 @@ export default defineConfig({
           { text: '快速开始', link: '/guide/quick-start' },
           { text: '完整配置指南', link: '/guide/configuration-guide' },
           { text: '业务配置最佳实践', link: '/guide/business-configuration-best-practices' }
+        ]
+      },
+      {
+        text: '架构',
+        items: [
+          { text: '架构总览', link: '/architecture/overview' },
+          { text: '渲染架构', link: '/architecture/rendering-pipeline' },
+          { text: '受控数据流', link: '/architecture/controlled-data-flow' },
+          { text: '扩展模型', link: '/architecture/extension-model' }
         ]
       },
       {
@@ -71,7 +81,6 @@ export default defineConfig({
             collapsed: false,
             items: [
               { text: '数据更新与受控回写', link: '/features/data-updates' },
-              { text: '复合字段映射', link: '/features/composite-binding' },
               { text: '校验、清理与重置', link: '/features/validation-reset' },
               { text: '动态显隐与配置更新', link: '/features/dynamic-configuration' },
               { text: '稳定身份与异步安全', link: '/features/stable-identity' },
@@ -80,21 +89,28 @@ export default defineConfig({
             ]
           },
           {
-            text: '渲染扩展',
+            text: '常用扩展',
             collapsed: false,
             items: [
               { text: 'Element 功能列透传', link: '/features/native-columns' },
               { text: '自定义表头', link: '/features/custom-header' },
               { text: 'cellSlot 列级单元格', link: '/features/cell-slot' },
-              { text: '自定义字段组件', link: '/features/custom-component' },
-              { text: '自定义字段 Type', link: '/features/custom-field-types' }
+              { text: '自定义字段组件', link: '/features/custom-component' }
+            ]
+          },
+          {
+            text: '高级扩展',
+            collapsed: true,
+            items: [
+              { text: '复合字段映射', link: '/features/composite-binding' },
+              { text: '自定义字段 Type', link: '/features/custom-field-types' },
+              { text: '远程 Schema', link: '/features/remote-schema' }
             ]
           },
           {
             text: '业务组合',
             collapsed: false,
             items: [
-              { text: '远程 Schema', link: '/features/remote-schema' },
               { text: '常见操作列与行增删', link: '/features/common-row-actions' },
               { text: '行列操作与异步提交', link: '/features/row-column-operations' }
             ]
@@ -113,11 +129,20 @@ export default defineConfig({
         text: '示例',
         items: [
           { text: '示例索引', link: '/examples/' },
-          { text: '自定义字段 Type', link: '/features/custom-field-types' },
-          { text: '企业复杂组件接入', link: '/examples/enterprise-components' },
-          { text: '单元格合并', link: '/examples/cell-merge' },
-          { text: '多需求费用明细', link: '/examples/heterogeneous-demands' },
-          { text: '多日议程编排', link: '/examples/itinerary-simple' }
+          {
+            text: '业务接入',
+            items: [
+              { text: '企业复杂组件接入', link: '/examples/enterprise-components' },
+              { text: '单元格合并', link: '/examples/cell-merge' }
+            ]
+          },
+          {
+            text: '完整场景',
+            items: [
+              { text: '多需求费用明细', link: '/examples/heterogeneous-demands' },
+              { text: '多日议程编排', link: '/examples/itinerary-simple' }
+            ]
+          }
         ]
       },
       {

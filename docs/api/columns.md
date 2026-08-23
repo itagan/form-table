@@ -19,7 +19,7 @@ columns[]                                  ColumnConfig
 | 配置路径 | 类型 | 必填 / 默认值 | 动态上下文 | 目标 / 作用 |
 | --- | --- | --- | --- | --- |
 | `columns[].key` | `string` | 可选 | — | 列的稳定渲染身份 |
-| `columns[].label` | `string` | 必填 | — | 默认列标题；可由解析后的 `columns[].props.label` 覆盖 |
+| `columns[].label` | `string` | 布局列和 cellSlot 列必填；原生列可选 | — | 默认列标题；可由解析后的 `columns[].props.label` 覆盖 |
 | `columns[].visible` | `DynamicValue<boolean, ColumnContext>` | `true` | `tableData, columnConfig` | 是否渲染列 |
 | `columns[].props` | `DynamicValue<ComponentProps, ColumnContext>` | `{}` | `tableData, columnConfig` | 透传 `el-table-column` |
 | `columns[].headerSlot` | `string` | 可选 | Slot scope | 表头具名 Slot |

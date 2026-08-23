@@ -92,8 +92,8 @@ const validateTable = () => formTableRef.value?.validate()
 
 根组件 `v-model` 绑定整张表的 `tableData`，底层复用 `tableData/update:tableData`。已有的 `:table-data.sync="tableData"` 继续兼容；需要在回写时执行保存等逻辑，可显式监听 `@update:tableData`。
 
-复杂布局和字段 Slot 参考 Playground 的 `/form-table-advanced`；原生 title、单实例 Tooltip 和自定义渲染下的 Hint 行为可直接打开 `/hint-scenarios`。其他独立能力可从[功能专题](../features/)选择配置与使用示例。
+完成基础编辑后，先通过[扩展模型](../architecture/extension-model.md)判断应该使用直接组件、字段 Slot 还是 `cellSlot`。复杂布局和字段 Slot 参考 Playground 的 `/form-table-advanced`；原生 title、单实例 Tooltip 和自定义渲染下的 Hint 行为可直接打开 `/hint-scenarios`。
 
 操作列、末尾新增、当前行后插入、复制和删除参考[常见操作列与行增删](../features/common-row-actions.md)；动态列以及确认或接口成功后再修改表格，参考[行列操作与异步提交](../features/row-column-operations.md)。
 
-同一业务组件及其 model 协议在多个页面稳定复用时，可以通过 `defineFormTableTypes` 注册实例级自定义字段 type，再在 columns 中直接使用 `type: 'employee'`。这不会增加额外组件层级；完整接入、泛型配对、字段覆盖和 `binding.map` 示例见[自定义字段 Type](../features/custom-field-types.md)。一次性或复杂动态组件仍直接使用 `type: 'component'`，多组件模板使用 `type: 'slot'`。
+自定义 Type 属于高级扩展。只有同一业务组件及其 model 协议已经在多个页面稳定复用时，才考虑通过 `defineFormTableTypes` 注册业务名称。一次性组件优先使用 `type: 'component'`，多组件模板使用 `type: 'slot'`；完整注册和泛型配对见[自定义字段 Type](../features/custom-field-types.md)。
