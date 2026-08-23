@@ -18,7 +18,12 @@ export default defineConfig({
         'src/**/__tests__/**',
         'src/types.ts',
         'src/types.public.ts',
-        'src/public-types.ts'
+        'src/public-types.ts',
+        'src/types/base.ts',
+        'src/types/component.ts',
+        'src/types/config.ts',
+        'src/types/context.ts',
+        'src/types/config/**'
       ],
       thresholds: {
         statements: 80,

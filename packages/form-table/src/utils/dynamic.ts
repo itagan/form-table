@@ -1,5 +1,6 @@
 import type { DynamicValue, TableRow } from '../types/base'
-import type { ColumnConfig, FormItemConfig } from '../types/config'
+import type { ColumnConfig } from '../types/config/column'
+import type { FormItemConfig } from '../types/config/field'
 import type {
   FormTableColumnContext,
   FormTableFieldRenderContext,

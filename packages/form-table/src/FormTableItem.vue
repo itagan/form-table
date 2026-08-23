@@ -47,7 +47,7 @@ import type {
   FormTableSlotContext,
   FormTableSlots
 } from './types'
-import { FORM_TABLE_FIELD_TYPES_KEY, FORM_TABLE_SLOTS_KEY } from './types'
+import { FORM_TABLE_FIELD_TYPES_KEY, FORM_TABLE_SLOTS_KEY } from './types/internal'
 import { extendLazyContext } from './utils/dynamic'
 
 /** 当前字段配置及其所在行的完整动态上下文。 */

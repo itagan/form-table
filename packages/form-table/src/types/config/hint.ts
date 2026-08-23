@@ -1,5 +1,7 @@
 import type {
   ComponentProps,
+  FormTableHintMode,
+  FormTableHintTargets,
   FormTableHintValue,
   TableRow
 } from '../base'
@@ -17,8 +19,8 @@ export type FormTableDefaultFieldHint<TRow extends TableRow = TableRow> =
 
 /** FormTable 自动提示策略；Tooltip 属性仅在对应模式下有效。 */
 export interface FormTableHintOptions<TRow extends TableRow = TableRow> {
-  mode?: false | 'title' | 'tooltip'
-  targets?: 'field' | 'header' | 'all'
+  mode?: FormTableHintMode
+  targets?: FormTableHintTargets
   /** false/未配置关闭默认字段内容；true 默认字符串化；函数统一格式化。 */
   field?: FormTableDefaultFieldHint<TRow>
   tooltipProps?: ComponentProps

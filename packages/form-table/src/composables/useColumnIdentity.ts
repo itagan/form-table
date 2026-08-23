@@ -1,6 +1,6 @@
 import { computed, ref, watch } from 'vue'
 import type { TableRow } from '../types/base'
-import type { ColumnConfig } from '../types/config'
+import type { ColumnConfig } from '../types/config/column'
 import type { FormTableTableContext } from '../types/context'
 import { createColumnContext, resolveVisible } from '../utils/dynamic'
 

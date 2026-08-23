@@ -9,7 +9,7 @@ import type {
   FormTableValue,
   TableRow
 } from '../types'
-import { FORM_TABLE_HINT_CONTEXT_KEY, FORM_TABLE_UPDATE_KEY } from '../types'
+import { FORM_TABLE_HINT_CONTEXT_KEY, FORM_TABLE_UPDATE_KEY } from '../types/internal'
 import {
   createFieldRenderContext,
   extendLazyContext,

@@ -85,7 +85,7 @@ import {
   FORM_TABLE_ROW_INDEX_KEY,
   FORM_TABLE_SLOTS_KEY,
   FORM_TABLE_UPDATE_KEY
-} from './types'
+} from './types/internal'
 import { useColumnIdentity } from './composables/useColumnIdentity'
 import { useControlledTableUpdate } from './composables/useControlledTableUpdate'
 import { useRowIndex } from './composables/useRowIndex'
