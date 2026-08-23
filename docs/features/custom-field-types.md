@@ -131,6 +131,109 @@ money: {
 
 读取时多个字段先组合为 `bindingValue`，再由 `valueToProp` 转换为组件值；写回时先经过 `valueFromEvent`，再生成一个行 patch。组件清空或输出缺少路径时，各项使用自己的 `fallbackValue`。字段路径属于具体业务结构，因此保留在 Item，不进入注册定义。
 
+### 金额与币种：多字段映射后再转换
+
+下面的行数据保存金额“分”和币种编码，金额组件则接收金额“元”和币种组成的对象：
+
+```ts
+interface PurchaseRow extends TableRow {
+  id: string
+  amountInCents: number
+  currencyCode: string
+}
+
+interface StoredMoney {
+  amountInCents: number
+  currency: string
+}
+
+interface MoneyEditorValue {
+  amount: number
+  currency: string
+}
+
+const fieldTypes = defineFormTableTypes<PurchaseRow>()({
+  money: {
+    is: MoneyEditor,
+    model: {
+      prop: 'money',
+      event: 'money-change',
+
+      valueToProp(value, context): MoneyEditorValue {
+        const stored = value as StoredMoney
+
+        return {
+          amount: Number(stored.amountInCents || 0) / 100,
+          currency: stored.currency || context.row.currencyCode
+        }
+      },
+
+      valueFromEvent(...args): StoredMoney | null {
+        const money = args[0] as MoneyEditorValue | null
+
+        if (!money) return null
+
+        return {
+          amountInCents: Math.round(money.amount * 100),
+          currency: money.currency
+        }
+      }
+    },
+    props: {
+      clearable: true,
+      supportedCurrencies: ['CNY', 'USD', 'EUR']
+    }
+  }
+})
+```
+
+Item 只负责声明当前业务行中哪些字段参与映射：
+
+```ts
+const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([{
+  label: '采购金额',
+  formItems: [{
+    fieldKey: 'amountInCents',
+    type: 'money',
+    binding: {
+      map: [
+        {
+          fieldPath: 'amountInCents',
+          valuePath: 'amountInCents',
+          fallbackValue: 0
+        },
+        {
+          fieldPath: 'currencyCode',
+          valuePath: 'currency',
+          fallbackValue: 'CNY'
+        }
+      ]
+    },
+    component: {
+      listeners: {
+        'money-change'(context, money, meta) {
+          console.log(context.bindingValue, money, meta)
+        }
+      }
+    }
+  }]
+}])
+```
+
+一条 `{ amountInCents: 123450, currencyCode: 'CNY' }` 的行数据会依次转换为：
+
+```text
+binding.map
+  { amountInCents: 123450, currency: 'CNY' }
+
+valueToProp
+  { amount: 1234.5, currency: 'CNY' }
+
+MoneyEditor.money
+```
+
+组件发出 `money-change({ amount: 2000, currency: 'USD' }, meta)` 时，`valueFromEvent` 先得到 `{ amountInCents: 200000, currency: 'USD' }`，随后 `binding.map` 一次写回 `{ amountInCents: 200000, currencyCode: 'USD' }`。因此只产生一次 `update:tableData`，两个实际变化字段分别产生 `field-change`；同名 listener 仍收到完整原始参数，其 `context.bindingValue` 是转换前的旧业务绑定值。组件清空并发出 `null` 时，两个字段分别使用 `0` 和 `'CNY'`。
+
 ## 名称、替换与错误处理
 
 内置 type 以及 `component`、`slot` 是保留名称，`defineFormTableTypes` 会在类型和运行时拒绝冲突。即使 JavaScript 配置绕过 helper，内置 type 仍优先。
