@@ -237,3 +237,5 @@ const columns = remoteColumns.map(column => enhanceColumn(column, {
 核心组件不执行远程代码，也不维护全局业务组件注册表。完整边界见[远程 Schema 与本地增强](../features/remote-schema.md)。
 
 下一步可以按任务选择：[API 总览](../api/configuration.md)、[功能专题](../features/index.md)或[业务示例](../examples/index.md)。
+
+如果已有明确页面任务，可从[开发任务导航](./development-workflows.md)直接选择最短路径；配置表现与预期不一致时，按[排错指南](./troubleshooting.md)逐项定位。

@@ -53,6 +53,12 @@ const requiredArchitecturePages = [
   'controlled-data-flow.md',
   'extension-model.md'
 ]
+const requiredWorkflowPages = [
+  'guide/development-workflows.md',
+  'guide/troubleshooting.md',
+  'examples/basic-editing.md',
+  'examples/form-workflow.md'
+]
 const allowedExampleCategories = new Set([
   'basics',
   'rendering',
@@ -169,6 +175,12 @@ for (const example of playgroundExamples) {
 for (const architecturePage of requiredArchitecturePages) {
   if (!fs.existsSync(path.join(repositoryRoot, 'docs/architecture', architecturePage))) {
     errors.push(`docs/architecture: 缺少架构页 ${architecturePage}`)
+  }
+}
+
+for (const workflowPage of requiredWorkflowPages) {
+  if (!fs.existsSync(path.join(repositoryRoot, 'docs', workflowPage))) {
+    errors.push(`docs: 缺少任务导向文档 ${workflowPage}`)
   }
 }
 

@@ -90,6 +90,8 @@ const validateTable = () => formTableRef.value?.validate()
 
 输入框应可以正常编辑；清空“姓名”后点击“校验”，`validate()` 会得到 `false` 并显示必填提示。后续页面可继续沿用同一份全局注册和样式入口。
 
+对应的逐步说明和行操作边界见[基础编辑示例](../examples/basic-editing.md)。需要继续接入接口加载、保存、撤销和未保存状态时，直接进入[完整编辑提交流程](../examples/form-workflow.md)。
+
 根组件 `v-model` 绑定整张表的 `tableData`，底层复用 `tableData/update:tableData`。已有的 `:table-data.sync="tableData"` 继续兼容；需要在回写时执行保存等逻辑，可显式监听 `@update:tableData`。
 
 完成基础编辑后，先通过[扩展模型](../architecture/extension-model.md)判断应该使用直接组件、字段 Slot 还是 `cellSlot`。复杂布局和字段 Slot 参考 Playground 的 `/form-table-advanced`；原生 title、单实例 Tooltip 和自定义渲染下的 Hint 行为可直接打开 `/hint-scenarios`。

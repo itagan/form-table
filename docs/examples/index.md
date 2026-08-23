@@ -48,6 +48,7 @@ Playground 直接引用组件源码。示例名称、路由、分类、难度、
 
 | Demo | 难度 | 业务重点 |
 | --- | --- | --- |
+| [完整编辑提交流程 ↗](http://localhost:5173/form-workflow) | 进阶 | 接口加载、脏状态、校验保存、撤销和提交转换 |
 | [行列操作与异步提交 ↗](http://localhost:5173/row-column-operations) | 进阶 | 行增删复制移动、动态列和成功后提交 |
 | [单元格合并 ↗](http://localhost:5173/cell-merge) | 高级 | 纵横合并、稳定列定位、共享字段和校验 |
 | [多需求费用明细 ↗](http://localhost:5173/heterogeneous-demands) | 高级 | 异构组件、差异数据和提交归一化 |
@@ -75,7 +76,9 @@ Playground 直接引用组件源码。示例名称、路由、分类、难度、
 ## 选择下一步
 
 - 普通字段与校验：[快速开始](../guide/quick-start.md)
+- 接口加载、保存和撤销：[完整编辑提交流程](./form-workflow.md)
 - 不确定使用组件还是 Slot：[扩展模型](../architecture/extension-model.md)
 - 行增删与异步流程：[行列操作与异步提交](../features/row-column-operations.md)
 - 企业组件协议：[企业复杂组件接入](./enterprise-components.md)
 - 性能问题：[性能优化建议](../features/performance-optimization.md)
+- 行为异常：[排错指南](../guide/troubleshooting.md)

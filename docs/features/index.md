@@ -2,6 +2,8 @@
 
 功能专题按实际开发任务组织。每一页说明问题、推荐入口、业务写法、失败边界和可运行演示；属性类型和完整路径仍以 [API 总览](../api/configuration.md) 为准，整体设计先看[架构总览](../architecture/overview.md)。
 
+如果只知道当前页面任务，不确定属于哪个功能点，先看[开发任务导航](../guide/development-workflows.md)；已有代码出现渲染、更新或校验异常时，直接按[排错指南](../guide/troubleshooting.md)定位。
+
 ## 基础能力
 
 这些页面只聚焦一个常见动作，适合在开发过程中直接查询。
@@ -40,6 +42,7 @@
 
 | 功能 | 配置入口 | 使用入口 | 可运行演示 |
 | --- | --- | --- | --- |
+| [完整编辑提交流程](../examples/form-workflow.md) | `tableData`、服务端快照、FormTable Ref | 加载、保存、撤销和 dirty 状态 | [`/form-workflow`](http://localhost:5173/form-workflow) |
 | [常见操作列与行增删](./common-row-actions.md) | `cellSlot`、`tableData`、`rowKey` | 末尾新增、后插、复制、删除 | [`/row-column-operations`](http://localhost:5173/row-column-operations) |
 | [行列操作与异步提交](./row-column-operations.md) | `tableData`、`columns`、`rowKey` | 页面业务函数 | [`/row-column-operations`](http://localhost:5173/row-column-operations) |
 

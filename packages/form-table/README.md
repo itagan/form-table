@@ -93,6 +93,8 @@ function handleFilterChange(filters: FormTableFilterChangePayload) {
 详细行为统一维护在 VitePress 文档中：
 
 - [快速开始](https://gitee.com/itagan/form-table/blob/master/docs/guide/quick-start.md)
+- [开发任务导航](https://gitee.com/itagan/form-table/blob/master/docs/guide/development-workflows.md)
+- [完整编辑提交流程](https://gitee.com/itagan/form-table/blob/master/docs/examples/form-workflow.md)
 - [架构总览](https://gitee.com/itagan/form-table/blob/master/docs/architecture/overview.md)
 - [配置与 API 总览](https://gitee.com/itagan/form-table/blob/master/docs/api/configuration.md)
 - [事件与 Ref](https://gitee.com/itagan/form-table/blob/master/docs/api/events-and-ref.md)
@@ -100,5 +102,6 @@ function handleFilterChange(filters: FormTableFilterChangePayload) {
 - [自定义字段 Type](https://gitee.com/itagan/form-table/blob/master/docs/features/custom-field-types.md)
 - [功能专题](https://gitee.com/itagan/form-table/blob/master/docs/features/index.md)
 - [示例索引](https://gitee.com/itagan/form-table/blob/master/docs/examples/index.md)
+- [排错指南](https://gitee.com/itagan/form-table/blob/master/docs/guide/troubleshooting.md)
 
 仓库开发、测试和发布命令见[根 README](https://gitee.com/itagan/form-table)。

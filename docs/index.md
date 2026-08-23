@@ -9,6 +9,8 @@ Vue 2.7 + Element UI 的轻量表格内表单组件。
 | 目标 | 入口 |
 | --- | --- |
 | 第一次接入 | [快速开始](./guide/quick-start.md) |
+| 按当前开发任务找最短路径 | [开发任务导航](./guide/development-workflows.md) |
+| 完成接口加载、编辑、保存和撤销 | [完整编辑提交流程](./examples/form-workflow.md) |
 | 理解组件边界和数据流 | [架构总览](./architecture/overview.md) |
 | 选择内置 Type、组件或 Slot | [扩展模型](./architecture/extension-model.md) |
 | 按完整属性路径查配置 | [API 总览](./api/configuration.md) |
@@ -17,6 +19,7 @@ Vue 2.7 + Element UI 的轻量表格内表单组件。
 | 查动态回调与 Slot 参数 | [Slot 与上下文](./api/contexts.md) |
 | 查事件、Ref 和公开类型 | [事件与 Ref](./api/events-and-ref.md) · [公开类型](./api/types.md) |
 | 查看独立功能和业务示例 | [功能专题](./features/) · [演示索引](./examples/) |
+| 按症状排查渲染、更新和校验问题 | [排错指南](./guide/troubleshooting.md) |
 | 直接运行和搜索 API | [打开 Playground 调试台 ↗](http://localhost:5173/) |
 
 核心原则：`formItems` 负责字段布局，`type/component/slot` 负责渲染，Element UI 负责组件行为，业务层负责行操作和字段联动。自定义 Type 用于治理已经稳定且重复的业务字段协议，属于高级扩展，不是基础接入的前置步骤。
