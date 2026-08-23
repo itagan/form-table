@@ -48,6 +48,7 @@ export function useControlledTableUpdate<TRow extends TableRow = TableRow>(
     sourceTableData: TRow[],
     rowKey: Exclude<RowKey<TRow>, undefined>
   ) => {
+    // 索引与数组引用、rowKey 配置共同绑定；任一变化都必须重新扫描。
     if (
       synchronousIdentityIndex?.source === sourceTableData
       && synchronousIdentityIndex.rowKey === rowKey
@@ -69,6 +70,7 @@ export function useControlledTableUpdate<TRow extends TableRow = TableRow>(
       return resolveRowIdentityIndex(identityIndex, targetRow, rowKey)
     }
 
+    // 优先相信当前数组中的直接引用；同步映射只为上一轮写回前的旧引用兜底。
     const referenceIndex = sourceTableData.indexOf(targetRow)
     if (referenceIndex >= 0) return referenceIndex
     return synchronousRowIndexes.get(targetRow) ?? -1
@@ -96,6 +98,7 @@ export function useControlledTableUpdate<TRow extends TableRow = TableRow>(
       return
     }
 
+    // 到这里事务已通过全部拒绝条件，后续提交必须保持 update 先于字段事件。
     const nextTableData = [...sourceTableData]
     nextTableData[rowIndex] = nextRow
 
@@ -104,18 +107,21 @@ export function useControlledTableUpdate<TRow extends TableRow = TableRow>(
       && synchronousIdentityIndex.rowKey === rowKey
       && isConfiguredRowKey(rowKey)
     ) {
+      // rowKey 不可变，因此行内容替换后原索引仍有效，只需推进其数组快照引用。
       synchronousIdentityIndex.source = nextTableData
     } else {
       synchronousIdentityIndex = null
     }
 
     synchronousUpdateBase = nextTableData
+    // 同步调用方可能持有任意阶段的行引用，三者都映射到同一最新位置。
     synchronousRowIndexes.set(targetRow, rowIndex)
     synchronousRowIndexes.set(currentRow, rowIndex)
     synchronousRowIndexes.set(nextRow, rowIndex)
     scheduleUpdateBaseReset()
     options.emitUpdate(nextTableData)
 
+    // applyRowPatch 保留 patch 的字段顺序，field-change 按相同顺序逐项派发。
     changes.forEach(change => {
       options.emitFieldChange({
         row: nextRow,

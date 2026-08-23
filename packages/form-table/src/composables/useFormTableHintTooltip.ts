@@ -26,10 +26,15 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
     content: options.content,
     resolveReferenceTarget: targetResolver.resolveReferenceTarget
   })
+  /** 当前指针命中的 Hint 业务目标，优先级高于焦点目标。 */
   let hoveredTarget: HTMLElement | null = null
+  /** 当前键盘焦点所属的 Hint 业务目标。 */
   let focusedTarget: HTMLElement | null = null
+  /** 实际接收 aria-describedby 的焦点元素，可能是 FormItem 内部输入控件。 */
   let focusAriaTarget: HTMLElement | null = null
+  /** Escape 只压制当前目标；切换鼠标或焦点目标后允许重新展示。 */
   let escapeSuppressed = false
+  /** 指针主动离开后，即使输入控件仍保有焦点，也不让 Tooltip 立即回弹。 */
   let focusSuppressedByPointer = false
   let observedContainer: HTMLElement | null = null
   let observer: MutationObserver | null = null
@@ -40,6 +45,7 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
       return
     }
 
+    // 动态显隐或重渲染可能移除旧节点，每次同步前先清理失效引用。
     if (!targetResolver.isOwnedByContainer(hoveredTarget)) hoveredTarget = null
     if (!targetResolver.isOwnedByContainer(focusedTarget)) {
       focusedTarget = null
@@ -74,6 +80,7 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
     const sourceTarget = targetResolver.findHintTarget(event.target)
     if (!sourceTarget || sourceTarget !== hoveredTarget) return
     const nextTarget = targetResolver.findHintTarget(event.relatedTarget)
+    // FormItem 内部子节点之间移动不算真正离开当前 Hint 区域。
     if (nextTarget === sourceTarget) return
 
     hoveredTarget = null
@@ -132,6 +139,7 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
     container.addEventListener('focusin', handleFocusIn)
     container.addEventListener('focusout', handleFocusOut)
     container.addEventListener('keydown', handleKeyDown)
+    // Hint 内容、可见性或子树变化时，复用当前目标并在下一次 DOM 更新后刷新定位。
     observer = new MutationObserver(() => {
       if (hoveredTarget || focusedTarget) syncActiveTarget(true)
     })
@@ -150,6 +158,7 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
   }
 
   watch(options.containerRef, (container) => {
+    // 根节点替换时旧 DOM 引用全部失效，Presenter 与交互状态必须一起清空。
     removeListeners()
     hoveredTarget = null
     focusedTarget = null

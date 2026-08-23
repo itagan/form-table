@@ -22,6 +22,7 @@ export function applyRowPatch<TRow extends TableRow>(
 
   Object.keys(patch).forEach((fieldKey) => {
     const value = patch[fieldKey]
+    // 始终从逐步生成的 nextRow 读取，使有先后依赖的路径 Patch 保持对象键顺序语义。
     const previousValue = getValueByPath(nextRow, fieldKey)
     if (Object.is(previousValue, value)) return
 
