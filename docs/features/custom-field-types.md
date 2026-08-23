@@ -63,7 +63,7 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([{
 | 属性 | 作用 |
 | --- | --- |
 | `is` | 稳定的组件对象或全局组件名 |
-| `model` | Vue 2 model prop、事件、`valueFromEvent`，或 `false` |
+| `model` | Vue 2 model prop、事件、`valueToProp/valueFromEvent`，或 `false` |
 | `props` | 静态或按字段上下文求值的默认属性 |
 
 自定义 type 的 Item `component` 只允许 `props/listeners/model`：
@@ -92,6 +92,24 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([{
 
 字段不能覆盖注册定义的 `is`，也不能使用 `resolveComponent/slot/options/optionProps`。需要动态选择组件、复杂选项模板或一次性协议时，继续使用 `type: 'component'`；需要多组件模板时使用 `type: 'slot'`。
 
+## 非对称值转换
+
+行字段与组件 model 格式不一致时，可以在稳定 model 协议中同时声明输入和输出转换。例如行数据保存金额“分”，组件接收金额“元”：
+
+```ts
+money: {
+  is: MoneyInput,
+  model: {
+    prop: 'amount',
+    event: 'amount-change',
+    valueToProp: (cents, context) => Number(cents || 0) / 100,
+    valueFromEvent: (...args) => Math.round(Number(args[0] || 0) * 100)
+  }
+}
+```
+
+`valueToProp` 的首参是当前 `bindingValue`，第二个参数是只读字段渲染上下文；其中 `context.value` 始终保留主字段原值。员工 ID 转对象、ISO 字符串转 `Date`、枚举 code 转 Option 等同步转换也适用。异步查询、跨字段副作用或带内部状态的复杂转换继续使用 Adapter、listener 或 Slot。
+
 ## 与 binding.map 组合
 
 当组件 model 是对象或数组时，Item 可以继续使用现有 `binding.map` 读写多个行字段：
@@ -111,7 +129,7 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([{
 }
 ```
 
-读取时多个字段组合为组件值；写回时生成一个行 patch。组件清空或输出缺少路径时，各项使用自己的 `fallbackValue`。字段路径属于具体业务结构，因此保留在 Item，不进入注册定义。
+读取时多个字段先组合为 `bindingValue`，再由 `valueToProp` 转换为组件值；写回时先经过 `valueFromEvent`，再生成一个行 patch。组件清空或输出缺少路径时，各项使用自己的 `fallbackValue`。字段路径属于具体业务结构，因此保留在 Item，不进入注册定义。
 
 ## 名称、替换与错误处理
 

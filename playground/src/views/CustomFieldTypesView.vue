@@ -4,7 +4,8 @@
     <h1>实例级自定义字段 Type</h1>
     <p>
       注册一次稳定的组件、model 和默认 props，columns 就可以像内置字段一样使用
-      <code>type: 'employee'</code>。字段级 props 仍可覆盖默认值，listener 仍会收到完整原始事件参数。
+      <code>type: 'employee'</code>。金额字段还通过 <code>valueToProp/valueFromEvent</code>
+      在“数据存分”和“组件显示元”之间同步转换；字段级 props 仍可覆盖默认值，listener 仍会收到完整原始事件参数。
     </p>
 
     <FormTable
@@ -61,7 +62,7 @@ import PhoneInput from '../components/CustomComponents/PhoneInput.vue'
 interface PurchaseRow extends TableRow {
   id: string
   phone: string
-  budget: number
+  budgetInCents: number
   currency: string
   employeeId: string
   employeeName: string
@@ -84,7 +85,9 @@ const fieldTypes = defineFormTableTypes<PurchaseRow>()({
     is: MoneyInput,
     model: {
       prop: 'amount',
-      event: 'amount-change'
+      event: 'amount-change',
+      valueToProp: value => Number(value || 0) / 100,
+      valueFromEvent: (...args) => Math.round(Number(args[0] || 0) * 100)
     },
     props: ({ row }) => ({
       currency: row.currency,
@@ -110,7 +113,7 @@ const lastBusinessEvent = ref('')
 const tableData = ref<PurchaseRow[]>([{
   id: 'purchase-1',
   phone: '+8613800000000',
-  budget: 12000,
+  budgetInCents: 1200000,
   currency: 'CNY',
   employeeId: 'u-101',
   employeeName: 'Alice',
@@ -135,9 +138,9 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([
     label: '非标准 model 与原始事件',
     props: { minWidth: 220 },
     formItems: [{
-      fieldKey: 'budget',
+      fieldKey: 'budgetInCents',
       type: 'money',
-      formItemProps: { label: '预算' },
+      formItemProps: { label: '预算（数据存分，组件显示元）' },
       component: {
         props: { precision: 0 },
         listeners: {

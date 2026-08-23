@@ -10,6 +10,7 @@ columns[].formItems[].component
 ├─ model
 │  ├─ prop
 │  ├─ event
+│  ├─ valueToProp
 │  └─ valueFromEvent
 ├─ props
 ├─ listeners
@@ -31,6 +32,7 @@ columns[].formItems[].component
 | `...component.model` | `false \| FieldModelConfig` | 内置 / `component` / 注册 type | — | 省略时按 Vue 2 组件 model 选项绑定；也可自定义或关闭绑定 |
 | `...component.model.prop` | `string` | 自定义 model | — | 接收字段值的 prop，默认 `value` |
 | `...component.model.event` | `string` | 自定义 model | — | 通知字段变化的事件，默认 `input` |
+| `...component.model.valueToProp` | `(bindingValue, ItemContext) => FormTableValue` | 自定义 model | ItemContext | 将字段值或 `binding.map` 组合值同步转换为组件 model prop |
 | `...component.model.valueFromEvent` | `(...args) => FormTableValue` | 自定义 model | 原始事件参数 | 从事件参数提取写回值 |
 | `...component.props` | `DynamicValue<ComponentProps, ItemContext>` | 全部 | ItemContext | 透传实际字段组件 |
 | `...component.listeners` | `Record<string, FormTableFieldListener>` | 全部 | ActionContext + 原始事件参数 | 配置式组件事件 |
@@ -43,7 +45,9 @@ columns[].formItems[].component
 
 `...` 在表格中缩写了共同前缀 `columns[].formItems[]`。
 
-Item 级 `binding.map` 位于 `columns[].formItems[].binding`，不属于组件协议。它在 model 读取时将多个行字段组合为组件值，在 model 写回时生成一个行 patch；因此可以与本页的 `component.model/valueFromEvent` 组合。每个映射项还可通过 `fallbackValue` 声明组件值路径缺失时的静态写回值。对象、数组、Slot、清空和校验规则见[复合字段映射](../features/composite-binding.md)。
+Item 级 `binding.map` 位于 `columns[].formItems[].binding`，不属于组件协议。读取顺序是先将多个行字段组合为 `bindingValue`，再由 `valueToProp` 转换为组件 model prop；写回顺序是 `valueFromEvent` 提取组件值，再由映射生成一个行 patch。每个映射项还可通过 `fallbackValue` 声明组件值路径缺失时的静态写回值。对象、数组、Slot、清空和校验规则见[复合字段映射](../features/composite-binding.md)。
+
+`valueToProp` 是同步纯转换函数。首参是转换前的 `bindingValue`，上下文中的 `value` 始终是主 `fieldKey` 的原始字段值。异步查询、跨字段更新和副作用应使用 Adapter、listener 或 Slot。`model: false`、字段 Slot 和 `type: 'text'` 不进入自动 model 链，因此不会调用它。
 
 ## 渲染模式约束
 

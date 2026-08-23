@@ -24,6 +24,7 @@
       v-else
       :type="config.type"
       :value="fieldContext.bindingValue"
+      :model-context="runtimeContext"
       :component="resolvedComponent"
       @input="fieldContext.setBindingValue"
     />

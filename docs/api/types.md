@@ -172,14 +172,18 @@ component.listeners      → Field 信息 + setValue, bindingValue, setBindingVa
 自定义组件绑定协议类型：
 
 ```ts
-interface FieldModelConfig {
+interface FieldModelConfig<TRow extends TableRow = TableRow> {
   prop?: string
   event?: string
+  valueToProp?: (
+    value: FormTableValue,
+    context: FormTableFieldRenderContext<TRow>
+  ) => FormTableValue
   valueFromEvent?: (...args: unknown[]) => FormTableValue
 }
 ```
 
-`FieldComponentConfig.model` 未配置时保留 Vue 2 原生 `v-model`；配置 `FieldModelConfig` 时使用指定 prop/event；配置 `false` 时不注入模型绑定。
+`FieldComponentConfig.model` 未配置时保留 Vue 2 原生 `v-model`；配置 `FieldModelConfig` 时使用指定 prop/event，并可通过 `valueToProp/valueFromEvent` 处理非对称值；配置 `false` 时不注入模型绑定。输入转换接收 `bindingValue` 和只读字段渲染上下文，保持同步且不承担副作用。
 
 复合字段映射类型：
 

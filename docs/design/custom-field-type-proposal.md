@@ -93,7 +93,7 @@ type 定义只描述跨页面稳定的技术协议。当前页面的权限、接
 | --- | --- | --- |
 | 内置字段 | `type: 'input'` | Element UI 标准字段 |
 | 注册字段 | `type: 'employee'` | 协议稳定、重复使用的业务组件 |
-| 自定义组件 | `type: 'component'` | 动态组件、非对称数据、复杂事件和一次性接入 |
+| 自定义组件 | `type: 'component'` | 动态或异步状态组件、复杂事件和一次性接入 |
 | 字段 Slot | `type: 'slot'` | 多组件模板和完全自定义内容 |
 
 自定义 type 是“使用方提供的业务内置 type”，不是新的渲染模式。
@@ -190,7 +190,7 @@ const fieldTypes = defineFormTableTypes<PurchaseRow>()({
 ```ts
 interface FieldTypeDefinition<TRow extends TableRow = TableRow> {
   is: string | Component
-  model?: FieldModelConfig | false
+  model?: FieldModelConfig<TRow> | false
   props?: DynamicValue<
     ComponentProps,
     FormTableFieldRenderContext<TRow>
@@ -207,15 +207,19 @@ interface FieldTypeDefinition<TRow extends TableRow = TableRow> {
 沿用现有 `FieldModelConfig`：
 
 ```ts
-interface FieldModelConfig {
+interface FieldModelConfig<TRow extends TableRow = TableRow> {
   prop?: string
   event?: string
+  valueToProp?: (
+    value: FormTableValue,
+    context: FormTableFieldRenderContext<TRow>
+  ) => FormTableValue
   valueFromEvent?: (...args: unknown[]) => FormTableValue
 }
 ```
 
 - 省略时使用组件真实的 Vue 2 v-model/model 选项；
-- 对象形式声明非标准 prop、事件和取值函数；
+- 对象形式声明非标准 prop、事件及同步输入/输出转换；
 - `false` 表示不注入 model，通常不适合注册为普通可编辑 type。
 
 ### `props`
@@ -281,6 +285,7 @@ component: {
 ```text
 读取
 row[fieldKey]
+  → valueToProp(value, context)
   → type.model.prop
   → 业务组件
 
@@ -369,13 +374,20 @@ user-confirm(EmployeeSelection)
 写回：EmployeeSelection → 多个字段
 ```
 
-则不能只用 `binding.map` 表达。此时选择：
+可以由通用 model 输入/输出转换表达：
 
-- Adapter 将组件统一为复合值 model；
-- type 的 `valueFromEvent` 写回主字段，Item listener 更新关联字段；
-- `type: 'component' + model: false + props/listeners` 手动同步。
+```ts
+model: {
+  prop: 'selection',
+  event: 'user-confirm',
+  valueToProp: (employeeId, context) =>
+    findEmployee(employeeId, context.row.departmentId),
+  valueFromEvent: (...args) =>
+    (args[0] as EmployeeSelection).id
+}
+```
 
-第一版不为自定义 type 增加独立的输入转换器和输出 patch 转换器，以免演变为新的状态管理协议。
+`valueToProp` 属于通用 `FieldModelConfig`，内置编辑 type、直接 component 和注册 type 共用，不是自定义 type 的独立协议。它只允许同步纯转换；异步查询、跨字段 patch 和副作用继续交给 Adapter、Item listener 或 Slot，避免演变为状态管理协议。
 
 ## 事件行为
 
@@ -503,6 +515,7 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([
 
 - 组件对象；
 - props 函数；
+- `valueToProp`；
 - `valueFromEvent`；
 - listeners；
 - 任意可执行代码。
@@ -515,6 +528,7 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([
 
 - 内置 type、`component` 和 `slot` 行为不变；
 - 注册类型的标准 v-model 和自定义 model；
+- `valueToProp` 的上下文、非对称值及 `binding.map` 执行顺序；
 - `valueFromEvent` 与同名 Item listener 的顺序和原始参数；
 - 静态及动态默认 props 与 Item props 的浅合并；
 - `binding.map` 的读取、原子写回、清空和 fallback；

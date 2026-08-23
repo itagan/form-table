@@ -1,6 +1,6 @@
 # 复合字段映射
 
-一个日期范围、地址、人员或金额组件经常需要同时读取和更新多个行字段。`binding.map` 为这种结构一致、仅路径不同的场景提供可序列化映射；需要计算、异步或副作用时继续使用 `model: false + props + listeners/updateRow`。
+一个日期范围、地址、人员或金额组件经常需要同时读取和更新多个行字段。`binding.map` 为这种结构一致、仅路径不同的场景提供可序列化映射；同步格式转换可组合 `model.valueToProp/valueFromEvent`，异步或副作用继续使用 Adapter、listener 或 Slot。
 
 > 可运行 Demo：[复合字段映射 ↗](http://localhost:5173/composite-binding)
 
@@ -13,8 +13,9 @@
 | 对象属性分别对应多个行字段，如 `selection.id/name` | `binding.map` |
 | 固定数组项分别对应多个行字段，如 `[0]/[1]` | `binding.map` |
 | 远程 Schema 需要描述可序列化的路径对应关系 | `binding.map` |
-| 遍历数组并提取、拼接、过滤或去重，如 `users[].id → ids` | `model: false + listeners + updateRow` |
-| 条件计算、异步处理或额外业务副作用 | `model: false + listeners + updateRow` |
+| 组件值与映射对象还需同步格式转换 | `binding.map + model.valueToProp/valueFromEvent` |
+| 遍历数组并提取、拼接、过滤或去重，如 `users[].id → ids` | 简单纯转换使用 model 转换；跨字段更新使用 listener |
+| 异步处理或额外业务副作用 | Adapter、listener 或字段 Slot |
 | 一个字段区域需要自行组合多个控件或布局 | 字段 Slot；简单路径写回仍可调用 `setBindingValue` |
 
 映射中的每个 `valuePath` 都必须是明确路径，不支持通配符、数组遍历或多个来源聚合。组件返回结构与行字段只是“形状不同、路径固定”时使用映射；需要计算新值时使用事件回调。
@@ -55,7 +56,7 @@ binding: {
 }
 ```
 
-自定义组件仍通过 `component.model` 声明 prop/event。`valueFromEvent` 先从原始事件参数提取组件值，随后 `binding.map` 再将该值转换为行 patch。
+自定义组件仍通过 `component.model` 声明 prop/event。读取时 `binding.map` 先组合值，`valueToProp` 再转换组件输入；写回时 `valueFromEvent` 先从原始事件参数提取组件值，随后 `binding.map` 将该值转换为行 patch。
 
 ## 字段 Slot
 
@@ -100,7 +101,7 @@ binding: {
 
 ## 复杂转换
 
-映射数组只表达路径对应关系和静态 fallback，不提供格式化、条件、数组遍历或异步转换。例如选择器返回多个用户，但业务字段还要保存拼接后的 `ids` 时，应主动处理组件事件：
+映射数组只表达路径对应关系和静态 fallback，不直接执行格式化、条件、数组遍历或异步转换。只改变组件 model 形状时组合同步 `valueToProp/valueFromEvent`；需要更新映射范围外的字段或执行副作用时主动处理组件事件：
 
 ```ts
 component: {

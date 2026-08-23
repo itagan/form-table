@@ -17,14 +17,14 @@ import type {
   FormTableFieldContext
 } from './context'
 
-export interface ResolvedComponentConfig {
+export interface ResolvedComponentConfig<TRow extends TableRow = TableRow> {
   is?: string | Component
   slot?: string
   props: ComponentProps
   listeners: Record<string, (...args: unknown[]) => void>
   options: FormItemOption[]
   optionProps?: OptionPropsConfig
-  model?: FieldModelConfig | false
+  model?: FieldModelConfig<TRow> | false
 }
 
 export interface FormTableFormItemSlotContext<TRow extends TableRow = TableRow> extends FormTableFieldContext<TRow> {
@@ -36,7 +36,7 @@ export interface FormTableFormItemErrorSlotContext<TRow extends TableRow = Table
 }
 
 export interface FormTableSlotContext<TRow extends TableRow = TableRow> extends FormTableFormItemSlotContext<TRow> {
-  component: ResolvedComponentConfig
+  component: ResolvedComponentConfig<TRow>
 }
 
 export interface FormTableHeaderSlotContext<TRow extends TableRow = TableRow> extends FormTableColumnContext<TRow> {

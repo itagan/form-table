@@ -59,7 +59,7 @@ export function useResolvedFieldComponent<TRow extends TableRow = TableRow>(
     return resolveTypeDefinition(config.type)?.is
   }
 
-  const resolvedComponent = computed<ResolvedComponentConfig>(() => {
+  const resolvedComponent = computed<ResolvedComponentConfig<TRow>>(() => {
     const config = options.getConfig()
     const context = options.runtimeContext.value
     const component = config.component

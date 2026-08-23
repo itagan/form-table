@@ -34,6 +34,7 @@ FormTable
          ├─ model
          │  ├─ prop
          │  ├─ event
+         │  ├─ valueToProp
          │  └─ valueFromEvent
          ├─ props / listeners / options
          └─ optionProps

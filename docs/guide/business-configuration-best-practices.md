@@ -9,7 +9,8 @@ FormTable 保持轻量运行时，只负责布局、字段渲染、校验路径�
 | Element UI 标准字段 | 内置 `type` | 否 |
 | 偶尔接入一个业务组件 | `type: 'component'` | 否 |
 | 同类字段在多个 columns 中重复 | 配置工厂函数 | 否 |
-| 历史组件具有特殊 model 协议 | Adapter 组件 | 否 |
+| 组件值只需同步输入/输出转换 | `component.model.valueToProp/valueFromEvent` | 否 |
+| 历史组件协议涉及异步、状态或多步交互 | Adapter 组件 | 否 |
 | 服务端下发业务字段名称 | 本地白名单映射到配置工厂 | 否 |
 | 多页面重复稳定的组件/model/默认 props | 实例级自定义 type | 是，已支持 |
 | Schema 需要直接使用已审核业务 `type` | 自定义 type + 本地白名单 | 是，已支持 |

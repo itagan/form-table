@@ -121,7 +121,7 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([{
 />
 ```
 
-注册定义只包含稳定的 `is/model/props`；字段仍可提供自己的 `props/listeners/model`，现有 `binding.map` 可直接完成复合值的多字段写回。动态组件和一次性复杂协议继续使用 `type: 'component'`，多组件模板使用 `type: 'slot'`。详见[自定义字段 Type](https://gitee.com/itagan/form-table/blob/master/docs/features/custom-field-types.md)。
+注册定义只包含稳定的 `is/model/props`；字段仍可提供自己的 `props/listeners/model`，现有 `binding.map` 可直接完成复合值的多字段写回。通用 model 还支持 `valueToProp/valueFromEvent`，用于“行内存分、组件显示元”或“行内存 ID、组件接收对象”等同步非对称转换。动态组件和一次性复杂协议继续使用 `type: 'component'`，多组件模板使用 `type: 'slot'`。详见[自定义字段 Type](https://gitee.com/itagan/form-table/blob/master/docs/features/custom-field-types.md)。
 
 ## 完整文档
 

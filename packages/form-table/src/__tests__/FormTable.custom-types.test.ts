@@ -46,6 +46,7 @@ describe('FormTable custom field types', () => {
 
   it('merges default and item props, adapts a custom model, and preserves raw listener args', async () => {
     const selectionListener = vi.fn()
+    const valueToProp = vi.fn((value: string) => ({ id: value, source: 'row' }))
     const EmployeeField = createButtonField(
       'registered-employee',
       'selectedId',
@@ -62,6 +63,7 @@ describe('FormTable custom field types', () => {
           model: {
             prop: 'selectedId',
             event: 'user-confirm',
+            valueToProp,
             valueFromEvent: (...args) => (args[0] as { id: string }).id
           },
           props: defaultProps
@@ -82,7 +84,7 @@ describe('FormTable custom field types', () => {
     await wrapper.vm.$nextTick()
 
     const field = wrapper.find('.registered-employee')
-    expect(field.attributes('data-value')).toBe(JSON.stringify('user-1'))
+    expect(field.attributes('data-value')).toBe(JSON.stringify({ id: 'user-1', source: 'row' }))
     expect(field.attributes('data-size')).toBe('small')
     expect(field.attributes('data-marker')).toBe('item')
     await field.trigger('click')
@@ -94,17 +96,27 @@ describe('FormTable custom field types', () => {
     ])
     expect(defaultProps).toHaveBeenCalledTimes(1)
     expect(itemProps).toHaveBeenCalledTimes(1)
+    expect(valueToProp).toHaveBeenCalledWith(
+      'user-1',
+      expect.objectContaining({ fieldKey: 'employeeId', value: 'user-1' })
+    )
     wrapper.destroy()
   })
 
   it('lets an item replace the registered model as one complete protocol', async () => {
+    const registeredValueToProp = vi.fn((value: boolean) => !value)
+    const itemValueToProp = vi.fn((value: boolean) => value)
     const OverrideField = createButtonField('registered-override', 'checked', 'toggle', false)
     const wrapper = mountFormTable({
       tableData: [{ enabled: true }],
       fieldTypes: {
         businessSwitch: {
           is: OverrideField,
-          model: { prop: 'wrongProp', event: 'wrong-event' }
+          model: {
+            prop: 'wrongProp',
+            event: 'wrong-event',
+            valueToProp: registeredValueToProp
+          }
         }
       },
       columns: [{
@@ -112,7 +124,9 @@ describe('FormTable custom field types', () => {
         formItems: [{
           fieldKey: 'enabled',
           type: 'businessSwitch',
-          component: { model: { prop: 'checked', event: 'toggle' } }
+          component: {
+            model: { prop: 'checked', event: 'toggle', valueToProp: itemValueToProp }
+          }
         }]
       }]
     })
@@ -120,12 +134,15 @@ describe('FormTable custom field types', () => {
 
     const field = wrapper.find('.registered-override')
     expect(field.attributes('data-value')).toBe('true')
+    expect(registeredValueToProp).not.toHaveBeenCalled()
+    expect(itemValueToProp).toHaveBeenCalled()
     await field.trigger('click')
     expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{ enabled: false }])
     wrapper.destroy()
   })
 
   it('supports model false for a registered display component', async () => {
+    const valueToProp = vi.fn(() => 'transformed')
     const DisplayField = {
       inheritAttrs: false,
       render(this: any, h: any) {
@@ -144,11 +161,18 @@ describe('FormTable custom field types', () => {
       fieldTypes: {
         status: {
           is: DisplayField,
-          model: false,
+          model: { valueToProp },
           props: ({ value }) => ({ status: value })
         }
       },
-      columns: [{ label: '状态', formItems: [{ fieldKey: 'status', type: 'status' }] }]
+      columns: [{
+        label: '状态',
+        formItems: [{
+          fieldKey: 'status',
+          type: 'status',
+          component: { model: false }
+        }]
+      }]
     })
     await wrapper.vm.$nextTick()
 
@@ -158,22 +182,30 @@ describe('FormTable custom field types', () => {
       'data-has-value': 'false',
       'data-has-input': 'false'
     })
+    expect(valueToProp).not.toHaveBeenCalled()
     wrapper.destroy()
   })
 
   it('combines binding.map with a registered composite model in one row update', async () => {
+    const selectionListener = vi.fn()
+    const valueToProp = vi.fn((value: unknown) => ({ payload: value }))
     const EmployeeField = createButtonField(
       'registered-composite',
       'selection',
       'user-confirm',
-      { id: 'user-2' }
+      { payload: { id: 'user-2' } }
     )
     const wrapper = mountFormTable({
       tableData: [{ employeeId: 'user-1', employeeName: 'Alice' }],
       fieldTypes: {
         employee: {
           is: EmployeeField,
-          model: { prop: 'selection', event: 'user-confirm' }
+          model: {
+            prop: 'selection',
+            event: 'user-confirm',
+            valueToProp,
+            valueFromEvent: (...args) => (args[0] as { payload: unknown }).payload
+          }
         }
       },
       columns: [{
@@ -186,14 +218,17 @@ describe('FormTable custom field types', () => {
               { fieldPath: 'employeeId', valuePath: 'id', fallbackValue: '' },
               { fieldPath: 'employeeName', valuePath: 'name', fallbackValue: '未命名' }
             ]
-          }
+          },
+          component: { listeners: { 'user-confirm': selectionListener } }
         }]
       }]
     })
     await wrapper.vm.$nextTick()
 
     const field = wrapper.find('.registered-composite')
-    expect(field.attributes('data-value')).toBe(JSON.stringify({ id: 'user-1', name: 'Alice' }))
+    expect(field.attributes('data-value')).toBe(JSON.stringify({
+      payload: { id: 'user-1', name: 'Alice' }
+    }))
     await field.trigger('click')
     expect(wrapper.emitted('update:tableData')).toHaveLength(1)
     expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{
@@ -204,6 +239,14 @@ describe('FormTable custom field types', () => {
       expect.objectContaining({ fieldKey: 'employeeId', value: 'user-2' }),
       expect.objectContaining({ fieldKey: 'employeeName', value: '未命名' })
     ])
+    expect(valueToProp).toHaveBeenCalledWith(
+      { id: 'user-1', name: 'Alice' },
+      expect.objectContaining({ fieldKey: 'employeeId', value: 'user-1' })
+    )
+    expect(selectionListener.mock.calls[0][0].bindingValue).toEqual({
+      id: 'user-1',
+      name: 'Alice'
+    })
     wrapper.destroy()
   })
 

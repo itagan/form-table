@@ -58,16 +58,21 @@ export interface OptionPropsConfig {
 }
 
 /** 自定义字段组件的受控值协议；未配置时使用组件原生 Vue 2 v-model。 */
-export interface FieldModelConfig {
+export interface FieldModelConfig<TRow extends TableRow = TableRow> {
   prop?: string
   event?: string
+  /** 将行字段或 binding.map 组合值同步转换为组件 model prop。 */
+  valueToProp?: (
+    value: FormTableValue,
+    context: FormTableFieldRenderContext<TRow>
+  ) => FormTableValue
   valueFromEvent?: (...args: unknown[]) => FormTableValue
 }
 
 /** 使用方注册的轻量字段类型，只描述稳定组件目标、model 和默认属性。 */
 export interface FieldTypeDefinition<TRow extends TableRow = TableRow> {
   is: string | Component
-  model?: FieldModelConfig | false
+  model?: FieldModelConfig<TRow> | false
   props?: DynamicValue<ComponentProps, FormTableFieldRenderContext<TRow>>
 }
 
@@ -106,7 +111,7 @@ export interface FieldComponentConfig<TRow extends TableRow = TableRow> {
   listeners?: Record<string, FormTableFieldListener<TRow>>
   options?: DynamicValue<FormItemOption[], FormTableFieldRenderContext<TRow>>
   optionProps?: DynamicValue<OptionPropsConfig, FormTableFieldRenderContext<TRow>>
-  model?: FieldModelConfig | false
+  model?: FieldModelConfig<TRow> | false
 }
 
 export type BuiltinFormItemType =

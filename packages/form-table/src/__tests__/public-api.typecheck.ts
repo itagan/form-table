@@ -117,10 +117,22 @@ const employeeTypeDefinition: FieldTypeDefinition<BusinessRow> = {
   model: {
     prop: 'selectedId',
     event: 'user-confirm',
+    valueToProp: (value, context) => ({
+      id: value,
+      departmentId: context.row.departmentId
+    }),
     valueFromEvent: (...args) => (args[0] as { id: string }).id
   },
   props: ({ row }) => ({ departmentId: row.departmentId })
 }
+
+const businessModel: FieldModelConfig<BusinessRow> = {
+  valueToProp(value, context) {
+    const departmentId: string = context.row.departmentId
+    return { value, departmentId }
+  }
+}
+void businessModel
 
 const businessFieldTypes = defineFormTableTypes<BusinessRow>()({
   employee: employeeTypeDefinition,

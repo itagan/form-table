@@ -29,7 +29,10 @@ describe('minimum peer package consumer', () => {
       render(createElement) {
         return createElement('button', {
           class: 'minimum-employee-field',
-          attrs: { type: 'button', 'data-selected-id': this.selectedId },
+          attrs: {
+            type: 'button',
+            'data-selected-id': (this.selectedId as { id: string }).id
+          },
           on: { click: () => this.$emit('user-confirm', { id: 'user-2' }) }
         }, this.selectedId)
       }
@@ -40,6 +43,7 @@ describe('minimum peer package consumer', () => {
         model: {
           prop: 'selectedId',
           event: 'user-confirm',
+          valueToProp: (value: unknown) => ({ id: value }),
           valueFromEvent: (...args) => (args[0] as { id: string }).id
         }
       }
