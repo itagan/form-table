@@ -121,7 +121,7 @@ component: {
   model: {
     prop: 'amount',
     event: 'amount-change',
-    valueToProp: cents => Number(cents || 0) / 100,
+    valueToProp: (_context, cents) => Number(cents || 0) / 100,
     valueFromEvent: (_context, ...args) =>
       Math.round((args[0] as { amount: number }).amount * 100)
   }

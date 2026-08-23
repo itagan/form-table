@@ -182,8 +182,8 @@ type FieldModelConfig<
   prop?: string
   event?: string
   valueToProp?: (
-    value: FormTableValue,
-    context: FormTableFieldRenderContext<TRow>
+    context: FormTableFieldRenderContext<TRow>,
+    bindingValue: FormTableValue
   ) => FormTableValue
   valueFromEvent?: (
     context: FormTableFieldRenderContext<TRow>,
