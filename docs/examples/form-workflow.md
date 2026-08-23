@@ -2,7 +2,7 @@
 
 > 可运行 Demo：[打开完整编辑提交流程 ↗](http://localhost:5173/form-workflow)
 
-这个示例补齐实际页面最常见的完整生命周期：接口加载、受控编辑、行操作、校验保存、脏状态和撤销恢复。它不把请求或快照管理塞进 FormTable 配置。
+这个示例补齐实际页面最常见的完整生命周期：接口加载、受控编辑、行操作、校验保存、脏状态、撤销恢复，以及加载失败、保存失败、过期响应和服务端字段错误。它不把请求或快照管理塞进 FormTable 配置。
 
 ## 状态划分
 
@@ -32,6 +32,32 @@ formTableRef.value?.clearValidate()
 ```
 
 两份数据不能共享可变行对象。示例使用浅克隆是因为行字段都是基本类型；存在嵌套对象时应按业务模型执行结构化克隆或不可变转换。
+
+### 忽略过期加载响应
+
+重新加载、切换筛选或切换业务单据可能产生并发请求。使用单调递增的请求序号，只允许最后一次响应替换当前页面：
+
+```ts
+let latestLoadRequest = 0
+
+async function loadData() {
+  const requestId = ++latestLoadRequest
+
+  try {
+    const rows = await fetchRows()
+    if (requestId !== latestLoadRequest) return
+
+    savedSnapshot.value = cloneRows(rows)
+    tableData.value = cloneRows(rows)
+  } catch (error) {
+    if (requestId === latestLoadRequest) showLoadError(error)
+  } finally {
+    if (requestId === latestLoadRequest) loading.value = false
+  }
+}
+```
+
+Demo 的“模拟过期响应”会先发起慢请求，再发起快请求；慢响应最终返回时不会覆盖新数据。真实请求还可以通过 `AbortController` 或请求库取消，但仍建议保留响应身份检查。
 
 ## 新行身份
 
@@ -79,7 +105,23 @@ await saveOrder(payload)
 savedSnapshot.value = cloneRows(tableData.value)
 ```
 
-只有接口成功后才更新快照。接口失败时保留用户当前输入和 dirty 状态，让用户可以修改后重试。
+只有接口成功后才更新快照。接口失败时保留用户当前输入和 dirty 状态，让用户可以修改后重试。保存按钮的禁用状态只是交互保护，保存函数本身仍应检查 `saving`；服务端通过幂等键或版本号处理重复请求。
+
+### 映射服务端字段错误
+
+推荐服务端按稳定行身份返回错误，不返回可能已经变化的数组下标：
+
+```ts
+interface ServerFieldError {
+  rowId: string
+  fieldKey: string
+  message: string
+}
+```
+
+页面保存这些错误，在最新 `tableData` 中按 `rowKey` 查找数据源下标，再调用原生 Form Ref 的 `validateField`。动态 validator 从当前服务端错误集合读取消息，因此错误会同时出现在表格字段和页面错误摘要中。
+
+用户修改对应字段后，通过 `field-change` 删除该项旧错误并清理字段校验状态。不要因为一项服务端校验失败而恢复整份旧快照，也不要长期缓存 `tableData.${index}.${fieldKey}` 路径；行结构变化后必须重新按稳定身份计算。
 
 ## 撤销修改
 
@@ -93,12 +135,18 @@ formTableRef.value?.clearValidate()
 
 这能同时恢复字段值、行顺序、新增行和删除行，并清理与旧结构关联的校验展示。
 
-## 生产项目需要补充什么
+## Demo 中可以验证的异常流程
 
-- 请求取消、超时和错误提示。
+- “下一次加载失败”：现有数据和编辑内容保持不变，可以重新加载。
+- “下一次保存失败”：保留 dirty 状态和当前输入，可以直接重试。
+- “服务端拒绝第一行商品”：按行 ID 映射字段错误；编辑该字段后清除旧错误。
+- “模拟过期响应”：较早发起的慢响应不会覆盖最新响应。
+
+## 生产项目仍需补充什么
+
+- 请求取消、超时、错误分类和统一提示。
 - 离开页面前的未保存修改确认。
-- 保存并发控制或幂等键。
-- 服务端校验错误到具体行字段的映射。
+- 保存幂等键、数据版本和多人编辑冲突处理。
 - 分页场景下的分批快照和提交策略。
 - 大型数据集更轻量的 dirty 追踪。
 

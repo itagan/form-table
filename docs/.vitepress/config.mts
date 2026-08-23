@@ -85,6 +85,7 @@ export default defineConfig({
               { text: '数据更新与受控回写', link: '/features/data-updates' },
               { text: '校验、清理与重置', link: '/features/validation-reset' },
               { text: '动态显隐与配置更新', link: '/features/dynamic-configuration' },
+              { text: '权限、只读与编辑模式', link: '/features/permissions-and-editing' },
               { text: '稳定身份与异步安全', link: '/features/stable-identity' },
               { text: 'Element UI 能力边界', link: '/features/element-ui-boundaries' },
               { text: 'Hint 提示体系', link: '/features/hint' }

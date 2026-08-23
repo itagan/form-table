@@ -47,7 +47,7 @@ Playground 直接引用组件源码。示例名称、路由、分类、难度、
 
 | Demo | 难度 | 业务重点 |
 | --- | --- | --- |
-| [完整编辑提交流程 ↗](http://localhost:5173/form-workflow) | 进阶 | 接口加载、脏状态、校验保存、撤销和提交转换 |
+| [完整编辑提交流程 ↗](http://localhost:5173/form-workflow) | 进阶 | 接口加载、校验保存、异常重试、服务端字段错误和过期响应 |
 | [行列操作与异步提交 ↗](http://localhost:5173/row-column-operations) | 进阶 | 行增删复制移动、动态列和成功后提交 |
 | [单元格合并 ↗](http://localhost:5173/cell-merge) | 高级 | 纵横合并、稳定列定位、共享字段和校验 |
 | [多需求费用明细 ↗](http://localhost:5173/heterogeneous-demands) | 高级 | 异构组件、差异数据和提交归一化 |
