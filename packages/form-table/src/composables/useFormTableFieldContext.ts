@@ -63,8 +63,10 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
   const resolvedHint = computed(() => {
     if (hintMode.value === false || hintTargets.value === 'header') return null
     const config = options.getConfig()
+    const defaultHint = defaultFieldHint.value
+    if (config.hint === undefined && !defaultHint) return null
     const source = resolveDynamicValue(config.hint, runtimeContext.value)
-    return resolveFormTableFieldHint(source, runtimeContext.value, defaultFieldHint.value)
+    return resolveFormTableFieldHint(source, runtimeContext.value, defaultHint)
   })
 
   /**
