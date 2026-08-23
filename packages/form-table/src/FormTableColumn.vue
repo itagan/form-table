@@ -1,6 +1,6 @@
 <template>
   <el-table-column
-    v-if="isPlainColumn"
+    v-if="columnRender.kind === 'plain'"
     :label="resolvedColumnLabel"
     v-bind="columnProps"
   />
@@ -30,14 +30,14 @@
         :slot-fn="cellSlotFn"
         :slot-props="createCellSlotContext(scope.row, scope.$index)"
       />
-      <template v-else-if="isLayoutColumn">
+      <template v-else-if="columnRender.kind === 'layout'">
         <FormTableRow
           :row="scope.row"
           :row-index="resolveRowIndex(scope.row, scope.$index)"
           :display-index="scope.$index"
           :column-context="columnContext"
-          :items="layoutItems"
-          :row-props="layoutRowProps"
+          :items="columnRender.items"
+          :row-props="columnRender.rowProps"
         />
       </template>
     </template>
@@ -49,7 +49,6 @@ import { computed, inject } from 'vue'
 import FormTableRow from './FormTableRow.vue'
 import SlotRenderer from './SlotRenderer'
 import type {
-  CellSlotColumnConfig,
   ColumnConfig,
   FormTableCellSlotContext,
   FormTableColumnContext,
@@ -74,6 +73,7 @@ import {
   extendLazyContext,
   resolveDynamicValue
 } from './utils/dynamic'
+import { resolveColumnRenderConfig } from './utils/columnRender'
 import { applyHintTargetProps, resolveFormTableHint } from './utils/hint'
 
 /** 当前列配置及其在可见列集合中的下标。 */
@@ -81,6 +81,9 @@ const props = defineProps<{
   column: ColumnConfig
   columnIndex: number
 }>()
+
+/** 将公开列联合类型一次归一化为纯列、布局列或 cellSlot 列。 */
+const columnRender = computed(() => resolveColumnRenderConfig(props.column))
 
 /** 根组件提供的表级响应式数据，是列动态回调的基础上下文。 */
 const formTableContext = inject<FormTableTableContext>(
@@ -142,36 +145,29 @@ const resolvedHeaderTargetProps = computed(() => {
   )
 })
 
-// 没有 formItems/cellSlot 的纯 Element Column 不挂载 FormTable 单元格 scoped slot。
-const isPlainColumn = computed(() => !('formItems' in props.column) && !('cellSlot' in props.column))
-
 /** cellSlot 列不经过 Row/Item 字段渲染链路。 */
 const cellSlotFn = computed(() => {
-  const slotName = 'cellSlot' in props.column ? props.column.cellSlot : undefined
-  return slotName ? parentSlots[slotName] || null : null
+  const renderConfig = columnRender.value
+  return renderConfig.kind === 'cell-slot' && renderConfig.slotName
+    ? parentSlots[renderConfig.slotName] || null
+    : null
 })
-
-/** 只有字段布局列进入 Row/Item 渲染链路。 */
-const isLayoutColumn = computed(() => 'formItems' in props.column)
-
-/** 仅布局列具有 formItems；cellSlot 列缺失对应 Slot 时保持空单元格。 */
-const layoutItems = computed(() => 'formItems' in props.column
-  ? props.column.formItems || []
-  : [])
-
-/** 唯一字段布局行使用列级 rowProps。 */
-const layoutRowProps = computed(() => 'formItems' in props.column
-  ? props.column.rowProps
-  : undefined)
 
 /** 为当前单元格构造无字段语义的精简 Slot 上下文。 */
-const createCellSlotContext = (row: TableRow, displayIndex: number): FormTableCellSlotContext => ({
-  row,
-  index: resolveRowIndex(row, displayIndex),
-  displayIndex,
-  columnConfig: props.column as CellSlotColumnConfig,
-  updateRow: patch => updateApi?.updateRow(row, patch)
-})
+const createCellSlotContext = (
+  row: TableRow,
+  displayIndex: number
+): FormTableCellSlotContext | undefined => {
+  const renderConfig = columnRender.value
+  if (renderConfig.kind !== 'cell-slot') return undefined
+  return {
+    row,
+    index: resolveRowIndex(row, displayIndex),
+    displayIndex,
+    columnConfig: renderConfig.column,
+    updateRow: patch => updateApi?.updateRow(row, patch)
+  }
+}
 
 /** 根据配置名称查找实际存在的父级表头插槽。 */
 const headerSlotFn = computed(() => props.column.headerSlot
