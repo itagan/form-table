@@ -210,8 +210,6 @@ describe('FormTable slot rendering', () => {
     const componentPropsResolver = vi.fn(({ row }: FormTableFieldRenderContext) => ({
       suffix: row.school === '一中' ? '（当前）' : ''
     }))
-    const optionsResolver = vi.fn(() => [{ label: '校区配置', value: 'campus' }])
-    const optionPropsResolver = vi.fn(() => ({ label: 'label', value: 'value' }))
     const slotListener = vi.fn()
     const valueToProp = vi.fn(() => '不应传入字段 Slot')
     const wrapper = mountFormTable({
@@ -225,8 +223,7 @@ describe('FormTable slot rendering', () => {
             slot: 'school',
             model: { valueToProp },
             props: componentPropsResolver,
-            options: optionsResolver,
-            optionProps: optionPropsResolver,
+            options: [{ label: '校区配置', value: 'campus' }],
             listeners: { commit: slotListener }
           }
         }]
@@ -236,14 +233,12 @@ describe('FormTable slot rendering', () => {
           type="button"
           class="slot-setter"
           @click="props.setValue('二中'); props.component.listeners.commit('saved')"
-        >{{ props.value }}{{ props.component.props.suffix }}{{ props.component.options[0].label }}{{ props.component.optionProps.label }}{{ props.component.slot }}</button>`
+        >{{ props.value }}{{ props.component.props.suffix }}{{ props.component.options[0].label }}{{ props.component.slot }}</button>`
       }
     })
     await wrapper.vm.$nextTick()
-    expect(wrapper.find('.slot-setter').text()).toBe('一中（当前）校区配置labelschool')
+    expect(wrapper.find('.slot-setter').text()).toBe('一中（当前）校区配置school')
     expect(componentPropsResolver).toHaveBeenCalledTimes(1)
-    expect(optionsResolver).toHaveBeenCalledTimes(1)
-    expect(optionPropsResolver).toHaveBeenCalledTimes(1)
     expect(valueToProp).not.toHaveBeenCalled()
     expect(Object.keys(componentPropsResolver.mock.calls[0][0]).sort()).toEqual([
       'columnConfig',

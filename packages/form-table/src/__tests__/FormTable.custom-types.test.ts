@@ -44,32 +44,6 @@ describe('FormTable custom field types', () => {
     wrapper.destroy()
   })
 
-  it('does not evaluate unsupported item options for a registered field type', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-    const options = vi.fn(() => [{ label: '不应解析', value: 'unused' }])
-    const optionProps = vi.fn(() => ({ label: 'label', value: 'value' }))
-    const RegisteredField = createButtonField('registered-with-ignored-options')
-    const wrapper = mountFormTable({
-      tableData: [{ name: 'Alice' }],
-      fieldTypes: { employee: { is: RegisteredField } },
-      columns: [{
-        label: '员工',
-        formItems: [{
-          fieldKey: 'name',
-          type: 'employee',
-          component: { options, optionProps }
-        }]
-      }]
-    })
-    await wrapper.vm.$nextTick()
-
-    expect(wrapper.find('.registered-with-ignored-options').exists()).toBe(true)
-    expect(options).not.toHaveBeenCalled()
-    expect(optionProps).not.toHaveBeenCalled()
-    warn.mockRestore()
-    wrapper.destroy()
-  })
-
   it('merges default and item props, adapts a custom model, and preserves raw listener args', async () => {
     const selectionListener = vi.fn()
     const valueToProp = vi.fn((

@@ -136,7 +136,7 @@ FormTableRow → el-row → el-col → FormTableItem → el-form-item
 
 `visible/props/options/formItemProps` 应保持同步、纯计算和低成本。不要在动态回调中请求接口、深拷贝整表、排序数据或创建新组件定义。Performance Lab 的回调计数可辅助判断一次操作影响的求值范围。
 
-字段没有显式 Hint 且表级没有默认字段 Hint 时会直接跳过 Hint 内容解析。`options/optionProps` 仅对 select、radio、checkbox 和需要公开已解析组件配置的字段 Slot 求值；其他字段不会执行无消费方的选项回调。
+字段没有显式 Hint 且表级没有默认字段 Hint 时会直接跳过 Hint 内容解析。
 
 ## 使用建议
 

@@ -36,16 +36,14 @@ columns[].formItems[].component
 | `...component.model.valueFromEvent` | `(context, ...args) => FormTableValue` | 自定义 model | 只读字段上下文 + 原始事件参数 | 从事件参数提取写回值；注册 type 可关联事件参数元组 |
 | `...component.props` | `DynamicValue<ComponentProps, ItemContext>` | 全部 | ItemContext | 透传实际字段组件 |
 | `...component.listeners` | `Record<string, FormTableFieldListener>` | 全部 | ActionContext + 原始事件参数 | 配置式组件事件 |
-| `...component.options` | `DynamicValue<FormItemOption[], ItemContext>` | select / radio / checkbox / slot | ItemContext | 选项组件子节点；Slot 上下文中的已解析配置 |
-| `...component.optionProps` | `DynamicValue<OptionPropsConfig, ItemContext>` | select / radio / checkbox / slot | ItemContext | 选项字段映射；Slot 上下文中的已解析配置 |
+| `...component.options` | `DynamicValue<FormItemOption[], ItemContext>` | 选项型 | ItemContext | select / radio / checkbox 选项 |
+| `...component.optionProps` | `DynamicValue<OptionPropsConfig, ItemContext>` | 选项型 | ItemContext | 选项字段映射 |
 | `...component.optionProps.label` | `string` | 选项型 | — | 选项展示字段 |
 | `...component.optionProps.value` | `string` | 选项型 | — | 选项值字段 |
 | `...component.optionProps.disabled` | `string` | 选项型 | — | 选项禁用字段 |
 | `...component.optionProps.key` | `string` | 选项型 | — | 选项渲染 key 字段 |
 
 `...` 在表格中缩写了共同前缀 `columns[].formItems[]`。
-
-`options/optionProps` 只在 select、radio、checkbox 和 slot 模式下求值。其他内置类型、`component` 和注册 type 不消费这两项配置，因此不会执行对应动态回调；业务组件需要选项时应通过 `component.props` 显式传入。
 
 Item 级 `binding.map` 位于 `columns[].formItems[].binding`，不属于组件协议。读取顺序是先将多个行字段组合为 `bindingValue`，再由 `valueToProp` 转换为组件 model prop；写回顺序是 `valueFromEvent` 提取组件值，再由映射生成一个行 patch。每个映射项还可通过 `fallbackValue` 声明组件值路径缺失时的静态写回值。对象、数组、Slot、清空和校验规则见[复合字段映射](../features/composite-binding.md)。
 

@@ -31,9 +31,6 @@ interface ResolvedFieldComponentOptions<TRow extends TableRow> {
   fieldTypes: Readonly<Ref<FieldTypeRegistry<TRow>>>
 }
 
-/** 只有内置选项组和字段 Slot 会消费已解析的 options/optionProps。 */
-const optionConfigTypes = new Set(['select', 'radio', 'checkbox', 'slot'])
-
 /**
  * 将公开的字段配置归一化为函数式字段渲染器可直接消费的渲染配置。
  * 动态组件、props 和 options 都集中在同一个 computed 中求值一次。
@@ -68,7 +65,6 @@ export function useResolvedFieldComponent<TRow extends TableRow = TableRow>(
     const component = config.component
     const typeDefinition = resolveTypeDefinition(config.type)
     const listeners = component?.listeners || {}
-    const shouldResolveOptions = optionConfigTypes.has(config.type)
     const defaultProps = resolveDynamicValue(typeDefinition?.props, context) || {}
     const componentProps = {
       ...defaultProps,
@@ -93,12 +89,11 @@ export function useResolvedFieldComponent<TRow extends TableRow = TableRow>(
         options.hintTrigger.value
       ),
       listeners: resolvedListeners,
-      options: shouldResolveOptions
-        ? resolveDynamicValue(component?.options, context) as FormItemOption[] || []
-        : [],
-      optionProps: shouldResolveOptions
-        ? resolveDynamicValue(component?.optionProps, context) as OptionPropsConfig | undefined
-        : undefined,
+      options: resolveDynamicValue(component?.options, context) as FormItemOption[] || [],
+      optionProps: resolveDynamicValue(
+        component?.optionProps,
+        context
+      ) as OptionPropsConfig | undefined,
       model: component?.model ?? typeDefinition?.model
     }
   })
