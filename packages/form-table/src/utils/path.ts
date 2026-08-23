@@ -7,9 +7,7 @@ function isObjectLike(value: unknown): value is FormTableRecord {
   return value !== null && typeof value === 'object'
 }
 
-/**
- * 将 `a.b[0].c` 归一化为路径片段数组。
- */
+/** 路径配置会在每个单元格重复使用；有限缓存避免反复解析，同时约束动态路径占用。 */
 const NORMALIZED_PATH_CACHE_LIMIT = 512
 const normalizedPathCache = new Map<string, readonly string[]>()
 const UNSAFE_PATH_SEGMENTS = new Set(['__proto__', 'prototype', 'constructor'])
@@ -35,6 +33,7 @@ export function normalizePath(path: string): readonly string[] {
   assertSafePath(path, segments)
 
   if (normalizedPathCache.size >= NORMALIZED_PATH_CACHE_LIMIT) {
+    // Map 保留插入顺序；删除最早项形成简单的先进先出上限。
     const oldestPath = normalizedPathCache.keys().next().value
     if (oldestPath !== undefined) normalizedPathCache.delete(oldestPath)
   }
@@ -105,6 +104,7 @@ export function setValueByPath<T extends FormTableRecord>(
     } else if (isObjectLike(nextValue)) {
       current[segment] = { ...nextValue }
     } else {
+      // 缺失中间节点时，根据下一片段是否为规范数组下标选择容器类型。
       current[segment] = ARRAY_INDEX_SEGMENT.test(segments[index + 1]) ? [] : {}
     }
 
