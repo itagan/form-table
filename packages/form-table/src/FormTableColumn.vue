@@ -85,16 +85,17 @@ const props = defineProps<{
 /** 根组件提供的表级响应式数据，是列动态回调的基础上下文。 */
 const formTableContext = inject<FormTableTableContext>(
   FORM_TABLE_CONTEXT_KEY,
-  createTableContext(() => [])
+  () => createTableContext(() => []),
+  true
 )
 
 /** 父组件具名插槽集合，用于解析表头和列级单元格 Slot。 */
-const parentSlots = inject<FormTableSlots>(FORM_TABLE_SLOTS_KEY, {})
+const parentSlots = inject<FormTableSlots>(FORM_TABLE_SLOTS_KEY, () => ({}), true)
 
 /** 根组件未提供模式时保持原生 title，便于列组件独立挂载测试。 */
 const hintContext = inject<FormTableHintContext | undefined>(FORM_TABLE_HINT_CONTEXT_KEY, undefined)
-const hintMode = computed(() => hintContext?.mode.value ?? 'title')
-const hintTargets = computed(() => hintContext?.targets.value ?? 'field')
+const hintMode = hintContext?.mode ?? computed(() => 'title' as const)
+const hintTargets = hintContext?.targets ?? computed(() => 'field' as const)
 
 /** 根组件下发的行更新入口，供列级单元格 Slot 执行业务操作。 */
 const updateApi = inject<FormTableUpdateApi | undefined>(FORM_TABLE_UPDATE_KEY, undefined)
@@ -102,7 +103,8 @@ const updateApi = inject<FormTableUpdateApi | undefined>(FORM_TABLE_UPDATE_KEY, 
 /** 将 Element Table 显示下标映射回受控 tableData 数据源下标。 */
 const resolveRowIndex = inject<FormTableRowIndexResolver>(
   FORM_TABLE_ROW_INDEX_KEY,
-  (_row, displayIndex) => displayIndex
+  (): FormTableRowIndexResolver => (_row, displayIndex) => displayIndex,
+  true
 )
 
 /** 合并表级数据和当前列配置，供列属性、表头和下级行共同复用。 */

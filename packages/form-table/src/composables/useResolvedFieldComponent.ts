@@ -1,5 +1,5 @@
 import { computed } from 'vue'
-import type { ComputedRef, Ref } from 'vue'
+import type { Ref } from 'vue'
 import {
   getComponentType,
   isBuiltinFormItemType,
@@ -23,11 +23,11 @@ import { applyHintComponentProps } from '../utils/hint'
 
 interface ResolvedFieldComponentOptions<TRow extends TableRow> {
   getConfig: () => FormItemConfig<TRow>
-  runtimeContext: ComputedRef<FormTableFieldRenderContext<TRow>>
-  fieldContext: ComputedRef<FormTableFieldContext<TRow>>
-  resolvedHint: ComputedRef<string | null>
-  hintMode: ComputedRef<FormTableHintMode>
-  hintTrigger: ComputedRef<FormTableHintTrigger>
+  runtimeContext: Readonly<Ref<FormTableFieldRenderContext<TRow>>>
+  fieldContext: Readonly<Ref<FormTableFieldContext<TRow>>>
+  resolvedHint: Readonly<Ref<string | null>>
+  hintMode: Readonly<Ref<FormTableHintMode>>
+  hintTrigger: Readonly<Ref<FormTableHintTrigger>>
   fieldTypes: Readonly<Ref<FieldTypeRegistry<TRow>>>
 }
 

@@ -38,9 +38,9 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
     FORM_TABLE_HINT_CONTEXT_KEY,
     undefined
   )
-  const hintMode = computed(() => hintContext?.mode.value ?? 'title')
-  const hintTargets = computed(() => hintContext?.targets.value ?? 'field')
-  const defaultFieldHint = computed(() => hintContext?.defaultFieldHint.value)
+  const hintMode = hintContext?.mode ?? computed(() => 'title' as const)
+  const hintTargets = hintContext?.targets ?? computed(() => 'field' as const)
+  const defaultFieldHint = hintContext?.defaultFieldHint ?? computed(() => undefined)
   const hintTrigger = computed(() => options.getConfig().hintTrigger ?? 'item')
 
   /**
