@@ -1,4 +1,4 @@
-import type { FormItemOption, OptionPropsConfig } from '../types/config'
+import type { FormItemOption, OptionPropsConfig } from '../types/config/field'
 
 /** 选项对象未声明字段映射时采用的默认键名。 */
 const DEFAULT_OPTION_PROPS: Required<OptionPropsConfig> = {

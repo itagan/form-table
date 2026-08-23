@@ -1,7 +1,7 @@
 import type {
   ColumnConfig,
-  FormItemConfig
-} from './config'
+} from './config/column'
+import type { FormItemConfig } from './config/field'
 import type { FormTableRowPatch, FormTableValue, TableRow } from './base'
 
 export interface FormTableTableContext<TRow extends TableRow = TableRow> {

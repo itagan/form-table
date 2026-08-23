@@ -1,6 +1,7 @@
 import type { Ref } from 'vue'
 import type { FormTableHintMode, FormTableHintTargets, TableRow } from './base'
-import type { FieldTypeRegistry, FormTableDefaultFieldHint } from './config'
+import type { FieldTypeRegistry } from './config/field'
+import type { FormTableDefaultFieldHint } from './config/hint'
 
 /** 以下注入键仅用于 FormTable 内部组件通信。 */
 export const FORM_TABLE_CONTEXT_KEY: unique symbol = Symbol('formTableContext')

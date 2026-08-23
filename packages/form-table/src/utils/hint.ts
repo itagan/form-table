@@ -5,7 +5,7 @@ import type {
   FormTableHintValue,
   TableRow
 } from '../types/base'
-import type { FormTableDefaultFieldHint } from '../types/config'
+import type { FormTableDefaultFieldHint } from '../types/config/hint'
 import type { FormTableFieldRenderContext } from '../types/context'
 
 /** 事件委托使用的内部提示标记，不作为调用方配置入口。 */

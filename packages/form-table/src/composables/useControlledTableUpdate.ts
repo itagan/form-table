@@ -1,5 +1,6 @@
 import type { FormTableRowPatch, FormTableValue, TableRow } from '../types/base'
-import type { FormTableFieldChangePayload, FormTableRowKey } from '../types/config'
+import type { FormTableFieldChangePayload } from '../types/config/events'
+import type { FormTableRowKey } from '../types/config/form-table'
 import type { FormTableUpdateApi } from '../types/context'
 import { getValueByPath, setValueByPath } from '../utils/path'
 

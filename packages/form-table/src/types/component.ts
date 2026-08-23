@@ -7,11 +7,10 @@ import type {
   EmptyFieldTypeRegistry,
   FieldTypeRegistry,
   FormItemOption,
-  FormTableEmits,
-  FormTableProps,
-  FormTableRowKey,
   OptionPropsConfig
-} from './config'
+} from './config/field'
+import type { FormTableEmits } from './config/events'
+import type { FormTableProps, FormTableRowKey } from './config/form-table'
 import type {
   FormTableColumnContext,
   FormTableFieldContext
