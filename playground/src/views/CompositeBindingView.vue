@@ -1,6 +1,6 @@
 <template>
   <main class="composite-binding-page">
-    <router-link to="/">← 返回调试台</router-link>
+    <router-link to="/">← 返回示例中心</router-link>
     <h1>复合字段映射</h1>
     <p>
       <code>binding.map</code> 将一个组件值映射到多个行字段；日期范围展示自定义组件及

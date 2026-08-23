@@ -2,7 +2,7 @@
 
 Vue 2.7 + Element UI 的轻量表格内表单组件。
 
-> 本地调试：[打开 Playground ↗](http://localhost:5173/)。调试台右上角可随时返回文档总站。
+> 可运行示例：[打开 Playground ↗](http://localhost:5173/)。示例页右上角可随时返回文档总站。
 
 ## 从这里开始
 
@@ -20,6 +20,6 @@ Vue 2.7 + Element UI 的轻量表格内表单组件。
 | 查事件、Ref 和公开类型 | [事件与 Ref](./api/events-and-ref.md) · [公开类型](./api/types.md) |
 | 查看独立功能和业务示例 | [功能专题](./features/) · [演示索引](./examples/) |
 | 按症状排查渲染、更新和校验问题 | [排错指南](./guide/troubleshooting.md) |
-| 直接运行和搜索 API | [打开 Playground 调试台 ↗](http://localhost:5173/) |
+| 直接运行示例 | [打开 Playground 示例中心 ↗](http://localhost:5173/) |
 
 核心原则：`formItems` 负责字段布局，`type/component/slot` 负责渲染，Element UI 负责组件行为，业务层负责行操作和字段联动。自定义 Type 用于治理已经稳定且重复的业务字段协议，属于高级扩展，不是基础接入的前置步骤。

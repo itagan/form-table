@@ -42,20 +42,6 @@
     "tags": ["hintOptions", "headerSlot", "custom component"]
   },
   {
-    "title": "高级示例",
-    "description": "集中演示原生选择/序号列、多行栅格、直接组件、动态 options、嵌套路径和 slot。",
-    "path": "/form-table-advanced",
-    "name": "form-table-advanced",
-    "view": "FormTableAdvancedView",
-    "category": "rendering",
-    "level": "intermediate",
-    "status": "legacy-composite",
-    "relatedDocs": ["/architecture/rendering-pipeline", "/api/contexts"],
-    "source": "playground/src/views/FormTableAdvancedView.vue",
-    "type": "success",
-    "tags": ["NativeColumnConfig", "selection", "index", "slot", "component.is"]
-  },
-  {
     "title": "Element 功能列透传",
     "description": "演示 selection、index、expand、列事件，以及 empty/append 原生 Slot。",
     "path": "/element-columns",
@@ -210,20 +196,6 @@
     "tags": ["SortableJS", "rowspan", "group data"]
   },
   {
-    "title": "调试台 API 速查",
-    "description": "按完整配置路径搜索 API，对照回调上下文、渲染方式、事件和 Ref。",
-    "path": "/form-table-docs",
-    "name": "form-table-docs",
-    "view": "FormTableDocsView",
-    "category": "tools",
-    "level": "advanced",
-    "status": "internal-tool",
-    "relatedDocs": ["/api/configuration", "/api/contexts"],
-    "source": "playground/src/views/FormTableDocsView.vue",
-    "type": "info",
-    "tags": ["API", "guide", "examples"]
-  },
-  {
     "title": "大数据量性能实验",
     "description": "可调行列规模，对比纯展示、编辑和动态配置的渲染及更新指标。",
     "path": "/performance",
@@ -236,19 +208,5 @@
     "source": "playground/src/views/PerformanceView.vue",
     "type": "warning",
     "tags": ["performance", "large data", "DOM count"]
-  },
-  {
-    "title": "组件对象直传与原生 Ref",
-    "description": "演示直接传入组件对象、字段事件上下文和原生 Form/Table Ref。",
-    "path": "/debug",
-    "name": "debug",
-    "view": "DirectComponentView",
-    "category": "rendering",
-    "level": "intermediate",
-    "status": "internal-tool",
-    "relatedDocs": ["/features/custom-component", "/api/events-and-ref"],
-    "source": "playground/src/views/DirectComponentView.vue",
-    "type": "danger",
-    "tags": ["component.is", "field context", "native ref"]
   }
 ]

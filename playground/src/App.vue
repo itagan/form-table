@@ -6,7 +6,7 @@ const docsSiteUrl = import.meta.env.VITE_DOCS_SITE_URL || 'http://localhost:5174
 <template>
   <div id="app">
     <nav class="cross-site-nav" aria-label="站点切换">
-      <router-link v-if="$route.path !== '/'" to="/">调试台首页</router-link>
+      <router-link v-if="$route.path !== '/'" to="/">示例中心</router-link>
       <a :href="docsSiteUrl" class="docs-site-link">← 返回文档总站</a>
     </nav>
     <router-view />

@@ -1,6 +1,6 @@
 <template>
   <main class="custom-field-types-page">
-    <router-link to="/">← 返回调试台</router-link>
+    <router-link to="/">← 返回示例中心</router-link>
     <h1>实例级自定义字段 Type</h1>
     <p>
       注册一次稳定的组件、model 和默认 props，columns 就可以像内置字段一样使用

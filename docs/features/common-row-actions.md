@@ -1,6 +1,6 @@
 # 常见操作列与行增删
 
-> 可运行 Demo：[打开行列操作调试页 ↗](http://localhost:5173/row-column-operations)
+> 可运行 Demo：[打开行列操作示例 ↗](http://localhost:5173/row-column-operations)
 
 新增、插入、复制和删除会改变整张表的数据结构，应由页面直接替换受控的 `tableData`。操作按钮不对应字段值，也不参与校验，推荐使用列级 [`cellSlot`](./cell-slot.md)，不需要为操作列虚构 `fieldKey`。
 

@@ -1,7 +1,7 @@
 <template>
   <main class="merge-page">
-    <router-link to="/">← 返回调试台</router-link>
-    <h1>单元格合并调试台</h1>
+    <router-link to="/">← 返回示例中心</router-link>
+    <h1>单元格合并示例</h1>
     <p class="page-description">
       通过 <code>tableProps.spanMethod</code> 使用 Element UI 原生合并能力。
       示例同时演示按采购部门纵向合并，以及小计行横跨“物料、数量、含税金额”三列。

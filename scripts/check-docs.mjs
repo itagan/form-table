@@ -64,16 +64,13 @@ const allowedExampleCategories = new Set([
   'rendering',
   'advanced',
   'business',
-  'engineering',
-  'tools'
+  'engineering'
 ])
 const allowedExampleLevels = new Set(['beginner', 'intermediate', 'advanced'])
 const allowedExampleStatuses = new Set([
   'featured',
   'example',
-  'legacy-composite',
-  'tool',
-  'internal-tool'
+  'tool'
 ])
 
 for (const file of uniqueMarkdownFiles) {

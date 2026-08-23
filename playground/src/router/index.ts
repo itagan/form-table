@@ -9,10 +9,8 @@ const viewLoaders: Record<string, () => Promise<unknown>> = {
   FormTableView: () => import('../views/FormTableView.vue'),
   FormWorkflowView: () => import('../views/FormWorkflowView.vue'),
   HintScenariosView: () => import('../views/HintScenariosView.vue'),
-  FormTableAdvancedView: () => import('../views/FormTableAdvancedView.vue'),
   ElementColumnsView: () => import('../views/ElementColumnsView.vue'),
   CellSlotView: () => import('../views/CellSlotView.vue'),
-  FormTableDocsView: () => import('../views/FormTableDocsView.vue'),
   PerformanceView: () => import('../views/PerformanceView.vue'),
   RemoteSchemaView: () => import('../views/RemoteSchemaView.vue'),
   FieldSlotVisibilityView: () => import('../views/FieldSlotVisibilityView.vue'),
@@ -22,7 +20,6 @@ const viewLoaders: Record<string, () => Promise<unknown>> = {
   ItinerarySimpleView: () => import('../views/ItinerarySimpleView.vue'),
   EnterpriseComponentsView: () => import('../views/EnterpriseComponentsView.vue'),
   CustomFieldTypesView: () => import('../views/CustomFieldTypesView.vue'),
-  DirectComponentView: () => import('../views/DirectComponentView.vue'),
   CompositeBindingView: () => import('../views/CompositeBindingView.vue')
 }
 

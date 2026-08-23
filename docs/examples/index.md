@@ -1,6 +1,6 @@
 # 示例索引
 
-示例按学习成本和开发任务分类，不再把基础接入、高级协议、完整业务场景和内部调试工具平铺在同一层。第一次使用请从基础编辑开始；自定义 Type、远程 Schema 和复合绑定属于高级扩展。
+示例按学习成本和开发任务分类，不再把基础接入、高级协议和完整业务场景平铺在同一层。第一次使用请从基础编辑开始；自定义 Type、远程 Schema 和复合绑定属于高级扩展。
 
 ## 运行方式
 
@@ -8,7 +8,7 @@
 pnpm site:dev
 ```
 
-- Playground：[打开本地调试入口 ↗](http://localhost:5173/)
+- Playground：[打开本地示例中心 ↗](http://localhost:5173/)
 - 文档站：`http://localhost:5174`
 
 Playground 直接引用组件源码。示例名称、路由、分类、难度、关联文档和源文件统一维护在 `playground/examples.json`；生产构建会把 Playground 合并到文档站的 `/playground/` 路径。
@@ -29,9 +29,8 @@ Playground 直接引用组件源码。示例名称、路由、分类、难度、
 | [Hint 多场景 ↗](http://localhost:5173/hint-scenarios) | 进阶 | title、单实例 Tooltip、表头和 FormItem Slot |
 | [`cellSlot` 列级单元格 ↗](http://localhost:5173/cell-slot) | 进阶 | 展示、状态、派生值和操作列 |
 | [字段 Slot 与动态显隐 ↗](http://localhost:5173/dynamic-slot-test) | 进阶 | 字段 Slot、更新助手和多层动态配置 |
-| [综合渲染模式 ↗](http://localhost:5173/form-table-advanced) | 进阶 | 原生列、直接组件、字段 Slot 和复杂布局对照 |
 
-综合渲染模式是历史集合页，后续会拆入对应的独立示例；新代码应按[扩展模型](../architecture/extension-model.md)选择最小入口。
+需要组合多个渲染入口时，先按[扩展模型](../architecture/extension-model.md)选择最小方案，再组合对应的独立示例。
 
 ## 高级扩展
 
@@ -63,15 +62,6 @@ Playground 直接引用组件源码。示例名称、路由、分类、难度、
 | [大数据量性能实验 ↗](http://localhost:5173/performance) | 对比展示、编辑和动态配置的渲染及更新指标 |
 
 性能实验应在 production build 和固定环境中重复测量；单次开发模式耗时不是容量结论。
-
-## 内部调试入口
-
-以下页面保留用于维护兼容性，不属于推荐学习路径：
-
-| 工具 | 当前用途 | 后续处理 |
-| --- | --- | --- |
-| [配置路径调试台 ↗](http://localhost:5173/form-table-docs) | 搜索 Playground 内置的 API 数据 | 迁移到文档站唯一 API 来源后移除重复数据 |
-| [组件对象与 Ref 调试 ↗](http://localhost:5173/debug) | 验证组件对象、字段上下文和原生 Ref | 合并进直接组件或企业组件示例 |
 
 ## 选择下一步
 

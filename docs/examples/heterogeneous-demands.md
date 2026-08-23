@@ -1,6 +1,6 @@
 # 多需求费用明细场景
 
-> 可运行 Demo：[打开多需求费用明细调试页 ↗](http://localhost:5173/heterogeneous-demands)
+> 可运行 Demo：[打开多需求费用明细示例 ↗](http://localhost:5173/heterogeneous-demands)
 
 该示例模拟从 jQuery DOM 渲染迁移到 Vue 的会务费用表。会场、酒店、用餐、机票、火车票、用车、其他和嘉宾共享相同的表格列，但每种需求拥有不同字段和交互组件。
 
@@ -99,7 +99,7 @@ interface DemandEditorProps<T> {
 }
 ```
 
-调试页的“只读模式”会同时作用于场景组件、公共组件和少量 FormTable 内置字段，用于验证协议一致性。组件注册表和 columns 都保持稳定，只读变化通过响应式动态 props 下发。
+示例页的“只读模式”会同时作用于场景组件、公共组件和少量 FormTable 内置字段，用于验证协议一致性。组件注册表和 columns 都保持稳定，只读变化通过响应式动态 props 下发。
 
 ## 需求类型是唯一分组
 
