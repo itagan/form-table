@@ -1,63 +1,81 @@
 # 示例索引
 
-本地开发推荐在项目根目录用一条命令同时启动调试台和文档站：
+示例按学习成本和开发任务分类，不再把基础接入、高级协议、完整业务场景和内部调试工具平铺在同一层。第一次使用请从基础编辑开始；自定义 Type、远程 Schema 和复合绑定属于高级扩展。
+
+## 运行方式
 
 ```bash
 pnpm site:dev
 ```
 
-命令会同时启动以下两个固定端口的站点：
+- Playground：[打开本地调试入口 ↗](http://localhost:5173/)
+- 文档站：`http://localhost:5174`
 
-- Playground 调试台：主机 `localhost`，端口 `5173`
-- VitePress 文档总站：主机 `localhost`，端口 `5174`
+Playground 直接引用组件源码。示例名称、路由、分类、难度、关联文档和源文件统一维护在 `playground/examples.json`；生产构建会把 Playground 合并到文档站的 `/playground/` 路径。
 
-需要单独调试某个站点时，也可以分别启动：
+## 基础使用
 
-```bash
-pnpm dev
-pnpm docs:dev
-```
-
-源码层仍保留两个应用，以隔离 Playground 的 Vue 2.7 和 VitePress 的 Vue 3 运行时；生产构建会合并为一个站点：
-
-```bash
-pnpm site:build
-pnpm site:preview
-```
-
-统一产物位于 `docs/.vitepress/dist`：文档使用 `/`，以下所有 Demo 使用 `/playground/`。部署时只需发布这个目录，不需要分别启动两个服务。
-
-文档顶部的 **Playground** 可进入调试台；调试台右上角的 **← 返回文档总站** 可返回当前文档站。然后通过以下入口打开调试台或具体的可运行 Demo：
-
-| Demo 页面 | 本地路由 | 内容 |
+| Demo | 难度 | 解决的问题 |
 | --- | --- | --- |
-| [表格内表单组件调试台 ↗](http://localhost:5173/) | `/` | 调试台首页，集中提供全部可运行 Demo、API 速查和文档总站入口 |
-| [基础编辑 ↗](http://localhost:5173/form-table) | `/form-table` | 基础 formItems、type、校验与父级行操作 |
-| [Hint 多场景 ↗](http://localhost:5173/hint-scenarios) | `/hint-scenarios` | title、单实例 Tooltip、动态 Hint、Slot、自定义组件与接管边界 |
-| [高级示例 ↗](http://localhost:5173/form-table-advanced) | `/form-table-advanced` | 原生选择/序号列、多行栅格、component.is、slot、动态 options、嵌套路径 |
-| [Element 功能列透传 ↗](http://localhost:5173/element-columns) | `/element-columns` | selection/index/expand、排序筛选事件，以及 empty/append 原生 Slot |
-| [`cellSlot` 列级单元格 ↗](http://localhost:5173/cell-slot) | `/cell-slot` | 组合展示、派生值、updateRow、异步 rowKey、字段 Slot 对照和 scope 检视 |
-| [远程 Schema ↗](http://localhost:5173/remote-schema) | `/remote-schema` | 远程纯 JSON 配置与页面本地组件、事件增强 |
-| [复合字段映射 ↗](http://localhost:5173/composite-binding) | `/composite-binding` | 对象、数组和字段 Slot 的多字段映射与原子写回 |
-| [实例级自定义字段 Type ↗](http://localhost:5173/custom-field-types) | `/custom-field-types` | 注册式业务 type、标准/非标准 model、事件、默认 props、binding.map 与未知名称保护 |
-| [企业复杂组件接入 ↗](http://localhost:5173/enterprise-components) | `/enterprise-components` | 企业全局组件、局部业务组件、自定义绑定协议与复杂事件联动 |
-| [字段 Slot 与动态显隐 ↗](http://localhost:5173/dynamic-slot-test) | `/dynamic-slot-test` | 字段 Slot、更新助手和三级动态显隐 |
-| [行列操作与异步提交 ↗](http://localhost:5173/row-column-operations) | `/row-column-operations` | 行增删复制移动、动态列和业务处理后异步提交 |
-| [单元格合并 ↗](http://localhost:5173/cell-merge) | `/cell-merge` | 分组纵向合并、汇总行横向合并、稳定列定位和表头隐藏 |
-| [多需求费用明细 ↗](http://localhost:5173/heterogeneous-demands) | `/heterogeneous-demands` | 公共表头下按需求类型加载独立组件、处理差异字段并归一化提交 |
-| [多日议程编排 ↗](http://localhost:5173/itinerary-simple) | `/itinerary-simple` | 日期与主题纵向合并、SortableJS 组内拖拽、行操作与分组提交 |
-| [组件对象直传与原生 Ref ↗](http://localhost:5173/debug) | `/debug` | 直接组件对象、字段事件上下文和原生 Ref |
-| [FormTable 精简 API ↗](http://localhost:5173/form-table-docs) | `/form-table-docs` | 精简 API 速查 |
-| [大数据量性能实验 ↗](http://localhost:5173/performance) | `/performance` | 可调行列规模、三类渲染场景、更新耗时、DOM 和动态回调计数 |
+| [基础编辑 ↗](http://localhost:5173/form-table) | 基础 | `formItems`、内置 Type、校验和受控数据 |
+| [Element 功能列透传 ↗](http://localhost:5173/element-columns) | 基础 | selection、index、expand、排序筛选事件及根级 Slot |
 
-Playground 直接引用包源码，修改组件后无需先构建 npm 包。示例名称、路由和页面入口统一维护在 `playground/examples.json`；Vue Router、调试台首页和生产静态直达页都读取这份清单。
+完成这两页后，应能够建立普通表格表单并使用 Element Table 原生能力。
 
-操作列、末尾新增、当前行后插入、复制和删除的入门代码参考[常见操作列与行增删](../features/common-row-actions.md)；确认、移动和异步提交等进阶模式参考[行列操作与异步提交](../features/row-column-operations.md)。
+## 常用渲染扩展
 
-公司内部存在大量全局组件、局部业务组件和非标准绑定协议时，参考[企业内部复杂组件接入示例](./enterprise-components.md)。
+| Demo | 难度 | 解决的问题 |
+| --- | --- | --- |
+| [Hint 多场景 ↗](http://localhost:5173/hint-scenarios) | 进阶 | title、单实例 Tooltip、表头和 FormItem Slot |
+| [`cellSlot` 列级单元格 ↗](http://localhost:5173/cell-slot) | 进阶 | 展示、状态、派生值和操作列 |
+| [字段 Slot 与动态显隐 ↗](http://localhost:5173/dynamic-slot-test) | 进阶 | 字段 Slot、更新助手和多层动态配置 |
+| [综合渲染模式 ↗](http://localhost:5173/form-table-advanced) | 进阶 | 原生列、直接组件、字段 Slot 和复杂布局对照 |
 
-需要处理纵向分组、横向汇总、共享字段同步和提交归一化时，参考[单元格合并业务处理示例](./cell-merge.md)。
+综合渲染模式是历史集合页，后续会拆入对应的独立示例；新代码应按[扩展模型](../architecture/extension-model.md)选择最小入口。
 
-需要把不同字段、不同业务组件的旧 DOM 表格迁移到 Vue 时，参考[多需求费用明细场景](./heterogeneous-demands.md)。
+## 高级扩展
 
-需要一个容易复制的“分组字段 + 明细行”入门实现时，参考[多日议程编排](./itinerary-simple.md)。
+| Demo | 使用前提 | 解决的问题 |
+| --- | --- | --- |
+| [复合字段映射 ↗](http://localhost:5173/composite-binding) | 一个组件稳定映射多个字段 | 对象、数组、fallback 和原子写回 |
+| [企业复杂组件接入 ↗](http://localhost:5173/enterprise-components) | 已有非标准业务组件协议 | Adapter、自定义 model、事件联动和手动同步 |
+| [实例级自定义字段 Type ↗](http://localhost:5173/custom-field-types) | 组件协议已跨页面稳定重复 | 注册名称、精确类型、默认 Props 和诊断 |
+| [远程 Schema ↗](http://localhost:5173/remote-schema) | 已建立结构校验和可信白名单 | 纯 JSON 配置与本地组件、函数、Slot 增强 |
+
+推荐顺序是先直接组件或 Adapter，再考虑自定义 Type；不要为了单个页面减少配置行数就建立注册协议。
+
+## 业务场景
+
+| Demo | 难度 | 业务重点 |
+| --- | --- | --- |
+| [行列操作与异步提交 ↗](http://localhost:5173/row-column-operations) | 进阶 | 行增删复制移动、动态列和成功后提交 |
+| [单元格合并 ↗](http://localhost:5173/cell-merge) | 高级 | 纵横合并、稳定列定位、共享字段和校验 |
+| [多需求费用明细 ↗](http://localhost:5173/heterogeneous-demands) | 高级 | 异构组件、差异数据和提交归一化 |
+| [多日议程编排 ↗](http://localhost:5173/itinerary-simple) | 高级 | 分组字段、拖拽、行操作和分组提交 |
+
+业务示例用于展示多项能力的组合方式，不替代 API 参考。复制代码前应先确认自己的行身份、校验和提交边界。
+
+## 工程验证
+
+| 工具 | 用途 |
+| --- | --- |
+| [大数据量性能实验 ↗](http://localhost:5173/performance) | 对比展示、编辑和动态配置的渲染及更新指标 |
+
+性能实验应在 production build 和固定环境中重复测量；单次开发模式耗时不是容量结论。
+
+## 内部调试入口
+
+以下页面保留用于维护兼容性，不属于推荐学习路径：
+
+| 工具 | 当前用途 | 后续处理 |
+| --- | --- | --- |
+| [配置路径调试台 ↗](http://localhost:5173/form-table-docs) | 搜索 Playground 内置的 API 数据 | 迁移到文档站唯一 API 来源后移除重复数据 |
+| [组件对象与 Ref 调试 ↗](http://localhost:5173/debug) | 验证组件对象、字段上下文和原生 Ref | 合并进直接组件或企业组件示例 |
+
+## 选择下一步
+
+- 普通字段与校验：[快速开始](../guide/quick-start.md)
+- 不确定使用组件还是 Slot：[扩展模型](../architecture/extension-model.md)
+- 行增删与异步流程：[行列操作与异步提交](../features/row-column-operations.md)
+- 企业组件协议：[企业复杂组件接入](./enterprise-components.md)
+- 性能问题：[性能优化建议](../features/performance-optimization.md)

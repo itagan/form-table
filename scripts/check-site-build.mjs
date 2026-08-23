@@ -62,6 +62,22 @@ if (fs.existsSync(path.join(playgroundDist, 'index.html'))) {
   }
 }
 
+const playgroundAssets = path.join(playgroundDist, 'assets')
+if (fs.existsSync(playgroundAssets)) {
+  const vueVendorEntry = fs
+    .readdirSync(playgroundAssets)
+    .find(file => /^vue-vendor\.[^.]+\.js$/.test(file))
+
+  if (!vueVendorEntry) {
+    errors.push('Playground 缺少现代浏览器的 Vue 基础依赖分包。')
+  } else {
+    const vueVendorSource = fs.readFileSync(path.join(playgroundAssets, vueVendorEntry), 'utf8')
+    if (/from["']\.\/element-ui\./.test(vueVendorSource)) {
+      errors.push('Playground 的 Vue 与 Element UI 分包形成循环依赖，生产页面可能无法启动。')
+    }
+  }
+}
+
 if (errors.length > 0) {
   console.error(`同站构建检查失败（${errors.length} 项）：`)
   for (const error of errors) console.error(`- ${error}`)
