@@ -98,6 +98,7 @@ interface CellSlotColumnConfig extends BaseColumnConfig {
 interface FormTableCellSlotContext {
   row: Readonly<TableRow>
   index: number
+  displayIndex: number
   columnConfig: Readonly<CellSlotColumnConfig>
   updateRow: (patch: FormTableRowPatch<TableRow>) => void
 }
@@ -126,7 +127,7 @@ type FormItemConfig =
   | { type: 'slot'; component: FieldComponentConfig & { slot: string } }
 ```
 
-所有 Item 都支持可选 `key` 作为稳定渲染身份，并要求 `fieldKey` 指向行数据路径。`key` 不参与取值、更新或表单校验路径计算。注册 type 的 Item 只允许 `component.props/listeners/model`，实际组件 `is` 由注册定义提供。Item 还可通过 `labelSlot/errorSlot` 引用 FormTable 上的具名 Slot；两者都获得字段操作上下文和完整 `propPath`，Error Slot 额外获得 `error`。
+所有 Item 都支持可选 `key` 作为稳定渲染身份，并要求 `fieldKey` 指向行数据路径。`key` 不参与取值、更新或表单校验路径计算。注册 type 的 Item 只允许 `component.props/listeners/model`，实际组件 `is` 由注册定义提供。Item 还可通过 `labelSlot/errorSlot` 引用 FormTable 上的具名 Slot；两者都获得字段操作上下文和 `propPath: string | undefined`，Error Slot 额外获得 `error`。
 
 三种 Item 也共享可选的静态 `meta: FormTableRecord`。FormTable 原样保留该对象但不解析或自动透传，动态配置、listener 和 Slot 通过 `itemConfig.meta` 读取。需要动态差异时应读取当前 `row/value` 或提供另一份 Item 配置，而不是把 `meta` 配置为函数。
 
@@ -161,12 +162,12 @@ type FieldComponentResolver = (
 
 ```text
 Column visible/props/headerProps/headerHint → tableData, columnConfig
-Column rowProps          → Column 信息 + row, index
+Column rowProps          → Column 信息 + row, index, displayIndex
 Field 布局与 Hint 求值   → Row 信息 + fieldKey, value, itemConfig
 component 动态配置       → Field 信息
 component.listeners      → Field 信息 + setValue, bindingValue, setBindingValue, updateRow
 字段 slot                → Listener 信息 + propPath, component
-列级 cellSlot            → row, index, columnConfig, updateRow
+列级 cellSlot            → row, index, displayIndex, columnConfig, updateRow
 ```
 
 `FormTableSlotContext.itemConfig.component` 保留调用方传入的原始配置；`FormTableSlotContext.component` 包含针对当前数据行解析并归一化后的 `props/listeners/options/optionProps/model`，用于直接绑定 Slot 内组件。该解析结果不再作为独立顶层类型导出。

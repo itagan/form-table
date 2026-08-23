@@ -58,13 +58,15 @@ if (valid) {
 
 ```ts
 function validateField(propPath) {
+  if (!propPath) return
+
   formTableRef.value
     ?.getFormRef()
     ?.validateField?.(propPath)
 }
 ```
 
-普通字段也可以按规则拼接 `tableData.${index}.${fieldKey}`，但行变动后不要缓存旧路径。
+普通字段也可以按规则拼接 `tableData.${index}.${fieldKey}`，但行变动后不要缓存旧路径。同一行对象重复出现在 `tableData` 且无法确定来源位置时，`propPath` 为 `undefined`，调用校验方法前应先判断。
 
 ## 清除校验状态
 

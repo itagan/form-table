@@ -91,8 +91,8 @@ export const apiGroups: ApiGroup[] = [
 export const contextRows = [
   { location: 'columns[].visible / props / headerProps / headerHint', context: 'ColumnContext', fields: 'tableData, columnConfig' },
   { location: 'columns[].headerSlot', context: 'HeaderSlotContext', fields: 'tableData, columnConfig, columnIndex, label' },
-  { location: 'columns[].cellSlot', context: 'FormTableCellSlotContext', fields: 'row, index, columnConfig, updateRow' },
-  { location: 'columns[].rowProps', context: 'RowContext', fields: 'ColumnContext + row, index' },
+  { location: 'columns[].cellSlot', context: 'FormTableCellSlotContext', fields: 'row, index, displayIndex, columnConfig, updateRow' },
+  { location: 'columns[].rowProps', context: 'RowContext', fields: 'ColumnContext + row, index, displayIndex' },
   { location: '…formItems[].visible / colProps / formItemProps / hint', context: 'ItemContext', fields: 'RowContext + fieldKey, value, itemConfig' },
   { location: '…component.props / options / optionProps / resolveComponent', context: 'ItemContext', fields: 'RowContext + fieldKey, value, itemConfig' },
   { location: '…component.listeners[event]', context: 'ActionContext', fields: 'ItemContext + setValue, bindingValue, setBindingValue, updateRow；后接原始事件参数' },

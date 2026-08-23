@@ -25,9 +25,9 @@ columns[]                                  ColumnConfig
 | `columns[].headerSlot` | `string` | 可选 | Slot scope | 表头具名 Slot |
 | `columns[].headerProps` | `DynamicValue<ComponentProps, ColumnContext>` | `{}` | `tableData, columnConfig` | 默认或 Slot 表头包装节点属性 |
 | `columns[].headerHint` | `DynamicValue<FormTableHintValue, ColumnContext>` | 可选 | `tableData, columnConfig` | 表头 Hint；仅在 `targets: 'header'/'all'` 时求值和展示 |
-| `columns[].rowProps` | `DynamicValue<ComponentProps, RowContext>` | `{ type: 'flex' }` | ColumnContext + `row, index` | 透传单元格内唯一 `el-row`；显式 `type` 可覆盖默认值 |
+| `columns[].rowProps` | `DynamicValue<ComponentProps, RowContext>` | `{ type: 'flex' }` | ColumnContext + `row, index, displayIndex` | 透传单元格内唯一 `el-row`；显式 `type` 可覆盖默认值 |
 | `columns[].formItems` | `FormItemConfig[]` | 与 `cellSlot` 互斥 | — | 进入 Item 字段链路 |
-| `columns[].cellSlot` | `string` | 与 `formItems` 互斥 | `row, index, columnConfig, updateRow` | 直接渲染单元格 |
+| `columns[].cellSlot` | `string` | 与 `formItems` 互斥 | `row, index, displayIndex, columnConfig, updateRow` | 直接渲染单元格 |
 
 无需字段渲染链路的功能列使用 `NativeColumnConfig`，所有 Element Column 属性继续放在 `props` 中：
 
@@ -90,7 +90,7 @@ fieldKey: profile.city
 propPath: tableData.0.profile.city
 ```
 
-`el-form-item.prop` 原本用于指向 `el-form.model` 中参与校验、清理和重置的字段。FormTable 根据当前行下标和 `fieldKey` 自动生成完整路径，确保每一行的同名字段拥有独立校验状态，并与字段更新目标一致。
+`el-form-item.prop` 原本用于指向 `el-form.model` 中参与校验、清理和重置的字段。FormTable 根据当前行在受控 `tableData` 中的数据源下标和 `fieldKey` 自动生成完整路径，确保 Element Table 内部排序或筛选后，同名字段仍拥有独立校验状态并与字段更新目标一致。
 
 因此，`prop` 不属于 `formItemProps` 的透传范围。TypeScript 会拒绝手工配置；JavaScript 或远程 Schema 即使传入，也会被 FormTable 生成的路径覆盖。需要调用原生 `validateField/clearValidate` 时，应使用 `tableData.{rowIndex}.{fieldKey}` 形式的完整路径。
 
