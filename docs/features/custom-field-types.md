@@ -272,4 +272,4 @@ MoneyEditor.money
 
 因此当前不提供 `base: 'number'`、`mergeFormTableTypes()` 或 `createFormTableSchema()`。这些 API 的主要收益是减少少量配置代码，却会增加内置预设继承、冲突覆盖和第二套 Schema 入口。复杂配置治理保留在业务层，FormTable 核心继续保持轻量、高性能，并优先服务高度自定义组件。
 
-完整运行示例见 [`/custom-field-types`](http://localhost:5173/custom-field-types)。架构取舍和首版边界见[自定义字段 Type 架构设计](../design/custom-field-type-proposal.md)。
+完整运行示例见 [`/custom-field-types`](http://localhost:5173/custom-field-types)。选择自定义 Type 的条件和保持轻量的边界见[扩展模型](../architecture/extension-model.md)。
