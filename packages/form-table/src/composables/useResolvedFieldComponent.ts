@@ -7,15 +7,12 @@ import {
 } from '../configs/defaultComponentConfigs'
 import type {
   FormItemConfig,
-  FormItemOption,
-  FieldComponentConfig,
   FieldTypeDefinition,
   FieldTypeRegistry,
   FormTableFieldContext,
   FormTableFieldRenderContext,
   FormTableHintMode,
   FormTableHintTrigger,
-  OptionPropsConfig,
   ResolvedComponentConfig,
   TableRow
 } from '../types'
@@ -49,8 +46,7 @@ const resolveComponentTarget = <TRow extends TableRow>(
   typeDefinition: FieldTypeDefinition<TRow> | undefined
 ) => {
   if (config.type === 'component') {
-    const component = config.component as FieldComponentConfig<TRow>
-    return component.resolveComponent?.(context) ?? component.is
+    return config.component.resolveComponent?.(context) ?? config.component.is
   }
   if (config.type === 'slot') return undefined
   if (isBuiltinFormItemType(config.type)) return getComponentType(config.type)
@@ -85,7 +81,7 @@ export function useResolvedFieldComponent<TRow extends TableRow = TableRow>(
     return {
       is: resolveComponentTarget(config, context, typeDefinition),
       slot: config.type === 'slot'
-        ? (config.component as FieldComponentConfig<TRow>).slot
+        ? config.component.slot
         : undefined,
       props: applyHintComponentProps(
         componentProps,
@@ -94,11 +90,8 @@ export function useResolvedFieldComponent<TRow extends TableRow = TableRow>(
         options.hintTrigger.value
       ),
       listeners: resolvedListeners,
-      options: resolveDynamicValue(component?.options, context) as FormItemOption[] || [],
-      optionProps: resolveDynamicValue(
-        component?.optionProps,
-        context
-      ) as OptionPropsConfig | undefined,
+      options: resolveDynamicValue(component?.options, context) || [],
+      optionProps: resolveDynamicValue(component?.optionProps, context),
       model: component?.model ?? typeDefinition?.model
     }
   })
