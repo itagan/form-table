@@ -289,7 +289,10 @@ export interface CellSlotColumnConfig<TRow extends TableRow = TableRow> extends 
 
 export interface FormTableCellSlotContext<TRow extends TableRow = TableRow> {
   row: Readonly<TRow>
+  /** 当前行在受控 tableData 中的数据源下标。 */
   index: number
+  /** 当前行经过 Element Table 排序或筛选后的显示下标。 */
+  displayIndex: number
   columnConfig: Readonly<CellSlotColumnConfig<TRow>>
   updateRow: (patch: FormTableRowPatch<TRow>) => void
 }

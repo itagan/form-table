@@ -38,6 +38,7 @@ import {
 const props = defineProps<{
   row: TableRow
   rowIndex: number
+  displayIndex: number
   columnContext: FormTableColumnContext
   items: FormItemConfig[]
   rowProps?: DynamicValue<ComponentProps, FormTableRowContext>
@@ -47,7 +48,8 @@ const props = defineProps<{
 const rowContext = computed<FormTableRowContext>(() => createRowContext(
   props.columnContext,
   props.row,
-  props.rowIndex
+  props.rowIndex,
+  props.displayIndex
 ))
 
 /** 默认使用支持换行的 Flex Row，调用方仍可通过 rowProps 显式覆盖。 */

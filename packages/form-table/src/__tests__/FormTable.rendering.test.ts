@@ -430,6 +430,7 @@ describe('FormTable rendering and configuration', () => {
     expect(Object.keys(listener.mock.calls[0][0]).sort()).toEqual([
       'bindingValue',
       'columnConfig',
+      'displayIndex',
       'fieldKey',
       'index',
       'itemConfig',
@@ -1184,12 +1185,14 @@ describe('FormTable rendering and configuration', () => {
     ])
     expect(Object.keys(rowProps.mock.calls[0][0]).sort()).toEqual([
       'columnConfig',
+      'displayIndex',
       'index',
       'row',
       'tableData'
     ])
     expect(Object.keys(fieldVisible.mock.calls[0][0]).sort()).toEqual([
       'columnConfig',
+      'displayIndex',
       'fieldKey',
       'index',
       'itemConfig',
@@ -1199,6 +1202,7 @@ describe('FormTable rendering and configuration', () => {
     ])
     expect(Object.keys(fieldOptions.mock.calls[0][0]).sort()).toEqual([
       'columnConfig',
+      'displayIndex',
       'fieldKey',
       'index',
       'itemConfig',

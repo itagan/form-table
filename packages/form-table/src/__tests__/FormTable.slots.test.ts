@@ -242,6 +242,7 @@ describe('FormTable slot rendering', () => {
     expect(valueToProp).not.toHaveBeenCalled()
     expect(Object.keys(componentPropsResolver.mock.calls[0][0]).sort()).toEqual([
       'columnConfig',
+      'displayIndex',
       'fieldKey',
       'index',
       'itemConfig',

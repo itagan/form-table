@@ -49,6 +49,7 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
    */
   const propPath = computed(() => {
     const rowContext = options.getRowContext()
+    if (rowContext.index < 0) return undefined
     return `tableData.${rowContext.index}.${options.getConfig().fieldKey}`
   })
 

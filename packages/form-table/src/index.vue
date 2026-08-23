@@ -82,11 +82,13 @@ import {
   FORM_TABLE_CONTEXT_KEY,
   FORM_TABLE_FIELD_TYPES_KEY,
   FORM_TABLE_HINT_CONTEXT_KEY,
+  FORM_TABLE_ROW_INDEX_KEY,
   FORM_TABLE_SLOTS_KEY,
   FORM_TABLE_UPDATE_KEY
 } from './types'
 import { useColumnIdentity } from './composables/useColumnIdentity'
 import { useControlledTableUpdate } from './composables/useControlledTableUpdate'
+import { useRowIndex } from './composables/useRowIndex'
 import { createTableContext } from './utils/dynamic'
 import { collectFieldTypeDiagnostics } from './utils/fieldTypeDiagnostics'
 import {
@@ -166,7 +168,7 @@ const resolvedTableProps = computed(() => {
   return resolveTableProps(props.tableProps as ComponentProps)
 })
 
-/** el-form 的校验模型；字段 prop 均以 tableData.{rowIndex}.{fieldKey} 开头。 */
+/** el-form 的校验模型；字段 prop 始终使用受控 tableData 的数据源下标。 */
 const formModel = computed(() => ({ tableData: props.tableData }))
 
 /** 将 Element Form 的逐字段校验结果与 Table 原生事件命名空间分离。 */
@@ -179,6 +181,9 @@ const formTableContext: FormTableTableContext = createTableContext(() => props.t
 
 const { visibleColumns } = useColumnIdentity(() => props.columns, formTableContext)
 
+/** 内部排序或筛选只改变显示位置；全部单元格共享同一份数据源行索引。 */
+const resolveRowIndex = useRowIndex(() => props.tableData)
+
 /** 通过独立受控更新模块统一不可变写回、稳定行定位和同步组合。 */
 const updateApi: FormTableUpdateApi = useControlledTableUpdate({
   getTableData: () => props.tableData,
@@ -190,6 +195,7 @@ const updateApi: FormTableUpdateApi = useControlledTableUpdate({
 /** 后代组件共享表数据、更新入口和父级插槽，避免逐层透传无关参数。 */
 provide(FORM_TABLE_CONTEXT_KEY, formTableContext)
 provide(FORM_TABLE_FIELD_TYPES_KEY, resolvedFieldTypes)
+provide(FORM_TABLE_ROW_INDEX_KEY, resolveRowIndex)
 provide(FORM_TABLE_UPDATE_KEY, updateApi)
 provide(FORM_TABLE_SLOTS_KEY, slots as FormTableSlots)
 provide<FormTableHintContext>(FORM_TABLE_HINT_CONTEXT_KEY, {
