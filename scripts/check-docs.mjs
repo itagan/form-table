@@ -47,6 +47,28 @@ const requiredPublicApiNames = [
   'getFormRef()',
   'getTableRef()'
 ]
+const requiredArchitecturePages = [
+  'overview.md',
+  'rendering-pipeline.md',
+  'controlled-data-flow.md',
+  'extension-model.md'
+]
+const allowedExampleCategories = new Set([
+  'basics',
+  'rendering',
+  'advanced',
+  'business',
+  'engineering',
+  'tools'
+])
+const allowedExampleLevels = new Set(['beginner', 'intermediate', 'advanced'])
+const allowedExampleStatuses = new Set([
+  'featured',
+  'example',
+  'legacy-composite',
+  'tool',
+  'internal-tool'
+])
 
 for (const file of uniqueMarkdownFiles) {
   const source = fs.readFileSync(file, 'utf8')
@@ -96,6 +118,7 @@ const playgroundRouterSource = fs.readFileSync(
   'utf8'
 )
 const exampleNames = new Set()
+const examplePaths = new Set()
 for (const example of playgroundExamples) {
   if (!exampleIndexSource.includes(`http://localhost:5173${example.path}`)) {
     errors.push(`docs/examples/index.md: 缺少示例清单路由 ${example.path}`)
@@ -104,8 +127,48 @@ for (const example of playgroundExamples) {
     errors.push(`playground/examples.json: 示例名称重复 ${example.name}`)
   }
   exampleNames.add(example.name)
+  if (examplePaths.has(example.path)) {
+    errors.push(`playground/examples.json: 示例路由重复 ${example.path}`)
+  }
+  examplePaths.add(example.path)
+  if (!allowedExampleCategories.has(example.category)) {
+    errors.push(`playground/examples.json: ${example.path} 分类无效 ${example.category}`)
+  }
+  if (!allowedExampleLevels.has(example.level)) {
+    errors.push(`playground/examples.json: ${example.path} 难度无效 ${example.level}`)
+  }
+  if (!allowedExampleStatuses.has(example.status)) {
+    errors.push(`playground/examples.json: ${example.path} 状态无效 ${example.status}`)
+  }
+  if (!Array.isArray(example.tags) || example.tags.length === 0) {
+    errors.push(`playground/examples.json: ${example.path} 缺少 tags`)
+  }
+  if (!Array.isArray(example.relatedDocs) || example.relatedDocs.length === 0) {
+    errors.push(`playground/examples.json: ${example.path} 缺少 relatedDocs`)
+  } else {
+    for (const relatedDoc of example.relatedDocs) {
+      const relativeDocPath = relatedDoc.replace(/^\/+/, '')
+      const docTarget = path.join(
+        repositoryRoot,
+        'docs',
+        relativeDocPath.endsWith('/') ? `${relativeDocPath}index.md` : `${relativeDocPath}.md`
+      )
+      if (!fs.existsSync(docTarget)) {
+        errors.push(`playground/examples.json: ${example.path} 关联文档不存在 ${relatedDoc}`)
+      }
+    }
+  }
+  if (typeof example.source !== 'string' || !fs.existsSync(path.join(repositoryRoot, example.source))) {
+    errors.push(`playground/examples.json: ${example.path} 源文件不存在 ${example.source}`)
+  }
   if (!playgroundRouterSource.includes(`${example.view}: () =>`)) {
     errors.push(`playground/examples.json: 页面加载器未在 Router 中声明 ${example.view}`)
+  }
+}
+
+for (const architecturePage of requiredArchitecturePages) {
+  if (!fs.existsSync(path.join(repositoryRoot, 'docs/architecture', architecturePage))) {
+    errors.push(`docs/architecture: 缺少架构页 ${architecturePage}`)
   }
 }
 

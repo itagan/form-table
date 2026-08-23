@@ -34,6 +34,12 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks(id) {
+            // CommonJS 运行时同时被 Vue 与 Element UI 使用。固定到基础依赖分包，
+            // 避免 Rollup 将它归入 Element UI 后形成 element-ui <-> vue-vendor 循环依赖。
+            if (id.includes('commonjsHelpers')) {
+              return 'vue-vendor'
+            }
+
             if (id.includes('/node_modules/vue/') || id.includes('/node_modules/vue-router/')) {
               return 'vue-vendor'
             }

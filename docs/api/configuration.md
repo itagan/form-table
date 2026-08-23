@@ -15,8 +15,9 @@ FormTable
 ├─ tableProps
 ├─ fieldTypes                           实例级自定义字段 type 注册表
 ├─ hintOptions
-│  ├─ mode / props
-│  └─ field
+│  ├─ mode / targets
+│  ├─ field
+│  └─ tooltipProps
 ├─ loading
 └─ columns[]
    ├─ key / label / visible / props
@@ -70,7 +71,7 @@ FormTable
 | FormItem Label / Error Slot | [能力边界与处理方案](../features/element-ui-boundaries.md#formitem-自定义-label-和-error) | [`/hint-scenarios`](http://localhost:5173/hint-scenarios) |
 | 列级单元格 Slot | [`cellSlot` 专题](../features/cell-slot.md) | [`/cell-slot`](http://localhost:5173/cell-slot) |
 | 自定义字段组件 | [配置与使用](../features/custom-component.md) | [`/enterprise-components`](http://localhost:5173/enterprise-components) |
-| 自定义字段 Type | [注册、覆盖与错误处理](../features/custom-field-types.md) | [`/custom-field-types`](http://localhost:5173/custom-field-types) |
+| 自定义字段 Type（高级） | [注册、覆盖与错误处理](../features/custom-field-types.md) | [`/custom-field-types`](http://localhost:5173/custom-field-types) |
 | 复合字段映射 | [配置与使用](../features/composite-binding.md) | [`/composite-binding`](http://localhost:5173/composite-binding) |
 | 复杂 Option / 分组选项 | [使用字段 Slot 接入](./component.md#复杂-option-接入) | — |
 | 远程 Schema | [配置与本地增强](../features/remote-schema.md) | [`/remote-schema`](http://localhost:5173/remote-schema) |

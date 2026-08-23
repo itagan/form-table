@@ -1,5 +1,7 @@
 # 自定义字段 Type
 
+> **高级扩展：**本能力用于治理已经跨页面稳定重复的组件、model 和默认 Props。单次接入优先使用 `type: 'component'`，复杂旧协议优先使用 Adapter；选择顺序见[扩展模型](../architecture/extension-model.md)。
+
 实例级 `fieldTypes` 可以把稳定、重复的业务组件协议注册成具名字段，使 columns 像内置 type 一样直接使用 `type: 'employee'`。它只是一层轻量解析，解析后仍复用现有组件 model、校验、Hint、受控更新和 `binding.map` 链路。
 
 ## 注册与使用
