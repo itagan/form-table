@@ -46,5 +46,6 @@ export interface FormTableFieldContext<TRow extends TableRow = TableRow> extends
 export interface FormTableUpdateApi<TRow extends TableRow = TableRow> {
   /** 组件内部更新入口；通过行身份重新定位，不依赖可能过期的渲染下标。 */
   setValue: (row: TRow, fieldKey: string, value: FormTableValue) => void
+  /** 不可变地批量更新指定行，patch 的 key 支持字段路径。 */
   updateRow: (row: TRow, patch: FormTableRowPatch<TRow>) => void
 }
