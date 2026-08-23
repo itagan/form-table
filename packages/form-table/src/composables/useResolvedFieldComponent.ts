@@ -9,6 +9,7 @@ import type {
   FormItemConfig,
   FormItemOption,
   FieldComponentConfig,
+  FieldTypeDefinition,
   FieldTypeRegistry,
   FormTableFieldContext,
   FormTableFieldRenderContext,
@@ -31,6 +32,31 @@ interface ResolvedFieldComponentOptions<TRow extends TableRow> {
   fieldTypes: Readonly<Ref<FieldTypeRegistry<TRow>>>
 }
 
+const resolveTypeDefinition = <TRow extends TableRow>(
+  type: string,
+  fieldTypes: FieldTypeRegistry<TRow>
+): FieldTypeDefinition<TRow> | undefined => {
+  if (isReservedFormItemType(type)) return undefined
+  return Object.prototype.hasOwnProperty.call(fieldTypes, type)
+    ? fieldTypes[type]
+    : undefined
+}
+
+/** 按字段类型优先级选择唯一组件目标，不读取注册表或其他响应式状态。 */
+const resolveComponentTarget = <TRow extends TableRow>(
+  config: FormItemConfig<TRow>,
+  context: FormTableFieldRenderContext<TRow>,
+  typeDefinition: FieldTypeDefinition<TRow> | undefined
+) => {
+  if (config.type === 'component') {
+    const component = config.component as FieldComponentConfig<TRow>
+    return component.resolveComponent?.(context) ?? component.is
+  }
+  if (config.type === 'slot') return undefined
+  if (isBuiltinFormItemType(config.type)) return getComponentType(config.type)
+  return typeDefinition?.is
+}
+
 /**
  * 将公开的字段配置归一化为函数式字段渲染器可直接消费的渲染配置。
  * 动态组件、props 和 options 都集中在同一个 computed 中求值一次。
@@ -38,32 +64,11 @@ interface ResolvedFieldComponentOptions<TRow extends TableRow> {
 export function useResolvedFieldComponent<TRow extends TableRow = TableRow>(
   options: ResolvedFieldComponentOptions<TRow>
 ) {
-  const resolveTypeDefinition = (type: string) => {
-    if (isReservedFormItemType(type)) return undefined
-    const fieldTypes = options.fieldTypes.value
-    return Object.prototype.hasOwnProperty.call(fieldTypes, type)
-      ? fieldTypes[type]
-      : undefined
-  }
-
-  const resolveComponentTarget = (
-    config: FormItemConfig<TRow>,
-    context: FormTableFieldRenderContext<TRow>
-  ) => {
-    if (config.type === 'component') {
-      const component = config.component as FieldComponentConfig<TRow>
-      return component.resolveComponent?.(context) ?? component.is
-    }
-    if (config.type === 'slot') return undefined
-    if (isBuiltinFormItemType(config.type)) return getComponentType(config.type)
-    return resolveTypeDefinition(config.type)?.is
-  }
-
   const resolvedComponent = computed<ResolvedComponentConfig<TRow>>(() => {
     const config = options.getConfig()
     const context = options.runtimeContext.value
     const component = config.component
-    const typeDefinition = resolveTypeDefinition(config.type)
+    const typeDefinition = resolveTypeDefinition(config.type, options.fieldTypes.value)
     const listeners = component?.listeners || {}
     const defaultProps = resolveDynamicValue(typeDefinition?.props, context) || {}
     const componentProps = {
@@ -78,7 +83,7 @@ export function useResolvedFieldComponent<TRow extends TableRow = TableRow>(
     }, {})
 
     return {
-      is: resolveComponentTarget(config, context),
+      is: resolveComponentTarget(config, context, typeDefinition),
       slot: config.type === 'slot'
         ? (config.component as FieldComponentConfig<TRow>).slot
         : undefined,
