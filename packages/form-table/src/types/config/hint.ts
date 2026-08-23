@@ -19,9 +19,12 @@ export type FormTableDefaultFieldHint<TRow extends TableRow = TableRow> =
 
 /** FormTable 自动提示策略；Tooltip 属性仅在对应模式下有效。 */
 export interface FormTableHintOptions<TRow extends TableRow = TableRow> {
+  /** Hint 展示方式；默认使用原生 title，false 关闭全部自动 Hint。 */
   mode?: FormTableHintMode
+  /** 自动 Hint 的作用范围；默认仅处理字段。 */
   targets?: FormTableHintTargets
   /** false/未配置关闭默认字段内容；true 默认字符串化；函数统一格式化。 */
   field?: FormTableDefaultFieldHint<TRow>
+  /** tooltip 模式下透传给单例 el-tooltip 的属性，受管属性会被忽略。 */
   tooltipProps?: ComponentProps
 }
