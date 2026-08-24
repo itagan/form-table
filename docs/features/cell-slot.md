@@ -134,7 +134,7 @@ const columns = computed(() => [
 </template>
 ```
 
-两份配置可以共享稳定 key、标题、列宽和业务 formatter，但不能在一个对象上同时保留 `formItems` 与 `cellSlot`。结构切换后在 `nextTick` 调用 `clearValidate()`，避免编辑模式的旧校验展示残留。更完整的模式选择和配置工厂见[权限、只读与编辑模式](./permissions-and-editing.md)。
+两份配置可以共享稳定 key、标题、列宽和业务 formatter，但不能在一个对象上同时保留 `formItems` 与 `cellSlot`。结构切换后在 `nextTick` 调用 `clearValidate()`，避免编辑模式的旧校验展示残留。`text` 空 Label、原生 Column 和混合配置的完整选择见[详情与编辑模式](./detail-and-editing-modes.md)。
 
 ## 手写多 Row 表单
 
