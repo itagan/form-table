@@ -4,9 +4,15 @@
       <div>
         <p class="eyebrow">FEATURE DEMO</p>
         <h1>cellSlot 列级单元格</h1>
-        <p>一个独立页面对比列级 cellSlot 与字段 Slot，并展示实际 scope 和更新事件。</p>
+        <p>对比列级 cellSlot 与字段 Slot，并演示详情、编辑模式切换时替换完整列配置。</p>
       </div>
-      <el-button @click="resetRows">恢复示例数据</el-button>
+      <div class="heading-actions">
+        <el-radio-group v-model="scoreMode" size="small">
+          <el-radio-button label="edit">评分编辑</el-radio-button>
+          <el-radio-button label="detail">评分详情</el-radio-button>
+        </el-radio-group>
+        <el-button @click="resetRows">恢复示例数据</el-button>
+      </div>
     </header>
 
     <section class="boundary-card">
@@ -64,6 +70,13 @@
           </div>
         </template>
 
+        <template #score-detail="context">
+          <button class="score-detail inspectable" type="button" @click="inspectContext(context)">
+            <strong>{{ context.row.score }}</strong>
+            <small>详情模式不创建 FormItem</small>
+          </button>
+        </template>
+
         <template #row-actions="context">
           <div class="row-actions">
             <el-button type="text" @click="context.updateRow({ status: context.row.status === 'enabled' ? 'disabled' : 'enabled' })">
@@ -103,7 +116,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { Message } from 'element-ui'
 import FormTable from '@itagan/form-table'
 import type {
@@ -136,8 +149,9 @@ const tableData = ref<DemoRow[]>(createRows())
 const formTableRef = ref<FormTableExpose>()
 const inspectedContext = ref<Record<string, unknown> | null>(null)
 const fieldEvents = ref<FormTableFieldChangePayload[]>([])
+const scoreMode = ref<'edit' | 'detail'>('edit')
 
-const columns: ColumnConfig[] = [
+const displayColumns: ColumnConfig[] = [
   {
     key: 'profile-column',
     label: '组合信息',
@@ -155,26 +169,50 @@ const columns: ColumnConfig[] = [
     label: '派生金额',
     cellSlot: 'amount-cell',
     props: { width: 140, align: 'right' }
-  },
-  {
-    key: 'score-column',
-    label: '评分（字段 Slot）',
-    props: { minWidth: 220 },
-    formItems: [{
-      key: 'score-field',
-      fieldKey: 'score',
-      type: 'slot',
-      formItemProps: { rules: [{ required: true, message: '请输入评分' }] },
-      component: { slot: 'score-editor' }
-    }]
-  },
-  {
-    key: 'actions-column',
-    label: '操作',
-    cellSlot: 'row-actions',
-    props: { width: 260, fixed: 'right', align: 'center' }
   }
 ]
+
+// 共享稳定身份和业务字段描述，按页面模式生成互斥的两种列结构。
+const scoreColumnBase = {
+  key: 'score-column',
+  label: '评分',
+  props: { minWidth: 220 }
+}
+
+const editScoreColumn: ColumnConfig = {
+  ...scoreColumnBase,
+  formItems: [{
+    key: 'score-field',
+    fieldKey: 'score',
+    type: 'slot',
+    formItemProps: { rules: [{ required: true, message: '请输入评分' }] },
+    component: { slot: 'score-editor' }
+  }]
+}
+
+const detailScoreColumn: ColumnConfig = {
+  ...scoreColumnBase,
+  cellSlot: 'score-detail'
+}
+
+const actionColumn: ColumnConfig = {
+  key: 'actions-column',
+  label: '操作',
+  cellSlot: 'row-actions',
+  props: { width: 260, fixed: 'right', align: 'center' }
+}
+
+const columns = computed<ColumnConfig[]>(() => [
+  ...displayColumns,
+  scoreMode.value === 'edit' ? editScoreColumn : detailScoreColumn,
+  actionColumn
+])
+
+watch(scoreMode, async () => {
+  // 详情列不再挂载字段 FormItem，清理编辑模式遗留的校验展示。
+  await nextTick()
+  formTableRef.value?.clearValidate()
+})
 
 const statusMeta = (status: DemoRow['status']) => ({
   enabled: { type: 'success', label: '启用' },
@@ -235,6 +273,13 @@ const configurationExample = `// 列级 cellSlot：无 fieldKey，直接使用 r
   ¥ {{ row.quantity * row.unitPrice }}
 </template>
 
+// 同一业务列在编辑和详情模式使用两份互斥结构
+const columns = computed(() => [
+  mode.value === 'edit'
+    ? { key: 'score', label: '评分', formItems: [scoreItem] }
+    : { key: 'score', label: '评分', cellSlot: 'score-detail' }
+])
+
 // 字段 Slot：保留 fieldKey、setValue、propPath 和 rules
 {
   fieldKey: 'score',
@@ -247,6 +292,7 @@ const configurationExample = `// 列级 cellSlot：无 fieldKey，直接使用 r
 <style scoped>
 .demo-page { max-width: 1380px; margin: 0 auto; padding: 40px 32px; color: #1f2937; }
 .page-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; }
+.heading-actions { display: flex; align-items: center; gap: 12px; }
 .page-heading h1 { margin: 4px 0 8px; }
 .page-heading p { margin: 0; color: #667085; }
 .eyebrow { color: #2563eb !important; font-size: 12px; font-weight: 700; letter-spacing: .08em; }
@@ -269,12 +315,15 @@ const configurationExample = `// 列级 cellSlot：无 fieldKey，直接使用 r
 .inspectable:hover { color: #2563eb; }
 .score-editor { display: flex; align-items: center; gap: 10px; }
 .score-editor :deep(.el-input-number) { width: 130px; }
+.score-detail { display: grid; gap: 3px; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.score-detail small { color: #667085; }
 .row-actions { display: flex; justify-content: center; white-space: nowrap; }
 .danger { color: #ef4444; }
 .empty { color: #98a2b3; }
 pre { max-height: 400px; margin: 0; padding: 16px; overflow: auto; border-radius: 8px; background: #f6f8fa; line-height: 1.55; }
 @media (max-width: 900px) {
   .page-heading { align-items: flex-start; flex-direction: column; }
+  .heading-actions { align-items: flex-start; flex-direction: column; }
   .boundary-card, .details-grid { grid-template-columns: 1fr; }
 }
 </style>

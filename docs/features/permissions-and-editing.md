@@ -38,6 +38,112 @@ const columns: ColumnConfig[] = [{
 
 对于 Select、日期选择器和上传等没有一致 `readonly` 语义的组件，通常使用 `disabled`。如果浏览态数据量较大，并且不需要 FormItem、校验和编辑组件，可提供另一份稳定的只读 columns，使用 `cellSlot` 展示文本；切换结构后在 `nextTick` 调用 `clearValidate()` 清理旧校验状态。
 
+## 详情与编辑是否共用配置
+
+两种方式都合理，应根据详情页是否还需要字段组件来选择：
+
+| 场景 | 推荐方式 | 代价 |
+| --- | --- | --- |
+| 页面内快速切换，布局和组件基本一致 | 复用 `formItems`，动态设置 `readonly/disabled` | 详情模式仍会创建组件、FormItem 和校验链路 |
+| 独立详情页、数据量较大或展示结构不同 | 详情 Column 使用 `cellSlot`，编辑 Column 使用 `formItems` | 需要分别描述展示和编辑渲染 |
+| 只有少数复杂字段展示不同 | 大部分复用组件，个别列按模式替换为 `cellSlot` | 配置工厂需要支持混合策略 |
+
+公开配置中没有 `colSlot`；列级单元格入口名为 `cellSlot`。一个 Column 不能同时声明 `formItems` 和 `cellSlot`，模式切换时应替换完整 Column 配置。
+
+### 复用组件配置
+
+详情只是暂时禁止编辑，并且业务组件有清晰的只读展示时，可以继续复用同一份 columns：
+
+```ts
+const mode = ref<'detail' | 'edit'>('edit')
+
+const columns: ColumnConfig[] = [{
+  key: 'supplier-column',
+  label: '供应商',
+  formItems: [{
+    fieldKey: 'supplierId',
+    type: 'component',
+    component: {
+      is: SupplierPickerAdapter,
+      props: () => ({
+        disabled: mode.value === 'detail'
+      })
+    }
+  }]
+}]
+```
+
+这种方式适合抽屉内“查看/编辑”即时切换，也能保留相同的组件格式和布局。自定义组件必须真正支持只读或禁用协议，不能只隐藏操作按钮但仍发出 model 事件。
+
+### 详情使用 cellSlot
+
+真正的详情页不需要输入组件、字段 Hint 或 Element Form 校验时，使用共享业务字段描述分别生成两套 Column：
+
+```ts
+const scoreColumnBase = {
+  key: 'score-column',
+  label: '评分',
+  props: { minWidth: 180 }
+}
+
+const editScoreColumn: ColumnConfig = {
+  ...scoreColumnBase,
+  formItems: [{
+    key: 'score-field',
+    fieldKey: 'score',
+    type: 'number'
+  }]
+}
+
+const detailScoreColumn: ColumnConfig = {
+  ...scoreColumnBase,
+  cellSlot: 'score-detail'
+}
+
+const columns = computed(() => [
+  mode.value === 'edit' ? editScoreColumn : detailScoreColumn
+])
+```
+
+```vue
+<template #score-detail="{ row }">
+  <strong>{{ row.score }}</strong>
+</template>
+```
+
+这里共享的是稳定 `key`、标题、宽度、业务字段定义和格式化函数，不强行共享渲染结构。编辑列拥有 `fieldKey`、model 和 rules；详情列只读取 `row`，不会创建空的 FormItem。
+
+### 从业务字段描述生成两种模式
+
+列较多时，可以把重复信息收敛为页面自己的字段描述，再由工厂映射到 FormTable 公开配置：
+
+```ts
+const fields = [{
+  key: 'amount',
+  label: '金额',
+  editItem: { fieldKey: 'amount', type: 'number' },
+  format: row => `¥ ${row.amount.toFixed(2)}`
+}]
+
+function createColumns(mode: 'detail' | 'edit'): ColumnConfig[] {
+  return fields.map(field => mode === 'edit'
+    ? {
+        key: field.key,
+        label: field.label,
+        formItems: [field.editItem]
+      }
+    : {
+        key: field.key,
+        label: field.label,
+        cellSlot: 'detail-cell'
+      })
+}
+```
+
+通用 `detail-cell` Slot 可以通过 `columnConfig.key` 找到字段描述并调用对应 formatter。字段描述属于页面或业务配置层，不需要扩展 FormTable API，也不要把 Vue VNode 或用户权限状态序列化到远程 Schema。
+
+模式切换后应在 `nextTick` 调用 `clearValidate()`。详情模式没有挂载的 FormItem 不参与 `validate()`；提交前必须切回编辑配置，或者在数据层执行独立校验。
+
 ## 行状态控制
 
 已提交、审批中或被其他用户锁定的行，应从当前 `row` 计算组件状态：
@@ -128,4 +234,4 @@ const columns = createPurchaseColumns({
 
 ## 相关文档
 
-[动态显隐与配置更新](./dynamic-configuration.md) · [Slot 与上下文](../api/contexts.md) · [远程 Schema](./remote-schema.md) · [稳定身份](./stable-identity.md)
+[动态显隐与配置更新](./dynamic-configuration.md) · [`cellSlot` 列级单元格](./cell-slot.md) · [Slot 与上下文](../api/contexts.md) · [远程 Schema](./remote-schema.md) · [稳定身份](./stable-identity.md)

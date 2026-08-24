@@ -4,6 +4,8 @@
 
 `cellSlot` 是与 Item 字段链路并列的列级渲染入口。它适合操作按钮、状态、图片、派生值和多字段组合展示。
 
+公开配置中没有 `colSlot`；列级内容使用 `cellSlot`，自定义表头使用 `headerSlot`。
+
 ## 配置示例
 
 ```ts
@@ -86,6 +88,38 @@ itemConfig / propPath / component
 | 原生选择或序号列 | `column.type` |
 
 `cellSlot` 内可以放置交互组件。单字段编辑优先使用字段 Slot；需要不规则多 Row 布局时，可以手写 Element Form 组件并接入根表单。
+
+## 详情与编辑模式
+
+详情和编辑布局一致、组件本身支持 `readonly/disabled` 时，可以复用同一份 `formItems`。这种方式切换简单，但详情模式仍然挂载输入组件、FormItem 和校验链路。
+
+纯详情页或展示结构明显不同时，推荐为同一个业务列准备两份互斥配置：
+
+```ts
+const editColumn: ColumnConfig = {
+  key: 'score-column',
+  label: '评分',
+  formItems: [{ fieldKey: 'score', type: 'number' }]
+}
+
+const detailColumn: ColumnConfig = {
+  key: 'score-column',
+  label: '评分',
+  cellSlot: 'score-detail'
+}
+
+const columns = computed(() => [
+  mode.value === 'edit' ? editColumn : detailColumn
+])
+```
+
+```vue
+<template #score-detail="{ row }">
+  <strong>{{ row.score }}</strong>
+</template>
+```
+
+两份配置可以共享稳定 key、标题、列宽和业务 formatter，但不能在一个对象上同时保留 `formItems` 与 `cellSlot`。结构切换后在 `nextTick` 调用 `clearValidate()`，避免编辑模式的旧校验展示残留。更完整的模式选择和配置工厂见[权限、只读与编辑模式](./permissions-and-editing.md)。
 
 ## 手写多 Row 表单
 
@@ -173,6 +207,7 @@ Playground [`/cell-slot`](http://localhost:5173/cell-slot) 同时演示：
 - `updateRow` 和 `field-change`。
 - 异步更新与 rowKey。
 - 字段 Slot 的对照展示。
+- 评分列在编辑字段 Slot 与详情 `cellSlot` 之间切换。
 - 实际 `FormTableCellSlotContext` 检视面板。
 
 ## 相关 API
