@@ -1,6 +1,6 @@
 <template>
   <main class="workflow-page">
-    <router-link to="/">← 返回示例中心</router-link>
+    <router-link to="/" @click.native.prevent="leavePage">← 返回示例中心</router-link>
     <header class="page-header">
       <div>
         <h1>完整编辑提交流程</h1>
@@ -11,6 +11,7 @@
           {{ dirty ? '有未保存修改' : '已与服务端同步' }}
         </el-tag>
         <el-tag v-if="saving" type="info">保存中</el-tag>
+        <el-tag type="info">提交基线 {{ baseVersion }}</el-tag>
       </div>
     </header>
 
@@ -68,6 +69,17 @@
         </ul>
       </div>
 
+      <div v-if="versionConflict" class="conflict-panel">
+        <div>
+          <strong>检测到服务端版本冲突</strong>
+          <p>服务端版本 {{ versionConflict.serverVersion }} 已更新，本地修改尚未被覆盖。</p>
+        </div>
+        <div class="conflict-actions">
+          <el-button size="small" @click="keepLocalChanges">保留本地并重试</el-button>
+          <el-button size="small" type="warning" @click="acceptServerVersion">采用服务端版本</el-button>
+        </div>
+      </div>
+
       <p class="workflow-note">
         保存成功后才更新服务端快照；撤销只恢复最近一次加载或保存成功的数据。
       </p>
@@ -78,6 +90,7 @@
         <el-checkbox v-model="failNextLoad">下一次加载失败</el-checkbox>
         <el-checkbox v-model="failNextSave">下一次保存失败</el-checkbox>
         <el-checkbox v-model="rejectFirstProduct">服务端拒绝第一行商品</el-checkbox>
+        <el-checkbox v-model="conflictNextSave">下一次保存发生版本冲突</el-checkbox>
       </div>
       <p class="workflow-note">
         加载或保存失败不会清空当前编辑；服务端字段错误按稳定行 ID 映射，重新编辑后清除。
@@ -91,8 +104,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, onMounted, ref } from 'vue'
-import { Message } from 'element-ui'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { Message, MessageBox } from 'element-ui'
 import FormTable from '@itagan/form-table'
 import type {
   ColumnConfig,
@@ -101,6 +114,7 @@ import type {
   TableRow
 } from '@itagan/form-table'
 import DemoCollapsiblePanel from '../components/DemoCollapsiblePanel.vue'
+import router from '../router'
 
 interface OrderRow extends TableRow {
   id: string
@@ -121,6 +135,17 @@ type ValidationCallback = (error?: Error) => void
 class ServerValidationError extends Error {
   constructor(readonly fieldErrors: ServerFieldError[]) {
     super('服务端校验未通过')
+  }
+}
+
+interface VersionConflict {
+  serverVersion: string
+  serverRows: OrderRow[]
+}
+
+class VersionConflictError extends Error {
+  constructor(readonly conflict: VersionConflict) {
+    super('服务端数据已被其他用户更新')
   }
 }
 
@@ -149,10 +174,13 @@ const savedSnapshot = ref<OrderRow[]>([])
 const loading = ref(false)
 const saving = ref(false)
 const lastSubmittedPayload = ref('')
+const baseVersion = ref('v1')
 const serverErrors = ref<ServerFieldError[]>([])
 const failNextLoad = ref(false)
 const failNextSave = ref(false)
 const rejectFirstProduct = ref(false)
+const conflictNextSave = ref(false)
+const versionConflict = ref<VersionConflict | null>(null)
 let latestLoadRequest = 0
 
 const dirty = computed(() => JSON.stringify(tableData.value) !== JSON.stringify(savedSnapshot.value))
@@ -251,7 +279,9 @@ const loadData = async (options: {
     savedSnapshot.value = cloneRows(rows)
     tableData.value = cloneRows(rows)
     lastSubmittedPayload.value = ''
+    baseVersion.value = 'v1'
     serverErrors.value = []
+    versionConflict.value = null
     await clearValidation()
     if (options.announceSuccess) Message.success('加载成功')
   } catch (error) {
@@ -291,6 +321,7 @@ const removeRow = (index: number) => {
 const resetChanges = async () => {
   tableData.value = cloneRows(savedSnapshot.value)
   serverErrors.value = []
+  versionConflict.value = null
   await clearValidation()
   Message.success('已恢复最近一次服务端快照')
 }
@@ -306,17 +337,30 @@ const saveData = async () => {
 
   saving.value = true
   try {
-    const payload = tableData.value.map(row => ({
-      id: row.id.startsWith('draft-') ? undefined : row.id,
-      productName: row.productName.trim(),
-      quantity: Number(row.quantity),
-      unitPrice: Number(row.unitPrice),
-      remark: row.remark.trim()
-    }))
+    const payload = {
+      expectedVersion: baseVersion.value,
+      rows: tableData.value.map(row => ({
+        id: row.id.startsWith('draft-') ? undefined : row.id,
+        productName: row.productName.trim(),
+        quantity: Number(row.quantity),
+        unitPrice: Number(row.unitPrice),
+        remark: row.remark.trim()
+      }))
+    }
     await wait(500)
     if (failNextSave.value) {
       failNextSave.value = false
       throw new Error('模拟保存失败，请检查网络后重试')
+    }
+    if (conflictNextSave.value) {
+      conflictNextSave.value = false
+      throw new VersionConflictError({
+        serverVersion: 'v2',
+        serverRows: serverRows.map(row => ({
+          ...row,
+          remark: row.id === 'line-1' ? '其他用户刚刚更新' : row.remark
+        }))
+      })
     }
     if (rejectFirstProduct.value && tableData.value[0]) {
       throw new ServerValidationError([{
@@ -328,10 +372,15 @@ const saveData = async () => {
 
     lastSubmittedPayload.value = JSON.stringify(payload, null, 2)
     savedSnapshot.value = cloneRows(tableData.value)
+    baseVersion.value = `v${Number(baseVersion.value.slice(1) || 0) + 1}`
     serverErrors.value = []
+    versionConflict.value = null
     Message.success('保存成功，已更新服务端快照')
   } catch (error) {
-    if (error instanceof ServerValidationError) {
+    if (error instanceof VersionConflictError) {
+      versionConflict.value = error.conflict
+      Message.warning('保存已停止，请选择如何处理服务端新版本')
+    } else if (error instanceof ServerValidationError) {
       serverErrors.value = error.fieldErrors
       await nextTick()
       error.fieldErrors.forEach(fieldError => {
@@ -349,6 +398,27 @@ const saveData = async () => {
   } finally {
     saving.value = false
   }
+}
+
+const keepLocalChanges = () => {
+  if (!versionConflict.value) return
+
+  baseVersion.value = versionConflict.value.serverVersion
+  versionConflict.value = null
+  Message.warning('已基于服务端新版本保留本地值；再次保存可能覆盖冲突字段')
+}
+
+const acceptServerVersion = async () => {
+  if (!versionConflict.value) return
+
+  const rows = cloneRows(versionConflict.value.serverRows)
+  savedSnapshot.value = cloneRows(rows)
+  tableData.value = rows
+  baseVersion.value = versionConflict.value.serverVersion
+  serverErrors.value = []
+  versionConflict.value = null
+  await clearValidation()
+  Message.success('已采用服务端最新版本')
 }
 
 const handleFieldChange = (event: FormTableFieldChangePayload) => {
@@ -369,7 +439,39 @@ const describeServerError = (error: ServerFieldError) => {
   return `${index >= 0 ? `第 ${index + 1} 行` : error.rowId} · 商品：${error.message}`
 }
 
-onMounted(() => loadData())
+const confirmDiscardChanges = async () => {
+  if (!dirty.value) return true
+
+  try {
+    await MessageBox.confirm('当前存在未保存修改，确认离开并丢弃吗？', '离开确认', {
+      type: 'warning',
+      confirmButtonText: '丢弃并离开',
+      cancelButtonText: '继续编辑'
+    })
+    return true
+  } catch {
+    return false
+  }
+}
+
+const leavePage = async () => {
+  if (await confirmDiscardChanges()) await router.push('/')
+}
+
+const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+  if (!dirty.value) return
+  event.preventDefault()
+  event.returnValue = ''
+}
+
+onMounted(() => {
+  window.addEventListener('beforeunload', handleBeforeUnload)
+  void loadData()
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('beforeunload', handleBeforeUnload)
+})
 </script>
 
 <style scoped>
@@ -386,9 +488,13 @@ pre { margin: 0; padding: 16px; overflow: auto; background: #f6f8fa; border-radi
 .failure-controls { display: flex; flex-wrap: wrap; gap: 18px; }
 .server-errors { margin-top: 16px; padding: 14px 16px; color: #b42318; background: #fef3f2; border: 1px solid #fecdca; border-radius: 8px; }
 .server-errors ul { margin: 8px 0 0; padding-left: 20px; }
+.conflict-panel { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 16px; padding: 14px 16px; color: #854d0e; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; }
+.conflict-panel p { margin: 6px 0 0; }
+.conflict-actions { display: flex; flex: none; gap: 8px; }
 
 @media (max-width: 760px) {
   .workflow-page { padding: 20px; }
   .page-header { align-items: flex-start; flex-direction: column; }
+  .conflict-panel { align-items: flex-start; flex-direction: column; }
 }
 </style>
