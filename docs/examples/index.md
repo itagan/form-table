@@ -31,6 +31,7 @@ Playground 直接引用组件源码。示例名称、路由、分类、难度、
 | [字段 Slot 与动态显隐 ↗](http://localhost:5173/dynamic-slot-test) | 进阶 | 字段 Slot、更新助手和多层动态配置 |
 
 需要组合多个渲染入口时，先按[扩展模型](../architecture/extension-model.md)选择最小方案，再组合对应的独立示例。
+浏览态需要在原生 Column、空 Label `text` 和 `cellSlot` 之间选择时，直接查看[详情与编辑模式](../features/detail-and-editing-modes.md)。
 
 ## 高级扩展
 

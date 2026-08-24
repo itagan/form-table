@@ -190,4 +190,4 @@ it('ignores an older response', async () => {
 
 ## 相关文档
 
-[完整编辑提交流程](../examples/form-workflow.md) · [企业复杂组件接入](../examples/enterprise-components.md) · [权限与编辑模式](../features/permissions-and-editing.md) · [分页与跨页编辑](../features/pagination-and-cross-page-editing.md)
+[完整编辑提交流程](../examples/form-workflow.md) · [企业复杂组件接入](../examples/enterprise-components.md) · [详情与编辑模式](../features/detail-and-editing-modes.md) · [权限与字段可编辑性](../features/permissions-and-editing.md) · [分页与跨页编辑](../features/pagination-and-cross-page-editing.md)
