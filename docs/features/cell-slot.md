@@ -93,7 +93,22 @@ itemConfig / propPath / component
 
 详情和编辑布局一致、组件本身支持 `readonly/disabled` 时，可以复用同一份 `formItems`。这种方式切换简单，但详情模式仍然挂载输入组件、FormItem 和校验链路。
 
-纯详情页或展示结构明显不同时，推荐为同一个业务列准备两份互斥配置：
+简单字段只需展示原值时，优先把 Item 改为 `type: 'text'`。同一列有多个字段也继续使用多个 `formItems`，不需要因为是详情模式就改成 `cellSlot`：
+
+```ts
+{
+  key: 'basic-detail',
+  label: '基础信息',
+  formItems: [
+    { fieldKey: 'name', type: 'text', colProps: { span: 12 } },
+    { fieldKey: 'department', type: 'text', colProps: { span: 12 } }
+  ]
+}
+```
+
+`type: 'text'` 保留字段路径、FormItem、Hint 和 Row/Col 布局。只有标签、图片、派生值、多个字段组合成一个整体或详情结构明显不同时，才需要 `cellSlot`。
+
+详情展示结构明显不同时，可为同一个业务列准备两份互斥配置：
 
 ```ts
 const editColumn: ColumnConfig = {
@@ -202,12 +217,12 @@ async function approve(context: FormTableCellSlotContext) {
 
 Playground [`/cell-slot`](http://localhost:5173/cell-slot) 同时演示：
 
-- 组合信息单元格。
+- 多字段基础详情使用多个 `type: 'text'` Item。
 - 状态和派生金额。
 - `updateRow` 和 `field-change`。
 - 异步更新与 rowKey。
 - 字段 Slot 的对照展示。
-- 评分列在编辑字段 Slot 与详情 `cellSlot` 之间切换。
+- 评分列在编辑字段 Slot 与详情 `type: 'text'` 之间切换。
 - 实际 `FormTableCellSlotContext` 检视面板。
 
 ## 相关 API

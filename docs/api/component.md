@@ -102,6 +102,8 @@ component: { is: 'corp-user-selector' }
 | `cascader` | `el-cascader` |
 | `autocomplete` | `el-autocomplete` |
 
+`type: 'text'` 直接使用 `String(bindingValue ?? '')` 渲染 `span`，不会执行自动 model，也不负责枚举翻译或金额、日期格式化。它适合保留 Item 布局和字段 Hint 的简单详情；需要格式化时使用字段 Slot，需要读取多个行字段并接管整格时使用 `cellSlot`。
+
 具体组件模式继续使用 Element UI 原生 Prop。多行文本使用 `type: 'input'` 配合 `component.props.type: 'textarea'`；日期时间、范围或月份等使用 `type: 'date'` 配合 DatePicker 的 `type` Prop：
 
 ```ts
