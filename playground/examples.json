@@ -64,7 +64,7 @@
     "category": "rendering",
     "level": "intermediate",
     "status": "featured",
-    "relatedDocs": ["/features/cell-slot", "/features/permissions-and-editing", "/api/contexts"],
+    "relatedDocs": ["/features/detail-and-editing-modes", "/features/cell-slot", "/api/contexts"],
     "source": "playground/src/views/CellSlotView.vue",
     "type": "primary",
     "tags": ["cellSlot", "text detail", "multiple items", "edit mode", "slot context"]

@@ -199,6 +199,7 @@ const detailScoreColumn: ColumnConfig = {
     key: 'score-field',
     fieldKey: 'score',
     type: 'text',
+    formItemProps: { label: '', labelWidth: '0' },
     component: { props: { class: 'detail-text' } }
   }]
 }
@@ -295,7 +296,15 @@ const configurationExample = `// 简单详情：一列可继续放多个 text It
 const columns = computed(() => [
   mode.value === 'edit'
     ? { key: 'score', label: '评分', formItems: [scoreItem] }
-    : { key: 'score', label: '评分', formItems: [{ fieldKey: 'score', type: 'text' }] }
+    : {
+        key: 'score',
+        label: '评分',
+        formItems: [{
+          fieldKey: 'score',
+          type: 'text',
+          formItemProps: { label: '', labelWidth: '0' }
+        }]
+      }
 ])
 
 // 字段 Slot：保留 fieldKey、setValue、propPath 和 rules
