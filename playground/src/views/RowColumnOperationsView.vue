@@ -11,6 +11,18 @@
           {{ showRemark ? '移除备注列' : '增加备注列' }}
         </el-button>
         <el-button @click="scoreFirst = !scoreFirst">姓名/评分换序</el-button>
+        <el-button :disabled="selectedKeys.length === 0" @click="batchMarkReviewed">
+          批量标记已复核
+        </el-button>
+        <el-button
+          type="danger"
+          plain
+          :disabled="selectedKeys.length === 0"
+          @click="batchRemoveAfterConfirm"
+        >
+          批量删除
+        </el-button>
+        <el-tag type="info">已选择 {{ selectedKeys.length }} 行</el-tag>
       </div>
 
       <FormTable
@@ -21,7 +33,14 @@
         row-key="_rowKey"
         :table-props="{ border: true }"
         @update:tableData="replaceTableData"
+        @selection-change="handleSelectionChange"
       >
+        <template #review-status="{ row }">
+          <el-tag size="small" :type="row.reviewed ? 'success' : 'info'">
+            {{ row.reviewed ? '已复核' : '待复核' }}
+          </el-tag>
+        </template>
+
         <template #score-editor="{ row, value, component }">
           <div class="score-editor">
             <el-input-number
@@ -64,6 +83,8 @@
           <li>删除先确认，再按稳定 <code>_rowKey</code> 删除。</li>
           <li>工具栏在末尾新增；操作列可在当前行后插入或复制。</li>
           <li>列显隐和换序通过重新生成 <code>columns</code> 完成。</li>
+          <li>selection 只保存稳定行 ID；批量修改通过一次 <code>map</code> 替换整表。</li>
+          <li>批量删除确认后按稳定 ID 集合过滤，并同步清理草稿与校验状态。</li>
         </ul>
       </div>
     </section>
@@ -83,6 +104,7 @@ type OperationRow = TableRow & {
   name: string
   score: number
   remark: string
+  reviewed: boolean
 }
 
 let clientSequence = 0
@@ -90,14 +112,24 @@ const createRowKey = () => `client:${Date.now()}:${++clientSequence}`
 const wait = (duration = 300) => new Promise(resolve => setTimeout(resolve, duration))
 
 const tableData = ref<OperationRow[]>([
-  { _rowKey: 'server:1', id: 1, name: '张三', score: 80, remark: '已有数据' },
-  { _rowKey: 'server:2', id: 2, name: '李四', score: 90, remark: '' }
+  { _rowKey: 'server:1', id: 1, name: '张三', score: 80, remark: '已有数据', reviewed: true },
+  { _rowKey: 'server:2', id: 2, name: '李四', score: 90, remark: '', reviewed: false }
 ])
 const showRemark = ref(true)
 const scoreFirst = ref(false)
 const scoreDrafts = ref<Record<string, number>>({})
 const savingKeys = ref<string[]>([])
+const selectedKeys = ref<string[]>([])
 const formTableRef = ref<FormTableExpose>()
+
+const selectionColumn: ColumnConfig = {
+  key: 'selection-column',
+  props: {
+    type: 'selection',
+    width: 48,
+    reserveSelection: true
+  }
+}
 
 const nameColumn: ColumnConfig = {
   key: 'name-column',
@@ -158,6 +190,13 @@ const remarkColumn: ColumnConfig = {
   }]
 }
 
+const reviewColumn: ColumnConfig = {
+  key: 'review-column',
+  label: '复核状态',
+  props: { width: 100, align: 'center' },
+  cellSlot: 'review-status'
+}
+
 const actionColumn: ColumnConfig = {
   key: 'action-column',
   label: '操作',
@@ -170,14 +209,20 @@ const columns = computed<ColumnConfig[]>(() => {
     ? [scoreColumn, nameColumn]
     : [nameColumn, scoreColumn]
   return [
+    selectionColumn,
     ...mainColumns,
     ...(showRemark.value ? [remarkColumn] : []),
+    reviewColumn,
     actionColumn
   ]
 })
 
 const replaceTableData = (rows: TableRow[]) => {
   tableData.value = rows as OperationRow[]
+}
+
+const handleSelectionChange = (rows: TableRow[]) => {
+  selectedKeys.value = rows.map(row => String(row._rowKey))
 }
 
 const getScoreDraft = (row: TableRow, value: unknown) => {
@@ -210,7 +255,7 @@ const addAfterValidate = async () => {
   await wait(200)
   tableData.value = [
     ...tableData.value,
-    { _rowKey: createRowKey(), name: '', score: 60, remark: '' }
+    { _rowKey: createRowKey(), name: '', score: 60, remark: '', reviewed: false }
   ]
   clearStructureValidation()
 }
@@ -220,7 +265,7 @@ const insertAfter = (source: OperationRow) => {
   if (index < 0) return
   tableData.value = [
     ...tableData.value.slice(0, index + 1),
-    { _rowKey: createRowKey(), name: '', score: 60, remark: '' },
+    { _rowKey: createRowKey(), name: '', score: 60, remark: '', reviewed: false },
     ...tableData.value.slice(index + 1)
   ]
   clearStructureValidation()
@@ -233,7 +278,8 @@ const copyRow = (source: OperationRow) => {
     ...source,
     id: undefined,
     _rowKey: createRowKey(),
-    name: `${source.name}（复制）`
+    name: `${source.name}（复制）`,
+    reviewed: false
   }
   tableData.value = [
     ...tableData.value.slice(0, index + 1),
@@ -261,10 +307,38 @@ const removeAfterConfirm = async (row: OperationRow) => {
     })
     await wait(200)
     tableData.value = tableData.value.filter(item => item._rowKey !== row._rowKey)
+    selectedKeys.value = selectedKeys.value.filter(key => key !== row._rowKey)
     clearScoreDraft(row._rowKey)
     clearStructureValidation()
   } catch {
     // 用户取消时保持表格不变。
+  }
+}
+
+const batchMarkReviewed = () => {
+  const selected = new Set(selectedKeys.value)
+  tableData.value = tableData.value.map(row => selected.has(row._rowKey) && !row.reviewed
+    ? { ...row, reviewed: true }
+    : row)
+  Message.success(`已批量复核 ${selected.size} 行`)
+}
+
+const batchRemoveAfterConfirm = async () => {
+  const selected = new Set(selectedKeys.value)
+  if (selected.size === 0) return
+
+  try {
+    await MessageBox.confirm(`确认删除选中的 ${selected.size} 行？`, '批量删除确认', {
+      type: 'warning'
+    })
+    tableData.value = tableData.value.filter(row => !selected.has(row._rowKey))
+    selected.forEach(clearScoreDraft)
+    selectedKeys.value = []
+    await nextTick()
+    formTableRef.value?.getTableRef()?.clearSelection()
+    formTableRef.value?.clearValidate()
+  } catch {
+    // 用户取消时保持选择和表格数据不变。
   }
 }
 </script>

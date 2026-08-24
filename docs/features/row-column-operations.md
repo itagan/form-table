@@ -40,6 +40,44 @@
 
 跨行更新由页面通过 `map` 替换数据；当前行的多个字段使用一次 `updateRow(patch)`。
 
+```ts
+const selectedKeys = ref<string[]>([])
+
+function handleSelectionChange(rows) {
+  selectedKeys.value = rows.map(row => row._rowKey)
+}
+
+function batchMarkReviewed() {
+  const selected = new Set(selectedKeys.value)
+  tableData.value = tableData.value.map(row => selected.has(row._rowKey)
+    ? { ...row, reviewed: true }
+    : row)
+}
+```
+
+不要为跨行批量操作循环调用某个单元格上下文的 `updateRow`。一次 `map/filter` 能明确生成一份新数组，并保留未变化行引用；批量接口、权限和审计也更适合在页面层统一处理。
+
+### 批量删除
+
+先把当前选择转换成稳定 ID 集合，确认成功后一次过滤：
+
+```ts
+async function batchRemove() {
+  const selected = new Set(selectedKeys.value)
+  await confirm(`确认删除 ${selected.size} 行？`)
+
+  tableData.value = tableData.value.filter(
+    row => !selected.has(row._rowKey)
+  )
+  selectedKeys.value = []
+  await nextTick()
+  formTableRef.value?.getTableRef()?.clearSelection()
+  formTableRef.value?.clearValidate()
+}
+```
+
+当前可运行 Demo 已加入 selection、批量复核和批量删除。跨页选择不能只保存当前行对象，完整状态模型见[分页与跨页编辑](./pagination-and-cross-page-editing.md)。
+
 ## 常见列和配置操作
 
 动态列由调用方不可变替换或派生 `columns`，并为每一列提供唯一稳定的 `column.key`。
@@ -165,9 +203,11 @@ async function commit({ row, fieldKey, setValue }, draftValue) {
 | 当前行同步联动 | listener + `setValue/updateRow` |
 | 确认或请求成功后更新字段 | 草稿组件发出 `commit`，成功后调用更新助手 |
 | 行增删复制移动 | 页面替换 `tableData` |
+| 当前页批量修改或删除 | selection 转稳定 ID 集合，页面一次 `map/filter` |
+| 跨页批量操作 | 页面或 Store 保存 ID 集合，通常交给服务端执行 |
 | 列显隐、增删、排序 | 页面替换或派生 `columns` |
 | 降低后端保存频率 | 本地立即回写，接口单独防抖或批量保存 |
 
 ## 相关 API
 
-[数据更新与受控回写](./data-updates.md) · [校验、清理与重置](./validation-reset.md) · [事件与 Ref](../api/events-and-ref.md)
+[数据更新与受控回写](./data-updates.md) · [分页与跨页编辑](./pagination-and-cross-page-editing.md) · [校验、清理与重置](./validation-reset.md) · [事件与 Ref](../api/events-and-ref.md)

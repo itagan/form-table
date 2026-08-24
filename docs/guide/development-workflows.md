@@ -8,6 +8,7 @@
 | --- | --- | --- |
 | 第一次接入并完成基础编辑 | [快速开始](./quick-start.md) | [`/form-table`](http://localhost:5173/form-table) |
 | 从接口加载，编辑后校验、保存或撤销 | [完整编辑提交流程](../examples/form-workflow.md) | [`/form-workflow`](http://localhost:5173/form-workflow) |
+| 分页编辑并保留跨页草稿或选择 | [分页与跨页编辑](../features/pagination-and-cross-page-editing.md) | 按页面分页器实现 |
 | 增删、复制、移动行 | [常见操作列与行增删](../features/common-row-actions.md) | [`/row-column-operations`](http://localhost:5173/row-column-operations) |
 | 接入公司或第三方组件 | [自定义字段组件](../features/custom-component.md) | [`/enterprise-components`](http://localhost:5173/enterprise-components) |
 | 一个组件同时编辑多个字段 | [复合字段映射](../features/composite-binding.md) | [`/composite-binding`](http://localhost:5173/composite-binding) |

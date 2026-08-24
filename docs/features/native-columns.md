@@ -56,6 +56,8 @@ const columns = defineFormTableColumns<TableRow>([
 }
 ```
 
+`selection-change` 返回当前表格数据中的选中行。当前页批量操作可直接转换为稳定 ID 集合；跨页选择还要在页面或 Store 中合并各页 ID，详见[分页与跨页编辑](./pagination-and-cross-page-editing.md)。
+
 ## 排序与筛选事件
 
 排序、筛选和表头交互由 Element Table 在根组件发出，不需要为列增加监听器配置：
