@@ -57,17 +57,17 @@
   },
   {
     "title": "cellSlot 列级单元格",
-    "description": "独立演示组合展示、派生值、行操作、异步 rowKey 和字段 Slot 对照。",
+    "description": "演示组合展示、行操作，以及详情 cellSlot 与编辑字段 Slot 的模式切换。",
     "path": "/cell-slot",
     "name": "cell-slot",
     "view": "CellSlotView",
     "category": "rendering",
     "level": "intermediate",
     "status": "featured",
-    "relatedDocs": ["/features/cell-slot", "/api/contexts"],
+    "relatedDocs": ["/features/cell-slot", "/features/permissions-and-editing", "/api/contexts"],
     "source": "playground/src/views/CellSlotView.vue",
     "type": "primary",
-    "tags": ["cellSlot", "updateRow", "slot context"]
+    "tags": ["cellSlot", "detail mode", "edit mode", "slot context"]
   },
   {
     "title": "字段 Slot 与动态显隐",
