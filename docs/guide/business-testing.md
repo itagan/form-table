@@ -35,19 +35,24 @@ it('disables price editing without permission', () => {
 
 重点断言业务结果，不对整个 columns 做巨大快照。大快照会把标签、宽度等无关变化都变成测试噪音。
 
-详情/编辑模式应验证结构互斥：
+详情/编辑模式应分别验证简单文本与复杂展示策略：
 
 ```ts
-it('uses FormItems for edit and cellSlot for detail', () => {
+it('uses text for simple detail and cellSlot for formatted detail', () => {
   const editColumn = createScoreColumn('edit')
   const detailColumn = createScoreColumn('detail')
+  const amountColumn = createAmountColumn('detail')
 
   expect(editColumn).toHaveProperty('formItems')
-  expect(editColumn).not.toHaveProperty('cellSlot')
-  expect(detailColumn).toHaveProperty('cellSlot', 'score-detail')
-  expect(detailColumn).not.toHaveProperty('formItems')
+  expect(detailColumn.formItems[0]).toMatchObject({
+    fieldKey: 'score',
+    type: 'text'
+  })
+  expect(amountColumn).toHaveProperty('cellSlot', 'amount-detail')
 })
 ```
+
+一列包含多个详情字段时，再断言 `formItems` 数量、字段顺序和 `colProps.span`，不需要测试不存在的 `cellSlot`。
 
 ## 测试 listener
 
