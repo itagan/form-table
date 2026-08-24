@@ -57,7 +57,7 @@
   },
   {
     "title": "cellSlot 列级单元格",
-    "description": "演示组合展示、行操作，以及详情 cellSlot 与编辑字段 Slot 的模式切换。",
+    "description": "演示多字段 text 详情、字段 Slot、派生展示 cellSlot，以及详情与编辑模式切换。",
     "path": "/cell-slot",
     "name": "cell-slot",
     "view": "CellSlotView",
@@ -67,7 +67,7 @@
     "relatedDocs": ["/features/cell-slot", "/features/permissions-and-editing", "/api/contexts"],
     "source": "playground/src/views/CellSlotView.vue",
     "type": "primary",
-    "tags": ["cellSlot", "detail mode", "edit mode", "slot context"]
+    "tags": ["cellSlot", "text detail", "multiple items", "edit mode", "slot context"]
   },
   {
     "title": "字段 Slot 与动态显隐",

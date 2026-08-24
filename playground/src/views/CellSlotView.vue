@@ -4,7 +4,7 @@
       <div>
         <p class="eyebrow">FEATURE DEMO</p>
         <h1>cellSlot 列级单元格</h1>
-        <p>对比列级 cellSlot 与字段 Slot，并演示详情、编辑模式切换时替换完整列配置。</p>
+        <p>对比详情文本、字段 Slot 与列级 cellSlot，并演示按内容复杂度选择渲染路径。</p>
       </div>
       <div class="heading-actions">
         <el-radio-group v-model="scoreMode" size="small">
@@ -16,6 +16,11 @@
     </header>
 
     <section class="boundary-card">
+      <div>
+        <strong>type: 'text'</strong>
+        <span>fieldKey / FormItem / 多 Item 布局</span>
+        <small>简单字段详情直接显示原值</small>
+      </div>
       <div>
         <strong>cellSlot</strong>
         <span>row / index / columnConfig / updateRow</span>
@@ -39,16 +44,6 @@
         @update:tableData="handleTableDataUpdate"
         @field-change="handleFieldChange"
       >
-        <template #profile-card="context">
-          <button class="profile-card inspectable" type="button" @click="inspectContext(context)">
-            <span class="avatar">{{ context.row.name.slice(0, 1) }}</span>
-            <span>
-              <strong>{{ context.row.name }}</strong>
-              <small>{{ context.row.department }}</small>
-            </span>
-          </button>
-        </template>
-
         <template #status-cell="context">
           <button class="plain-cell inspectable" type="button" @click="inspectContext(context)">
             <el-tag size="small" :type="statusMeta(context.row.status).type">
@@ -70,13 +65,6 @@
           </div>
         </template>
 
-        <template #score-detail="context">
-          <button class="score-detail inspectable" type="button" @click="inspectContext(context)">
-            <strong>{{ context.row.score }}</strong>
-            <small>详情模式不创建 FormItem</small>
-          </button>
-        </template>
-
         <template #row-actions="context">
           <div class="row-actions">
             <el-button type="text" @click="context.updateRow({ status: context.row.status === 'enabled' ? 'disabled' : 'enabled' })">
@@ -96,7 +84,7 @@
         title="当前 cellSlot scope"
         :default-open="inspectedContext !== null"
       >
-        <p v-if="!inspectedContext" class="empty">点击组合信息、状态、金额或“查看 scope”。</p>
+        <p v-if="!inspectedContext" class="empty">点击状态、金额或“查看 scope”。</p>
         <pre v-else>{{ JSON.stringify(inspectedContext, null, 2) }}</pre>
       </DemoCollapsiblePanel>
       <DemoCollapsiblePanel
@@ -153,10 +141,25 @@ const scoreMode = ref<'edit' | 'detail'>('edit')
 
 const displayColumns: ColumnConfig[] = [
   {
-    key: 'profile-column',
-    label: '组合信息',
-    cellSlot: 'profile-card',
-    props: { minWidth: 200 }
+    key: 'basic-detail-column',
+    label: '基础详情（多个字段）',
+    props: { minWidth: 280 },
+    formItems: [
+      {
+        fieldKey: 'name',
+        type: 'text',
+        colProps: { span: 12 },
+        formItemProps: { label: '姓名' },
+        component: { props: { class: 'detail-text' } }
+      },
+      {
+        fieldKey: 'department',
+        type: 'text',
+        colProps: { span: 12 },
+        formItemProps: { label: '部门' },
+        component: { props: { class: 'detail-text' } }
+      }
+    ]
   },
   {
     key: 'status-column',
@@ -192,7 +195,12 @@ const editScoreColumn: ColumnConfig = {
 
 const detailScoreColumn: ColumnConfig = {
   ...scoreColumnBase,
-  cellSlot: 'score-detail'
+  formItems: [{
+    key: 'score-field',
+    fieldKey: 'score',
+    type: 'text',
+    component: { props: { class: 'detail-text' } }
+  }]
 }
 
 const actionColumn: ColumnConfig = {
@@ -209,7 +217,7 @@ const columns = computed<ColumnConfig[]>(() => [
 ])
 
 watch(scoreMode, async () => {
-  // 详情列不再挂载字段 FormItem，清理编辑模式遗留的校验展示。
+  // 切换字段组件后清理编辑模式遗留的校验展示。
   await nextTick()
   formTableRef.value?.clearValidate()
 })
@@ -262,7 +270,17 @@ const resetRows = () => {
   formTableRef.value?.clearValidate()
 }
 
-const configurationExample = `// 列级 cellSlot：无 fieldKey，直接使用 row
+const configurationExample = `// 简单详情：一列可继续放多个 text Item
+{
+  key: 'basic-detail',
+  label: '基础详情',
+  formItems: [
+    { fieldKey: 'name', type: 'text', colProps: { span: 12 } },
+    { fieldKey: 'department', type: 'text', colProps: { span: 12 } }
+  ]
+}
+
+// 列级 cellSlot：用于派生值或自定义组合，无 fieldKey
 {
   key: 'amount-column',
   label: '派生金额',
@@ -273,11 +291,11 @@ const configurationExample = `// 列级 cellSlot：无 fieldKey，直接使用 r
   ¥ {{ row.quantity * row.unitPrice }}
 </template>
 
-// 同一业务列在编辑和详情模式使用两份互斥结构
+// 同一字段：编辑用组件，详情直接用 text
 const columns = computed(() => [
   mode.value === 'edit'
     ? { key: 'score', label: '评分', formItems: [scoreItem] }
-    : { key: 'score', label: '评分', cellSlot: 'score-detail' }
+    : { key: 'score', label: '评分', formItems: [{ fieldKey: 'score', type: 'text' }] }
 ])
 
 // 字段 Slot：保留 fieldKey、setValue、propPath 和 rules
@@ -296,7 +314,7 @@ const columns = computed(() => [
 .page-heading h1 { margin: 4px 0 8px; }
 .page-heading p { margin: 0; color: #667085; }
 .eyebrow { color: #2563eb !important; font-size: 12px; font-weight: 700; letter-spacing: .08em; }
-.boundary-card { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 22px; }
+.boundary-card { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 22px; }
 .boundary-card div { display: grid; gap: 5px; padding: 16px 18px; border: 1px solid #dbe4f0; border-radius: 10px; background: #f8fafc; }
 .boundary-card strong { color: #1d4ed8; }
 .boundary-card span { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
@@ -305,18 +323,13 @@ const columns = computed(() => [
 .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .detail-card { min-width: 0; }
 .detail-card h2, .code-card h2 { margin-top: 0; font-size: 18px; }
-.profile-card, .plain-cell, .amount { width: 100%; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: inherit; cursor: pointer; }
-.profile-card { display: flex; align-items: center; gap: 10px; }
-.profile-card span:last-child { display: grid; gap: 3px; }
-.profile-card small { color: #667085; }
-.avatar { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; color: #1d4ed8; background: #dbeafe; font-weight: 700; }
+.plain-cell, .amount { width: 100%; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: inherit; cursor: pointer; }
+.detail-text { color: #334155; font-weight: 600; }
 .plain-cell { text-align: center; }
 .amount { font-variant-numeric: tabular-nums; text-align: right; font-weight: 700; }
 .inspectable:hover { color: #2563eb; }
 .score-editor { display: flex; align-items: center; gap: 10px; }
 .score-editor :deep(.el-input-number) { width: 130px; }
-.score-detail { display: grid; gap: 3px; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
-.score-detail small { color: #667085; }
 .row-actions { display: flex; justify-content: center; white-space: nowrap; }
 .danger { color: #ef4444; }
 .empty { color: #98a2b3; }
