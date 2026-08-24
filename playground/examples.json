@@ -15,7 +15,7 @@
   },
   {
     "title": "完整编辑提交流程",
-    "description": "演示接口加载、受控编辑、校验保存、异常重试、服务端字段错误和过期响应保护。",
+    "description": "演示加载保存、异常重试、字段错误、版本冲突、未保存离开和过期响应保护。",
     "path": "/form-workflow",
     "name": "form-workflow",
     "view": "FormWorkflowView",
@@ -25,7 +25,7 @@
     "relatedDocs": ["/examples/form-workflow", "/guide/development-workflows"],
     "source": "playground/src/views/FormWorkflowView.vue",
     "type": "primary",
-    "tags": ["load", "validate", "save", "retry", "server errors", "stale response"]
+    "tags": ["load", "save", "retry", "server errors", "version conflict", "dirty guard", "stale response"]
   },
   {
     "title": "Hint 多场景",

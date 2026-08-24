@@ -43,10 +43,11 @@
 
 | 功能 | 配置入口 | 使用入口 | 可运行演示 |
 | --- | --- | --- | --- |
-| [完整编辑提交流程](../examples/form-workflow.md) | `tableData`、服务端快照、FormTable Ref | 加载、保存、撤销和 dirty 状态 | [`/form-workflow`](http://localhost:5173/form-workflow) |
+| [完整编辑提交流程](../examples/form-workflow.md) | `tableData`、服务端快照、FormTable Ref | 加载、保存、撤销、dirty 和冲突状态 | [`/form-workflow`](http://localhost:5173/form-workflow) |
 | [常见操作列与行增删](./common-row-actions.md) | `cellSlot`、`tableData`、`rowKey` | 末尾新增、后插、复制、删除 | [`/row-column-operations`](http://localhost:5173/row-column-operations) |
 | [行列操作与异步提交](./row-column-operations.md) | `tableData`、`columns`、`rowKey` | 页面业务函数 | [`/row-column-operations`](http://localhost:5173/row-column-operations) |
 | [分页与跨页编辑](./pagination-and-cross-page-editing.md) | 当前页 `tableData`、稳定 ID、业务 Store | 草稿、选择、校验和批量提交 | 页面或服务端分页器 |
+| [多人编辑冲突与未保存离开](./concurrent-editing-and-navigation.md) | 服务端版本、页面快照、dirty | 冲突选择、路由和浏览器离开保护 | [`/form-workflow`](http://localhost:5173/form-workflow) |
 
 ## 性能
 

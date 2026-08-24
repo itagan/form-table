@@ -50,6 +50,7 @@ export default defineConfig({
           { text: '开发任务导航', link: '/guide/development-workflows' },
           { text: '完整配置指南', link: '/guide/configuration-guide' },
           { text: '业务配置最佳实践', link: '/guide/business-configuration-best-practices' },
+          { text: '业务配置测试指南', link: '/guide/business-testing' },
           { text: '排错指南', link: '/guide/troubleshooting' }
         ]
       },
@@ -116,7 +117,8 @@ export default defineConfig({
             items: [
               { text: '常见操作列与行增删', link: '/features/common-row-actions' },
               { text: '行列操作与异步提交', link: '/features/row-column-operations' },
-              { text: '分页与跨页编辑', link: '/features/pagination-and-cross-page-editing' }
+              { text: '分页与跨页编辑', link: '/features/pagination-and-cross-page-editing' },
+              { text: '多人编辑与未保存离开', link: '/features/concurrent-editing-and-navigation' }
             ]
           },
           {
