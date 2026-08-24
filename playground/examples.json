@@ -141,17 +141,17 @@
   },
   {
     "title": "行列操作与异步提交",
-    "description": "演示行增删复制移动、动态列，以及业务检查成功后才写入字段。",
+    "description": "演示行增删复制移动、稳定 ID 批量操作、动态列和延迟字段提交。",
     "path": "/row-column-operations",
     "name": "row-column-operations",
     "view": "RowColumnOperationsView",
     "category": "business",
     "level": "intermediate",
     "status": "featured",
-    "relatedDocs": ["/features/common-row-actions", "/features/row-column-operations"],
+    "relatedDocs": ["/features/common-row-actions", "/features/row-column-operations", "/features/pagination-and-cross-page-editing"],
     "source": "playground/src/views/RowColumnOperationsView.vue",
     "type": "warning",
-    "tags": ["row operations", "columns", "delayed commit"]
+    "tags": ["row operations", "selection", "batch update", "columns", "delayed commit"]
   },
   {
     "title": "单元格合并",
