@@ -27,7 +27,7 @@ Playground 直接引用组件源码。示例名称、路由、分类、难度、
 | Demo | 难度 | 解决的问题 |
 | --- | --- | --- |
 | [Hint 多场景 ↗](http://localhost:5173/hint-scenarios) | 进阶 | title、单实例 Tooltip、表头和 FormItem Slot |
-| [`cellSlot` 列级单元格 ↗](http://localhost:5173/cell-slot) | 进阶 | 展示、状态、派生值和操作列 |
+| [`cellSlot` 列级单元格 ↗](http://localhost:5173/cell-slot) | 进阶 | 展示、状态、派生值，以及详情/编辑渲染切换 |
 | [字段 Slot 与动态显隐 ↗](http://localhost:5173/dynamic-slot-test) | 进阶 | 字段 Slot、更新助手和多层动态配置 |
 
 需要组合多个渲染入口时，先按[扩展模型](../architecture/extension-model.md)选择最小方案，再组合对应的独立示例。
