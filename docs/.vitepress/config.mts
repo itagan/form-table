@@ -115,7 +115,8 @@ export default defineConfig({
             collapsed: false,
             items: [
               { text: '常见操作列与行增删', link: '/features/common-row-actions' },
-              { text: '行列操作与异步提交', link: '/features/row-column-operations' }
+              { text: '行列操作与异步提交', link: '/features/row-column-operations' },
+              { text: '分页与跨页编辑', link: '/features/pagination-and-cross-page-editing' }
             ]
           },
           {
