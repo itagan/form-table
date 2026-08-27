@@ -15,6 +15,7 @@ const viewLoaders: Record<string, () => Promise<unknown>> = {
   RemoteSchemaView: () => import('../views/RemoteSchemaView.vue'),
   FieldSlotVisibilityView: () => import('../views/FieldSlotVisibilityView.vue'),
   RowColumnOperationsView: () => import('../views/RowColumnOperationsView.vue'),
+  SharedOperationColumnView: () => import('../views/SharedOperationColumnView.vue'),
   CellMergeView: () => import('../views/CellMergeView.vue'),
   HeterogeneousDemandView: () => import('../views/HeterogeneousDemandView.vue'),
   ItinerarySimpleView: () => import('../views/ItinerarySimpleView.vue'),

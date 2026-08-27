@@ -154,6 +154,20 @@
     "tags": ["row operations", "selection", "batch update", "columns", "delayed commit"]
   },
   {
+    "title": "多需求共享固定操作列",
+    "description": "勾选需求项后循环渲染多个 FormTable，复用同一份固定操作列配置并验证行新增、删除的数据隔离。",
+    "path": "/shared-operation-column",
+    "name": "shared-operation-column",
+    "view": "SharedOperationColumnView",
+    "category": "business",
+    "level": "intermediate",
+    "status": "example",
+    "relatedDocs": ["/features/common-row-actions", "/features/row-column-operations"],
+    "source": "playground/src/views/SharedOperationColumnView.vue",
+    "type": "warning",
+    "tags": ["v-for", "shared columns", "fixed right", "row operations"]
+  },
+  {
     "title": "单元格合并",
     "description": "演示分组纵向合并、汇总行横向合并、稳定列定位和表头隐藏。",
     "path": "/cell-merge",
