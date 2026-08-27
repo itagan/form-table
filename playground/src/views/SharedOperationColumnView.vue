@@ -6,7 +6,7 @@
       <div>
         <p class="eyebrow">SHARED CONFIG REGRESSION DEMO</p>
         <h1>多需求共享固定操作列</h1>
-        <p>勾选需求项后通过 v-for 渲染多个 FormTable；所有实例复用同一个 columns 数组和固定操作列对象。</p>
+        <p>父页面接收独立选择组件的结果，再通过 props 传给表单列表组件循环渲染多个 FormTable。</p>
       </div>
       <el-tag :type="isIsolated ? 'success' : 'danger'">
         {{ isIsolated ? '需求数据相互隔离' : '检测到数据异常' }}
@@ -20,46 +20,19 @@
     />
 
     <p class="selection-parameter">
-      父页面收到的 selectedKeys 参数：<code>{{ selectedDemandKeys.join(', ') || '[]' }}</code>
+      传给 DemandFormList 的 props.selectedKeys：<code>{{ selectedDemandKeys.join(', ') || '[]' }}</code>
     </p>
 
-    <section v-if="selectedDemands.length === 0" class="demo-card empty-card">
-      请至少勾选一个需求项。
-    </section>
-
-    <section
-      v-for="demand in selectedDemands"
-      :key="demand.key"
-      class="demo-card demand-card"
-      :data-demand-key="demand.key"
-    >
-      <div class="demand-heading">
-        <div>
-          <h2>{{ demand.label }}</h2>
-          <span>{{ demand.description }}</span>
-        </div>
-        <div class="demand-summary">
-          <el-tag size="small" type="info">{{ demandRows[demand.key].length }} 行</el-tag>
-          <el-button size="small" type="primary" @click="appendRow(demand.key)">末尾新增</el-button>
-        </div>
-      </div>
-
-      <FormTable
-        :table-data="demandRows[demand.key]"
-        :columns="sharedColumns"
-        row-key="id"
-        :form-props="{ size: 'small' }"
-        :table-props="{ border: true, emptyText: '暂无明细，请点击末尾新增' }"
-        @update:tableData="replaceRows(demand.key, $event)"
-      >
-        <template #demand-actions="{ row }">
-          <div class="row-actions">
-            <el-button type="text" @click="insertAfter(demand.key, row)">后插一行</el-button>
-            <el-button type="text" class="danger" @click="removeRow(demand.key, row)">删除</el-button>
-          </div>
-        </template>
-      </FormTable>
-    </section>
+    <DemandFormList
+      :selected-keys="selectedDemandKeys"
+      :demand-options="demandOptions"
+      :demand-rows="demandRows"
+      :columns="sharedColumns"
+      @replace-rows="replaceRows"
+      @append-row="appendRow"
+      @insert-after="insertAfter"
+      @remove-row="removeRow"
+    />
 
     <section class="demo-card result-card">
       <div>
@@ -78,8 +51,8 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import FormTable from '@itagan/form-table'
 import type { ColumnConfig, TableRow } from '@itagan/form-table'
+import DemandFormList from '../components/DemandFormList.vue'
 import DemandItemSelector from '../components/DemandItemSelector.vue'
 
 type DemandKey = 'hotel' | 'meal' | 'car' | 'train' | 'flight'
@@ -114,7 +87,6 @@ const demandOptions: DemandOption[] = [
 ]
 
 const selectedDemandKeys = ref<DemandKey[]>(['hotel', 'meal', 'car'])
-const selectedDemands = computed(() => demandOptions.filter(item => selectedDemandKeys.value.includes(item.key)))
 const demandKeySet = new Set<DemandKey>(demandOptions.map(item => item.key))
 
 const handleDemandSelection = (selectedKeys: string[]) => {
@@ -245,22 +217,17 @@ const removeRow = (key: DemandKey, source: TableRow) => {
 <style scoped>
 .demo-page { max-width: 1180px; margin: 0 auto; padding: 32px; }
 .page-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-top: 20px; }
-.page-heading h1, .demand-heading h2, .result-card h2 { margin: 0; }
+.page-heading h1, .result-card h2 { margin: 0; }
 .page-heading p { margin: 10px 0 0; color: #64748b; }
 .eyebrow { color: #2563eb !important; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; }
 .demo-card { margin-top: 20px; padding: 22px; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; }
 .selection-parameter { margin: 10px 2px 0; color: #64748b; font-size: 13px; }
 .selection-parameter code { color: #1d4ed8; }
-.demand-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 16px; }
-.demand-heading span, .note { color: #64748b; font-size: 13px; }
-.demand-summary, .row-actions { display: flex; align-items: center; gap: 10px; }
-.row-actions { justify-content: center; white-space: nowrap; }
-.danger { color: #f56c6c; }
-.empty-card { color: #64748b; text-align: center; }
+.note { color: #64748b; font-size: 13px; }
 .result-card { display: grid; grid-template-columns: 260px 1fr; gap: 24px; }
 @media (max-width: 760px) {
   .demo-page { padding: 20px; }
-  .page-heading, .demand-heading { align-items: flex-start; flex-direction: column; }
+  .page-heading { align-items: flex-start; flex-direction: column; }
   .result-card { grid-template-columns: 1fr; }
 }
 </style>

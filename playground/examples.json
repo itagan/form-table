@@ -155,7 +155,7 @@
   },
   {
     "title": "多需求共享固定操作列",
-    "description": "独立组件把勾选需求项作为参数传入后循环渲染多个 FormTable，复用固定操作列并验证行增删隔离。",
+    "description": "父页面接收独立组件的勾选结果，通过 props 传给表单列表组件循环渲染 FormTable 并验证行增删隔离。",
     "path": "/shared-operation-column",
     "name": "shared-operation-column",
     "view": "SharedOperationColumnView",
