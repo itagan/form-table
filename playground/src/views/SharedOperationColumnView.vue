@@ -13,19 +13,15 @@
       </el-tag>
     </header>
 
-    <section class="demo-card selector-card">
-      <strong>选择要填写的需求项</strong>
-      <el-checkbox-group v-model="selectedDemandKeys">
-        <el-checkbox
-          v-for="demand in demandOptions"
-          :key="demand.key"
-          :label="demand.key"
-        >
-          {{ demand.label }}
-        </el-checkbox>
-      </el-checkbox-group>
-      <p class="note">取消勾选只隐藏表单，不清空已填写数据；重新勾选后继续编辑原数据。</p>
-    </section>
+    <DemandItemSelector
+      :options="demandOptions"
+      :selected-keys="selectedDemandKeys"
+      @change="handleDemandSelection"
+    />
+
+    <p class="selection-parameter">
+      父页面收到的 selectedKeys 参数：<code>{{ selectedDemandKeys.join(', ') || '[]' }}</code>
+    </p>
 
     <section v-if="selectedDemands.length === 0" class="demo-card empty-card">
       请至少勾选一个需求项。
@@ -84,6 +80,7 @@
 import { computed, ref } from 'vue'
 import FormTable from '@itagan/form-table'
 import type { ColumnConfig, TableRow } from '@itagan/form-table'
+import DemandItemSelector from '../components/DemandItemSelector.vue'
 
 type DemandKey = 'hotel' | 'meal' | 'car' | 'train' | 'flight'
 
@@ -118,6 +115,11 @@ const demandOptions: DemandOption[] = [
 
 const selectedDemandKeys = ref<DemandKey[]>(['hotel', 'meal', 'car'])
 const selectedDemands = computed(() => demandOptions.filter(item => selectedDemandKeys.value.includes(item.key)))
+const demandKeySet = new Set<DemandKey>(demandOptions.map(item => item.key))
+
+const handleDemandSelection = (selectedKeys: string[]) => {
+  selectedDemandKeys.value = selectedKeys.filter((key): key is DemandKey => demandKeySet.has(key as DemandKey))
+}
 
 let rowSequence = 10
 const createRow = (content = '', quantity = 1, remark = ''): DemandRow => ({
@@ -247,8 +249,8 @@ const removeRow = (key: DemandKey, source: TableRow) => {
 .page-heading p { margin: 10px 0 0; color: #64748b; }
 .eyebrow { color: #2563eb !important; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; }
 .demo-card { margin-top: 20px; padding: 22px; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; }
-.selector-card { display: flex; align-items: center; flex-wrap: wrap; gap: 18px; }
-.selector-card .note { flex-basis: 100%; }
+.selection-parameter { margin: 10px 2px 0; color: #64748b; font-size: 13px; }
+.selection-parameter code { color: #1d4ed8; }
 .demand-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 16px; }
 .demand-heading span, .note { color: #64748b; font-size: 13px; }
 .demand-summary, .row-actions { display: flex; align-items: center; gap: 10px; }
