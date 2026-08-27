@@ -85,7 +85,7 @@ import { computed, ref } from 'vue'
 import FormTable from '@itagan/form-table'
 import type { ColumnConfig, TableRow } from '@itagan/form-table'
 
-type DemandKey = 'venue' | 'hotel' | 'meal'
+type DemandKey = 'hotel' | 'meal' | 'car' | 'train' | 'flight'
 
 interface DemandOption {
   key: DemandKey
@@ -109,12 +109,14 @@ interface OperationLog {
 }
 
 const demandOptions: DemandOption[] = [
-  { key: 'venue', label: '会场需求', description: '会场、会议室和设备明细' },
-  { key: 'hotel', label: '住宿需求', description: '酒店、房型和间夜明细' },
-  { key: 'meal', label: '用餐需求', description: '餐次、桌数和人数明细' }
+  { key: 'hotel', label: '酒店需求', description: '酒店、房型、间数和间夜明细' },
+  { key: 'meal', label: '用餐需求', description: '餐次、餐标和人数明细' },
+  { key: 'car', label: '用车需求', description: '车型、接送路线和车辆数明细' },
+  { key: 'train', label: '火车需求', description: '出发到达站、席别和乘车人数明细' },
+  { key: 'flight', label: '机票需求', description: '出发到达机场、舱位和乘机人数明细' }
 ]
 
-const selectedDemandKeys = ref<DemandKey[]>(['venue', 'hotel'])
+const selectedDemandKeys = ref<DemandKey[]>(['hotel', 'meal', 'car'])
 const selectedDemands = computed(() => demandOptions.filter(item => selectedDemandKeys.value.includes(item.key)))
 
 let rowSequence = 10
@@ -126,9 +128,11 @@ const createRow = (content = '', quantity = 1, remark = ''): DemandRow => ({
 })
 
 const demandRows = ref<Record<DemandKey, DemandRow[]>>({
-  venue: [createRow('主会场 LED 屏', 1, '含调试')],
   hotel: [createRow('高级双床房', 8, '入住两晚')],
-  meal: [createRow('会议午餐', 60, '含素食 3 份')]
+  meal: [createRow('会议午餐', 60, '含素食 3 份')],
+  car: [createRow('机场至酒店接机', 2, '7 座商务车')],
+  train: [createRow('杭州东至上海虹桥', 4, '二等座')],
+  flight: [createRow('北京首都至杭州萧山', 3, '经济舱')]
 })
 
 /** 同一数组（包括 actionColumn 对象）直接传给每一个 FormTable，用于覆盖共享配置场景。 */
@@ -181,11 +185,10 @@ const operationLogs = ref<OperationLog[]>([])
 let logSequence = 0
 
 const demandLabel = (key: DemandKey) => demandOptions.find(item => item.key === key)?.label || key
-const rowCounts = (): Record<DemandKey, number> => ({
-  venue: demandRows.value.venue.length,
-  hotel: demandRows.value.hotel.length,
-  meal: demandRows.value.meal.length
-})
+const rowCounts = (): Record<DemandKey, number> => demandOptions.reduce((counts, item) => {
+  counts[item.key] = demandRows.value[item.key].length
+  return counts
+}, {} as Record<DemandKey, number>)
 
 const recordOperation = (
   key: DemandKey,
