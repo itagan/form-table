@@ -40,6 +40,7 @@ export default defineConfig({
       { text: 'API', link: '/api/configuration' },
       { text: '示例', link: '/examples/' },
       { text: 'Playground', link: `${playgroundSiteUrl}/` },
+      { text: 'npm', link: 'https://www.npmjs.com/package/@itagan/form-table' },
       { text: '源码', link: 'https://gitee.com/itagan/form-table' }
     ],
     sidebar: [
