@@ -38,11 +38,11 @@ FormTable 根组件的 `v-model` 映射到 `tableData/update:tableData`。组件
 | --- | --- |
 | 日常双向绑定（推荐） | `v-model="tableData"` |
 | Vue 2 具名兼容写法 | `:table-data.sync="tableData"` |
-| 保存、审计等自定义回写 | `:table-data="tableData" @update:tableData="handleUpdate"` |
+| Store、派生数组或 DTO 适配 | `:table-data="tableData" @update:tableData="handleUpdate"` |
 
 根组件 `v-model` 不发出额外的 `input` 事件；它通过 Vue 2 `model` 配置直接复用 `update:tableData`。这与 Item 的 `component.model` 不同：前者绑定整张表，后者适配某个字段组件的值协议。
 
-本地回写必须立即执行；后端保存可在独立流程中防抖。各种更新入口、事件结果和异步行为见[数据更新与受控回写](../features/data-updates.md)。
+三种写法都是受控更新，`v-model` 只是推荐简写。保存、审计等副作用不要求展开为显式写法；本地回写必须立即执行，后端保存可在独立流程中防抖。选择规则、各种更新入口和异步行为见[数据更新与受控回写](../features/data-updates.md)。
 
 ## Element UI 透传
 

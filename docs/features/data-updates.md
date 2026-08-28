@@ -4,6 +4,8 @@
 
 `tableData` 是 FormTable 唯一的数据源。根组件 `v-model` 映射到 `tableData/update:tableData`；组件内部不会直接修改传入数组，字段输入、`setValue` 和 `updateRow` 都会生成新数组交给父组件。
 
+`v-model` 本身就是推荐的受控回写写法，不是与受控更新并列的另一种模式。字段配置中的自动 model 只负责把控件变化转换成行更新；无论字段使用内置 Type、直接组件、自定义 Type 还是更新助手，页面最终都必须接住新的 `tableData`。
+
 ## 基础配置
 
 ```vue
@@ -20,7 +22,9 @@ function handleFieldChange(event) {
 }
 ```
 
-`v-model="tableData"` 与 `:table-data.sync="tableData"` 等价。需要在回写时附加后端保存等逻辑时，改用显式事件；本地状态仍必须先同步：
+`v-model="tableData"` 与 `:table-data.sync="tableData"` 等价。一般页面只需使用 `v-model`；保存和审计可通过 `field-change` 或监听本地数据附加，不需要为了副作用手动展开受控协议。
+
+当数据来自 Store getter、只读 computed、过滤/分页副本，或者组件数据需要转换成另一套页面 DTO 时，才显式接收事件并同步回写唯一数据源：
 
 ```vue
 <FormTable
@@ -34,10 +38,12 @@ function handleFieldChange(event) {
 
 ```ts
 function handleTableDataUpdate(nextTableData) {
-  tableData.value = nextTableData
+  replaceSourceRows(nextTableData)
   scheduleSave(nextTableData)
 }
 ```
+
+只传 `:table-data` 而不处理 `update:tableData`，相当于只读使用；若表格仍包含可编辑字段，输入产生的新数组不会成为下一轮数据源。
 
 ## 选择更新方式
 
