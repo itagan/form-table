@@ -34,6 +34,8 @@ LayoutColumnConfig
 
 每个字段只创建一条明确的 FormItem 链路。`FieldRenderer` 是函数式渲染器，不增加有状态 Vue 实例；它负责内置选项、组件 model 和监听器绑定。
 
+进入 `FieldRenderer` 后，内置 Type、直接组件和自定义 Type 共用同一条 model 读写链路：先由 `fieldKey` 或 `binding.map` 形成 `bindingValue`，再执行可选的 model 转换并连接受控更新。完整顺序及 Slot、只读文本等旁路见[受控数据流：字段双向绑定管线](./controlled-data-flow.md#字段双向绑定管线)。
+
 ## 字段渲染方式
 
 | 方式 | 配置入口 | 适用场景 | 层级 |
@@ -77,4 +79,3 @@ Hint 不改变字段值、model 或 Slot 上下文。存在 `column.props.render
 ## 相关文档
 
 [Column / Item API](../api/columns.md) · [Component API](../api/component.md) · [Slot 与上下文](../api/contexts.md) · [扩展模型](./extension-model.md)
-
