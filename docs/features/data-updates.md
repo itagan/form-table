@@ -6,6 +6,26 @@
 
 `v-model` 本身就是推荐的受控回写写法，不是与受控更新并列的另一种模式。字段配置中的自动 model 只负责把控件变化转换成行更新；无论字段使用内置 Type、直接组件、自定义 Type 还是更新助手，页面最终都必须接住新的 `tableData`。
 
+## 如何选择根表写法
+
+先设想显式处理器的内容：
+
+```ts
+function handleTableDataUpdate(nextTableData) {
+  tableData.value = nextTableData
+}
+```
+
+如果处理器只有这一行，直接删除处理器并使用 `v-model="tableData"`。即使数据之后会被接口刷新、撤销或整体替换，这个结论也不变。
+
+只有处理器必须完成以下工作时，才显式使用 `:table-data` + `@update:tableData`：
+
+- 调用 Store action/mutation，而不是直接给 getter 赋值。
+- 把过滤、分组或分页视图的变化按 `rowKey` 合并回完整数组。
+- 把 FormTable 行结构转换回页面或接口使用的 DTO。
+
+这不是为了支持多个数据源。页面仍应只有一个权威数据源；显式处理器只是它与 FormTable 视图之间的适配边界。Store 若对外提供可写 computed，也可以直接绑定 `v-model`。
+
 ## 基础配置
 
 ```vue
@@ -24,26 +44,23 @@ function handleFieldChange(event) {
 
 `v-model="tableData"` 与 `:table-data.sync="tableData"` 等价。一般页面只需使用 `v-model`；保存和审计可通过 `field-change` 或监听本地数据附加，不需要为了副作用手动展开受控协议。
 
-当数据来自 Store getter、只读 computed、过滤/分页副本，或者组件数据需要转换成另一套页面 DTO 时，才显式接收事件并同步回写唯一数据源：
+例如表格展示过滤后的 `visibleRows` 时，返回的新数组不能直接替换完整的 `sourceRows`，需要显式合并：
 
 ```vue
 <FormTable
-  :table-data="tableData"
+  :table-data="visibleRows"
   :columns="columns"
-  @update:tableData="handleTableDataUpdate"
+  @update:tableData="replaceVisibleRows"
 />
 ```
 
-后端保存可以独立防抖：
-
 ```ts
-function handleTableDataUpdate(nextTableData) {
-  replaceSourceRows(nextTableData)
-  scheduleSave(nextTableData)
+function replaceVisibleRows(nextVisibleRows) {
+  sourceRows.value = mergeByRowKey(sourceRows.value, nextVisibleRows)
 }
 ```
 
-只传 `:table-data` 而不处理 `update:tableData`，相当于只读使用；若表格仍包含可编辑字段，输入产生的新数组不会成为下一轮数据源。
+只传 `:table-data` 而不处理 `update:tableData`，相当于只读使用；若表格仍包含可编辑字段，输入产生的新数组不会成为下一轮数据源。保存和审计可通过 `field-change` 或监听权威数据源独立处理，不需要为此展开 `v-model`。
 
 ## 选择更新方式
 

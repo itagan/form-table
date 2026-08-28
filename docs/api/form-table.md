@@ -42,7 +42,7 @@ FormTable 根组件的 `v-model` 映射到 `tableData/update:tableData`。组件
 
 根组件 `v-model` 不发出额外的 `input` 事件；它通过 Vue 2 `model` 配置直接复用 `update:tableData`。这与 Item 的 `component.model` 不同：前者绑定整张表，后者适配某个字段组件的值协议。
 
-三种写法都是受控更新，`v-model` 只是推荐简写。保存、审计等副作用不要求展开为显式写法；本地回写必须立即执行，后端保存可在独立流程中防抖。选择规则、各种更新入口和异步行为见[数据更新与受控回写](../features/data-updates.md)。
+三种写法都是受控更新，`v-model` 只是推荐简写。若显式处理器只会执行 `tableData = $event`，应改用 `v-model`；只有回写必须经过 Store 调用、派生列表合并或 DTO 转换时才展开协议。保存、审计等副作用不构成展开理由。完整选择规则、更新入口和异步行为见[数据更新与受控回写](../features/data-updates.md)。
 
 ## Element UI 透传
 
