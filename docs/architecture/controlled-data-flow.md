@@ -2,6 +2,36 @@
 
 FormTable 把整张 `tableData` 作为受控数据。字段编辑不会直接修改 Props，而是计算新行和新数组，再通过统一事件交给父组件回写。
 
+## 先区分两个层级
+
+FormTable 没有“`v-model` 模式”和“受控模式”两套数据机制。根组件 `v-model="tableData"` 只是下面这组受控协议的简写：
+
+```vue
+<FormTable
+  :table-data="tableData"
+  @update:tableData="tableData = $event"
+/>
+```
+
+文档中提到的两类 model 作用不同：
+
+| 层级 | 解决的问题 | 是否替代根表回写 |
+| --- | --- | --- |
+| 根组件 `v-model` | 页面把新的整张 `tableData` 立即保存到可写状态 | 是，它本身就是根表回写 |
+| 字段自动 model | 字段组件的值如何生成当前行 Patch | 否，最终仍会发出 `update:tableData` |
+
+只要页面有一份可以直接赋值的本地 `data/ref`，就使用 `v-model`。只有传入值不是可直接赋值的唯一数据源，或更新必须经过 Store action、数据适配等明确边界时，才显式传入并接收 `tableData`：
+
+| 数据来源 | 推荐写法 | 原因 |
+| --- | --- | --- |
+| 页面本地可写数组 | `v-model="tableData"` | 最短且不易漏掉同步回写 |
+| Vue 2 具名兼容场景 | `:table-data.sync="tableData"` | 与根组件 `v-model` 使用同一协议 |
+| Store getter、只读 computed | `:table-data` + `@update:tableData` | 事件中调用 Store action 或更新其可写源数据 |
+| 过滤、分组、分页等派生数组 | `:table-data` + `@update:tableData` | 必须把视图更新映射回唯一源数据 |
+| 组件值与页面 DTO 结构不同 | `:table-data` + `@update:tableData` | 在边界同步完成双向适配 |
+
+保存、审计和埋点本身不是改用显式回写的理由。日常页面可继续使用 `v-model`，再通过 `field-change` 或监听本地 `tableData` 执行副作用。若选择显式监听 `update:tableData`，也必须先同步更新本地或 Store 状态，再启动可防抖的后端保存。
+
 ## 基础流程
 
 ```text

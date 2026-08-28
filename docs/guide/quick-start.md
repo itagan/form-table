@@ -101,7 +101,7 @@ const validateTable = () => formTableRef.value?.validate()
 
 对应的逐步说明和行操作边界见[基础编辑示例](../examples/basic-editing.md)。需要继续接入接口加载、保存、撤销和未保存状态时，直接进入[完整编辑提交流程](../examples/form-workflow.md)。
 
-根组件 `v-model` 绑定整张表的 `tableData`，底层复用 `tableData/update:tableData`。已有的 `:table-data.sync="tableData"` 继续兼容；需要在回写时执行保存等逻辑，可显式监听 `@update:tableData`。
+根组件 `v-model` 绑定整张表的 `tableData`，底层复用 `tableData/update:tableData`，因此它本身就是受控回写的推荐简写。已有的 `:table-data.sync="tableData"` 继续兼容；只有 Store getter、派生列表或 DTO 适配等无法直接赋值的来源，才需要显式组合 `:table-data` 与 `@update:tableData`。保存等副作用可以继续监听本地数据或 `field-change`。
 
 完成基础编辑后，先通过[扩展模型](../architecture/extension-model.md)判断应该使用直接组件、字段 Slot 还是 `cellSlot`。字段 Slot 和动态显隐参考 `/dynamic-slot-test`，列级自定义单元格参考 `/cell-slot`；Hint 行为可直接打开 `/hint-scenarios`。
 
