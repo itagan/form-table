@@ -112,6 +112,8 @@ component: { is: 'corp-user-selector' }
 { type: 'date', component: { props: { type: 'daterange' } } }
 ```
 
+`daterange/datetimerange` 仍然只渲染一个 DatePicker，但其 model 值是 `[start, end]` 数组。如果行数据将开始和结束时间保存为两个字段，需要使用 `binding.map` 将它们映射到 `[0]/[1]`；只设置 `component.props.type` 不会自动拆装字段。完整可复制配置见[复合字段映射：内置 date](../features/composite-binding.md#内置-date-映射开始与结束字段)。
+
 任意时间使用 `time`；按固定步长生成时间列表时使用独立的 `time-select`：
 
 ```ts

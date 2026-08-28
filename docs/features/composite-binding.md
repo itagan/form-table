@@ -20,7 +20,48 @@
 
 映射中的每个 `valuePath` 都必须是明确路径，不支持通配符、数组遍历或多个来源聚合。组件返回结构与行字段只是“形状不同、路径固定”时使用映射；需要计算新值时使用事件回调。
 
-## 数组值
+## 内置 date 映射开始与结束字段
+
+内置 `type: 'date'` 渲染的是一个 `el-date-picker`。当 `component.props.type` 设置为 `daterange` 或 `datetimerange` 时，它仍然只有一个 model，但 model 值会变成 `[start, end]` 数组。`component.props` 只切换 DatePicker 模式，不会自动把两个行字段组合成组件值，因此需要用 `binding.map` 明确数组位置：
+
+```ts
+interface ScheduleRow extends TableRow {
+  startDate: string | null
+  endDate: string | null
+}
+
+const columns = defineFormTableColumns<ScheduleRow>([{
+  label: '活动日期',
+  formItems: [{
+    // 主字段同时作为 FormItem 校验和 Hint 的锚点。
+    fieldKey: 'startDate',
+    type: 'date',
+    binding: {
+      map: [
+        { fieldPath: 'startDate', valuePath: '[0]', fallbackValue: null },
+        { fieldPath: 'endDate', valuePath: '[1]', fallbackValue: null }
+      ]
+    },
+    component: {
+      props: {
+        type: 'daterange',
+        valueFormat: 'yyyy-MM-dd',
+        rangeSeparator: '至',
+        startPlaceholder: '开始日期',
+        endPlaceholder: '结束日期'
+      }
+    }
+  }]
+}])
+```
+
+读取时 FormTable 生成 `[row.startDate, row.endDate]` 并交给 DatePicker 的默认 `value` Prop；组件触发默认 `input` 事件后，数组的 `[0]/[1]` 会在一次受控更新中分别写回 `startDate/endDate`。配置 `valueFormat` 后数组项是格式化字符串；不配置时遵循 Element UI DatePicker 的原生值类型，映射机制本身不做日期格式转换。
+
+常见未生效原因是把 `valuePath` 写成 `start/end` 等对象路径，而 `daterange` 实际返回数组；反向映射找不到对应路径时只会处理配置了 `fallbackValue` 的字段。数组映射必须统一使用 `[0]`、`[1]`，不能与对象根路径混用。
+
+清空 DatePicker 时，两个字段分别使用上例的 `null`。如果接口约定空字符串，可把两项的 `fallbackValue` 改为 `''`。开始日期和结束日期需要各自独立校验提示时，应拆成两个 Item；单个范围组件只能以 `fieldKey` 指向的主字段作为 FormItem 校验锚点。
+
+## 自定义组件的数组值
 
 自定义日期范围组件通过 `range/range-change` 提供数组值，但行数据分别保存开始和结束日期：
 
