@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.1 - 2026-08-28
+
+### Fixed
+
+- 修复稳定 key 复用 FormTable、父级整体重建循环项且多个实例共享列配置时，单元格操作 Slot 仍调用旧闭包的问题。
+- 表头、字段内容、FormItem Label 和 Error Slot 改为解析父组件最新函数，避免配置对象复用时渲染陈旧内容。
+
+### Added
+
+- 新增共享列、共享 `cellSlot`、循环渲染和整体重建板块对象的 Playground 示例与使用文档。
+- 文档明确 npm 公开包入口、`latest` 安装方式和新版本维护流程。
+
 ## 1.0.0 - 2026-08-25
 
 [`@itagan/form-table@1.0.0`](https://www.npmjs.com/package/@itagan/form-table/v/1.0.0) 首次公开发布。
