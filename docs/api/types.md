@@ -58,7 +58,7 @@ const columns = defineFormTableColumns<PurchaseRow>([{
 
 ```ts
 const fieldTypes = defineFormTableTypes<PurchaseRow>()({
-  employee: {
+  'hr-employee': {
     is: EmployeePicker,
     model: { prop: 'selectedId', event: 'user-confirm' }
   }
@@ -67,7 +67,7 @@ const fieldTypes = defineFormTableTypes<PurchaseRow>()({
 const FormTable = createFormTable<PurchaseRow, typeof fieldTypes>()
 const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([{
   label: '负责人',
-  formItems: [{ fieldKey: 'employeeId', type: 'employee' }]
+  formItems: [{ fieldKey: 'employeeId', type: 'hr-employee' }]
 }])
 ```
 

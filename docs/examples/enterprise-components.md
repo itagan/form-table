@@ -283,7 +283,7 @@ const handleSupplierChange = (supplier, source) => {
 
 ## 什么时候升级为自定义 Type
 
-只有组件目标、model 和默认 Props 已经跨页面稳定重复，并且业务希望在 columns 中直接表达 `type: 'employee'` 等语义时，才使用实例级自定义 Type。
+只有组件目标、model 和默认 Props 已经跨页面稳定重复，并且业务希望在 columns 中直接表达 `type: 'hr-employee'` 等语义时，才使用实例级自定义 Type。注册名称推荐使用公司、部门或业务域前缀，完整规则见[自定义字段 Type：推荐命名规范](../features/custom-field-types.md#推荐命名规范)。
 
 一次性组件继续使用 `type: 'component'`；协议复杂但仍可能变化时继续使用 Adapter。完整判断见[扩展模型](../architecture/extension-model.md)。
 
