@@ -2,7 +2,7 @@
 
 > **高级扩展：**本能力用于治理已经跨页面稳定重复的组件、model 和默认 Props。单次接入优先使用 `type: 'component'`，复杂旧协议优先使用 Adapter；选择顺序见[扩展模型](../architecture/extension-model.md)。
 
-实例级 `fieldTypes` 可以把稳定、重复的业务组件协议注册成具名字段，使 columns 像内置 type 一样直接使用 `type: 'employee'`。它只是一层轻量解析，解析后仍复用现有组件 model、校验、Hint、受控更新和 `binding.map` 链路。
+实例级 `fieldTypes` 可以把稳定、重复的业务组件协议注册成具名字段，使 columns 像内置 type 一样直接使用 `type: 'hr-employee'`。它只是一层轻量解析，解析后仍复用现有组件 model、校验、Hint、受控更新和 `binding.map` 链路。
 
 ## 注册与使用
 
@@ -52,7 +52,7 @@ const employeeType = defineFormTableType<PurchaseRow>()<
 })
 
 const fieldTypes = defineFormTableTypes<PurchaseRow>()({
-  employee: employeeType
+  'hr-employee': employeeType
 })
 
 const FormTable = createFormTable<PurchaseRow, typeof fieldTypes>()
@@ -61,7 +61,7 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([{
   label: '负责人',
   formItems: [{
     fieldKey: 'employeeId',
-    type: 'employee'
+    type: 'hr-employee'
   }]
 }])
 ```
@@ -102,7 +102,7 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([{
 ```ts
 {
   fieldKey: 'employeeId',
-  type: 'employee',
+  type: 'hr-employee',
   component: {
     props: ({ row }) => ({ disabled: row.status === 'approved' }),
     listeners: {
@@ -123,7 +123,7 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([{
 行字段与组件 model 格式不一致时，可以在稳定 model 协议中同时声明输入和输出转换。例如行数据保存金额“分”，组件接收金额“元”：
 
 ```ts
-money: {
+'finance-money': {
   is: MoneyInput,
   model: {
     prop: 'amount',
@@ -143,7 +143,7 @@ money: {
 ```ts
 {
   fieldKey: 'employeeId',
-  type: 'employee',
+  type: 'hr-employee',
   binding: {
     map: [
       { fieldPath: 'employeeId', valuePath: 'id', fallbackValue: '' },
@@ -179,7 +179,7 @@ interface MoneyEditorValue {
 }
 
 const fieldTypes = defineFormTableTypes<PurchaseRow>()({
-  money: {
+  'finance-money': {
     is: MoneyEditor,
     model: {
       prop: 'money',
@@ -218,7 +218,7 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([{
   label: '采购金额',
   formItems: [{
     fieldKey: 'amountInCents',
-    type: 'money',
+    type: 'finance-money',
     binding: {
       map: [
         {
@@ -259,6 +259,25 @@ MoneyEditor.money
 组件发出 `money-change({ amount: 2000, currency: 'USD' }, meta)` 时，`valueFromEvent` 先收到只读字段上下文和已推导的事件参数，再得到 `{ amountInCents: 200000, currency: 'USD' }`；随后 `binding.map` 一次写回 `{ amountInCents: 200000, currencyCode: 'USD' }`。因此只产生一次 `update:tableData`，两个实际变化字段分别产生 `field-change`；同名 listener 仍收到完整原始参数，其 `context.bindingValue` 是转换前的旧业务绑定值。组件清空并发出 `null` 时，两个字段分别使用 `0` 和 `'CNY'`。
 
 ## 名称、替换与错误处理
+
+### 推荐命名规范
+
+自定义 Type 推荐使用 `<组织或领域>-<业务能力>` 的小写 kebab-case 名称。前缀可以是公司、部门或稳定业务域缩写，例如 `acme-employee`、`hr-position`、`finance-money`。命名空间能标明协议归属，并降低 FormTable 后续增加内置 Type 时发生同名冲突的概率。
+
+后半段应描述业务能力，而不是复刻底层 Element UI 组件名：
+
+| 推荐 | 不推荐 | 原因 |
+| --- | --- | --- |
+| `hr-employee` | `employee` | 无组织前缀，未来更容易与公共或内置名称冲突 |
+| `finance-money` | `money` | 业务归属不明确 |
+| `acme-contract-party` | `acme-input` | `input` 只是 `el-input` 的组件类别，没有表达业务协议 |
+| `hr-position` | `hr-select` | `select` 复刻 `el-select` 的名称，底层组件替换后语义会失真 |
+
+不要使用 `el-*` 前缀，它属于 Element UI 组件命名空间；也不建议把 `el-input`、`el-select`、`el-date-picker` 等名称去掉 `el-` 后直接作为自定义 Type 的业务部分，例如 `acme-input`、`acme-select`、`acme-date-picker`。自定义 Type 应命名稳定的业务协议，而不是当前采用的 UI 控件。
+
+这是一项向前兼容的推荐规范，不会在运行时强制现有名称迁移。团队一旦选定前缀，应在项目内保持一致，并把注册名称视为配置协议的一部分进行评审。
+
+### 保留名称与实例替换
 
 内置 type 以及 `component`、`slot` 是保留名称，`defineFormTableTypes` 会在类型和运行时拒绝冲突。即使 JavaScript 配置绕过 helper，内置 type 仍优先。
 

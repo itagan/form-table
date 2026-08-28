@@ -49,7 +49,7 @@ Element UI 标准字段？
 
 - 同一业务字段在多个页面或模块重复。
 - 组件目标、model 和默认 Props 已经稳定。
-- 希望 columns 直接表达 `type: 'employee'` 等业务语义。
+- 希望 columns 直接表达 `type: 'hr-employee'` 等带归属的业务语义。
 - 团队愿意维护注册名称、泛型协议和实例级注册表。
 
 注册定义只包含稳定的 `is/model/props`。字段路径、页面事件、权限和关联字段仍留在具体 Item 或页面。自定义 Type 不提供继承、全局合并或远程代码执行。

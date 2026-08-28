@@ -4,7 +4,7 @@
     <h1>实例级自定义字段 Type</h1>
     <p>
       注册一次稳定的组件、model 和默认 props，columns 就可以像内置字段一样使用
-      <code>type: 'employee'</code>。金额字段还通过 <code>valueToProp/valueFromEvent</code>
+      <code>type: 'hr-employee'</code>。金额字段还通过 <code>valueToProp/valueFromEvent</code>
       在“数据存分”和“组件显示元”之间同步转换；可选的 <code>defineFormTableType</code>
       为字段级 props 和 listener 原始参数提供精确类型，且不会增加运行时包装。
     </p>
@@ -131,9 +131,9 @@ const employeeType = defineFormTableType<PurchaseRow>()<{
 })
 
 const fieldTypes = defineFormTableTypes<PurchaseRow>()({
-  businessPhone: businessPhoneType,
-  money: moneyType,
-  employee: employeeType
+  'acme-business-phone': businessPhoneType,
+  'finance-money': moneyType,
+  'hr-employee': employeeType
 })
 
 const FormTable = createFormTable<PurchaseRow, typeof fieldTypes>()
@@ -155,7 +155,7 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([
     props: { minWidth: 240 },
     formItems: [{
       fieldKey: 'phone',
-      type: 'businessPhone',
+      type: 'acme-business-phone',
       formItemProps: { label: '联系电话' },
       component: {
         props: { placeholder: '字段 props 覆盖注册默认值' }
@@ -167,7 +167,7 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([
     props: { minWidth: 220 },
     formItems: [{
       fieldKey: 'budgetInCents',
-      type: 'money',
+      type: 'finance-money',
       formItemProps: { label: '预算（数据存分，组件显示元）' },
       component: {
         props: { precision: 0 },
@@ -184,7 +184,7 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([
     props: { minWidth: 320 },
     formItems: [{
       fieldKey: 'employeeId',
-      type: 'employee',
+      type: 'hr-employee',
       formItemProps: { label: '负责人 / 所属部门' },
       binding: {
         map: [
