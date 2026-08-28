@@ -1,6 +1,6 @@
 # cellSlot 列级单元格
 
-> 可运行 Demo：[打开 cellSlot 专项页 ↗](http://localhost:5173/cell-slot)
+> 可运行 Demo：[打开 cellSlot 专项页 ↗](http://localhost:5173/cell-slot) · [共享插槽与循环表格 ↗](http://localhost:5173/shared-slot-loop)
 
 `cellSlot` 是与 Item 字段链路并列的列级渲染入口。它适合操作按钮、状态、图片、派生值和多字段组合展示。
 
@@ -227,4 +227,4 @@ Playground [`/cell-slot`](http://localhost:5173/cell-slot) 同时演示：
 
 ## 相关 API
 
-[Column / Item](../api/columns.md) · [Slot 与上下文](../api/contexts.md) · [事件与 Ref](../api/events-and-ref.md)
+[共享插槽与循环 FormTable](../examples/shared-slot-loop.md) · [Column / Item](../api/columns.md) · [Slot 与上下文](../api/contexts.md) · [事件与 Ref](../api/events-and-ref.md)

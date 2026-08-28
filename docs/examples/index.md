@@ -51,6 +51,7 @@ Playground 直接引用组件源码。示例名称、路由、分类、难度、
 | [完整编辑提交流程 ↗](http://localhost:5173/form-workflow) | 进阶 | 加载保存、异常重试、字段错误、版本冲突和未保存离开 |
 | [行列操作与异步提交 ↗](http://localhost:5173/row-column-operations) | 进阶 | 行增删复制移动、批量选择、动态列和成功后提交 |
 | [多需求共享固定操作列 ↗](http://localhost:5173/shared-operation-column) | 进阶 | 父组件通过 props 下发勾选结果、循环渲染、共享固定操作列和数据隔离 |
+| [共享插槽与循环表格 ↗](http://localhost:5173/shared-slot-loop) | 进阶 | 共享列和 cellSlot、稳定 key 复用，以及整体重建板块对象后的插槽刷新 |
 | [单元格合并 ↗](http://localhost:5173/cell-merge) | 高级 | 纵横合并、稳定列定位、共享字段和校验 |
 | [多需求费用明细 ↗](http://localhost:5173/heterogeneous-demands) | 高级 | 异构组件、差异数据和提交归一化 |
 | [多日议程编排 ↗](http://localhost:5173/itinerary-simple) | 高级 | 分组字段、拖拽、行操作和分组提交 |
@@ -71,6 +72,7 @@ Playground 直接引用组件源码。示例名称、路由、分类、难度、
 - 接口加载、保存和撤销：[完整编辑提交流程](./form-workflow.md)
 - 不确定使用组件还是 Slot：[扩展模型](../architecture/extension-model.md)
 - 行增删与异步流程：[行列操作与异步提交](../features/row-column-operations.md)
+- 共享列和循环表格：[共享插槽与循环 FormTable](./shared-slot-loop.md)
 - 企业组件协议：[企业复杂组件接入](./enterprise-components.md)
 - 性能问题：[性能优化建议](../features/performance-optimization.md)
 - 行为异常：[排错指南](../guide/troubleshooting.md)
