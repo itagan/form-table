@@ -227,11 +227,19 @@ type ComponentTargetConfig<TRow extends TableRow = TableRow> =
   | { is: string | Component, resolveComponent?: FieldComponentResolver<TRow>, slot?: never }
   | { is?: never, resolveComponent: FieldComponentResolver<TRow>, slot?: never }
 
+type DirectFieldComponentConfig<TRow extends TableRow = TableRow> = Omit<
+  FieldComponentConfig<TRow>,
+  'options' | 'optionProps'
+> & {
+  options?: never
+  optionProps?: never
+}
+
 /** 直接指定静态或动态 Vue 组件的字段配置。 */
 export interface ComponentFormItemConfig<TRow extends TableRow = TableRow> extends BaseFormItemConfig<TRow> {
   type: 'component'
-  /** 必须通过 is 或 resolveComponent 提供组件目标。 */
-  component: FieldComponentConfig<TRow> & ComponentTargetConfig<TRow>
+  /** 必须通过 is 或 resolveComponent 提供组件目标；选项数据作为实际组件 props 传入。 */
+  component: DirectFieldComponentConfig<TRow> & ComponentTargetConfig<TRow>
 }
 
 /** 使用根 FormTable 具名 Slot 渲染内容的字段配置。 */

@@ -36,14 +36,16 @@ columns[].formItems[].component
 | `...component.model.valueFromEvent` | `(context, ...args) => FormTableValue` | 自定义 model | 只读字段上下文 + 原始事件参数 | 从事件参数提取写回值；注册 type 可关联事件参数元组 |
 | `...component.props` | `DynamicValue<ComponentProps, ItemContext>` | 全部 | ItemContext | 透传实际字段组件 |
 | `...component.listeners` | `Record<string, FormTableFieldListener>` | 全部 | ActionContext + 原始事件参数 | 配置式组件事件 |
-| `...component.options` | `DynamicValue<FormItemOption[], ItemContext>` | 选项型 | ItemContext | select / radio / checkbox 选项 |
-| `...component.optionProps` | `DynamicValue<OptionPropsConfig, ItemContext>` | 选项型 | ItemContext | 选项字段映射 |
+| `...component.options` | `DynamicValue<FormItemOption[], ItemContext>` | 内置 select / radio / checkbox、字段 Slot | ItemContext | 内置模式生成选项子节点；Slot 通过解析后上下文读取 |
+| `...component.optionProps` | `DynamicValue<OptionPropsConfig, ItemContext>` | 内置 select / radio / checkbox、字段 Slot | ItemContext | 内置选项字段映射；Slot 可自行使用 |
 | `...component.optionProps.label` | `string` | 选项型 | — | 选项展示字段 |
 | `...component.optionProps.value` | `string` | 选项型 | — | 选项值字段 |
 | `...component.optionProps.disabled` | `string` | 选项型 | — | 选项禁用字段 |
 | `...component.optionProps.key` | `string` | 选项型 | — | 选项渲染 key 字段 |
 
 `...` 在表格中缩写了共同前缀 `columns[].formItems[]`。
+
+`type: 'component'` 和注册的自定义 Type 在 TypeScript 配置中不接受 `component.options/optionProps`。FormTable 不知道业务组件采用 Prop、Slot、远程加载还是其他选项协议，也不会把同级 `options` 自动注入实际组件；JavaScript 绕过类型传入时该配置同样不会生效。需要组件接收选项数组时使用 `component.props.options`。字段 Slot 不创建实际组件，但会在 Slot 上下文的 `component.options/optionProps` 中暴露动态解析结果，供模板自行渲染。
 
 Item 级 `binding.map` 位于 `columns[].formItems[].binding`，不属于组件协议。读取顺序是先将多个行字段组合为 `bindingValue`，再由 `valueToProp` 转换为组件 model prop；写回顺序是 `valueFromEvent` 提取组件值，再由映射生成一个行 patch。每个映射项还可通过 `fallbackValue` 声明组件值路径缺失时的静态写回值。对象、数组、Slot、清空和校验规则见[复合字段映射](../features/composite-binding.md)。
 
@@ -136,7 +138,7 @@ component: { is: 'corp-user-selector' }
 
 ## 复杂 Option 接入
 
-结构固定的扁平选项使用 `options + optionProps`，可以继续获得 FormTable 的最小选项渲染：
+结构固定的扁平选项配合内置 `select/radio/checkbox` 使用 `options + optionProps`，可以继续获得 FormTable 的最小选项渲染：
 
 ```ts
 {
@@ -148,6 +150,23 @@ component: { is: 'corp-user-selector' }
   }
 }
 ```
+
+直接组件的选项属于该组件自己的 Prop 协议，应放进 `props`，而不是同级 `options`：
+
+```ts
+{
+  fieldKey: 'ownerId',
+  type: 'component',
+  component: {
+    is: EmployeePicker,
+    props: {
+      options: employeeOptions
+    }
+  }
+}
+```
+
+注册的自定义 Type 同样通过注册默认 `props` 或 Item 的 `component.props` 提供选项。
 
 选项分组、自定义选项内容、跨字段禁用逻辑等场景改用字段 Slot，直接发挥 Element UI 的 `el-option-group`、`el-option` 和原生属性能力：
 

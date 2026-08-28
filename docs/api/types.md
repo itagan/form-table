@@ -119,10 +119,10 @@ type FormItemConfig =
     }
   | {
       type: 'component'
-      component: FieldComponentConfig & (
+      component: Omit<FieldComponentConfig, 'options' | 'optionProps'> & (
         | { is: string | Component; resolveComponent?: FieldComponentResolver }
         | { is?: never; resolveComponent: FieldComponentResolver }
-      )
+      ) & { options?: never; optionProps?: never }
     }
   | { type: 'slot'; component: FieldComponentConfig & { slot: string } }
 ```
@@ -136,10 +136,10 @@ type FormItemConfig =
 ```ts
 interface ComponentItemShape {
   type: 'component'
-  component: FieldComponentConfig & (
+  component: Omit<FieldComponentConfig, 'options' | 'optionProps'> & (
     | { is: string | Component; resolveComponent?: FieldComponentResolver }
     | { is?: never; resolveComponent: FieldComponentResolver }
-  )
+  ) & { options?: never; optionProps?: never }
 }
 
 interface SlotItemShape {

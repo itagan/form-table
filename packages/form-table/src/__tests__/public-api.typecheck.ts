@@ -618,6 +618,33 @@ const compositeBindingColumns: ColumnConfig[] = [{
 }]
 void compositeBindingColumns
 
+const directComponentOptionsUseProps: ColumnConfig[] = [{
+  label: '自定义组件选项',
+  formItems: [{
+    fieldKey: 'ownerId',
+    type: 'component',
+    component: {
+      is: CustomInput,
+      props: { options: [{ label: 'Alice', value: 'employee-1' }] }
+    }
+  }]
+}]
+void directComponentOptionsUseProps
+
+const invalidDirectComponentOptions: ColumnConfig[] = [{
+  label: '错误的自定义组件选项入口',
+  formItems: [{
+    fieldKey: 'ownerId',
+    type: 'component',
+    component: {
+      resolveComponent: () => CustomInput,
+      // @ts-expect-error type: 'component' 的 options 不会传给实际组件，应使用 props.options。
+      options: [{ label: 'Alice', value: 'employee-1' }]
+    }
+  }]
+}]
+void invalidDirectComponentOptions
+
 const invalidFieldBinding: FieldBindingConfig = {
   map: [{
     // @ts-expect-error fieldPath must be a string path.
