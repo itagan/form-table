@@ -147,6 +147,7 @@ export default defineConfig({
             text: '业务接入',
             items: [
               { text: '企业复杂组件接入', link: '/examples/enterprise-components' },
+              { text: '共享插槽与循环表格', link: '/examples/shared-slot-loop' },
               { text: '单元格合并', link: '/examples/cell-merge' }
             ]
           },

@@ -168,6 +168,20 @@
     "tags": ["component params", "v-for", "shared columns", "fixed right", "row operations"]
   },
   {
+    "title": "共享插槽与循环表格",
+    "description": "多个 FormTable 共享列和 cellSlot，在稳定 key 复用实例及整体重建板块对象后继续操作当前数据。",
+    "path": "/shared-slot-loop",
+    "name": "shared-slot-loop",
+    "view": "SharedSlotLoopView",
+    "category": "business",
+    "level": "intermediate",
+    "status": "example",
+    "relatedDocs": ["/examples/shared-slot-loop", "/features/cell-slot", "/features/stable-identity"],
+    "source": "playground/src/views/SharedSlotLoopView.vue",
+    "type": "success",
+    "tags": ["v-for", "shared columns", "cellSlot", "stable key", "object rebuild"]
+  },
+  {
     "title": "单元格合并",
     "description": "演示分组纵向合并、汇总行横向合并、稳定列定位和表头隐藏。",
     "path": "/cell-merge",
