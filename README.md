@@ -2,11 +2,15 @@
 
 `FormTable` 是一个基于 `Vue 2.7 + Element UI + TypeScript` 的表格表单组件。本页只说明仓库开发；组件行为与 API 统一以 [VitePress 文档](./docs/index.md)为准。
 
+[![npm version](https://img.shields.io/npm/v/%40itagan%2Fform-table.svg)](https://www.npmjs.com/package/@itagan/form-table)
+
+组件已作为公开包 [`@itagan/form-table`](https://www.npmjs.com/package/@itagan/form-table) 发布到 npm Registry；业务项目可直接安装，不需要从本仓库复制源码或配置 workspace alias。
+
 ## 仓库结构
 
 ```text
 packages/
-  form-table/        # 可发布到 npm 的组件包
+  form-table/        # 已发布到 npm 的组件包
 playground/          # Vue 2.7 调试和示例应用
 docs/                # Vue 3 / VitePress 文档站与统一站点产物
 ```
@@ -53,6 +57,12 @@ pnpm release:check
 - `pnpm --filter @itagan/form-table build`：只构建可发布 npm 包。
 
 ## npm 包使用
+
+公开包主页：[`@itagan/form-table` on npm](https://www.npmjs.com/package/@itagan/form-table)。
+
+```bash
+pnpm add @itagan/form-table@latest
+```
 
 安装、兼容范围和最小示例见[组件包说明](./packages/form-table/README.md)；完整行为说明以[快速开始](./docs/guide/quick-start.md)和 [API 总览](./docs/api/configuration.md)为准。
 

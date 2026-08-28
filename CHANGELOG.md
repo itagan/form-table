@@ -1,8 +1,8 @@
 # Changelog
 
-## 1.0.0 - 2026-08-23
+## 1.0.0 - 2026-08-25
 
-`@itagan/form-table` 首次公开发布。
+[`@itagan/form-table@1.0.0`](https://www.npmjs.com/package/@itagan/form-table/v/1.0.0) 首次公开发布。
 
 ### Added
 

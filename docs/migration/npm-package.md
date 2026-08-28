@@ -1,5 +1,13 @@
 # npm 包发布与维护
 
+`@itagan/form-table` 已作为 public scoped package 发布到 [npm Registry](https://www.npmjs.com/package/@itagan/form-table)。查看当前 `latest`、全部版本和发布时间时，以 Registry 返回结果为准：
+
+```bash
+npm view @itagan/form-table version dist-tags time
+```
+
+本页后续步骤用于维护者发布新版本，不是业务项目的安装流程。使用方请从[快速开始](../guide/quick-start.md)接入。
+
 仓库采用“组件包 + playground + 独立 docs”的单体仓库结构：
 
 ```text
@@ -80,7 +88,7 @@ pnpm site:preview
 - `__tests__`
 - `vite.config.ts`
 
-## 发布 Checklist
+## 新版本发布 Checklist
 
 1. 确认 npm 包名、版本和发布 registry：
 
@@ -108,9 +116,11 @@ pnpm pack:check
 npm login
 ```
 
-5. 发布作用域包：
+5. 确认版本号未在 Registry 中使用，然后发布作用域包：
 
 ```bash
+node -p "require('./packages/form-table/package.json').version"
+npm view @itagan/form-table versions --json
 cd packages/form-table
 npm publish --access public
 ```

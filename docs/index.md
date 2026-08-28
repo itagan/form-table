@@ -2,12 +2,17 @@
 
 Vue 2.7 + Element UI 的轻量表格内表单组件。
 
-> 可运行示例：[打开 Playground ↗](http://localhost:5173/)。示例页右上角可随时返回文档总站。
+> 已发布到 npm：[`@itagan/form-table` ↗](https://www.npmjs.com/package/@itagan/form-table) · 可运行示例：[打开 Playground ↗](http://localhost:5173/)
+
+```bash
+pnpm add @itagan/form-table@latest
+```
 
 ## 从这里开始
 
 | 目标 | 入口 |
 | --- | --- |
+| 从 npm 安装公开包 | [`@itagan/form-table` ↗](https://www.npmjs.com/package/@itagan/form-table) |
 | 第一次接入 | [快速开始](./guide/quick-start.md) |
 | 按当前开发任务找最短路径 | [开发任务导航](./guide/development-workflows.md) |
 | 完成接口加载、编辑、保存和撤销 | [完整编辑提交流程](./examples/form-workflow.md) |

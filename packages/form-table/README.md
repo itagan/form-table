@@ -2,10 +2,21 @@
 
 Vue 2.7 + Element UI 的轻量表格内表单组件，负责布局、字段渲染、校验路径和受控数据更新。
 
+[![npm version](https://img.shields.io/npm/v/%40itagan%2Fform-table.svg)](https://www.npmjs.com/package/@itagan/form-table)
+
 ## 安装与版本
 
+`@itagan/form-table` 已作为 public scoped package 发布到 [npm Registry](https://www.npmjs.com/package/@itagan/form-table)。`latest` 标签对应的版本可直接安装：
+
 ```bash
-pnpm add @itagan/form-table
+pnpm add @itagan/form-table@latest
+```
+
+也可以使用 npm 或 Yarn：
+
+```bash
+npm install @itagan/form-table@latest
+yarn add @itagan/form-table@latest
 ```
 
 使用方需要预先安装并注册 Vue 与 Element UI：

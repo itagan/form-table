@@ -2,8 +2,17 @@
 
 ## 安装
 
+`@itagan/form-table` 已公开发布到 [npm Registry](https://www.npmjs.com/package/@itagan/form-table)。推荐安装 `latest` 标签；需要锁定版本时，再把 `latest` 替换为项目确认过的具体版本号。
+
 ```bash
-pnpm add @itagan/form-table
+pnpm add @itagan/form-table@latest
+```
+
+其他包管理器使用同一个公开包：
+
+```bash
+npm install @itagan/form-table@latest
+yarn add @itagan/form-table@latest
 ```
 
 FormTable 将 Vue 和 Element UI 声明为 peer dependencies，不会重复安装或注册它们。接入前请确认项目已安装并注册 Element UI，且依赖版本满足：
