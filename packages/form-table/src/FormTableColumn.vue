@@ -10,13 +10,13 @@
     :label="resolvedColumnLabel"
     v-bind="columnProps"
   >
-    <template v-if="shouldRenderHeader" v-slot:header>
+    <template v-if="shouldRenderHeader()" v-slot:header>
       <span
         class="form-table-column-header"
         v-bind="resolvedHeaderTargetProps"
       >
         <SlotRenderer
-          v-if="headerSlotFn"
+          v-if="headerSlotFn && hasHeaderSlot()"
           :slot-fn="headerSlotFn"
           :slot-props="headerSlotProps"
         />
@@ -148,9 +148,9 @@ const resolvedHeaderTargetProps = computed(() => {
 /** cellSlot 列不经过 Row/Item 字段渲染链路。 */
 const cellSlotFn = computed(() => {
   const renderConfig = columnRender.value
-  return renderConfig.kind === 'cell-slot' && renderConfig.slotName
-    ? parentSlots[renderConfig.slotName] || null
-    : null
+  if (renderConfig.kind !== 'cell-slot' || !renderConfig.slotName) return null
+  const slotName = renderConfig.slotName
+  return (context: FormTableCellSlotContext) => parentSlots[slotName]?.(context) ?? null
 })
 
 /** 为当前单元格构造无字段语义的精简 Slot 上下文。 */
@@ -169,17 +169,24 @@ const createCellSlotContext = (
   }
 }
 
-/** 根据配置名称查找实际存在的父级表头插槽。 */
-const headerSlotFn = computed(() => props.column.headerSlot
-  ? parentSlots[props.column.headerSlot] || null
-  : null)
+/** 包装函数保持稳定，但每次渲染都按名称调用父组件最新的表头插槽。 */
+const headerSlotFn = computed(() => {
+  const slotName = props.column.headerSlot
+  if (!slotName) return null
+  return (context: FormTableHeaderSlotContext) => parentSlots[slotName]?.(context) ?? null
+})
+
+/** 插槽集合由 Vue 2 在父级渲染时原位同步，因此显式活查找实际函数。 */
+const hasHeaderSlot = () => Boolean(
+  props.column.headerSlot && parentSlots[props.column.headerSlot]
+)
 
 /** 仅在没有原生 renderHeader 且确有自定义内容或属性时接管普通列表头。 */
-const shouldRenderHeader = computed(() => {
+const shouldRenderHeader = () => {
   // 原生 renderHeader 的优先级高于 FormTable 的具名表头插槽。
   return typeof columnProps.value.renderHeader !== 'function'
-    && (Boolean(headerSlotFn.value) || Object.keys(resolvedHeaderTargetProps.value).length > 0)
-})
+    && (hasHeaderSlot() || Object.keys(resolvedHeaderTargetProps.value).length > 0)
+}
 
 /** 传给自定义表头插槽的完整列上下文。 */
 const headerSlotProps = computed<FormTableHeaderSlotContext>(() => extendLazyContext(

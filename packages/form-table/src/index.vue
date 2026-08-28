@@ -55,7 +55,7 @@ export default defineComponent({
 </script>
 
 <script lang="ts" setup>
-import { computed, getCurrentInstance, provide, ref, useSlots, watchEffect } from 'vue'
+import { computed, getCurrentInstance, provide, reactive, ref, useSlots, watchEffect } from 'vue'
 import FormTableColumn from './FormTableColumn.vue'
 import FormTableHintTooltip from './FormTableHintTooltip.vue'
 import type {
@@ -155,7 +155,7 @@ const isTooltipHintMode = computed(() => hintMode.value === 'tooltip')
 const defaultFieldHint = computed(() => props.hintOptions.field)
 
 /** 保存父组件插槽和 Vue 2 组件实例，供后代组件及事件透传使用。 */
-const slots = useSlots()
+const slots = reactive(useSlots())
 const instance = getCurrentInstance()
 
 // 组件自身事件在本层触发，其余监听器原样交给 el-table。
