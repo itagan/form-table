@@ -1,13 +1,13 @@
 <template>
   <el-form-item v-bind="resolvedFormItemProps">
-    <template v-if="labelSlotFn" v-slot:label>
+    <template v-if="labelSlotFn && hasLabelSlot()" v-slot:label>
       <SlotRenderer
         :slot-fn="labelSlotFn"
         :slot-props="formItemSlotContext"
       />
     </template>
 
-    <template v-if="errorSlotFn" v-slot:error="{ error }">
+    <template v-if="errorSlotFn && hasErrorSlot()" v-slot:error="{ error }">
       <SlotRenderer
         :slot-fn="errorSlotFn"
         :slot-props="createErrorSlotContext(error)"
@@ -15,7 +15,7 @@
     </template>
 
     <SlotRenderer
-      v-if="config.type === 'slot' && slotFn"
+      v-if="config.type === 'slot' && slotFn && hasFieldSlot()"
       :slot-fn="slotFn"
       :slot-props="slotContext"
     />
@@ -64,13 +64,23 @@ const fieldTypes = inject<FormTableFieldTypesRef>(
   true
 )
 
-/** 按 Item 配置名称解析 FormItem 的 Label 和 Error Slot；缺失时保留 Element 默认内容。 */
-const labelSlotFn = computed(() => props.config.labelSlot
-  ? parentSlots[props.config.labelSlot] || null
-  : null)
-const errorSlotFn = computed(() => props.config.errorSlot
-  ? parentSlots[props.config.errorSlot] || null
-  : null)
+/** 包装函数随配置更新，调用时再解析父组件最新的 Label/Error Slot。 */
+const labelSlotFn = computed(() => {
+  const slotName = props.config.labelSlot
+  if (!slotName) return null
+  return (context: FormTableFormItemSlotContext) => parentSlots[slotName]?.(context) ?? null
+})
+const errorSlotFn = computed(() => {
+  const slotName = props.config.errorSlot
+  if (!slotName) return null
+  return (context: FormTableFormItemErrorSlotContext) => parentSlots[slotName]?.(context) ?? null
+})
+const hasLabelSlot = () => Boolean(
+  props.config.labelSlot && parentSlots[props.config.labelSlot]
+)
+const hasErrorSlot = () => Boolean(
+  props.config.errorSlot && parentSlots[props.config.errorSlot]
+)
 
 /** 字段定位、校验路径和安全写回由上下文组合式 API 统一维护。 */
 const {
@@ -97,10 +107,14 @@ const { resolvedComponent } = useResolvedFieldComponent({
   fieldTypes
 })
 
-/** 仅 slot 模式按 slot 名称查找插槽；未找到时返回 null。 */
-const slotFn = computed(() => props.config.type === 'slot'
-  ? parentSlots[props.config.component.slot] || null
-  : null)
+/** 字段内容 Slot 同样只缓存稳定包装函数，避免持有父级旧闭包。 */
+const slotFn = computed(() => {
+  if (props.config.type !== 'slot') return null
+  const slotName = props.config.component.slot
+  return (context: FormTableSlotContext) => parentSlots[slotName]?.(context) ?? null
+})
+const hasFieldSlot = () => props.config.type === 'slot'
+  && Boolean(parentSlots[props.config.component.slot])
 
 /** Label/Error 共用字段更新能力和当前响应式校验路径。 */
 const formItemSlotContext = computed<FormTableFormItemSlotContext>(() => {
