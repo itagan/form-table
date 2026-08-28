@@ -98,6 +98,24 @@ model: {
 
 `valueToProp` 不执行异步查询或副作用；需要请求数据、缓存状态或更新其他字段时，继续使用 Adapter 或 listener。
 
+## 选项数据使用组件 Prop
+
+`type: 'component'` 不接受同级 `component.options/optionProps`。这两个配置是 FormTable 为内置 `select/radio/checkbox` 生成选项子节点，以及字段 Slot 暴露解析结果时使用的协议；它们不会自动传给任意业务组件。
+
+自定义组件需要选项数组时，按组件自身声明的 Prop 名称传入：
+
+```ts
+component: {
+  is: UserSelector,
+  props: ({ row }) => ({
+    options: getUsers(row.departmentId),
+    optionKey: 'userId'
+  })
+}
+```
+
+这样 `options` 是否必填、元素结构以及远程加载方式都由 `UserSelector` 自己的协议决定。需要由模板创建 `el-option` 或分组选项时使用字段 Slot；Slot 可从解析后的 `component.options/optionProps` 读取 FormTable 选项配置。
+
 ## 按行选择组件
 
 同一字段在不同行使用不同组件时，使用同步 `resolveComponent`：
