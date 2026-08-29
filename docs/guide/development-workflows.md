@@ -11,6 +11,9 @@
 | 分页编辑并保留跨页草稿或选择 | [分页与跨页编辑](../features/pagination-and-cross-page-editing.md) | 按页面分页器实现 |
 | 处理多人编辑冲突和未保存离开 | [多人编辑冲突与未保存离开](../features/concurrent-editing-and-navigation.md) | [`/form-workflow`](http://localhost:5173/form-workflow) |
 | 增删、复制、移动行 | [常见操作列与行增删](../features/common-row-actions.md) | [`/row-column-operations`](http://localhost:5173/row-column-operations) |
+| 原子批量修改多行字段 | [数据更新与受控回写](../features/data-updates.md#updaterows-原子更新多行) | [`/row-column-operations`](http://localhost:5173/row-column-operations) |
+| 校验失败后定位或聚焦字段 | [校验、清理与重置](../features/validation-reset.md) | [`/form-table`](http://localhost:5173/form-table) |
+| 使用 Enter 连续录入 | [Enter 字段导航](../features/keyboard-navigation.md) | [`/row-column-operations`](http://localhost:5173/row-column-operations) |
 | 接入公司或第三方组件 | [自定义字段组件](../features/custom-component.md) | [`/enterprise-components`](http://localhost:5173/enterprise-components) |
 | 一个组件同时编辑多个字段 | [复合字段映射](../features/composite-binding.md) | [`/composite-binding`](http://localhost:5173/composite-binding) |
 | 自定义整格展示或操作区 | [`cellSlot`](../features/cell-slot.md) | [`/cell-slot`](http://localhost:5173/cell-slot) |
@@ -64,6 +67,9 @@ FormTable 负责中间的渲染、字段写回和校验；接口请求、加载�
 
 一次修改当前行多个字段
 → updateRow(patch)
+
+一次原子修改多行字段并统一派发字段事件
+→ FormTable Ref updateRows(updates)
 
 新增、删除、移动或替换行
 → 页面不可变替换 tableData

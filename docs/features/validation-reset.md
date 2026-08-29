@@ -56,8 +56,6 @@ const valid = await formTableRef.value?.validateField(row, 'profile.phone')
 
 配置稳定 `rowKey` 后，即使 `row` 是数据刷新或重排前保存的旧引用，FormTable 也会按身份定位最新行。字段隐藏、被筛选或尚未挂载时返回 `false`。
 
-字段 Slot 仍可以直接使用 scope 中的完整 `propPath` 调用 Element 原生方法：
-
 字段 Slot 可以直接使用 scope 中的 `propPath`：
 
 ```vue
@@ -92,7 +90,13 @@ await nextTick()
 formTableRef.value?.clearValidate()
 ```
 
-只清理某个字段时，可使用原生 Form Ref：
+只清理某个字段时，优先继续使用业务行和字段路径：
+
+```ts
+formTableRef.value?.clearFieldValidate(row, 'profile.phone')
+```
+
+已经持有完整 Element 路径时，原生 Form Ref 调用方式仍然兼容：
 
 ```ts
 formTableRef.value
@@ -138,6 +142,10 @@ formItemProps: ({ row }) => ({
 | --- | --- |
 | 提交前校验全部字段 | `await validate()` |
 | 按业务行校验某个动态字段 | `await validateField(row, fieldKey)` |
+| 获取字段当前完整 Element 路径 | `getFieldProp(row, fieldKey)` |
+| 只清除一个业务字段的错误 | `clearFieldValidate(row, fieldKey)` |
+| 聚焦一个业务字段 | `await focusField(row, fieldKey)` |
+| 校验失败后跳到当前首个错误 | `await scrollToFirstError()` |
 | 已持有完整 Element 路径 | `getFormRef().validateField(propPath)` |
 | 行变化后清除旧错误 | `clearValidate()` |
 | 完全使用 Element 原生重置 | `getFormRef().resetFields()`（绕过受控协议） |

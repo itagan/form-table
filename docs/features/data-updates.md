@@ -142,15 +142,29 @@ const patch: FormTableRowPatch<PurchaseRow> = {
 ## updateRows：原子更新多行
 
 ```ts
-const updated = formTableRef.value?.updateRows([
-  { row: tableData.value[0], patch: { status: 'approved' } },
-  { row: tableData.value[1], patch: { status: 'approved', 'audit.source': 'batch' } }
-])
+import type { FormTableRowUpdate } from '@itagan/form-table'
+
+const updates: FormTableRowUpdate<PurchaseRow>[] = selectedRows.map(row => ({
+  row,
+  patch: { status: 'approved', 'audit.source': 'batch' }
+}))
+
+const updated = formTableRef.value?.updateRows(updates)
 ```
 
 `updateRows` 先解析并验证全部目标，再复制一次顶层数组并发出一次 `update:tableData`。相同行出现多次时按输入顺序组合，后面的同字段值覆盖前面的值；`field-change` 仍保留每一步实际变化，并在数组更新事件之后派发，载荷中的 `row` 指向该行最终结果。
 
-它具有原子失败语义：任一目标行不存在、身份重复，或任一 patch 修改 `rowKey` 时，整批返回 `false`，不发出任何更新事件。空批次和全部字段均未变化时同样返回 `false`。成功提交返回 `true`。
+| 情况 | 返回值 | 事件与数据结果 |
+| --- | --- | --- |
+| 至少一个字段实际变化 | `true` | 一次 `update:tableData`，随后按处理顺序发出 `field-change` |
+| 同一行出现多个 patch | `true`（有变化时） | 按输入顺序组合，后值覆盖前值 |
+| 目标不存在或身份重复 | `false` | 整批拒绝，不发事件 |
+| patch 修改 `rowKey` | `false` | 整批拒绝，不发事件 |
+| 空批次或所有值均未变化 | `false` | 不复制数组，不发事件 |
+
+批量操作应传入业务当前选择对应的行，并配置唯一稳定的 `rowKey`。这样即使选择后发生了数据对象替换，旧行引用仍能重新定位到最新行。不要循环调用单元格的 `updateRow` 修改多行，否则会重复复制数组并产生多次更新事件。
+
+可运行示例见[行列操作与异步提交 ↗](http://localhost:5173/row-column-operations)：勾选多行后点击“批量标记已复核”，可以同时观察表格数据和按钮返回结果。业务组合代码见[行列操作专题](./row-column-operations.md#批量修改)。
 
 ## 连续更新
 
