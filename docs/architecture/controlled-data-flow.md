@@ -90,10 +90,20 @@ model 事件原始参数
 | `setValue(value)` | 直接写主 `fieldKey`，不经过 `binding.map` 或 model 转换 |
 | `setBindingValue(value)` | 从“新 bindingValue”开始；有映射时拆分为多字段 Patch，无映射时等同于 `setValue` |
 | 字段 Slot | 不创建自动 model；Slot 自行渲染控件，并调用上下文更新助手 |
-| `component.model: false` | 不注入 model prop，也不自动监听 model 事件；可在 listener 中主动调用更新助手 |
+| `component.model: false` | 不注入 model prop，也不自动监听 model 事件；`binding.map` 仍解析，Props 可读 `bindingValue`，listener 可调用 `setBindingValue` |
 | `type: 'text'` | 只读取并字符串化 `bindingValue`，不执行 `valueToProp/valueFromEvent`，也不写回 |
 
 一个组件对应多个字段时，先确认它的 model 根值是对象还是数组，再让所有 `binding.map[].valuePath` 使用同一种根结构。例如日期范围组件接收 `[start, end]`，映射路径应为 `0` 和 `1`，而不是对象属性名。具体配置与清空回退规则见[复合字段映射](../features/composite-binding.md)。
+
+复合字段组件有三条推荐路径：
+
+| 场景 | 读取与写回 | 更新次数 |
+| --- | --- | --- |
+| 协议稳定的对象或数组 model | 自定义 model + `binding.map` | model 事件产生一次 `update:tableData` |
+| 完全手动且要求原子写回 | `model: false`；Props 读 `bindingValue`，listener 调 `setBindingValue` | 一次调用产生一次 `update:tableData` |
+| 保留自动 model，并在同一事件 listener 追加 `updateRow` | 自动写回后再执行 listener | 两个 Patch，可能产生第二次 `update:tableData` |
+
+listener 始终可以用于埋点、通知等回调。若它只做副作用而不再更新行，不会额外产生更新事件；若要与映射字段一起原子更新，应把字段纳入 `binding.map`，或关闭自动 model 后在 listener 中一次完成写回。
 
 ## 更新入口
 

@@ -9,6 +9,7 @@ import type {
   FormItemConfig,
   FieldTypeDefinition,
   FieldTypeRegistry,
+  FormTableFieldBindingContext,
   FormTableFieldContext,
   FormTableFieldRenderContext,
   FormTableHintMode,
@@ -22,6 +23,7 @@ import { applyHintComponentProps } from '../utils/hint'
 interface ResolvedFieldComponentOptions<TRow extends TableRow> {
   getConfig: () => FormItemConfig<TRow>
   runtimeContext: Readonly<Ref<FormTableFieldRenderContext<TRow>>>
+  bindingContext: Readonly<Ref<FormTableFieldBindingContext<TRow>>>
   fieldContext: Readonly<Ref<FormTableFieldContext<TRow>>>
   resolvedHint: Readonly<Ref<string | null>>
   hintMode: Readonly<Ref<FormTableHintMode>>
@@ -63,13 +65,14 @@ export function useResolvedFieldComponent<TRow extends TableRow = TableRow>(
   const resolvedComponent = computed<ResolvedComponentConfig<TRow>>(() => {
     const config = options.getConfig()
     const context = options.runtimeContext.value
+    const propsContext = options.bindingContext.value
     const component = config.component
     const typeDefinition = resolveTypeDefinition(config.type, options.fieldTypes.value)
     const listeners = component?.listeners || {}
-    const defaultProps = resolveDynamicValue(typeDefinition?.props, context) || {}
+    const defaultProps = resolveDynamicValue(typeDefinition?.props, propsContext) || {}
     const componentProps = {
       ...defaultProps,
-      ...(resolveDynamicValue(component?.props, context) || {})
+      ...(resolveDynamicValue(component?.props, propsContext) || {})
     }
 
     /** 保留原始事件参数，并在首位注入带安全更新助手的字段上下文。 */

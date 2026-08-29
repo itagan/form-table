@@ -34,7 +34,7 @@ columns[].formItems[].component
 | `...component.model.event` | `string` | 自定义 model | — | 通知字段变化的事件，默认 `input` |
 | `...component.model.valueToProp` | `(context, bindingValue) => FormTableValue` | 自定义 model | 只读字段上下文 + 绑定值 | 将字段值或 `binding.map` 组合值同步转换为组件 model prop |
 | `...component.model.valueFromEvent` | `(context, ...args) => FormTableValue` | 自定义 model | 只读字段上下文 + 原始事件参数 | 从事件参数提取写回值；注册 type 可关联事件参数元组 |
-| `...component.props` | `DynamicValue<ComponentProps, ItemContext>` | 全部 | ItemContext | 透传实际字段组件 |
+| `...component.props` | `DynamicValue<ComponentProps, BindingContext>` | 全部 | ItemContext + 只读 `bindingValue` | 透传实际字段组件 |
 | `...component.listeners` | `Record<string, FormTableFieldListener>` | 全部 | ActionContext + 原始事件参数 | 配置式组件事件 |
 | `...component.options` | `DynamicValue<FormItemOption[], ItemContext>` | 内置 select / radio / checkbox、字段 Slot | ItemContext | 内置模式生成选项子节点；Slot 通过解析后上下文读取 |
 | `...component.optionProps` | `DynamicValue<OptionPropsConfig, ItemContext>` | 内置 select / radio / checkbox、字段 Slot | ItemContext | 内置选项字段映射；Slot 可自行使用 |
@@ -49,7 +49,24 @@ columns[].formItems[].component
 
 Item 级 `binding.map` 位于 `columns[].formItems[].binding`，不属于组件协议。读取顺序是先将多个行字段组合为 `bindingValue`，再由 `valueToProp` 转换为组件 model prop；写回顺序是 `valueFromEvent` 提取组件值，再由映射生成一个行 patch。每个映射项还可通过 `fallbackValue` 声明组件值路径缺失时的静态写回值。对象、数组、Slot、清空和校验规则见[复合字段映射](../features/composite-binding.md)。
 
-`valueToProp` 是同步纯转换函数。首参是只读字段上下文，第二个参数是转换前的 `bindingValue`；上下文中的 `value` 始终是主 `fieldKey` 的原始字段值。异步查询、跨字段更新和副作用应使用 Adapter、listener 或 Slot。`model: false`、字段 Slot 和 `type: 'text'` 不进入自动 model 链，因此不会调用它。
+`component.props` 可通过只读 `bindingValue` 读取单字段值或 `binding.map` 组合值，但不能更新数据。`valueToProp` 是同步纯转换函数。首参是只读字段上下文，第二个参数是转换前的 `bindingValue`；上下文中的 `value` 始终是主 `fieldKey` 的原始字段值。异步查询、跨字段更新和副作用应使用 Adapter、listener 或 Slot。`model: false`、字段 Slot 和 `type: 'text'` 不进入自动 model 链，因此不会调用它。
+
+`model: false` 只关闭自动 model Prop 注入和事件监听，不关闭 `binding.map`。完全手动绑定时，用 Props 读取，用 listener 写回：
+
+```ts
+component: {
+  is: EmployeePicker,
+  model: false,
+  props: ({ bindingValue }) => ({ selection: bindingValue }),
+  listeners: {
+    confirm({ setBindingValue }, employee) {
+      setBindingValue(employee)
+    }
+  }
+}
+```
+
+一次 `setBindingValue` 会将映射值作为一个 Patch 写回，因此最多产生一次 `update:tableData`；每个实际变化字段仍分别产生 `field-change`。
 
 ## 渲染模式约束
 

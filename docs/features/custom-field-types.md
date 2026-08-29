@@ -90,11 +90,12 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([{
 | --- | --- |
 | `is` | 稳定的组件对象或全局组件名 |
 | `model` | Vue 2 model prop、事件、`valueToProp/valueFromEvent`，或 `false` |
-| `props` | 静态或按字段上下文求值的默认属性 |
+| `props` | 静态或按只读绑定上下文求值的默认属性 |
 
 自定义 type 的 Item `component` 只允许 `props/listeners/model`：
 
 - 注册 props 和字段 props 分别求值后浅合并，字段 props 优先；
+- 注册默认 props 与 Item props 都可读取只读 `bindingValue`；不包含更新助手；
 - 字段 model 未配置时继承注册 model，配置对象或 `false` 时整体覆盖；
 - listener 只属于当前 Item，第一个参数为 ActionContext，后面保留全部原始事件参数；
 - model 事件先写回字段，再调用同名 listener。
@@ -104,7 +105,10 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([{
   fieldKey: 'employeeId',
   type: 'hr-employee',
   component: {
-    props: ({ row }) => ({ disabled: row.status === 'approved' }),
+    props: ({ row, bindingValue }) => ({
+      disabled: row.status === 'approved',
+      selection: bindingValue
+    }),
     listeners: {
       'user-confirm'({ updateRow }, employee, meta) {
         const selected = employee as EmployeeSelection

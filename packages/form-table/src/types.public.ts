@@ -26,6 +26,7 @@ export type {
   FormTableColumnContext,
   FormTableFieldChangePayload,
   FormTableFilterChangePayload,
+  FormTableFieldBindingContext,
   FormTableFieldContext,
   FormTableFieldRenderContext,
   FormTableFormItemProps,

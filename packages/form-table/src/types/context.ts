@@ -32,11 +32,15 @@ export interface FormTableFieldRenderContext<TRow extends TableRow = TableRow> e
   itemConfig: Readonly<FormItemConfig<TRow>>
 }
 
-export interface FormTableFieldContext<TRow extends TableRow = TableRow> extends FormTableFieldRenderContext<TRow> {
+/** 组件 Props 使用的只读字段绑定上下文。 */
+export interface FormTableFieldBindingContext<TRow extends TableRow = TableRow> extends FormTableFieldRenderContext<TRow> {
+  /** 由 binding.map 解析的复合组件值；未配置时等同于 value。 */
+  readonly bindingValue: FormTableValue
+}
+
+export interface FormTableFieldContext<TRow extends TableRow = TableRow> extends FormTableFieldBindingContext<TRow> {
   /** 不可变地更新当前字段。 */
   setValue: (value: FormTableValue) => void
-  /** 由 binding.map 解析的复合组件值；未配置时等同于 value。 */
-  bindingValue: FormTableValue
   /** 按 binding.map 一次写回多个字段；未配置时等同于 setValue。 */
   setBindingValue: (value: FormTableValue) => void
   /** 不可变地批量更新当前行，patch 的 key 支持字段路径。 */

@@ -1,11 +1,17 @@
 import { describe, expect, it, vi } from 'vitest'
-import type { FormTableFieldRenderContext } from '../types.public'
+import type {
+  FormTableFieldBindingContext,
+  FormTableFieldRenderContext
+} from '../types.public'
 import { mountFormTable } from './test-utils'
 
 describe('FormTable component rendering and model protocols', () => {
   it('renders a directly supplied component and wraps its listeners', async () => {
     const listener = vi.fn((context) => context.setValue('disabled'))
-    const componentProps = vi.fn((context: FormTableFieldRenderContext) => ({ marker: context.fieldKey }))
+    const componentProps = vi.fn((context: FormTableFieldBindingContext) => ({
+      marker: context.fieldKey,
+      bindingValue: context.bindingValue
+    }))
     const StatusInput = {
       props: ['value'],
       render(this: any, h: any) {
@@ -34,6 +40,8 @@ describe('FormTable component rendering and model protocols', () => {
     })
     await wrapper.vm.$nextTick()
     expect(componentProps).toHaveBeenCalledTimes(1)
+    expect(componentProps.mock.calls[0][0].bindingValue).toBe('enabled')
+    expect(Object.keys(componentProps.mock.calls[0][0])).not.toContain('setBindingValue')
     expect(Object.keys(componentProps.mock.calls[0][0])).not.toContain('hint')
     await wrapper.find('.status-input').trigger('click')
 
@@ -497,6 +505,82 @@ describe('FormTable component rendering and model protocols', () => {
     expect(field.attributes('data-has-value')).toBe('false')
     expect(field.attributes('data-has-input')).toBe('false')
     expect(wrapper.emitted('update:tableData')).toBeUndefined()
+    wrapper.destroy()
+  })
+
+  it('reads and manually writes a mapped binding when model is false', async () => {
+    const propsResolver = vi.fn((context: FormTableFieldBindingContext) => ({
+      selection: context.bindingValue
+    }))
+    const confirmListener = vi.fn((context, employee) => {
+      context.setBindingValue(employee)
+    })
+    const EmployeePicker = {
+      props: ['selection'],
+      render(this: any, h: any) {
+        return h('button', {
+          class: 'manual-composite-picker',
+          attrs: {
+            type: 'button',
+            'data-selection': JSON.stringify(this.selection)
+          },
+          on: {
+            click: () => this.$emit('confirm', { id: 'user-2', name: 'Bob' })
+          }
+        })
+      }
+    }
+    const wrapper = mountFormTable({
+      tableData: [{ employeeId: 'user-1', employeeName: 'Alice' }],
+      columns: [{
+        label: '员工',
+        formItems: [{
+          fieldKey: 'employeeId',
+          type: 'component',
+          binding: {
+            map: [
+              { fieldPath: 'employeeId', valuePath: 'id' },
+              { fieldPath: 'employeeName', valuePath: 'name' }
+            ]
+          },
+          component: {
+            is: EmployeePicker,
+            model: false,
+            props: propsResolver,
+            listeners: { confirm: confirmListener }
+          }
+        }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    const picker = wrapper.find('.manual-composite-picker')
+    expect(picker.attributes('data-selection')).toBe(JSON.stringify({
+      id: 'user-1',
+      name: 'Alice'
+    }))
+    expect(Object.keys(propsResolver.mock.calls[0][0])).not.toContain('setBindingValue')
+
+    await picker.trigger('click')
+
+    expect(wrapper.emitted('update:tableData')).toHaveLength(1)
+    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{
+      employeeId: 'user-2',
+      employeeName: 'Bob'
+    }])
+    expect(wrapper.emitted('field-change')?.map(event => event[0])).toEqual([
+      expect.objectContaining({ fieldKey: 'employeeId', value: 'user-2' }),
+      expect.objectContaining({ fieldKey: 'employeeName', value: 'Bob' })
+    ])
+    expect(confirmListener).toHaveBeenCalledTimes(1)
+
+    await wrapper.setProps({
+      tableData: [{ employeeId: 'user-3', employeeName: 'Carol' }]
+    })
+    expect(wrapper.find('.manual-composite-picker').attributes('data-selection')).toBe(JSON.stringify({
+      id: 'user-3',
+      name: 'Carol'
+    }))
     wrapper.destroy()
   })
 })

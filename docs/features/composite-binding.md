@@ -114,6 +114,35 @@ binding: {
 
 `type: 'slot'` 不会猜测 Slot 内控件的 model 协议，仍由模板显式绑定。
 
+## 关闭自动 model 后手动绑定
+
+`model: false` 只关闭 FormTable 对 model Prop 和事件的自动注入，`binding.map` 仍然生效。动态 Props 可读取只读 `bindingValue`，listener 可通过 `setBindingValue` 一次写回映射字段：
+
+```ts
+{
+  fieldKey: 'employeeId',
+  type: 'component',
+  binding: {
+    map: [
+      { fieldPath: 'employeeId', valuePath: 'id' },
+      { fieldPath: 'employeeName', valuePath: 'name' }
+    ]
+  },
+  component: {
+    is: EmployeePicker,
+    model: false,
+    props: ({ bindingValue }) => ({ selection: bindingValue }),
+    listeners: {
+      confirm({ setBindingValue }, employee) {
+        setBindingValue(employee)
+      }
+    }
+  }
+}
+```
+
+这种方式适合组件双向绑定协议不可靠，或需要由一个确认事件原子更新多个字段的场景。稳定且可复用的组件协议仍优先使用自定义 model + `binding.map`。保留自动 model 后又在同一事件 listener 中调用 `updateRow` 会执行第二个 Patch，可能产生第二次 `update:tableData`；仅做回调或副作用则不会。
+
 ## 写回和清空语义
 
 - 一次 `setBindingValue()` 最多发出一次 `update:tableData`，每个实际变化字段分别发出 `field-change`。
@@ -148,7 +177,7 @@ binding: {
 component: {
   is: UserSelector,
   model: false,
-  props: ({ row }) => ({ value: row.users }),
+  props: ({ bindingValue }) => ({ value: bindingValue }),
   listeners: {
     change({ updateRow }, users = []) {
       updateRow({

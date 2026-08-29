@@ -18,6 +18,7 @@ import FormTable, {
   type FormTableElementColumn,
   type FormTableEmits,
   type FormTableExpose,
+  type FormTableFieldBindingContext,
   type FormTableFieldRenderContext,
   type FormTableFormItemErrorSlotContext,
   type FormTableFormItemSlotContext,
@@ -153,7 +154,10 @@ const employeeTypeDefinition = defineFormTableType<BusinessRow>()<
       return employeeId
     }
   },
-  props: ({ row }) => ({ departmentId: row.departmentId })
+  props: ({ row, bindingValue }) => ({
+    departmentId: row.departmentId,
+    disabled: bindingValue == null
+  })
 })
 
 const directlyTypedEmployeeItem: FormItemConfig<BusinessRow, {
@@ -243,9 +247,18 @@ const businessModel: FieldModelConfig<BusinessRow> = {
   }
 }
 declare const businessRenderContext: FormTableFieldRenderContext<BusinessRow>
+declare const businessBindingContext: FormTableFieldBindingContext<BusinessRow>
 businessModel.valueToProp?.(businessRenderContext, 'employee-1')
+const businessBindingValue: unknown = businessBindingContext.bindingValue
+// @ts-expect-error 组件 Props 上下文中的绑定值只读。
+businessBindingContext.bindingValue = 'employee-2'
+// @ts-expect-error 组件 Props 上下文只读，不提供更新助手。
+businessBindingContext.setBindingValue('employee-2')
+// @ts-expect-error 组件 Props 上下文只读，不提供行更新助手。
+businessBindingContext.updateRow({ employeeName: 'Bob' })
 // @ts-expect-error valueToProp 统一以只读字段上下文作为首参。
 businessModel.valueToProp?.('employee-1', businessRenderContext)
+void businessBindingValue
 void businessModel
 
 const businessTypeRegistry = {
@@ -265,7 +278,9 @@ const businessColumns = defineFormTableColumns<BusinessRow, typeof businessField
     fieldKey: 'employeeId',
     type: 'employee',
     component: {
-      props: ({ row }) => ({ disabled: !row.departmentId }),
+      props: ({ row, bindingValue }) => ({
+        disabled: !row.departmentId || bindingValue == null
+      }),
       listeners: {
         'user-confirm'({ updateRow }, employee, meta) {
           updateRow({ employeeName: employee.name })
@@ -360,6 +375,41 @@ const componentVariantColumns: ColumnConfig[] = [{
   ]
 }]
 void componentVariantColumns
+
+const separatedDynamicContexts = defineFormTableColumns<BusinessRow>([{
+  label: '动态上下文边界',
+  formItems: [{
+    fieldKey: 'employeeId',
+    type: 'component',
+    component: {
+      is: CustomInput,
+      resolveComponent(context) {
+        // @ts-expect-error 组件解析只读取字段渲染上下文。
+        void context.bindingValue
+        return AlternativeInput
+      },
+      props({ bindingValue }) {
+        return { selection: bindingValue }
+      }
+    }
+  }, {
+    fieldKey: 'departmentId',
+    type: 'select',
+    component: {
+      options(context) {
+        // @ts-expect-error 选项解析不扩展复合绑定值。
+        void context.bindingValue
+        return []
+      },
+      optionProps(context) {
+        // @ts-expect-error 选项属性解析不扩展复合绑定值。
+        void context.bindingValue
+        return { value: 'value', label: 'label' }
+      }
+    }
+  }]
+}])
+void separatedDynamicContexts
 
 const contentHintColumns: ColumnConfig[] = [{
   label: '紧凑提示',
