@@ -43,6 +43,7 @@ export type {
   FormTableProps,
   FormTableRecord,
   FormTableRowPatch,
+  FormTableRowUpdate,
   FormTableRowContext,
   FormTableSlotContext,
   FormTableSortChangePayload,

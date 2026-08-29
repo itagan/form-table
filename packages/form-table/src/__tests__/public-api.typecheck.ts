@@ -34,6 +34,7 @@ import FormTable, {
   type FormTableHintOptions,
   type FormTableProps,
   type FormTableRowPatch,
+  type FormTableRowUpdate,
   type FormTableSortChangePayload,
   type FormTableTableProps,
   type LayoutColumnConfig,
@@ -530,7 +531,12 @@ const typedFieldValid: Promise<boolean> = typedFormTableInstance.validateField(t
 typedFormTableInstance.clearFieldValidate(typedTargetRow, 'amount')
 const typedFieldFocused: Promise<boolean> = typedFormTableInstance.focusField(typedTargetRow, 'amount')
 const typedFirstErrorFocused: Promise<boolean> = typedFormTableInstance.scrollToFirstError()
-void [typedFieldProp, typedFieldValid, typedFieldFocused, typedFirstErrorFocused]
+const typedRowUpdates: FormTableRowUpdate<PurchaseRow>[] = [{
+  row: typedTargetRow,
+  patch: { amount: 40 }
+}]
+const typedRowsUpdated: boolean = typedFormTableInstance.updateRows(typedRowUpdates)
+void [typedFieldProp, typedFieldValid, typedFieldFocused, typedFirstErrorFocused, typedRowsUpdated]
 // @ts-expect-error field target rows preserve the business row type.
 typedFormTableInstance.focusField({ name: '缺少金额' }, 'amount')
 const elementColumn: FormTableElementColumn = {
@@ -898,6 +904,7 @@ async function useExpose(expose: FormTableExpose) {
   expose.clearFieldValidate(row, 'name')
   await expose.focusField(row, 'name')
   await expose.scrollToFirstError()
+  expose.updateRows([{ row, patch: { name: 'updated' } }])
   return expose.getTableRef()
 }
 

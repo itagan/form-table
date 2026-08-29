@@ -83,7 +83,7 @@
           <li>删除先确认，再按稳定 <code>_rowKey</code> 删除。</li>
           <li>工具栏在末尾新增；操作列可在当前行后插入或复制。</li>
           <li>列显隐和换序通过重新生成 <code>columns</code> 完成。</li>
-          <li>selection 只保存稳定行 ID；批量修改通过一次 <code>map</code> 替换整表。</li>
+          <li>selection 只保存稳定行 ID；批量字段修改通过 Ref <code>updateRows</code> 原子提交。</li>
           <li>批量删除确认后按稳定 ID 集合过滤，并同步清理草稿与校验状态。</li>
         </ul>
       </div>
@@ -120,7 +120,7 @@ const scoreFirst = ref(false)
 const scoreDrafts = ref<Record<string, number>>({})
 const savingKeys = ref<string[]>([])
 const selectedKeys = ref<string[]>([])
-const formTableRef = ref<FormTableExpose>()
+const formTableRef = ref<FormTableExpose<OperationRow>>()
 
 const selectionColumn: ColumnConfig = {
   key: 'selection-column',
@@ -317,10 +317,11 @@ const removeAfterConfirm = async (row: OperationRow) => {
 
 const batchMarkReviewed = () => {
   const selected = new Set(selectedKeys.value)
-  tableData.value = tableData.value.map(row => selected.has(row._rowKey) && !row.reviewed
-    ? { ...row, reviewed: true }
-    : row)
-  Message.success(`已批量复核 ${selected.size} 行`)
+  const updates = tableData.value
+    .filter(row => selected.has(row._rowKey) && !row.reviewed)
+    .map(row => ({ row, patch: { reviewed: true } }))
+  const updated = formTableRef.value?.updateRows(updates)
+  Message.success(updated ? `已批量复核 ${updates.length} 行` : '所选行均已复核')
 }
 
 const batchRemoveAfterConfirm = async () => {

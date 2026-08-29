@@ -2,7 +2,7 @@ import type {
   ColumnConfig,
 } from './config/column'
 import type { FormItemConfig } from './config/field'
-import type { FormTableRowPatch, FormTableValue, TableRow } from './base'
+import type { FormTableRowPatch, FormTableRowUpdate, FormTableValue, TableRow } from './base'
 
 export interface FormTableTableContext<TRow extends TableRow = TableRow> {
   /** 当前受控表格数据，只读以避免动态配置直接修改 props。 */
@@ -52,4 +52,6 @@ export interface FormTableUpdateApi<TRow extends TableRow = TableRow> {
   setValue: (row: TRow, fieldKey: string, value: FormTableValue) => void
   /** 不可变地批量更新指定行，patch 的 key 支持字段路径。 */
   updateRow: (row: TRow, patch: FormTableRowPatch<TRow>) => void
+  /** 原子更新多行；全部目标通过身份校验后只提交一次受控数组。 */
+  updateRows: (updates: FormTableRowUpdate<TRow>[]) => boolean
 }

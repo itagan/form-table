@@ -72,6 +72,7 @@ void exposed.validateField(targetRow, 'amount')
 exposed.clearFieldValidate(targetRow, 'amount')
 void exposed.focusField(targetRow, 'amount')
 void exposed.scrollToFirstError()
+void exposed.updateRows([{ row: targetRow, patch: { amount: 20 } }])
 typedInstance.$emit('update:tableData', typedProps.tableData || [])
 typedInstance.$emit('field-change', {
   row: typedProps.tableData![0],

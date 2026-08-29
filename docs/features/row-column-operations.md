@@ -38,7 +38,7 @@
 
 ### 批量修改
 
-跨行更新由页面通过 `map` 替换数据；当前行的多个字段使用一次 `updateRow(patch)`。
+需要 FormTable 统一派发字段事件时，使用 Ref `updateRows` 原子修改多行：
 
 ```ts
 const selectedKeys = ref<string[]>([])
@@ -49,13 +49,15 @@ function handleSelectionChange(rows) {
 
 function batchMarkReviewed() {
   const selected = new Set(selectedKeys.value)
-  tableData.value = tableData.value.map(row => selected.has(row._rowKey)
-    ? { ...row, reviewed: true }
-    : row)
+  formTableRef.value?.updateRows(
+    tableData.value
+      .filter(row => selected.has(row._rowKey))
+      .map(row => ({ row, patch: { reviewed: true } }))
+  )
 }
 ```
 
-不要为跨行批量操作循环调用某个单元格上下文的 `updateRow`。一次 `map/filter` 能明确生成一份新数组，并保留未变化行引用；批量接口、权限和审计也更适合在页面层统一处理。
+`updateRows` 只复制一次顶层数组，保留未变化行引用，并为每个实际变化字段派发事件。无需字段事件、需要同时改变数组结构，或需要把分页视图合并回外部 Store 时，页面直接使用一次 `map/filter` 仍是合适的受控数据写法。不要循环调用某个单元格上下文的 `updateRow` 修改多行。
 
 ### 批量删除
 
@@ -203,7 +205,8 @@ async function commit({ row, fieldKey, setValue }, draftValue) {
 | 当前行同步联动 | listener + `setValue/updateRow` |
 | 确认或请求成功后更新字段 | 草稿组件发出 `commit`，成功后调用更新助手 |
 | 行增删复制移动 | 页面替换 `tableData` |
-| 当前页批量修改或删除 | selection 转稳定 ID 集合，页面一次 `map/filter` |
+| 当前页批量修改字段 | selection 转稳定 ID 集合，Ref `updateRows` |
+| 当前页批量删除或改变结构 | 页面一次 `filter` 或其他不可变数组操作 |
 | 跨页批量操作 | 页面或 Store 保存 ID 集合，通常交给服务端执行 |
 | 列显隐、增删、排序 | 页面替换或派生 `columns` |
 | 降低后端保存频率 | 本地立即回写，接口单独防抖或批量保存 |

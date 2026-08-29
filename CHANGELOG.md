@@ -5,6 +5,7 @@
 ### Added
 
 - FormTable Ref 新增按业务行定位字段、单字段校验与清理、字段聚焦和首个错误定位方法。
+- FormTable Ref 新增原子 `updateRows`，可在一次受控数组提交中顺序组合多行 Patch。
 
 ## 1.1.0 - 2026-08-29
 
