@@ -60,7 +60,8 @@ const TypedFormTable = createFormTable<PurchaseRow>()
 const typedProps: InstanceType<typeof TypedFormTable>['$props'] = {
   tableData: [{ id: 'purchase-1', name: '采购单', amount: 100 }],
   columns,
-  rowKey: row => row.id
+  rowKey: row => row.id,
+  navigationOptions: { enabled: true }
 }
 void typedProps
 

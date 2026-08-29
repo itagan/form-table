@@ -5,6 +5,7 @@ import type {
   ColumnConfig,
   FieldTypeRegistry,
   FormTableHintOptions,
+  FormTableNavigationOptions,
   FormTableRowKey,
   TableRow
 } from '../types.public'
@@ -30,6 +31,7 @@ export function mountFormTable(options: {
   tableProps?: Record<string, any>
   rowKey?: FormTableRowKey
   hintOptions?: FormTableHintOptions
+  navigationOptions?: FormTableNavigationOptions
   scopedSlots?: Record<string, any>
   listeners?: Record<string, (...args: any[]) => void>
 } = {}) {
@@ -42,6 +44,7 @@ export function mountFormTable(options: {
       tableProps: { border: true, ...options.tableProps },
       rowKey: options.rowKey,
       hintOptions: options.hintOptions,
+      navigationOptions: options.navigationOptions,
       fieldTypes: options.fieldTypes
     },
     scopedSlots: options.scopedSlots,

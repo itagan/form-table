@@ -7,6 +7,7 @@
 - `FieldTypeDefinition`、`TypedFieldTypeDefinition`、`FieldTypeRegistry`、`EmptyFieldTypeRegistry`、`FieldTypeEventMap`、`FieldTypeListeners`
 - `FormItemOption`、`OptionPropsConfig`
 - `FormTableHintValue`、`FormTableHintMode`、`FormTableHintTargets`、`FormTableHintTrigger`、`FormTableFieldHintFormatter`、`FormTableHintOptions`
+- `FormTableNavigationOptions`
 - `TableRow`、`FormTableRecord`、`FormTableRowPatch`、`FormTableRowUpdate`、`FormTableProps`、`FormTableRowKey`
 - `FormTableTableProps`、`FormTableFormProps`、`FormTableFormItemProps`
 - `FormTableColumnContext`、`FormTableRowContext`、`FormTableFieldRenderContext`、`FormTableFieldBindingContext`

@@ -3,6 +3,7 @@
     ref="containerRef"
     class="form-table-container"
     data-form-table-hint-root
+    @keydown="handleNavigationKeydown"
   >
     <el-form
       ref="formRef"
@@ -70,6 +71,7 @@ import type {
   FormTableHintMode,
   FormTableHintTargets,
   FormTableHintOptions,
+  FormTableNavigationOptions,
   FormTableRowKey,
   FormTableTableProps,
   FormTableSlots,
@@ -89,6 +91,7 @@ import {
 import { useColumnIdentity } from './composables/useColumnIdentity'
 import { useControlledTableUpdate } from './composables/useControlledTableUpdate'
 import { useFormTableFieldLocator } from './composables/useFormTableFieldLocator'
+import { useFormTableKeyboardNavigation } from './composables/useFormTableKeyboardNavigation'
 import { useRowIndex } from './composables/useRowIndex'
 import { createTableContext } from './utils/dynamic'
 import { collectFieldTypeDiagnostics } from './utils/fieldTypeDiagnostics'
@@ -107,6 +110,7 @@ const props = withDefaults(defineProps<{
   tableProps?: FormTableTableProps
   rowKey?: FormTableRowKey
   hintOptions?: FormTableHintOptions
+  navigationOptions?: FormTableNavigationOptions
   loading?: boolean
   fieldTypes?: FieldTypeRegistry
 }>(), {
@@ -199,6 +203,13 @@ const fieldLocator = useFormTableFieldLocator({
   getRowKey: () => props.rowKey,
   containerRef,
   formRef
+})
+
+/** 键盘导航只消费 P1 的挂载字段注册和聚焦能力，不维护第二份字段顺序。 */
+const { handleNavigationKeydown } = useFormTableKeyboardNavigation({
+  getOptions: () => props.navigationOptions,
+  getMountedFields: fieldLocator.getMountedFields,
+  focusElement: fieldLocator.focusElement
 })
 
 /** 后代组件共享表数据、更新入口和父级插槽，避免逐层透传无关参数。 */

@@ -58,6 +58,7 @@ const columns: ColumnConfig[] = defineFormTableColumns([{
   row-key="id"
   :form-props="{ size: 'small' }"
   :table-props="{ border: true }"
+  :navigation-options="{ enabled: true }"
   @field-change="handleFieldChange"
   @sort-change="handleSortChange"
 >
@@ -69,6 +70,8 @@ const columns: ColumnConfig[] = defineFormTableColumns([{
 ```
 
 根组件 `v-model` 使用 `tableData/update:tableData`；`:table-data.sync` 仍兼容。字段输入和 Slot 更新助手均进行不可变写回。Table 原生事件直接透传，通过 ref 可调用整表或单字段校验、字段聚焦、首错定位，以及获取底层 Form/Table 实例。
+
+`navigationOptions` 是可选增强；未配置时不改变原有键盘行为，启用后 Enter/Shift+Enter 会按当前实际显示顺序移动到下一个或上一个可编辑字段。Textarea、按钮、输入法组合和带修饰键的 Enter 不接管。
 
 ## Element Table 事件与根级 Slot
 

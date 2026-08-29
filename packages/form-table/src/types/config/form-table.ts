@@ -16,6 +16,11 @@ export type FormTableRowKey<TRow extends TableRow = TableRow> =
   | string
   | ((row: TRow) => FormTableValue)
 
+/** 可选键盘导航策略；传入对象即启用，enabled: false 可临时关闭。 */
+export interface FormTableNavigationOptions {
+  enabled?: boolean
+}
+
 interface BaseFormTableProps<
   TRow extends TableRow,
   TFieldTypes extends FieldTypeRegistry<TRow>
@@ -32,6 +37,8 @@ interface BaseFormTableProps<
   tableProps?: FormTableTableProps
   /** 字段与表头的统一 Hint 展示策略。 */
   hintOptions?: FormTableHintOptions<TRow>
+  /** Enter/Shift+Enter 字段导航；未配置时不接管键盘。 */
+  navigationOptions?: FormTableNavigationOptions
   /** 是否在表格区域显示 Element UI loading 遮罩。 */
   loading?: boolean
 }
