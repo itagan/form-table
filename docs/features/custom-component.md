@@ -148,21 +148,22 @@ component: {
 }
 ```
 
-如果仍需手动更新字段，可组合动态 props 和 listener：
+`model: false` 只关闭自动 model，不关闭 `binding.map`。如果仍需手动更新字段，可在动态 Props 中读取只读 `bindingValue`，并在 listener 中调用 `setBindingValue`：
 
 ```ts
 component: {
-  is: SkuSelector,
+  is: EmployeePicker,
   model: false,
-  props: ({ value }) => ({ selectedSkuId: value }),
+  props: ({ bindingValue }) => ({ selection: bindingValue }),
   listeners: {
-    'select-sku'({ setValue, updateRow }, sku) {
-      setValue(sku.id)
-      updateRow({ skuName: sku.name })
+    confirm({ setBindingValue }, employee) {
+      setBindingValue(employee)
     }
   }
 }
 ```
+
+上例配置 `binding.map` 时可以一次写回多个字段；未配置时 `bindingValue/setBindingValue` 等同于 `value/setValue`。Props 上下文不提供更新助手，避免动态求值时产生副作用。
 
 ## 选择方式
 

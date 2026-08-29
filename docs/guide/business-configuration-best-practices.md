@@ -70,7 +70,7 @@ import MoneyInput from '@/components/MoneyInput.vue'
 import type {
   ColumnConfig,
   FormItemConfig,
-  FormTableFieldRenderContext,
+  FormTableFieldBindingContext,
   TableRow
 } from '@itagan/form-table'
 
@@ -105,7 +105,7 @@ function createMoneyItem(options: MoneyItemOptions): FormItemConfig<PurchaseRow>
         prop: 'amount',
         event: 'amount-change'
       },
-      props: ({ row }: FormTableFieldRenderContext<PurchaseRow>) => ({
+      props: ({ row }: FormTableFieldBindingContext<PurchaseRow>) => ({
         currency: row.currency || 'CNY',
         precision,
         placeholder,

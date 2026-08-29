@@ -9,7 +9,7 @@
 - `FormTableHintValue`、`FormTableHintMode`、`FormTableHintTargets`、`FormTableHintTrigger`、`FormTableFieldHintFormatter`、`FormTableHintOptions`
 - `TableRow`、`FormTableRecord`、`FormTableRowPatch`、`FormTableProps`、`FormTableRowKey`
 - `FormTableTableProps`、`FormTableFormProps`、`FormTableFormItemProps`
-- `FormTableColumnContext`、`FormTableRowContext`、`FormTableFieldRenderContext`
+- `FormTableColumnContext`、`FormTableRowContext`、`FormTableFieldRenderContext`、`FormTableFieldBindingContext`
 - `FormTableFieldContext`、`FormTableFormItemSlotContext`、`FormTableFormItemErrorSlotContext`
 - `FormTableSlotContext`、`FormTableCellSlotContext`
 - `FormTableFieldChangePayload`、`FormTableHeaderSlotContext`
@@ -164,13 +164,25 @@ type FieldComponentResolver = (
 Column visible/props/headerProps/headerHint → tableData, columnConfig
 Column rowProps          → Column 信息 + row, index, displayIndex
 Field 布局与 Hint 求值   → Row 信息 + fieldKey, value, itemConfig
-component 动态配置       → Field 信息
-component.listeners      → Field 信息 + setValue, bindingValue, setBindingValue, updateRow
+resolveComponent/options/optionProps → Field 信息
+component.props          → Field 信息 + bindingValue（只读）
+component.listeners      → Props 信息 + setValue, setBindingValue, updateRow
 字段 slot                → Listener 信息 + propPath, component
 列级 cellSlot            → row, index, displayIndex, columnConfig, updateRow
 ```
 
 `FormTableSlotContext.itemConfig.component` 保留调用方传入的原始配置；`FormTableSlotContext.component` 包含针对当前数据行解析并归一化后的 `props/listeners/options/optionProps/model`，用于直接绑定 Slot 内组件。该解析结果不再作为独立顶层类型导出。
+
+组件 Props 使用独立的只读绑定上下文：
+
+```ts
+interface FormTableFieldBindingContext<TRow extends TableRow = TableRow>
+  extends FormTableFieldRenderContext<TRow> {
+  readonly bindingValue: FormTableValue
+}
+```
+
+它用于 Item `component.props` 和自定义 Type 注册定义的默认 `props`。未配置 `binding.map` 时 `bindingValue === value`；配置后为当前行投影出的复合值。该上下文不包含 `setValue/setBindingValue/updateRow`，写回仍由 listener 或 Slot 完成。`resolveComponent/options/optionProps` 继续使用 `FormTableFieldRenderContext`。
 
 自定义组件绑定协议的宽松形态如下；第二个泛型传入事件表时会收紧为按 `event` 区分的联合类型：
 
@@ -224,7 +236,7 @@ interface FieldBindingConfig {
 }
 ```
 
-`fallbackValue` 仅在组件输出中无法解析 `valuePath` 时参与写回，不改变从 row 组装 `bindingValue` 的读取方向。`bindingValue/setBindingValue` 进入 `FormTableFieldContext` 及其 Slot 扩展上下文；主 `value/setValue` 始终保留单一 `fieldKey` 语义。完整规则见[复合字段映射](../features/composite-binding.md)。
+`fallbackValue` 仅在组件输出中无法解析 `valuePath` 时参与写回，不改变从 row 组装 `bindingValue` 的读取方向。只读 `bindingValue` 进入组件 Props 上下文；`bindingValue/setBindingValue` 进入 `FormTableFieldContext` 及其 Slot 扩展上下文。主 `value/setValue` 始终保留单一 `fieldKey` 语义。完整规则见[复合字段映射](../features/composite-binding.md)。
 
 `row/tableData` 与 `columnConfig/itemConfig` 在回调类型中采用浅层只读约束；运行时不会冻结原对象。字段更新使用 `setValue` 或 `updateRow`，配置调整由调用方替换 `columns`。
 
