@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.0 - 2026-08-29
+
+### Added
+
+- `component.props` 和自定义字段 Type 的默认 Props 可读取当前 `bindingValue`，便于复合绑定组件按组合值计算属性。
+- 新增公开类型 `FormTableFieldBindingContext`，区分只读 Props 上下文与包含更新能力的字段事件上下文。
+
 ## 1.0.1 - 2026-08-28
 
 ### Fixed

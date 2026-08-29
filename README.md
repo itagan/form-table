@@ -53,7 +53,8 @@ pnpm release:check
 - `pnpm build`：先构建 npm 包，再构建 playground。
 - `pnpm compat:check`：使用最低 peer dependency 组合验证构建后的包入口。
 - `pnpm pack:check`：检查 npm tarball 内容、声明文件和 ESM/CommonJS 导出。
-- `pnpm release:check`：执行 Lint、覆盖率测试、类型检查、构建、文档和 npm 打包预检。
+- `pnpm release:meta-check`：检查包版本、Changelog 和 Git 版本 Tag 是否一致。
+- `pnpm release:check`：执行发布元数据、Lint、覆盖率测试、类型检查、构建、文档和 npm 打包预检。
 - `pnpm --filter @itagan/form-table build`：只构建可发布 npm 包。
 
 ## npm 包使用
