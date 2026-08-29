@@ -168,7 +168,7 @@ const serverRows: OrderRow[] = [
   { id: 'line-2', productName: '参会证件', quantity: 120, unitPrice: 3.2, remark: '' }
 ]
 
-const formTableRef = ref<FormTableExpose | null>(null)
+const formTableRef = ref<FormTableExpose<OrderRow> | null>(null)
 const tableData = ref<OrderRow[]>([])
 const savedSnapshot = ref<OrderRow[]>([])
 const loading = ref(false)
@@ -384,13 +384,10 @@ const saveData = async () => {
       serverErrors.value = error.fieldErrors
       await nextTick()
       error.fieldErrors.forEach(fieldError => {
-        const index = tableData.value.findIndex(row => row.id === fieldError.rowId)
-        if (index >= 0) {
-          formTableRef.value?.getFormRef()?.validateField?.(
-            `tableData.${index}.${fieldError.fieldKey}`
-          )
-        }
+        const row = tableData.value.find(row => row.id === fieldError.rowId)
+        if (row) void formTableRef.value?.validateField(row, fieldError.fieldKey)
       })
+      await formTableRef.value?.scrollToFirstError()
       Message.error('请处理服务端返回的字段错误')
     } else {
       Message.error(error instanceof Error ? error.message : '保存失败，请重试')

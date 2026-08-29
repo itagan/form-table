@@ -10,7 +10,7 @@
 | `field-change` | `{ row, index, fieldKey, value, previousValue }` |
 | `form-validate` | `propPath, valid, message` |
 
-`form-validate` 转发 Element Form 的逐字段校验结果；`message` 在校验通过时为 `null`。它保留 Element 生成的完整 `propPath`，不将原生 `validateField()` 提升为 FormTable 顶层方法。单字段校验继续使用字段 Slot 当前的 `propPath` 和 `getFormRef().validateField()`。
+`form-validate` 转发 Element Form 的逐字段校验结果；`message` 在校验通过时为 `null`。它保留 Element 生成的完整 `propPath`。业务代码可通过 FormTable Ref 的 `validateField(row, fieldKey)` 使用稳定行身份校验字段；已经持有完整路径时仍可调用 `getFormRef().validateField()`。
 
 Element Table 事件直接透传，参数顺序与引用保持不变。公开类型覆盖列、单元格、行、当前行、展开和选择事件；`expand-change` 的第二个参数使用 `boolean | TRow[]` 兼容树形展开和 expand 列。
 
@@ -207,11 +207,26 @@ component: {
 ```ts
 await formTableRef.value?.validate()
 formTableRef.value?.clearValidate()
+await formTableRef.value?.validateField(row, 'profile.phone')
+await formTableRef.value?.focusField(row, 'profile.phone')
+await formTableRef.value?.scrollToFirstError()
 formTableRef.value?.getFormRef()
 formTableRef.value?.getTableRef()
 ```
 
 `validate()` 使用 Element UI 完整规则并统一返回 `Promise<boolean>`；校验失败时返回 `false`，不会要求调用方捕获 rejected Promise。
+
+字段级 Ref 方法统一接受业务行和 `fieldKey`：
+
+| 方法 | 结果 |
+| --- | --- |
+| `getFieldProp(row, fieldKey)` | 返回当前已挂载字段的完整校验路径；无法定位时为 `undefined` |
+| `validateField(row, fieldKey)` | 校验字段并返回 `Promise<boolean>` |
+| `clearFieldValidate(row, fieldKey)` | 清除字段校验状态 |
+| `focusField(row, fieldKey)` | 聚焦字段内首个可交互元素并返回是否成功 |
+| `scrollToFirstError()` | 滚动到首个错误字段、尽可能聚焦并返回是否找到 |
+
+配置 `rowKey` 后，这些方法可以使用数据替换前保存的旧行引用重新定位最新行。目标身份缺失或重复、字段因显隐或筛选未挂载时，查询返回 `undefined`，操作返回 `false` 或安全跳过。字段被 Element Table 本地排序后仍按数据源下标生成校验路径。
 
 `getFormRef()` 和 `getTableRef()` 分别返回基于当前项目 Element UI 类型声明的原生 Form 与 Table 实例。Table Ref 额外为数据和行方法保留业务行泛型；以下方法在支持范围 2.4.9–2.15.14 中保持稳定：
 
@@ -247,7 +262,7 @@ const resetTable = async () => {
 }
 ```
 
-这样可以由新增、编辑等业务场景自行决定是否删除新增行、恢复已删除行或只重置部分字段。原生 `getFormRef().resetFields()` 仍可作为底层逃生口，但它会直接修改 `tableData` 且不触发受控更新事件。单字段校验、滚动等未封装能力也可通过原生 Form Ref 使用：
+这样可以由新增、编辑等业务场景自行决定是否删除新增行、恢复已删除行或只重置部分字段。原生 `getFormRef().resetFields()` 仍可作为底层逃生口，但它会直接修改 `tableData` 且不触发受控更新事件。已经持有完整 Element Form 路径时也可继续使用原生方法：
 
 ```ts
 formTableRef.value

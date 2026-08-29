@@ -83,6 +83,16 @@ export interface FormTableExpose<TRow extends TableRow = TableRow> {
   validate: (callback?: (valid: boolean, fields?: FormTableValue) => void) => Promise<boolean>
   /** 清除全部或指定字段路径的校验状态。 */
   clearValidate: (fieldProps?: string | string[]) => void
+  /** 获取当前已挂载字段的 Element Form 完整 prop 路径。 */
+  getFieldProp: (row: TRow, fieldKey: string) => string | undefined
+  /** 通过业务行与字段路径校验当前已挂载字段。 */
+  validateField: (row: TRow, fieldKey: string) => Promise<boolean>
+  /** 通过业务行与字段路径清除当前已挂载字段的校验状态。 */
+  clearFieldValidate: (row: TRow, fieldKey: string) => void
+  /** 聚焦当前已挂载字段内的首个可交互元素。 */
+  focusField: (row: TRow, fieldKey: string) => Promise<boolean>
+  /** 滚动到首个错误 FormItem，并尽可能聚焦其中的可交互元素。 */
+  scrollToFirstError: () => Promise<boolean>
   /** 获取底层 Element Form 实例；挂载完成前返回 null。 */
   getFormRef: () => FormTableElementFormRef | null
   /** 获取底层 Element Table 实例；挂载完成前返回 null。 */

@@ -88,6 +88,7 @@ import {
 } from './types/internal'
 import { useColumnIdentity } from './composables/useColumnIdentity'
 import { useControlledTableUpdate } from './composables/useControlledTableUpdate'
+import { useFormTableFieldLocator } from './composables/useFormTableFieldLocator'
 import { useRowIndex } from './composables/useRowIndex'
 import { createTableContext } from './utils/dynamic'
 import { collectFieldTypeDiagnostics } from './utils/fieldTypeDiagnostics'
@@ -192,6 +193,14 @@ const updateApi: FormTableUpdateApi = useControlledTableUpdate({
   emitFieldChange: payload => emit('field-change', payload)
 })
 
+/** 统一把业务行和字段路径解析为当前 FormItem，供顶层 Ref 方法和键盘导航复用。 */
+const fieldLocator = useFormTableFieldLocator({
+  getTableData: () => props.tableData,
+  getRowKey: () => props.rowKey,
+  containerRef,
+  formRef
+})
+
 /** 后代组件共享表数据、更新入口和父级插槽，避免逐层透传无关参数。 */
 provide(FORM_TABLE_CONTEXT_KEY, formTableContext)
 provide(FORM_TABLE_FIELD_TYPES_KEY, resolvedFieldTypes)
@@ -223,6 +232,11 @@ const validate = async (callback?: (valid: boolean, fields?: FormTableValue) => 
 defineExpose({
   validate,
   clearValidate: (fieldProps?: string | string[]) => formRef.value?.clearValidate?.(fieldProps),
+  getFieldProp: fieldLocator.getFieldProp,
+  validateField: fieldLocator.validateField,
+  clearFieldValidate: fieldLocator.clearFieldValidate,
+  focusField: fieldLocator.focusField,
+  scrollToFirstError: fieldLocator.scrollToFirstError,
   getFormRef: () => formRef.value,
   getTableRef: () => tableRef.value
 })
