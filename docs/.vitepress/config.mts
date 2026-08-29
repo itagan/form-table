@@ -86,6 +86,7 @@ export default defineConfig({
             items: [
               { text: '数据更新与受控回写', link: '/features/data-updates' },
               { text: '校验、清理与重置', link: '/features/validation-reset' },
+              { text: 'Enter 字段导航', link: '/features/keyboard-navigation' },
               { text: '动态显隐与配置更新', link: '/features/dynamic-configuration' },
               { text: '详情与编辑模式', link: '/features/detail-and-editing-modes' },
               { text: '权限与字段可编辑性', link: '/features/permissions-and-editing' },

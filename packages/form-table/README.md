@@ -73,6 +73,32 @@ const columns: ColumnConfig[] = defineFormTableColumns([{
 
 `navigationOptions` 是可选增强；未配置时不改变原有键盘行为，启用后 Enter/Shift+Enter 会按当前实际显示顺序移动到下一个或上一个可编辑字段。Textarea、按钮、输入法组合和带修饰键的 Enter 不接管。
 
+## 字段定位与批量更新
+
+配置稳定且唯一的 `rowKey` 后，Ref 方法可以用业务行定位当前数据中的字段。校验失败时可以直接跳到首个错误，也可以只操作一个字段：
+
+```ts
+const valid = await formTableRef.value?.validateField(row, 'profile.phone')
+await formTableRef.value?.focusField(row, 'profile.phone')
+
+if (!await formTableRef.value?.validate()) {
+  await formTableRef.value?.scrollToFirstError()
+}
+```
+
+跨行字段修改使用 `updateRows`。它会先验证所有目标，只复制并发出一次新数组；任一目标无效时整批拒绝：
+
+```ts
+const updated = formTableRef.value?.updateRows(
+  selectedRows.map(row => ({
+    row,
+    patch: { reviewed: true, 'audit.source': 'batch' }
+  }))
+)
+```
+
+完整规则见[数据更新与受控回写](https://gitee.com/itagan/form-table/blob/master/docs/features/data-updates.md)、[校验、清理与重置](https://gitee.com/itagan/form-table/blob/master/docs/features/validation-reset.md)和[Enter 字段导航](https://gitee.com/itagan/form-table/blob/master/docs/features/keyboard-navigation.md)。批量修改及键盘导航的可运行实现见[行列操作 Playground 源码](https://gitee.com/itagan/form-table/blob/master/playground/src/views/RowColumnOperationsView.vue)。
+
 ## Element Table 事件与根级 Slot
 
 列相关事件继续在 FormTable 根组件监听，不配置额外的 `column.listeners`。排序、筛选、表头、单元格和选择事件均保留 Element UI 的原始参数：
@@ -113,6 +139,9 @@ function handleFilterChange(filters: FormTableFilterChangePayload) {
 - [配置与 API 总览](https://gitee.com/itagan/form-table/blob/master/docs/api/configuration.md)
 - [事件与 Ref](https://gitee.com/itagan/form-table/blob/master/docs/api/events-and-ref.md)
 - [公开类型](https://gitee.com/itagan/form-table/blob/master/docs/api/types.md)
+- [数据更新与原子批量更新](https://gitee.com/itagan/form-table/blob/master/docs/features/data-updates.md)
+- [字段校验、定位与聚焦](https://gitee.com/itagan/form-table/blob/master/docs/features/validation-reset.md)
+- [Enter 字段导航](https://gitee.com/itagan/form-table/blob/master/docs/features/keyboard-navigation.md)
 - [自定义字段 Type](https://gitee.com/itagan/form-table/blob/master/docs/features/custom-field-types.md)
 - [功能专题](https://gitee.com/itagan/form-table/blob/master/docs/features/index.md)
 - [示例索引](https://gitee.com/itagan/form-table/blob/master/docs/examples/index.md)

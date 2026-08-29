@@ -148,7 +148,7 @@
     "category": "business",
     "level": "intermediate",
     "status": "featured",
-    "relatedDocs": ["/features/common-row-actions", "/features/row-column-operations", "/features/pagination-and-cross-page-editing"],
+    "relatedDocs": ["/features/data-updates", "/features/keyboard-navigation", "/features/common-row-actions", "/features/row-column-operations", "/features/pagination-and-cross-page-editing"],
     "source": "playground/src/views/RowColumnOperationsView.vue",
     "type": "warning",
     "tags": ["row operations", "selection", "batch update", "columns", "delayed commit"]
