@@ -38,6 +38,7 @@ pnpm release:check
 
 这条命令会依次执行：
 
+- `pnpm release:meta-check`
 - `pnpm lint`
 - `pnpm test:coverage`
 - `pnpm type-check`
@@ -48,7 +49,7 @@ pnpm release:check
 - `pnpm site:check`
 - `pnpm pack:check`
 
-其中 `compat:check` 使用 Vue 2.7.1 + Element UI 2.4.9 从构建后的包入口完成类型和运行时验证；`pack:check` 会断言 tarball 文件清单、公开声明和 ESM/CommonJS 导出。`site:build` 会先执行 `docs:install`，再生成文档、Playground 和各示例路由的静态直达入口；`site:check` 会检查统一基址、全部示例路由和生产产物中的 localhost 残留。
+其中 `release:meta-check` 会校验组件包版本、Changelog 最新条目和已有 Git 版本 Tag；尚未创建当前版本 Tag 时允许继续执行发布前预检。`compat:check` 使用 Vue 2.7.1 + Element UI 2.4.9 从构建后的包入口完成类型和运行时验证；`pack:check` 会断言 tarball 文件清单、公开声明和 ESM/CommonJS 导出。单独运行 `compat:check` 或 `pack:check` 时会先构建组件包，完整 `release:check` 则复用流程中已经生成的产物。`site:build` 会先执行 `docs:install`，再生成文档、Playground 和各示例路由的静态直达入口；`site:check` 会检查统一基址、全部示例路由和生产产物中的 localhost 残留。
 
 ## 文档站部署
 
