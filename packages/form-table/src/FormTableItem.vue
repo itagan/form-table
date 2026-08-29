@@ -1,5 +1,6 @@
 <template>
   <el-form-item
+    class="form-table-form-item"
     v-bind="resolvedFormItemProps"
     :data-form-table-field-prop="propPath"
   >

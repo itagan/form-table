@@ -1,3 +1,4 @@
+import './style.css'
 import FormTable from './index.vue'
 import type {
   EmptyFieldTypeRegistry,

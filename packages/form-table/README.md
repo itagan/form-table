@@ -27,6 +27,18 @@ yarn add @itagan/form-table@latest
 
 Vue 3 和 Element Plus 暂不支持。完整兼容说明见[快速开始](https://gitee.com/itagan/form-table/blob/master/docs/guide/quick-start.md)。
 
+## 样式入口
+
+FormTable 的 JavaScript 与样式独立发布。请在应用入口按 Element UI → FormTable → 业务覆盖的顺序引入一次：
+
+```ts
+import 'element-ui/lib/theme-chalk/index.css'
+import '@itagan/form-table/style.css'
+import './form-table-overrides.css'
+```
+
+FormTable 样式只负责多字段换行和表格内 FormItem 间距，不包含 Element UI 主题、颜色、字体或全局 reset。业务可以在后加载的 CSS 中覆盖 `.form-table-field-layout` 和 `.form-table-container .form-table-form-item`，也可以通过 `rowProps.style/formItemProps.style` 进行局部覆盖。完整边界见[样式加载与覆盖](https://gitee.com/itagan/form-table/blob/master/docs/architecture/style-loading.md)。
+
 ## 最小示例
 
 ```ts

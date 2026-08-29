@@ -61,6 +61,7 @@ export default defineConfig({
           { text: '架构总览', link: '/architecture/overview' },
           { text: '渲染架构', link: '/architecture/rendering-pipeline' },
           { text: '受控数据流', link: '/architecture/controlled-data-flow' },
+          { text: '样式加载与覆盖', link: '/architecture/style-loading' },
           { text: '扩展模型', link: '/architecture/extension-model' }
         ]
       },
