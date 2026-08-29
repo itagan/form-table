@@ -210,6 +210,7 @@ formTableRef.value?.clearValidate()
 await formTableRef.value?.validateField(row, 'profile.phone')
 await formTableRef.value?.focusField(row, 'profile.phone')
 await formTableRef.value?.scrollToFirstError()
+formTableRef.value?.updateRows([{ row, patch: { reviewed: true } }])
 formTableRef.value?.getFormRef()
 formTableRef.value?.getTableRef()
 ```
@@ -227,6 +228,8 @@ formTableRef.value?.getTableRef()
 | `scrollToFirstError()` | 滚动到首个错误字段、尽可能聚焦并返回是否找到 |
 
 配置 `rowKey` 后，这些方法可以使用数据替换前保存的旧行引用重新定位最新行。目标身份缺失或重复、字段因显隐或筛选未挂载时，查询返回 `undefined`，操作返回 `false` 或安全跳过。字段被 Element Table 本地排序后仍按数据源下标生成校验路径。
+
+`updateRows([{ row, patch }])` 用于跨行原子字段更新。全部目标通过行身份和不可变 `rowKey` 校验后，只发出一次 `update:tableData`，再按 patch 处理顺序派发每个实际变化的 `field-change`；失败或没有实际变化时返回 `false`。行增删、复制和排序仍由页面直接替换 `tableData`。
 
 `getFormRef()` 和 `getTableRef()` 分别返回基于当前项目 Element UI 类型声明的原生 Form 与 Table 实例。Table Ref 额外为数据和行方法保留业务行泛型；以下方法在支持范围 2.4.9–2.15.14 中保持稳定：
 

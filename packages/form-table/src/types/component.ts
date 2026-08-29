@@ -1,7 +1,7 @@
 import type { Component, DefineComponent } from 'vue'
 import type { ElForm } from 'element-ui/types/form'
 import type { ElTable } from 'element-ui/types/table'
-import type { ComponentProps, FormTableValue, TableRow } from './base'
+import type { ComponentProps, FormTableRowUpdate, FormTableValue, TableRow } from './base'
 import type {
   FieldModelConfig,
   EmptyFieldTypeRegistry,
@@ -93,6 +93,8 @@ export interface FormTableExpose<TRow extends TableRow = TableRow> {
   focusField: (row: TRow, fieldKey: string) => Promise<boolean>
   /** 滚动到首个错误 FormItem，并尽可能聚焦其中的可交互元素。 */
   scrollToFirstError: () => Promise<boolean>
+  /** 原子更新多行；成功时只发出一次受控数组更新。 */
+  updateRows: (updates: FormTableRowUpdate<TRow>[]) => boolean
   /** 获取底层 Element Form 实例；挂载完成前返回 null。 */
   getFormRef: () => FormTableElementFormRef | null
   /** 获取底层 Element Table 实例；挂载完成前返回 null。 */

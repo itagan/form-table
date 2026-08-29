@@ -1,4 +1,4 @@
-import type { FormTableRowPatch, TableRow } from '../types/base'
+import type { FormTableRowPatch, FormTableRowUpdate, TableRow } from '../types/base'
 import type { FormTableFieldChangePayload } from '../types/config/events'
 import type { FormTableUpdateApi } from '../types/context'
 import { applyRowPatch } from '../utils/rowPatch'
@@ -76,31 +76,57 @@ export function useControlledTableUpdate<TRow extends TableRow = TableRow>(
     return synchronousRowIndexes.get(targetRow) ?? -1
   }
 
-  const updateRow = (targetRow: TRow, patch: FormTableRowPatch<TRow>) => {
-    // 一次更新事务严格按：定位 -> 计算 -> 身份校验 -> 提交 -> 发事件执行。
+  const updateRows = (updates: FormTableRowUpdate<TRow>[]) => {
+    if (updates.length === 0) return false
+
+    // 整批事务严格按：全部定位 -> 顺序计算 -> 身份校验 -> 单次提交 -> 发事件执行。
     const sourceTableData = synchronousUpdateBase || options.getTableData()
     const rowKey = options.getRowKey()
-    const rowIndex = resolveUpdateRowIndex(sourceTableData, targetRow, rowKey)
-    if (rowIndex < 0) return
-    const currentRow = sourceTableData[rowIndex]
-    if (!currentRow) return
+    const workingRows = new Map<number, TRow>()
+    const referencedRows = new Map<TRow, number>()
+    const pendingChanges: Array<{
+      index: number
+      fieldKey: string
+      value: unknown
+      previousValue: unknown
+    }> = []
 
-    const { nextRow, changes } = applyRowPatch(currentRow, patch)
-    if (changes.length === 0) return
-
-    if (
-      isConfiguredRowKey(rowKey)
-      && !Object.is(getRowIdentity(currentRow, rowKey), getRowIdentity(nextRow, rowKey))
-    ) {
-      if (import.meta.env.DEV) {
-        console.warn('[FormTable] rowKey is an immutable row identity; updateRow rejected a patch that changes it.')
+    for (const update of updates) {
+      const rowIndex = resolveUpdateRowIndex(sourceTableData, update.row, rowKey)
+      const currentRow = workingRows.get(rowIndex) || sourceTableData[rowIndex]
+      if (rowIndex < 0 || !currentRow) {
+        if (import.meta.env.DEV && updates.length > 1) {
+          console.warn('[FormTable] updateRows rejected the batch because a target row could not be resolved uniquely.')
+        }
+        return false
       }
-      return
+
+      const { nextRow, changes } = applyRowPatch(currentRow, update.patch)
+      if (
+        isConfiguredRowKey(rowKey)
+        && !Object.is(getRowIdentity(currentRow, rowKey), getRowIdentity(nextRow, rowKey))
+      ) {
+        if (import.meta.env.DEV) {
+          console.warn('[FormTable] rowKey is an immutable row identity; updateRows rejected a patch that changes it.')
+        }
+        return false
+      }
+
+      referencedRows.set(update.row, rowIndex)
+      referencedRows.set(currentRow, rowIndex)
+      if (changes.length === 0) continue
+      workingRows.set(rowIndex, nextRow)
+      referencedRows.set(nextRow, rowIndex)
+      changes.forEach(change => pendingChanges.push({ index: rowIndex, ...change }))
     }
 
-    // 到这里事务已通过全部拒绝条件，后续提交必须保持 update 先于字段事件。
+    if (pendingChanges.length === 0) return false
+
+    // 到这里整批事务已通过全部拒绝条件，只复制一次顶层数组。
     const nextTableData = [...sourceTableData]
-    nextTableData[rowIndex] = nextRow
+    workingRows.forEach((row, index) => {
+      nextTableData[index] = row
+    })
 
     if (
       synchronousIdentityIndex?.source === sourceTableData
@@ -114,21 +140,23 @@ export function useControlledTableUpdate<TRow extends TableRow = TableRow>(
     }
 
     synchronousUpdateBase = nextTableData
-    // 同步调用方可能持有任意阶段的行引用，三者都映射到同一最新位置。
-    synchronousRowIndexes.set(targetRow, rowIndex)
-    synchronousRowIndexes.set(currentRow, rowIndex)
-    synchronousRowIndexes.set(nextRow, rowIndex)
+    // 同步调用方可能持有事务前后的任意行引用，全部映射到最新位置。
+    referencedRows.forEach((index, row) => synchronousRowIndexes.set(row, index))
     scheduleUpdateBaseReset()
     options.emitUpdate(nextTableData)
 
-    // applyRowPatch 保留 patch 的字段顺序，field-change 按相同顺序逐项派发。
-    changes.forEach(change => {
+    // 所有字段事件都在唯一一次数组更新后派发，row 指向该行的最终事务结果。
+    pendingChanges.forEach(change => {
       options.emitFieldChange({
-        row: nextRow,
-        index: rowIndex,
+        row: nextTableData[change.index],
         ...change
       })
     })
+    return true
+  }
+
+  const updateRow = (targetRow: TRow, patch: FormTableRowPatch<TRow>) => {
+    updateRows([{ row: targetRow, patch }])
   }
 
   return {
@@ -136,6 +164,7 @@ export function useControlledTableUpdate<TRow extends TableRow = TableRow>(
       row,
       { [fieldKey]: value } as FormTableRowPatch<TRow>
     ),
-    updateRow
+    updateRow,
+    updateRows
   }
 }

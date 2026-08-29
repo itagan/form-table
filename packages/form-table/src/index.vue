@@ -237,6 +237,7 @@ defineExpose({
   clearFieldValidate: fieldLocator.clearFieldValidate,
   focusField: fieldLocator.focusField,
   scrollToFirstError: fieldLocator.scrollToFirstError,
+  updateRows: updateApi.updateRows,
   getFormRef: () => formRef.value,
   getTableRef: () => tableRef.value
 })

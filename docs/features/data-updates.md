@@ -2,7 +2,7 @@
 
 > 可运行 Demo：[`cellSlot` 更新助手 ↗](http://localhost:5173/cell-slot) · [行列操作与异步提交 ↗](http://localhost:5173/row-column-operations)
 
-`tableData` 是 FormTable 唯一的数据源。根组件 `v-model` 映射到 `tableData/update:tableData`；组件内部不会直接修改传入数组，字段输入、`setValue` 和 `updateRow` 都会生成新数组交给父组件。
+`tableData` 是 FormTable 唯一的数据源。根组件 `v-model` 映射到 `tableData/update:tableData`；组件内部不会直接修改传入数组，字段输入、`setValue`、`updateRow` 和 Ref `updateRows` 都会生成新数组交给父组件。
 
 `v-model` 本身就是推荐的受控回写写法，不是与受控更新并列的另一种模式。字段配置中的自动 model 只负责把控件变化转换成行更新；无论字段使用内置 Type、直接组件、自定义 Type 还是更新助手，页面最终都必须接住新的 `tableData`。
 
@@ -69,6 +69,7 @@ function replaceVisibleRows(nextVisibleRows) {
 | 标准字段输入 | 自动 model | 内置类型、`type: 'component'` | `update:tableData` + `field-change` |
 | 更新当前字段 | `setValue(nextValue)` | 字段 listener、字段 Slot | `update:tableData` + 当前字段的 `field-change` |
 | 同时更新当前行多个字段 | `updateRow(patch)` | 字段 listener、字段 Slot、`cellSlot` | 一次 `update:tableData` + 每个变化字段的 `field-change` |
+| 原子更新多行 | Ref `updateRows(updates)` | 页面业务层 | 一次 `update:tableData` + 按处理顺序派发 `field-change` |
 | 新增、删除、复制、排序行 | 替换父组件 `tableData` | 页面业务层 | 不经过 FormTable，不自动发出上述事件 |
 | 服务端刷新整表 | 替换父组件 `tableData` | 页面业务层 | 不经过 FormTable，不自动发出上述事件 |
 
@@ -138,6 +139,19 @@ const patch: FormTableRowPatch<PurchaseRow> = {
 </template>
 ```
 
+## updateRows：原子更新多行
+
+```ts
+const updated = formTableRef.value?.updateRows([
+  { row: tableData.value[0], patch: { status: 'approved' } },
+  { row: tableData.value[1], patch: { status: 'approved', 'audit.source': 'batch' } }
+])
+```
+
+`updateRows` 先解析并验证全部目标，再复制一次顶层数组并发出一次 `update:tableData`。相同行出现多次时按输入顺序组合，后面的同字段值覆盖前面的值；`field-change` 仍保留每一步实际变化，并在数组更新事件之后派发，载荷中的 `row` 指向该行最终结果。
+
+它具有原子失败语义：任一目标行不存在、身份重复，或任一 patch 修改 `rowKey` 时，整批返回 `false`，不发出任何更新事件。空批次和全部字段均未变化时同样返回 `false`。成功提交返回 `true`。
+
 ## 连续更新
 
 同一同步调用链中可以组合两个助手，后一次更新会基于前一次结果继续合并：
@@ -199,6 +213,7 @@ async function approve({ row, updateRow }) {
 - 异步结束后使用旧 `index` 修改数组：行排序后可能写错目标。
 - 用 `setValue` 更新其他字段：应改用 `updateRow`。
 - 通过 `updateRow` 修改 `rowKey`：行身份必须由页面业务层维护。
+- 循环调用 `updateRow` 修改多行：需要单次提交和字段事件时使用 Ref `updateRows`。
 
 ## 相关 API
 

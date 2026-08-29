@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import FormTable from '../index.vue'
 import type {
   ColumnConfig,
+  FormTableExpose,
   FormTableFieldRenderContext,
   FormTableRowContext,
   TableRow
@@ -232,6 +233,25 @@ describe('FormTable data updates', () => {
     expect(updates).toHaveLength(2)
     expect(updates[1]?.[0]).toEqual([{ name: 'Bob', touched: true }])
     expect(original).toEqual([{ name: 'Alice', touched: false }])
+    wrapper.destroy()
+  })
+
+  it('exposes atomic multi-row updates through the component ref', async () => {
+    const rows = [{ id: 1, name: 'Alice' }, { id: 2, name: 'Bob' }]
+    const wrapper = mountFormTable({ tableData: rows, rowKey: 'id' })
+    await wrapper.vm.$nextTick()
+    const expose = wrapper.vm as unknown as FormTableExpose
+
+    expect(expose.updateRows([
+      { row: rows[0], patch: { name: 'Alicia' } },
+      { row: rows[1], patch: { name: 'Robert' } }
+    ])).toBe(true)
+    expect(wrapper.emitted('update:tableData')).toHaveLength(1)
+    expect(wrapper.emitted('field-change')).toHaveLength(2)
+    expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([
+      { id: 1, name: 'Alicia' },
+      { id: 2, name: 'Robert' }
+    ])
     wrapper.destroy()
   })
 })

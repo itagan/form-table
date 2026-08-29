@@ -29,6 +29,12 @@ export type FormTableRowPatch<TRow extends TableRow = TableRow> = Partial<TRow> 
   FormTableValue
 >>
 
+/** 原子批量更新中的单个行目标与不可变 Patch。 */
+export interface FormTableRowUpdate<TRow extends TableRow = TableRow> {
+  row: TRow
+  patch: FormTableRowPatch<TRow>
+}
+
 /** 支持直接值或根据运行时上下文计算的动态值。 */
 export type DynamicValue<T, Context> = T | ((context: Context) => T)
 
