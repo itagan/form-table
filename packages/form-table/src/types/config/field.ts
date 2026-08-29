@@ -10,6 +10,7 @@ import type {
   TableRow
 } from '../base'
 import type {
+  FormTableFieldBindingContext,
   FormTableFieldContext,
   FormTableFieldRenderContext
 } from '../context'
@@ -113,7 +114,7 @@ export interface FieldTypeDefinition<
 > {
   is: string | Component
   model?: FieldModelConfig<TRow, TEvents> | false
-  props?: DynamicValue<Partial<TProps>, FormTableFieldRenderContext<TRow>>
+  props?: DynamicValue<Partial<TProps>, FormTableFieldBindingContext<TRow>>
 }
 
 /** defineFormTableType 返回的协议化定义；品牌仅存在于类型系统。 */
@@ -167,7 +168,7 @@ export interface FieldComponentConfig<TRow extends TableRow = TableRow> {
   /** slot 字段在根 FormTable 上对应的具名 Slot。 */
   slot?: string
   /** 透传给实际字段组件的属性。 */
-  props?: DynamicValue<ComponentProps, FormTableFieldRenderContext<TRow>>
+  props?: DynamicValue<ComponentProps, FormTableFieldBindingContext<TRow>>
   /** 字段组件事件监听器；回调首参固定为可更新的字段上下文。 */
   listeners?: Record<string, FormTableFieldListener<TRow>>
   /** select、radio、checkbox 等选项型组件的数据源。 */
@@ -279,7 +280,7 @@ type CustomFieldComponentConfig<
 > = {
   props?: DynamicValue<
     Partial<RegisteredFieldTypeProps<TDefinition>>,
-    FormTableFieldRenderContext<TRow>
+    FormTableFieldBindingContext<TRow>
   >
   listeners?: RegisteredFieldTypeListeners<TRow, TDefinition>
   model?: FieldModelConfig<TRow, RegisteredFieldTypeEvents<TDefinition>> | false

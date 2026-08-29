@@ -90,6 +90,7 @@ const {
   hintMode,
   hintTrigger,
   resolvedFormItemProps,
+  bindingContext,
   fieldContext
 } = useFormTableFieldContext({
   getRowContext: () => props.rowContext,
@@ -100,6 +101,7 @@ const {
 const { resolvedComponent } = useResolvedFieldComponent({
   getConfig: () => props.config,
   runtimeContext,
+  bindingContext,
   fieldContext,
   resolvedHint,
   hintMode,

@@ -1,6 +1,7 @@
 import { computed, inject } from 'vue'
 import type {
   FormItemConfig,
+  FormTableFieldBindingContext,
   FormTableFieldContext,
   FormTableHintContext,
   FormTableRowPatch,
@@ -86,11 +87,35 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
   })
 
   /**
+   * 组件 Props 可读取复合绑定值，但不获得任何更新助手。
+   * bindingValue 按当前响应式周期惰性求值一次，供 Props、渲染器和完整字段上下文复用。
+   */
+  const bindingContext = computed<FormTableFieldBindingContext<TRow>>(() => {
+    const context = runtimeContext.value
+    const targetRow = context.row as TRow
+    const binding = options.getConfig().binding
+    let hasResolvedBindingValue = false
+    let resolvedBindingValue: FormTableValue
+
+    return extendLazyContext(context, {
+      get bindingValue() {
+        if (!hasResolvedBindingValue) {
+          resolvedBindingValue = binding
+            ? resolveBindingValue(targetRow, binding)
+            : context.value
+          hasResolvedBindingValue = true
+        }
+        return resolvedBindingValue
+      }
+    })
+  })
+
+  /**
    * 每次上下文重建时把当前行引用和 fieldKey 固化进更新闭包。
    * 业务代码保存旧 context 后再调用 setValue，仍只会尝试更新原行和原字段。
    */
   const fieldContext = computed<FormTableFieldContext<TRow>>(() => {
-    const context = runtimeContext.value
+    const context = bindingContext.value
     const targetRow = context.row as TRow
     const targetFieldKey = context.fieldKey
     const binding = options.getConfig().binding
@@ -101,9 +126,6 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
     )
     return extendLazyContext(context, {
       setValue,
-      get bindingValue() {
-        return binding ? resolveBindingValue(targetRow, binding) : context.value
-      },
       setBindingValue: (nextValue: FormTableValue) => {
         if (!binding) {
           setValue(nextValue)
@@ -123,6 +145,7 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
     hintMode,
     hintTrigger,
     resolvedFormItemProps,
+    bindingContext,
     fieldContext
   }
 }

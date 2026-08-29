@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
-import type { FieldTypeRegistry, FormTableFieldRenderContext } from '../types.public'
+import type {
+  FieldTypeRegistry,
+  FormTableFieldBindingContext,
+  FormTableFieldRenderContext
+} from '../types.public'
 import { mountFormTable } from './test-utils'
 
 const createButtonField = (
@@ -62,8 +66,13 @@ describe('FormTable custom field types', () => {
       'user-confirm',
       { id: 'user-2', name: 'Bob' }
     )
-    const defaultProps = vi.fn(() => ({ size: 'small', marker: 'default' }))
-    const itemProps = vi.fn(() => ({ marker: 'item' }))
+    const defaultProps = vi.fn((context: FormTableFieldBindingContext) => ({
+      size: 'small',
+      marker: `default-${String(context.bindingValue)}`
+    }))
+    const itemProps = vi.fn((context: FormTableFieldBindingContext) => ({
+      marker: `item-${String(context.bindingValue)}`
+    }))
     const wrapper = mountFormTable({
       tableData: [{ employeeId: 'user-1' }],
       fieldTypes: {
@@ -95,7 +104,7 @@ describe('FormTable custom field types', () => {
     const field = wrapper.find('.registered-employee')
     expect(field.attributes('data-value')).toBe(JSON.stringify({ id: 'user-1', source: 'row' }))
     expect(field.attributes('data-size')).toBe('small')
-    expect(field.attributes('data-marker')).toBe('item')
+    expect(field.attributes('data-marker')).toBe('item-user-1')
     await field.trigger('click')
 
     expect(wrapper.emitted('update:tableData')?.[0]?.[0]).toEqual([{ employeeId: 'user-2' }])
@@ -105,6 +114,9 @@ describe('FormTable custom field types', () => {
     ])
     expect(defaultProps).toHaveBeenCalledTimes(1)
     expect(itemProps).toHaveBeenCalledTimes(1)
+    expect(defaultProps.mock.calls[0][0].bindingValue).toBe('user-1')
+    expect(itemProps.mock.calls[0][0].bindingValue).toBe('user-1')
+    expect(Object.keys(defaultProps.mock.calls[0][0])).not.toContain('updateRow')
     expect(valueToProp).toHaveBeenCalledWith(
       expect.objectContaining({ fieldKey: 'employeeId', value: 'user-1' }),
       'user-1'
