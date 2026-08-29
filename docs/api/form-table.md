@@ -11,6 +11,7 @@
 | `formProps` | `FormTableFormProps` | 可选 | `{}` | 透传给 `el-form`；不接受内部管理的 `model` |
 | `tableProps` | `FormTableTableProps` | 可选 | `{}` | 透传给 `el-table`；不接受内部管理的 `data/rowKey` |
 | `hintOptions` | `FormTableHintOptions<TRow>` | 可选 | `{ mode: 'title', targets: 'field' }` | 整表 Hint 展示策略、作用范围及字段统一格式化 |
+| `navigationOptions` | `FormTableNavigationOptions` | 可选 | —（关闭） | 启用 Enter/Shift+Enter 已挂载字段导航；`enabled: false` 可临时关闭 |
 | `loading` | `boolean` | 可选 | `false` | `el-table` 的 `v-loading` |
 
 `tableData` 和 `columns` 在公开 `FormTableProps` 类型中是必填项；组件仍提供空数组作为运行时容错默认值。TypeScript 项目应显式传入两者，不依赖运行时默认值。
@@ -20,6 +21,8 @@
 `mode` 支持 `false/'title'/'tooltip'`：关闭、原生 `title` 或整表共享单个 Element Tooltip。`targets` 支持 `field/header/all`，默认仅字段；被排除的目标不会求值。`tooltipProps` 只在 Tooltip 模式生效。
 
 `field` 可配置 `boolean | FormTableFieldHintFormatter`：未配置或 `false` 表示无全局字段处理，`true` 对非空字段值执行 `String(value)`，函数统一格式化。Item 不写、返回 `null` 或空字符串时继承，`false` 关闭，非空字符串覆盖。表头不继承字段默认值，必须显式配置 `headerHint`。完整行为见 [Hint 提示体系](../features/hint.md)。
+
+`navigationOptions` 未配置时不改变任何键盘行为；传入对象后启用 Enter 前进和 Shift+Enter 后退，顺序跟随当前排序、筛选和显隐后的 DOM。Textarea、组合输入和带修饰键的 Enter 保持原组件行为。完整规则见 [Enter 字段导航](../features/keyboard-navigation.md)。
 
 ## 受控数据
 

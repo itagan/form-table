@@ -30,6 +30,7 @@
         :table-data="tableData"
         :columns="columns"
         :form-props="{ size: 'small' }"
+        :navigation-options="{ enabled: true }"
         row-key="_rowKey"
         :table-props="{ border: true }"
         @update:tableData="replaceTableData"
@@ -83,6 +84,7 @@
           <li>删除先确认，再按稳定 <code>_rowKey</code> 删除。</li>
           <li>工具栏在末尾新增；操作列可在当前行后插入或复制。</li>
           <li>列显隐和换序通过重新生成 <code>columns</code> 完成。</li>
+          <li>启用键盘导航后，Enter/Shift+Enter 按当前显示顺序切换可编辑字段。</li>
           <li>selection 只保存稳定行 ID；批量字段修改通过 Ref <code>updateRows</code> 原子提交。</li>
           <li>批量删除确认后按稳定 ID 集合过滤，并同步清理草稿与校验状态。</li>
         </ul>

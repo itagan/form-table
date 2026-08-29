@@ -18,8 +18,8 @@ const FOCUSABLE_SELECTOR = [
   'textarea:not([disabled]):not([readonly])',
   'select:not([disabled])',
   'button:not([disabled])',
-  '[contenteditable="true"]',
-  '[tabindex]:not([tabindex="-1"])'
+  '[contenteditable="true"]:not([aria-disabled="true"])',
+  '[tabindex]:not([tabindex="-1"]):not([aria-disabled="true"])'
 ].join(',')
 
 interface FormTableFieldLocatorOptions<TRow extends TableRow> {
@@ -71,9 +71,12 @@ export function useFormTableFieldLocator<TRow extends TableRow = TableRow>(
     return `tableData.${rowIndex}.${fieldKey}`
   }
 
-  const getMountedFields = () => Array.from(
-    options.containerRef.value?.querySelectorAll<HTMLElement>(`[${FORM_TABLE_FIELD_PROP_ATTRIBUTE}]`) || []
-  )
+  const getMountedFields = () => {
+    const container = options.containerRef.value
+    if (!container) return []
+    return Array.from(container.querySelectorAll<HTMLElement>(`[${FORM_TABLE_FIELD_PROP_ATTRIBUTE}]`))
+      .filter(element => element.closest('[data-form-table-hint-root]') === container)
+  }
 
   const findFieldElementByProp = (propPath: string) => getMountedFields().find(
     element => element.getAttribute(FORM_TABLE_FIELD_PROP_ATTRIBUTE) === propPath

@@ -32,6 +32,7 @@ import FormTable, {
   type FormTableHintTrigger,
   type FormTableHintTargets,
   type FormTableHintOptions,
+  type FormTableNavigationOptions,
   type FormTableProps,
   type FormTableRowPatch,
   type FormTableRowUpdate,
@@ -475,10 +476,12 @@ const TypedFormTable = createFormTable<PurchaseRow>()
 const typedComponent: Component = TypedFormTable
 void typedComponent
 type TypedFormTableProps = InstanceType<typeof TypedFormTable>['$props']
+const typedNavigationOptions: FormTableNavigationOptions = { enabled: true }
 const typedComponentProps: TypedFormTableProps = {
   tableData: [{ name: '采购单', amount: 10 }],
   columns: typedColumns,
-  rowKey: row => row.amount
+  rowKey: row => row.amount,
+  navigationOptions: typedNavigationOptions
 }
 if (typeof typedComponentProps.rowKey === 'function') {
   typedComponentProps.rowKey({ name: '采购单', amount: 10 })
