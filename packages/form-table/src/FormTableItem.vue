@@ -1,5 +1,8 @@
 <template>
-  <el-form-item v-bind="resolvedFormItemProps">
+  <el-form-item
+    v-bind="resolvedFormItemProps"
+    :data-form-table-field-prop="propPath"
+  >
     <template v-if="labelSlotFn && hasLabelSlot()" v-slot:label>
       <SlotRenderer
         :slot-fn="labelSlotFn"

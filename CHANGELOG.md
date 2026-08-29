@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- FormTable Ref 新增按业务行定位字段、单字段校验与清理、字段聚焦和首个错误定位方法。
+
 ## 1.1.0 - 2026-08-29
 
 ### Added

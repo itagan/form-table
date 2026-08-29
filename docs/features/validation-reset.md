@@ -48,6 +48,16 @@ if (valid) {
 
 ## 校验单个字段
 
+业务代码优先通过当前行和字段路径调用 FormTable Ref：
+
+```ts
+const valid = await formTableRef.value?.validateField(row, 'profile.phone')
+```
+
+配置稳定 `rowKey` 后，即使 `row` 是数据刷新或重排前保存的旧引用，FormTable 也会按身份定位最新行。字段隐藏、被筛选或尚未挂载时返回 `false`。
+
+字段 Slot 仍可以直接使用 scope 中的完整 `propPath` 调用 Element 原生方法：
+
 字段 Slot 可以直接使用 scope 中的 `propPath`：
 
 ```vue
@@ -127,10 +137,23 @@ formItemProps: ({ row }) => ({
 | 需求 | 方法 |
 | --- | --- |
 | 提交前校验全部字段 | `await validate()` |
-| 校验某个动态字段 | `getFormRef().validateField(propPath)` |
+| 按业务行校验某个动态字段 | `await validateField(row, fieldKey)` |
+| 已持有完整 Element 路径 | `getFormRef().validateField(propPath)` |
 | 行变化后清除旧错误 | `clearValidate()` |
 | 完全使用 Element 原生重置 | `getFormRef().resetFields()`（绕过受控协议） |
 | 按业务初始数据重置 | 替换 `tableData` 后调用 `clearValidate()` |
+
+## 聚焦和首个错误字段
+
+```ts
+await formTableRef.value?.focusField(row, 'profile.phone')
+
+if (!await formTableRef.value?.validate()) {
+  await formTableRef.value?.scrollToFirstError()
+}
+```
+
+`focusField` 优先聚焦 FormItem 内首个未禁用、非只读的输入控件、按钮或可聚焦自定义组件。`scrollToFirstError` 使用当前 DOM 中第一个错误 FormItem；分页、筛选或动态显隐导致未挂载的字段不在其处理范围内。
 
 ## 相关 API
 

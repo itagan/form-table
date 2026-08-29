@@ -68,7 +68,7 @@ const columns: ColumnConfig[] = defineFormTableColumns([{
 </FormTable>
 ```
 
-根组件 `v-model` 使用 `tableData/update:tableData`；`:table-data.sync` 仍兼容。字段输入和 Slot 更新助手均进行不可变写回。Table 原生事件直接透传，通过 ref 可调用 `validate()`、`clearValidate()`、`getFormRef()` 和 `getTableRef()`。
+根组件 `v-model` 使用 `tableData/update:tableData`；`:table-data.sync` 仍兼容。字段输入和 Slot 更新助手均进行不可变写回。Table 原生事件直接透传，通过 ref 可调用整表或单字段校验、字段聚焦、首错定位，以及获取底层 Form/Table 实例。
 
 ## Element Table 事件与根级 Slot
 

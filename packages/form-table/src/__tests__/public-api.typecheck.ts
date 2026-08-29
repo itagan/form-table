@@ -524,6 +524,15 @@ const typedFormRef = typedFormTableInstance.getFormRef()
 typedFormRef?.resetFields()
 typedFormRef?.validateField('tableData.0.amount', () => undefined)
 void typedFormRef?.model
+const typedTargetRow = typedComponentProps.tableData![0]
+const typedFieldProp: string | undefined = typedFormTableInstance.getFieldProp(typedTargetRow, 'amount')
+const typedFieldValid: Promise<boolean> = typedFormTableInstance.validateField(typedTargetRow, 'amount')
+typedFormTableInstance.clearFieldValidate(typedTargetRow, 'amount')
+const typedFieldFocused: Promise<boolean> = typedFormTableInstance.focusField(typedTargetRow, 'amount')
+const typedFirstErrorFocused: Promise<boolean> = typedFormTableInstance.scrollToFirstError()
+void [typedFieldProp, typedFieldValid, typedFieldFocused, typedFirstErrorFocused]
+// @ts-expect-error field target rows preserve the business row type.
+typedFormTableInstance.focusField({ name: '缺少金额' }, 'amount')
 const elementColumn: FormTableElementColumn = {
   id: 'el-table_1_column_1',
   columnKey: 'amount-column',
@@ -883,6 +892,12 @@ const named: Component = NamedFormTable
 async function useExpose(expose: FormTableExpose) {
   await expose.validate()
   expose.clearValidate()
+  const row = { id: 'default-row' }
+  void expose.getFieldProp(row, 'name')
+  await expose.validateField(row, 'name')
+  expose.clearFieldValidate(row, 'name')
+  await expose.focusField(row, 'name')
+  await expose.scrollToFirstError()
   return expose.getTableRef()
 }
 

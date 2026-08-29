@@ -66,6 +66,12 @@ void typedProps
 
 declare const typedInstance: InstanceType<typeof TypedFormTable>
 const exposed: FormTableExpose<PurchaseRow> = typedInstance
+const targetRow: PurchaseRow = { id: 'purchase-1', name: '采购单', amount: 10 }
+void exposed.getFieldProp(targetRow, 'amount')
+void exposed.validateField(targetRow, 'amount')
+exposed.clearFieldValidate(targetRow, 'amount')
+void exposed.focusField(targetRow, 'amount')
+void exposed.scrollToFirstError()
 typedInstance.$emit('update:tableData', typedProps.tableData || [])
 typedInstance.$emit('field-change', {
   row: typedProps.tableData![0],
