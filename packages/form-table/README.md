@@ -25,7 +25,7 @@ yarn add @itagan/form-table@latest
 - Element UI `>=2.4.9 <3.0.0`
 - 推荐 Vue `2.7.16` + Element UI `2.15.14`
 
-Vue 3 和 Element Plus 暂不支持。完整兼容说明见[快速开始](https://gitee.com/itagan/form-table/blob/master/docs/guide/quick-start.md)。
+Vue 3 和 Element Plus 暂不支持。完整兼容说明见[快速开始](https://github.com/itagan/form-table/blob/master/docs/guide/quick-start.md)。
 
 ## 样式入口
 
@@ -37,9 +37,9 @@ import '@itagan/form-table/style.css'
 import './form-table-overrides.css'
 ```
 
-FormTable 样式只负责多字段换行、表格内 FormItem 间距，以及内置 `number/date/time/time-select` 的列宽适配，不包含 Element UI 主题、颜色、字体或全局 reset。业务可以在后加载的 CSS 中覆盖稳定类，也可以通过 `rowProps.style/formItemProps.style/component.props.style` 进行局部覆盖。完整边界见[样式加载与覆盖](https://gitee.com/itagan/form-table/blob/master/docs/architecture/style-loading.md)。
+FormTable 样式只负责多字段换行、表格内 FormItem 间距，以及内置 `number/date/time/time-select` 的列宽适配，不包含 Element UI 主题、颜色、字体或全局 reset。业务可以在后加载的 CSS 中覆盖稳定类，也可以通过 `rowProps.style/formItemProps.style/component.props.style` 进行局部覆盖。完整边界见[样式加载与覆盖](https://github.com/itagan/form-table/blob/master/docs/architecture/style-loading.md)。
 
-需要精确调整单元格内 `el-row`、`el-col`、`el-form-item` 或实际字段组件时，分别使用 `rowProps`、`colProps`、`formItemProps` 和 `component.props`。class/style、自定义组件根节点及 scoped CSS 示例见[样式定位与属性透传](https://gitee.com/itagan/form-table/blob/master/docs/features/style-props.md)。
+需要精确调整单元格内 `el-row`、`el-col`、`el-form-item` 或实际字段组件时，分别使用 `rowProps`、`colProps`、`formItemProps` 和 `component.props`。class/style、自定义组件根节点及 scoped CSS 示例见[样式定位与属性透传](https://github.com/itagan/form-table/blob/master/docs/features/style-props.md)。
 
 ## 最小示例
 
@@ -111,7 +111,7 @@ const updated = formTableRef.value?.updateRows(
 )
 ```
 
-完整规则见[数据更新与受控回写](https://gitee.com/itagan/form-table/blob/master/docs/features/data-updates.md)、[校验、清理与重置](https://gitee.com/itagan/form-table/blob/master/docs/features/validation-reset.md)和[Enter 字段导航](https://gitee.com/itagan/form-table/blob/master/docs/features/keyboard-navigation.md)。批量修改及键盘导航的可运行实现见[行列操作 Playground 源码](https://gitee.com/itagan/form-table/blob/master/playground/src/views/RowColumnOperationsView.vue)。
+完整规则见[数据更新与受控回写](https://github.com/itagan/form-table/blob/master/docs/features/data-updates.md)、[校验、清理与重置](https://github.com/itagan/form-table/blob/master/docs/features/validation-reset.md)和[Enter 字段导航](https://github.com/itagan/form-table/blob/master/docs/features/keyboard-navigation.md)。批量修改及键盘导航的可运行实现见[行列操作 Playground 源码](https://github.com/itagan/form-table/blob/master/playground/src/views/RowColumnOperationsView.vue)。
 
 ## Element Table 事件与根级 Slot
 
@@ -140,25 +140,25 @@ function handleFilterChange(filters: FormTableFilterChangePayload) {
 
 一次性业务组件优先使用 `type: 'component'`，完全自定义字段模板使用 `type: 'slot'`。只有组件、model 和默认 Props 已经在多个页面稳定重复时，才使用实例级自定义 Type；远程 Schema 还需要额外的结构校验和可信前端白名单。
 
-选择顺序、职责边界和高级注册入口见[扩展模型](https://gitee.com/itagan/form-table/blob/master/docs/architecture/extension-model.md)与[自定义字段 Type](https://gitee.com/itagan/form-table/blob/master/docs/features/custom-field-types.md)。
+选择顺序、职责边界和高级注册入口见[扩展模型](https://github.com/itagan/form-table/blob/master/docs/architecture/extension-model.md)与[自定义字段 Type](https://github.com/itagan/form-table/blob/master/docs/features/custom-field-types.md)。
 
 ## 完整文档
 
 详细行为统一维护在 VitePress 文档中：
 
-- [快速开始](https://gitee.com/itagan/form-table/blob/master/docs/guide/quick-start.md)
-- [开发任务导航](https://gitee.com/itagan/form-table/blob/master/docs/guide/development-workflows.md)
-- [完整编辑提交流程](https://gitee.com/itagan/form-table/blob/master/docs/examples/form-workflow.md)
-- [架构总览](https://gitee.com/itagan/form-table/blob/master/docs/architecture/overview.md)
-- [配置与 API 总览](https://gitee.com/itagan/form-table/blob/master/docs/api/configuration.md)
-- [事件与 Ref](https://gitee.com/itagan/form-table/blob/master/docs/api/events-and-ref.md)
-- [公开类型](https://gitee.com/itagan/form-table/blob/master/docs/api/types.md)
-- [数据更新与原子批量更新](https://gitee.com/itagan/form-table/blob/master/docs/features/data-updates.md)
-- [字段校验、定位与聚焦](https://gitee.com/itagan/form-table/blob/master/docs/features/validation-reset.md)
-- [Enter 字段导航](https://gitee.com/itagan/form-table/blob/master/docs/features/keyboard-navigation.md)
-- [自定义字段 Type](https://gitee.com/itagan/form-table/blob/master/docs/features/custom-field-types.md)
-- [功能专题](https://gitee.com/itagan/form-table/blob/master/docs/features/index.md)
-- [示例索引](https://gitee.com/itagan/form-table/blob/master/docs/examples/index.md)
-- [排错指南](https://gitee.com/itagan/form-table/blob/master/docs/guide/troubleshooting.md)
+- [快速开始](https://github.com/itagan/form-table/blob/master/docs/guide/quick-start.md)
+- [开发任务导航](https://github.com/itagan/form-table/blob/master/docs/guide/development-workflows.md)
+- [完整编辑提交流程](https://github.com/itagan/form-table/blob/master/docs/examples/form-workflow.md)
+- [架构总览](https://github.com/itagan/form-table/blob/master/docs/architecture/overview.md)
+- [配置与 API 总览](https://github.com/itagan/form-table/blob/master/docs/api/configuration.md)
+- [事件与 Ref](https://github.com/itagan/form-table/blob/master/docs/api/events-and-ref.md)
+- [公开类型](https://github.com/itagan/form-table/blob/master/docs/api/types.md)
+- [数据更新与原子批量更新](https://github.com/itagan/form-table/blob/master/docs/features/data-updates.md)
+- [字段校验、定位与聚焦](https://github.com/itagan/form-table/blob/master/docs/features/validation-reset.md)
+- [Enter 字段导航](https://github.com/itagan/form-table/blob/master/docs/features/keyboard-navigation.md)
+- [自定义字段 Type](https://github.com/itagan/form-table/blob/master/docs/features/custom-field-types.md)
+- [功能专题](https://github.com/itagan/form-table/blob/master/docs/features/index.md)
+- [示例索引](https://github.com/itagan/form-table/blob/master/docs/examples/index.md)
+- [排错指南](https://github.com/itagan/form-table/blob/master/docs/guide/troubleshooting.md)
 
-仓库开发、测试和发布命令见[根 README](https://gitee.com/itagan/form-table)。
+仓库开发、测试和发布命令见[根 README](https://github.com/itagan/form-table)。

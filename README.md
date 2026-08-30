@@ -6,6 +6,13 @@
 
 组件已作为公开包 [`@itagan/form-table`](https://www.npmjs.com/package/@itagan/form-table) 发布到 npm Registry；业务项目可直接安装，不需要从本仓库复制源码或配置 workspace alias。
 
+## 源码仓库
+
+- GitHub 主仓库：<https://github.com/itagan/form-table>
+- Gitee 国内镜像：<https://gitee.com/itagan/form-table>
+
+两个仓库同步维护；GitHub 用于源码发布和公共协作，Gitee 为国内访问提供镜像。
+
 ## 仓库结构
 
 ```text

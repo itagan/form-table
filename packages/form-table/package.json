@@ -30,12 +30,12 @@
   "author": "itagan",
   "repository": {
     "type": "git",
-    "url": "git+https://gitee.com/itagan/form-table.git",
+    "url": "git+https://github.com/itagan/form-table.git",
     "directory": "packages/form-table"
   },
-  "homepage": "https://gitee.com/itagan/form-table#readme",
+  "homepage": "https://github.com/itagan/form-table#readme",
   "bugs": {
-    "url": "https://gitee.com/itagan/form-table/issues"
+    "url": "https://github.com/itagan/form-table/issues"
   },
   "scripts": {
     "build": "run-s build:lib build:types",
