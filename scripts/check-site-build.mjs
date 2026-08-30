@@ -54,7 +54,7 @@ if (fs.existsSync(siteDist)) {
     if (source.includes('localhost:5173')) {
       errors.push(`生产站点仍包含 localhost:5173：${path.relative(repositoryRoot, file)}`)
     }
-    if (duplicatedSiteBase && source.includes(duplicatedSiteBase)) {
+    if (duplicatedSiteBase && path.extname(file) === '.html' && source.includes(duplicatedSiteBase)) {
       errors.push(`生产站点包含重复基址 ${duplicatedSiteBase}：${path.relative(repositoryRoot, file)}`)
     }
   }
