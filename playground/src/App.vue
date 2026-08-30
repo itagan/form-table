@@ -48,7 +48,11 @@ onBeforeUnmount(() => {
 
 <template>
   <div id="app" class="playground-shell" :class="{ 'navigation-open': navigationOpen }">
-    <aside id="playground-navigation" v-show="navigationOpen" class="playground-sidebar">
+    <aside
+      id="playground-navigation"
+      class="playground-sidebar"
+      :aria-hidden="navigationOpen ? 'false' : 'true'"
+    >
       <PlaygroundNavigation
         :active-path="activePath"
         :docs-site-url="docsSiteUrl"
@@ -57,13 +61,15 @@ onBeforeUnmount(() => {
       />
     </aside>
 
-    <button
-      v-if="isCompact && navigationOpen"
-      class="navigation-backdrop"
-      type="button"
-      aria-label="关闭示例菜单"
-      @click="navigationOpen = false"
-    />
+    <transition name="navigation-backdrop">
+      <button
+        v-if="isCompact && navigationOpen"
+        class="navigation-backdrop"
+        type="button"
+        aria-label="关闭示例菜单"
+        @click="navigationOpen = false"
+      />
+    </transition>
 
     <section class="playground-workspace">
       <header class="workspace-header">
@@ -101,7 +107,7 @@ onBeforeUnmount(() => {
   display: grid;
   grid-template-columns: 0 minmax(0, 1fr);
   min-height: 100vh;
-  transition: grid-template-columns 0.2s ease;
+  transition: grid-template-columns 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .playground-shell.navigation-open {
@@ -115,12 +121,22 @@ onBeforeUnmount(() => {
   width: 280px;
   height: 100vh;
   overflow: hidden;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
   transform: translateX(-100%);
-  transition: transform 0.2s ease;
+  transition:
+    transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.2s ease,
+    visibility 0s linear 0.28s;
 }
 
 .navigation-open .playground-sidebar {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
   transform: translateX(0);
+  transition-delay: 0s;
 }
 
 .playground-workspace {
@@ -184,6 +200,7 @@ onBeforeUnmount(() => {
   border: 1px solid #dbe3ee;
   border-radius: 8px;
   cursor: pointer;
+  transition: color 0.18s ease, border-color 0.18s ease, background-color 0.18s ease;
 }
 
 .navigation-toggle:hover {
@@ -216,6 +233,16 @@ onBeforeUnmount(() => {
 
 .navigation-backdrop {
   display: none;
+}
+
+.navigation-backdrop-enter-active,
+.navigation-backdrop-leave-active {
+  transition: opacity 0.24s ease;
+}
+
+.navigation-backdrop-enter,
+.navigation-backdrop-leave-to {
+  opacity: 0;
 }
 
 @media (max-width: 960px) {
@@ -251,6 +278,15 @@ onBeforeUnmount(() => {
 
   .workspace-title strong {
     margin: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .playground-shell,
+  .playground-sidebar,
+  .navigation-backdrop-enter-active,
+  .navigation-backdrop-leave-active {
+    transition-duration: 0.01ms;
   }
 }
 
