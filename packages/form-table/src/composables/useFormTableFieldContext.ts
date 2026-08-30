@@ -3,21 +3,18 @@ import type {
   FormItemConfig,
   FormTableFieldBindingContext,
   FormTableFieldContext,
-  FormTableHintContext,
   FormTableRowPatch,
   FormTableRowContext,
   FormTableUpdateApi,
   FormTableValue,
   TableRow
 } from '../types'
-import { FORM_TABLE_HINT_CONTEXT_KEY, FORM_TABLE_UPDATE_KEY } from '../types/internal'
+import { FORM_TABLE_UPDATE_KEY } from '../types/internal'
 import {
   createFieldRenderContext,
-  extendLazyContext,
-  resolveDynamicValue
+  extendLazyContext
 } from '../utils/dynamic'
 import { createBindingPatch, resolveBindingValue } from '../utils/binding'
-import { applyHintTargetProps, resolveFormTableFieldHint } from '../utils/hint'
 
 interface FormTableFieldContextOptions<TRow extends TableRow> {
   getRowContext: () => FormTableRowContext<TRow>
@@ -25,66 +22,22 @@ interface FormTableFieldContextOptions<TRow extends TableRow> {
 }
 
 /**
- * 构造单个字段的响应式上下文和 el-form-item 属性。
+ * 构造单个字段的响应式数据与更新上下文。
  *
- * 本组合式 API 只处理“字段位于哪一行、绑定哪个路径、如何写回”三类状态，
- * 不解析实际渲染组件，避免数据更新协议和渲染配置相互耦合。
+ * 只处理“字段位于哪一行、绑定哪个路径、如何写回”，
+ * FormItem 展示和实际渲染组件由独立模块解析。
  */
 export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
   options: FormTableFieldContextOptions<TRow>
 ) {
   /** 注入缺失时字段仍可只读渲染，更新助手退化为空操作。 */
   const updateApi = inject<FormTableUpdateApi<TRow> | undefined>(FORM_TABLE_UPDATE_KEY, undefined)
-  const hintContext = inject<FormTableHintContext<TRow> | undefined>(
-    FORM_TABLE_HINT_CONTEXT_KEY,
-    undefined
-  )
-  const hintMode = hintContext?.mode ?? computed(() => 'title' as const)
-  const hintTargets = hintContext?.targets ?? computed(() => 'field' as const)
-  const defaultFieldHint = hintContext?.defaultFieldHint ?? computed(() => undefined)
-  const hintTrigger = computed(() => options.getConfig().hintTrigger ?? 'item')
-
-  /**
-   * Element UI 以数组下标组织表单校验路径；行排序后 computed 会生成新路径，
-   * 调用方仍应在动态增删行后按文档清理旧校验状态。
-   */
-  const propPath = computed(() => {
-    const rowContext = options.getRowContext()
-    if (rowContext.index < 0) return undefined
-    return `tableData.${rowContext.index}.${options.getConfig().fieldKey}`
-  })
 
   /** 动态配置共享同一个字段渲染上下文，避免各属性分别拼装上下文。 */
   const runtimeContext = computed(() => createFieldRenderContext(
     options.getRowContext(),
     options.getConfig()
   ))
-
-  /** Hint 与其他动态字段配置共享上下文，并只在当前响应式周期求值一次。 */
-  const resolvedHint = computed(() => {
-    if (hintMode.value === false || hintTargets.value === 'header') return null
-    const config = options.getConfig()
-    const defaultHint = defaultFieldHint.value
-    if (config.hint === undefined && !defaultHint) return null
-    const source = resolveDynamicValue(config.hint, runtimeContext.value)
-    return resolveFormTableFieldHint(source, runtimeContext.value, defaultHint)
-  })
-
-  /**
-   * FormTable 始终掌控 form-item 的 prop；自动 Hint 覆盖透传 title，
-   * 自定义托管或未声明 Hint 时保留调用方的原始 formItemProps。
-   */
-  const resolvedFormItemProps = computed(() => {
-    const config = options.getConfig()
-    const formItemProps = resolveDynamicValue(config.formItemProps, runtimeContext.value) || {}
-    return {
-      ...applyHintTargetProps(formItemProps, resolvedHint.value, hintMode.value, {
-        trigger: hintTrigger.value,
-        fieldKey: config.fieldKey
-      }),
-      prop: propPath.value
-    }
-  })
 
   /**
    * 组件 Props 可读取复合绑定值，但不获得任何更新助手。
@@ -139,12 +92,7 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
   })
 
   return {
-    propPath,
     runtimeContext,
-    resolvedHint,
-    hintMode,
-    hintTrigger,
-    resolvedFormItemProps,
     bindingContext,
     fieldContext
   }
