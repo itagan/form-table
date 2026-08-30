@@ -2,8 +2,18 @@
 
 ## Unreleased
 
+## 1.3.0 - 2026-08-30
+
+### Added
+
+- 新增稳定的 `.form-table-form-item` 与 `.form-table-field-control--full` 样式定位标记，方便业务进行局部覆盖。
+- 补充 Row、Col、FormItem 与字段组件的 class/style 定位、动态透传和 scoped CSS 使用指南。
+- 补充宽表通过外部按钮滚动到首列、末列或指定字段的文档与 Playground 示例。
+
 ### Changed
 
+- 将组件布局样式迁移到独立 CSS 源码，继续保留显式 `@itagan/form-table/style.css` 入口、包导出和 CSS sideEffects。
+- 内置 `number/date/time/time-select` 默认填满字段列宽，并保留 `component.props.style` 和业务 class 覆盖能力。
 - 补充 `select` 等非固定宽度内置组件通过 `component.props.style` 或业务 class 铺满字段列的文档。
 
 ## 1.2.0 - 2026-08-29
@@ -17,10 +27,6 @@
 ### Changed
 
 - 串联字段定位、原子批量更新和键盘导航的 README、侧栏、专题、API 与 Playground 文档入口。
-- 将组件布局样式收敛到独立 CSS 源码和稳定类名，并补充加载、覆盖及跨环境边界文档。
-- 补充 Row、Col、FormItem 与字段组件的 class/style 定位、动态透传和 scoped CSS 使用指南。
-- 补充宽表通过外部按钮滚动到首列、末列或指定字段的文档与 Playground 示例。
-- 内置 `number/date/time/time-select` 默认填满字段列宽，并保留 `component.props.style` 覆盖能力。
 
 ## 1.1.0 - 2026-08-29
 
