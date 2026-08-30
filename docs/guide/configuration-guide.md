@@ -1,6 +1,6 @@
 # 完整配置指南
 
-本页用于建立 FormTable 的整体心智模型：先理解布局，再选择渲染方式，最后确定数据更新和业务边界。查询单个属性的类型、默认值和完整路径时，直接使用 [API 总览](../api/configuration.md)。
+本页用于建立 FormTable 的整体心智模型：先理解布局，再选择渲染方式，最后确定数据更新和业务边界。这里保留连续阅读所需的结论和小例子；属性类型、默认值和完整路径以 [API 总览](../api/configuration.md)为准，具体能力的失败边界以对应专题为准。
 
 ## FormTable Props
 
@@ -17,7 +17,7 @@ FormTable 的顶层输入包括：
 
 根组件 `v-model` 映射到 `tableData/update:tableData`。父组件收到更新后必须立即回写本地状态；后端保存可以独立防抖或批量处理。完整协议见 [FormTable Props](../api/form-table.md) 和[数据更新与受控回写](../features/data-updates.md)。
 
-`rowKey` 不是普通编辑的必选项。只有异步期间可能刷新、克隆或替换行对象，或 Element Table 自身需要稳定身份时，才应配置唯一稳定的 rowKey。
+`rowKey` 不是普通编辑的必选项；异步期间会替换行对象或 Element Table 需要稳定身份时再配置。身份约束见[稳定身份与异步安全](../features/stable-identity.md)。
 
 ## 布局
 
@@ -62,7 +62,7 @@ Column 负责表格列及单元格内唯一 Row（默认 `type: 'flex'`，可由
 }
 ```
 
-FormTable 会按当前行在受控 `tableData` 中的数据源下标生成 `tableData.{rowIndex}.{fieldKey}`。Element Table 内部排序或筛选只改变 `displayIndex`，不会让校验路径偏离原行。父组件增删、移动数据后仍应在 `nextTick` 后清理旧校验状态。提交、单字段校验、重置边界见[校验、清理与重置](../features/validation-reset.md)。
+FormTable 会根据当前行在受控 `tableData` 中的位置生成校验路径。排序、增删、移动后的路径与清理时机见[校验、清理与重置](../features/validation-reset.md)。
 
 ## 渲染模式
 
@@ -105,11 +105,11 @@ component: {
 }
 ```
 
-`fallbackValue` 在组件值路径缺失、复合值为空或清除时提供按字段兜底；路径明确存在的 `null/undefined` 仍以组件值为准。`fieldKey` 仍是唯一校验锚点。详细路径、Slot 助手和清空语义见[复合字段映射](../features/composite-binding.md)。
+`fieldKey` 仍是唯一校验锚点；路径、兜底值和清空语义见[复合字段映射](../features/composite-binding.md)。
 
 ### 外层提示模式
 
-默认或 Slot 表头提示使用 `column.headerHint`，字段提示使用 Item `hint`；紧凑组件可用 `hintTrigger: 'content'` 将触发区域收敛到唯一可见内容根节点。`hintOptions.field` 未配置或为 `false` 时无全局字段处理，`true` 默认字符串化，函数统一格式化；Item 不写或返回空值时继承、`false` 关闭、非空字符串覆盖。整张表通过 `hintOptions` 在原生 `title` 和单实例 `tooltip` 之间二选一。完整规则与场景示例见 [Hint 提示体系](../features/hint.md)。
+表头提示使用 `column.headerHint`，字段提示使用 Item `hint`，整张表通过 `hintOptions` 选择原生 `title` 或单实例 Tooltip。继承优先级、触发区域和关闭方式见 [Hint 提示体系](../features/hint.md)。
 
 ### 自定义组件绑定协议
 
@@ -174,10 +174,6 @@ Item   → Row 信息 + fieldKey, value, itemConfig
 
 配置引用和数据按浅只读约定使用。字段数据通过 `setValue/updateRow` 更新，配置通过调用方不可变替换 `columns`。
 
-### 异步更新与稳定行身份
-
-`row/index/value` 是触发时快照。更新助手绑定触发时的数据行；配置稳定 `rowKey` 后，异步结束时会在最新数据中重新定位。目标行已删除或身份不唯一时忽略更新。详见[稳定身份与异步安全](../features/stable-identity.md)。
-
 ### 各回调上下文速查
 
 | 入口 | 读取数据 | 更新能力 |
@@ -189,7 +185,7 @@ Item   → Row 信息 + fieldKey, value, itemConfig
 | 字段 Slot | Item 全部数据与已解析组件 | `setValue/updateRow` |
 | `cellSlot` | `row/index/displayIndex/columnConfig` | `updateRow` |
 
-完整类型和快照语义见 [Slot 与上下文](../api/contexts.md)及[事件与 Ref](../api/events-and-ref.md)。
+完整类型和快照语义见 [Slot 与上下文](../api/contexts.md)，异步更新的行定位规则见[稳定身份与异步安全](../features/stable-identity.md)。
 
 ### 实际回传数据示例
 

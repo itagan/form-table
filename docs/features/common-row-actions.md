@@ -2,7 +2,9 @@
 
 > 可运行 Demo：[打开行列操作示例 ↗](http://localhost:5173/row-column-operations)
 
-新增、插入、复制和删除会改变整张表的数据结构，应由页面直接替换受控的 `tableData`。操作按钮不对应字段值，也不参与校验，推荐使用列级 [`cellSlot`](./cell-slot.md)，不需要为操作列虚构 `fieldKey`。
+本页只处理同步的新增、插入、复制和删除。它们会改变整张表的数据结构，应由页面直接替换受控的 `tableData`。操作按钮不对应字段值，也不参与校验，推荐使用列级 [`cellSlot`](./cell-slot.md)，不需要为操作列虚构 `fieldKey`。
+
+涉及确认、接口、批量更新或请求竞争时，转到[行列操作与异步提交](./row-column-operations.md)。
 
 ## 完整示例
 
