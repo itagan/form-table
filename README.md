@@ -36,6 +36,8 @@ pnpm install
 pnpm dev
 pnpm site:dev
 pnpm site:build
+pnpm site:build:github
+pnpm site:check:github
 pnpm site:preview
 pnpm lint
 pnpm type-check
@@ -52,6 +54,8 @@ pnpm release:check
 - `pnpm dev`：启动 `playground`，用于本地调试组件。
 - `pnpm site:dev`：同时启动 Playground 与文档站，保持两个 Vue 运行时隔离。
 - `pnpm site:build`：构建单个可部署目录，文档位于 `/`，Playground 位于 `/playground/`。
+- `pnpm site:build:github`：按 GitHub Pages 的 `/form-table/` 子路径构建文档和 Playground。
+- `pnpm site:check:github`：校验 GitHub Pages 构建的资源和页面路径。
 - `pnpm site:preview`：预览 `pnpm site:build` 生成的统一站点。
 - `pnpm lint`：检查组件包和 playground 的 TypeScript/Vue 代码规范。
 - `pnpm type-check`：检查组件包和 playground。
@@ -90,6 +94,7 @@ pnpm add @itagan/form-table@latest
 - [更新记录](./CHANGELOG.md)
 - [组件包说明](./packages/form-table/README.md)
 - [维护与发布](./docs/migration/npm-package.md)
+- [GitHub Pages 部署](./docs/migration/github-pages.md)
 
 ## 发布前检查
 

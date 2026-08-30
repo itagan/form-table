@@ -5,6 +5,10 @@ import process from 'node:process'
 const repositoryRoot = process.cwd()
 const siteDist = path.join(repositoryRoot, 'docs/.vitepress/dist')
 const playgroundDist = path.join(siteDist, 'playground')
+const rawSiteBase = process.env.VITE_SITE_BASE || '/'
+const sitePath = rawSiteBase.replace(/^\/+|\/+$/g, '')
+const siteBase = sitePath ? `/${sitePath}/` : '/'
+const playgroundBase = `${siteBase}playground/`
 const examples = JSON.parse(
   fs.readFileSync(path.join(repositoryRoot, 'playground/examples.json'), 'utf8')
 )
@@ -52,13 +56,18 @@ if (fs.existsSync(siteDist)) {
 
 if (fs.existsSync(path.join(siteDist, 'index.html'))) {
   const docsEntry = fs.readFileSync(path.join(siteDist, 'index.html'), 'utf8')
-  if (!docsEntry.includes('/playground/')) errors.push('文档首页缺少 /playground/ 入口。')
+  if (!docsEntry.includes(playgroundBase)) {
+    errors.push(`文档首页缺少 ${playgroundBase} 入口。`)
+  }
+  if (siteBase !== '/' && !docsEntry.includes(`${siteBase}assets/`)) {
+    errors.push(`文档资源没有使用 ${siteBase} 基址。`)
+  }
 }
 
 if (fs.existsSync(path.join(playgroundDist, 'index.html'))) {
   const playgroundEntry = fs.readFileSync(path.join(playgroundDist, 'index.html'), 'utf8')
-  if (!playgroundEntry.includes('/playground/assets/')) {
-    errors.push('Playground 资源没有使用 /playground/ 基址。')
+  if (!playgroundEntry.includes(`${playgroundBase}assets/`)) {
+    errors.push(`Playground 资源没有使用 ${playgroundBase} 基址。`)
   }
 }
 
