@@ -181,3 +181,5 @@ component: {
 - 字段使用 `type: 'slot'` 时，FormTable 不创建实际字段组件；应在 Slot 模板中自行绑定 class、style 和解析后的 `component.props`。
 
 全局样式文件、加载顺序、稳定类名和 SSR/UMD 边界见[样式加载与覆盖契约](../architecture/style-loading.md)。完整类型和动态上下文见 [Column / Item](../api/columns.md) 与 [Component 配置](../api/component.md)。
+
+业务 class 除了用于 CSS，也可以作为宽表的稳定定位标记。外部按钮控制首尾或指定字段滚动的完整示例见[宽表横向滚动与字段定位](./horizontal-scroll.md)。

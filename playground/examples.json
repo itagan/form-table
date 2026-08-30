@@ -56,6 +56,20 @@
     "tags": ["NativeColumnConfig", "sort-change", "filter-change", "empty", "append"]
   },
   {
+    "title": "宽表横向定位",
+    "description": "演示通过外部按钮把宽表滚动到首列、末列或指定业务字段。",
+    "path": "/horizontal-scroll",
+    "name": "horizontal-scroll",
+    "view": "HorizontalScrollView",
+    "category": "basics",
+    "level": "beginner",
+    "status": "example",
+    "relatedDocs": ["/features/horizontal-scroll", "/features/style-props", "/api/events-and-ref"],
+    "source": "playground/src/views/HorizontalScrollView.vue",
+    "type": "primary",
+    "tags": ["horizontal scroll", "getTableRef", "colProps.class"]
+  },
+  {
     "title": "cellSlot 列级单元格",
     "description": "演示多字段 text 详情、字段 Slot、派生展示 cellSlot，以及详情与编辑模式切换。",
     "path": "/cell-slot",

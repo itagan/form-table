@@ -19,8 +19,9 @@ Playground 直接引用组件源码。示例名称、路由、分类、难度、
 | --- | --- | --- |
 | [基础编辑 ↗](http://localhost:5173/form-table) | 基础 | `formItems`、内置 Type、校验和受控数据 |
 | [Element 功能列透传 ↗](http://localhost:5173/element-columns) | 基础 | selection、index、expand、排序筛选事件及根级 Slot |
+| [宽表横向定位 ↗](http://localhost:5173/horizontal-scroll) | 基础 | 外部按钮滚动到首列、末列或指定业务字段 |
 
-完成这两页后，应能够建立普通表格表单并使用 Element Table 原生能力。
+完成这些页面后，应能够建立普通表格表单、使用 Element Table 原生能力并处理宽表导航。
 
 ## 常用渲染扩展
 

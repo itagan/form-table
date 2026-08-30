@@ -89,6 +89,7 @@ export default defineConfig({
               { text: '校验、清理与重置', link: '/features/validation-reset' },
               { text: 'Enter 字段导航', link: '/features/keyboard-navigation' },
               { text: '样式定位与属性透传', link: '/features/style-props' },
+              { text: '宽表横向滚动与定位', link: '/features/horizontal-scroll' },
               { text: '动态显隐与配置更新', link: '/features/dynamic-configuration' },
               { text: '详情与编辑模式', link: '/features/detail-and-editing-modes' },
               { text: '权限与字段可编辑性', link: '/features/permissions-and-editing' },
