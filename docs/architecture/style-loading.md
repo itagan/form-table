@@ -10,6 +10,21 @@ import './form-table-overrides.css'
 
 整个应用只需引入一次。顺序固定为 Element UI → FormTable → 业务覆盖，避免依赖打包工具隐式调整 CSS 副作用。
 
+Element UI 使用 CDN 时，可以先在 HTML 中加载它的主题，再在实际使用 FormTable 的页面组件脚本中按需引入组件 CSS：
+
+```html
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+```
+
+```vue
+<script setup lang="ts">
+import FormTable from '@itagan/form-table'
+import '@itagan/form-table/style.css'
+</script>
+```
+
+这里写在 `<script>` 中的是构建期 CSS import，仍会生成样式资源。不要把包样式放进 `<style scoped>`，否则 scoped 选择器可能改变第三方样式的匹配范围；完全无构建工具的 CDN 页面则使用第二个 `<link>` 加载 FormTable CSS。
+
 ## 当前包含的样式
 
 `style.css` 只修正 FormTable 自身布局，不包含 Element UI 主题、颜色、字体或全局 reset：
@@ -55,6 +70,8 @@ import './form-table-overrides.css'
 ```
 
 调用方的 class 会与 FormTable 稳定类名合并，不会替换内部标记。
+
+需要进一步区分 `el-row`、`el-col`、`el-form-item` 和实际字段组件时，使用对应的 `rowProps/colProps/formItemProps/component.props`，参见[样式定位与属性透传](../features/style-props.md)。
 
 ## 构建与运行时边界
 
