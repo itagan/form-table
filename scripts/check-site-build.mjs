@@ -57,6 +57,18 @@ if (fs.existsSync(siteDist)) {
     if (duplicatedSiteBase && path.extname(file) === '.html' && source.includes(duplicatedSiteBase)) {
       errors.push(`生产站点包含重复基址 ${duplicatedSiteBase}：${path.relative(repositoryRoot, file)}`)
     }
+    if (path.extname(file) === '.html') {
+      const playgroundLinks = (source.match(/<a\b[^>]*>/g) || [])
+        .filter(tag => /href="[^"]*\/playground(?:\/|")/.test(tag))
+      if (playgroundLinks.some(tag => (
+        !tag.includes(`href="${playgroundBase}`)
+        || !tag.includes('target="_self"')
+      ))) {
+        errors.push(
+          `文档中的 Playground 链接基址错误或可能被 VitePress 路由拦截：${path.relative(repositoryRoot, file)}`
+        )
+      }
+    }
   }
 }
 
