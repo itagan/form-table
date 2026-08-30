@@ -115,9 +115,8 @@ if (fs.existsSync(playgroundAssets)) {
       path.join(playgroundAssets, playgroundAppEntry),
       'utf8'
     )
-    const docsSiteUrlIndex = playgroundAppSource.indexOf('docsSiteUrl:')
-    const docsSiteUrlSource = playgroundAppSource.slice(docsSiteUrlIndex, docsSiteUrlIndex + 160)
-    if (!docsSiteUrlSource.includes(JSON.stringify(siteBase))) {
+    const compiledDocsFallback = `VITE_DOCS_SITE_URL||${JSON.stringify(siteBase)}`
+    if (!playgroundAppSource.includes(compiledDocsFallback)) {
       errors.push(`Playground 返回文档总站的地址没有使用 ${siteBase} 基址。`)
     }
   }
