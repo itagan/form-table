@@ -40,6 +40,7 @@ import { computed, inject } from 'vue'
 import FieldRenderer from './FieldRenderer'
 import SlotRenderer from './SlotRenderer'
 import { useFormTableFieldContext } from './composables/useFormTableFieldContext'
+import { useFormTableFieldPresentation } from './composables/useFormTableFieldPresentation'
 import { useResolvedFieldComponent } from './composables/useResolvedFieldComponent'
 import type {
   FormItemConfig,
@@ -88,17 +89,25 @@ const hasErrorSlot = () => Boolean(
 
 /** 字段定位、校验路径和安全写回由上下文组合式 API 统一维护。 */
 const {
-  propPath,
   runtimeContext,
-  resolvedHint,
-  hintMode,
-  hintTrigger,
-  resolvedFormItemProps,
   bindingContext,
   fieldContext
 } = useFormTableFieldContext({
   getRowContext: () => props.rowContext,
   getConfig: () => props.config
+})
+
+/** FormItem 校验路径、Hint 和透传属性与字段数据更新分开解析。 */
+const {
+  propPath,
+  resolvedHint,
+  hintMode,
+  hintTrigger,
+  resolvedFormItemProps
+} = useFormTableFieldPresentation({
+  getRowContext: () => props.rowContext,
+  getConfig: () => props.config,
+  runtimeContext
 })
 
 /** 组件选择、动态属性、选项和监听器统一归一化后再交给无实例渲染层。 */
