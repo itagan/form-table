@@ -47,7 +47,7 @@ columns[].formItems[].component
 
 `component.props` 中的普通键按实际组件 Prop/attribute 透传；`class/style` 会按 Vue 2 VNode 原生语义应用到实际组件根节点，不会作为同名普通业务 Prop 传入，也不会影响 model、其他 Props 或 listeners。需要控制自定义组件内部节点时，请为组件设计 `panelClass/contentStyle` 等明确 Prop。完整示例和 scoped CSS 边界见[样式定位与属性透传](../features/style-props.md)。
 
-Element UI 自带固定像素宽度的内置 `number/date/time/time-select` 在 FormTable 中默认宽度为 `100%`；其他 Type 不参与宽度重置。需要固定宽度时通过 `component.props.style.width` 覆盖。
+Element UI 自带固定像素宽度的内置 `number/date/time/time-select` 在 FormTable 中默认宽度为 `100%`；其他 Type 不参与宽度重置。需要固定宽度时通过 `component.props.style.width` 覆盖。`select` 等其他组件需要铺满字段列时，同样可设置 `component.props.style: { width: '100%' }`；`el-select--small` 仅表示尺寸规格，不表示固定宽度。完整示例见[样式定位与属性透传](../features/style-props.md#select-等其他控件需要铺满列宽)。
 
 `type: 'component'` 和注册的自定义 Type 在 TypeScript 配置中不接受 `component.options/optionProps`。FormTable 不知道业务组件采用 Prop、Slot、远程加载还是其他选项协议，也不会把同级 `options` 自动注入实际组件；JavaScript 绕过类型传入时该配置同样不会生效。需要组件接收选项数组时使用 `component.props.options`。字段 Slot 不创建实际组件，但会在 Slot 上下文的 `component.options/optionProps` 中暴露动态解析结果，供模板自行渲染。
 

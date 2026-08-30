@@ -164,6 +164,45 @@ Element UI 为 InputNumber 和 DateEditor 系列声明了固定像素宽度。Fo
 
 调用方 class 会与 `.form-table-field-control--full` 合并，不会替换内部标记。
 
+### Select 等其他控件需要铺满列宽
+
+`select` 不属于上述固定像素宽度组件。渲染后的 `el-select el-select--small` 中，`el-select--small` 只表示 Element UI 的尺寸规格，不表示 FormTable 或 Element UI 为它设置了固定宽度，因此 FormTable 不会自动重置它。
+
+只有一个字段需要铺满时，直接通过 `component.props.style` 将内联样式应用到实际的 `el-select` 根节点：
+
+```ts
+{
+  fieldKey: 'status',
+  type: 'select',
+  component: {
+    props: {
+      size: 'small',
+      clearable: true,
+      style: { width: '100%' }
+    },
+    options: statusOptions
+  }
+}
+```
+
+这不会影响 `size`、`clearable`、model 或其他组件参数。宽度需要在多个字段间复用时，改用业务 class：
+
+```ts
+component: {
+  props: {
+    class: 'order-status-select'
+  }
+}
+```
+
+```css
+.order-page .order-status-select {
+  width: 100%;
+}
+```
+
+业务样式应在 Element UI 和 FormTable 样式之后加载。页面使用 `<style scoped>` 时，内部渲染节点需要配合 `:deep(.order-status-select)`；单字段内联 `style` 不受 scoped CSS 影响。相同方式也适用于未被 FormTable 重置宽度的其他内置 Type、自定义组件根节点。
+
 ## scoped 样式为什么可能匹配不到
 
 `rowProps/colProps/formItemProps` 添加的节点由 FormTable 内部渲染。调用页面的 `<style scoped>` 会附加页面自己的 scope 属性，普通选择器不一定能进入这些内部节点。
