@@ -34,6 +34,11 @@ import {
   resolveVisible
 } from './utils/dynamic'
 
+interface VisibleFormTableItem {
+  config: FormItemConfig
+  colProps: Record<string, unknown>
+}
+
 /** 当前数据行、扁平字段列表以及上级已解析的列上下文。 */
 const props = defineProps<{
   row: TableRow
@@ -58,14 +63,12 @@ const resolvedRowProps = computed(() => ({
   ...(resolveDynamicValue(props.rowProps, rowContext.value) || {})
 }))
 
-// 在一次遍历中完成显隐过滤和栅格属性解析，模板不再重复执行动态回调。
-const visibleItems = computed(() => props.items.reduce<Array<{
-  config: FormItemConfig
-  colProps: Record<string, unknown>
-}>>((items, config) => {
-  const itemContext = createFieldRenderContext(rowContext.value, config)
+const visibleItems = computed(() => {
+  const items: VisibleFormTableItem[] = []
+  for (const config of props.items) {
+    const itemContext = createFieldRenderContext(rowContext.value, config)
+    if (!resolveVisible(config.visible, itemContext)) continue
 
-  if (resolveVisible(config.visible, itemContext)) {
     items.push({
       config,
       colProps: {
@@ -75,5 +78,5 @@ const visibleItems = computed(() => props.items.reduce<Array<{
     })
   }
   return items
-}, []))
+})
 </script>

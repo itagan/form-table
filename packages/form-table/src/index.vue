@@ -141,19 +141,16 @@ if (import.meta.env.DEV) {
   })
 }
 
-/** 数据更新和字段粒度变更是组件自身负责派发的两个业务事件。 */
 const emit = defineEmits<{
   (event: 'update:tableData', data: TableRow[]): void
   (event: 'field-change', payload: FormTableFieldChangePayload): void
   (event: 'form-validate', propPath: string, valid: boolean, message: string | null): void
 }>()
 
-/** 暴露给父组件的 Element UI 原始实例引用。 */
 const formRef = ref<FormTableElementFormRef | null>(null)
 const tableRef = ref<FormTableElementTableRef | null>(null)
 const containerRef = ref<HTMLElement | null>(null)
 
-/** hintOptions 是整个表格唯一的提示展示策略。 */
 const hintMode = computed<FormTableHintMode>(() => props.hintOptions.mode ?? 'title')
 const hintTargets = computed<FormTableHintTargets>(() => props.hintOptions.targets || 'field')
 const isTooltipHintMode = computed(() => hintMode.value === 'tooltip')
@@ -181,7 +178,6 @@ const handleFormValidate = (propPath: string, valid: boolean, message: string | 
   emit('form-validate', propPath, valid, message)
 }
 
-/** 向列、行、字段组件提供的响应式表级上下文。 */
 const formTableContext: FormTableTableContext = createTableContext(() => props.tableData)
 
 const { visibleColumns } = useColumnIdentity(() => props.columns, formTableContext)
@@ -239,7 +235,6 @@ const validate = async (callback?: (valid: boolean, fields?: FormTableValue) => 
   }
 }
 
-/** 对外只暴露稳定方法，避免父组件依赖 setup 内部状态。 */
 defineExpose({
   validate,
   clearValidate: (fieldProps?: string | string[]) => formRef.value?.clearValidate?.(fieldProps),

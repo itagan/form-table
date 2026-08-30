@@ -28,24 +28,18 @@ export function useColumnIdentity<TRow extends TableRow = TableRow>(
   })
 
   const columnOrderVersion = ref(0)
-  let previousColumnIdentities: string[] | null = null
-  // 监听稳定签名，避免 watch 直接观察每次 computed 新建的数组引用。
-  const columnIdentitySignature = computed(() => JSON.stringify(columnIdentities.value))
-
-  watch(columnIdentitySignature, () => {
-    const nextIdentities = columnIdentities.value
-    if (previousColumnIdentities) {
-      const previousSet = new Set(previousColumnIdentities)
+  watch(columnIdentities, (nextIdentities, previousIdentities) => {
+    if (previousIdentities) {
+      const previousSet = new Set(previousIdentities)
       const nextSet = new Set(nextIdentities)
       // 忽略纯增删，只比较前后都存在的列，判断它们的相对顺序是否改变。
-      const previousShared = previousColumnIdentities.filter(identity => nextSet.has(identity))
+      const previousShared = previousIdentities.filter(identity => nextSet.has(identity))
       const nextShared = nextIdentities.filter(identity => previousSet.has(identity))
       const orderChanged = previousShared.length > 1
         && previousShared.some((identity, index) => identity !== nextShared[index])
 
       if (orderChanged) columnOrderVersion.value += 1
     }
-    previousColumnIdentities = [...nextIdentities]
   }, { immediate: true })
 
   /**

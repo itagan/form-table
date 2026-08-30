@@ -275,6 +275,48 @@ describe('FormTable tooltip hint behavior', () => {
     wrapper.destroy()
   })
 
+  it('keeps pointer suppression until focus moves to another hint target', async () => {
+    const wrapper = mountFormTable({
+      hintOptions: { mode: 'tooltip' },
+      tableData: [{ first: 'A', second: 'B' }],
+      columns: [{
+        label: '字段',
+        formItems: [
+          { fieldKey: 'first', type: 'input', hint: '第一个说明' },
+          { fieldKey: 'second', type: 'input', hint: '第二个说明' }
+        ]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+    const tooltip = getHintTooltip(wrapper)
+    const show = vi.spyOn(tooltip, 'handleShowPopper').mockImplementation(() => undefined)
+    const close = vi.spyOn(tooltip, 'handleClosePopper').mockImplementation(() => undefined)
+    const inputs = wrapper.findAll('input')
+    const firstInput = inputs.at(0).element
+    const secondInput = inputs.at(1).element
+
+    dispatchFocusEvent(firstInput, 'focusin')
+    firstInput.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }))
+    await flushTooltip(wrapper)
+    expect(tooltip.content).toBe('第一个说明')
+
+    firstInput.dispatchEvent(new MouseEvent('mouseout', { bubbles: true }))
+    await flushTooltip(wrapper)
+    expect(close).toHaveBeenCalled()
+    const showCallsAfterPointerLeave = show.mock.calls.length
+
+    firstInput.setAttribute('class', 'changed-while-focused')
+    await flushTooltip(wrapper)
+    expect(show).toHaveBeenCalledTimes(showCallsAfterPointerLeave)
+
+    dispatchFocusEvent(firstInput, 'focusout', secondInput)
+    dispatchFocusEvent(secondInput, 'focusin', firstInput)
+    await flushTooltip(wrapper)
+    expect(tooltip.content).toBe('第二个说明')
+    expect(show.mock.calls.length).toBeGreaterThan(showCallsAfterPointerLeave)
+    wrapper.destroy()
+  })
+
   it('keeps the next tooltip open when the pointer moves directly between fields', async () => {
     vi.useFakeTimers()
     let wrapper: Wrapper<Vue> | null = null

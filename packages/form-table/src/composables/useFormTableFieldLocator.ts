@@ -10,6 +10,7 @@ import {
   isConfiguredRowKey,
   resolveRowIdentityIndex
 } from '../utils/rowIdentity'
+import { FORM_TABLE_HINT_ROOT_ATTRIBUTE } from '../utils/hint'
 
 export const FORM_TABLE_FIELD_PROP_ATTRIBUTE = 'data-form-table-field-prop'
 
@@ -75,7 +76,7 @@ export function useFormTableFieldLocator<TRow extends TableRow = TableRow>(
     const container = options.containerRef.value
     if (!container) return []
     return Array.from(container.querySelectorAll<HTMLElement>(`[${FORM_TABLE_FIELD_PROP_ATTRIBUTE}]`))
-      .filter(element => element.closest('[data-form-table-hint-root]') === container)
+      .filter(element => element.closest(`[${FORM_TABLE_HINT_ROOT_ATTRIBUTE}]`) === container)
   }
 
   const findFieldElementByProp = (propPath: string) => getMountedFields().find(
