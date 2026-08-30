@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- 补充 `select` 等非固定宽度内置组件通过 `component.props.style` 或业务 class 铺满字段列的文档。
+
 ## 1.2.0 - 2026-08-29
 
 ### Added
