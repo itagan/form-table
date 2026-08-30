@@ -7,7 +7,7 @@ const normalizeSiteBase = (value: string) => {
 }
 const siteBase = normalizeSiteBase(process.env.VITE_SITE_BASE || '/')
 const defaultPlaygroundUrl = process.env.VITE_SITE_BASE
-  ? `${siteBase}playground`
+  ? '/playground'
   : localPlaygroundUrl
 const playgroundSiteUrl = (process.env.VITE_PLAYGROUND_SITE_URL || defaultPlaygroundUrl)
   .replace(/\/+$/, '')
