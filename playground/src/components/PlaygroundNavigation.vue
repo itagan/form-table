@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import { exampleGroups, levelLabels } from '../exampleCatalog'
 
-const props = defineProps<{
+defineProps<{
   activePath: string
   docsSiteUrl: string
 }>()
