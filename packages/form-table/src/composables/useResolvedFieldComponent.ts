@@ -7,6 +7,8 @@ import {
 } from '../configs/defaultComponentConfigs'
 import type {
   FormItemConfig,
+  FieldComponentConfig,
+  FormTableFieldListener,
   FieldTypeDefinition,
   FieldTypeRegistry,
   FormTableFieldBindingContext,
@@ -17,6 +19,7 @@ import type {
   ResolvedComponentConfig,
   TableRow
 } from '../types'
+import type { ComponentProps } from '../types/base'
 import { resolveDynamicValue } from '../utils/dynamic'
 import { applyHintComponentProps } from '../utils/hint'
 
@@ -55,6 +58,26 @@ const resolveComponentTarget = <TRow extends TableRow>(
   return typeDefinition?.is
 }
 
+const resolveComponentProps = <TRow extends TableRow>(
+  component: FieldComponentConfig<TRow> | undefined,
+  typeDefinition: FieldTypeDefinition<TRow> | undefined,
+  context: FormTableFieldBindingContext<TRow>
+): ComponentProps => ({
+  ...(resolveDynamicValue(typeDefinition?.props, context) || {}),
+  ...(resolveDynamicValue(component?.props, context) || {})
+})
+
+const resolveComponentListeners = <TRow extends TableRow>(
+  listeners: Record<string, FormTableFieldListener<TRow>>,
+  getFieldContext: () => FormTableFieldContext<TRow>
+) => {
+  const resolved: Record<string, (...args: unknown[]) => void> = {}
+  for (const name of Object.keys(listeners)) {
+    resolved[name] = (...args) => listeners[name]?.(getFieldContext(), ...args)
+  }
+  return resolved
+}
+
 /**
  * 将公开的字段配置归一化为函数式字段渲染器可直接消费的渲染配置。
  * 动态组件、props 和 options 都集中在同一个 computed 中求值一次。
@@ -69,17 +92,6 @@ export function useResolvedFieldComponent<TRow extends TableRow = TableRow>(
     const component = config.component
     const typeDefinition = resolveTypeDefinition(config.type, options.fieldTypes.value)
     const listeners = component?.listeners || {}
-    const defaultProps = resolveDynamicValue(typeDefinition?.props, propsContext) || {}
-    const componentProps = {
-      ...defaultProps,
-      ...(resolveDynamicValue(component?.props, propsContext) || {})
-    }
-
-    /** 保留原始事件参数，并在首位注入带安全更新助手的字段上下文。 */
-    const resolvedListeners = Object.keys(listeners).reduce<Record<string, (...args: unknown[]) => void>>((result, name) => {
-      result[name] = (...args) => listeners[name]?.(options.fieldContext.value, ...args)
-      return result
-    }, {})
 
     return {
       is: resolveComponentTarget(config, context, typeDefinition),
@@ -87,12 +99,12 @@ export function useResolvedFieldComponent<TRow extends TableRow = TableRow>(
         ? config.component.slot
         : undefined,
       props: applyHintComponentProps(
-        componentProps,
+        resolveComponentProps(component, typeDefinition, propsContext),
         options.resolvedHint.value,
         options.hintMode.value,
         options.hintTrigger.value
       ),
-      listeners: resolvedListeners,
+      listeners: resolveComponentListeners(listeners, () => options.fieldContext.value),
       options: resolveDynamicValue(component?.options, context) || [],
       optionProps: resolveDynamicValue(component?.optionProps, context),
       model: component?.model ?? typeDefinition?.model

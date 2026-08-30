@@ -48,6 +48,7 @@
 import { computed, inject } from 'vue'
 import FormTableRow from './FormTableRow.vue'
 import SlotRenderer from './SlotRenderer'
+import { useForwardedSlot } from './composables/useForwardedSlot'
 import type {
   ColumnConfig,
   FormTableCellSlotContext,
@@ -145,13 +146,13 @@ const resolvedHeaderTargetProps = computed(() => {
   )
 })
 
-/** cellSlot 列不经过 Row/Item 字段渲染链路。 */
-const cellSlotFn = computed(() => {
-  const renderConfig = columnRender.value
-  if (renderConfig.kind !== 'cell-slot' || !renderConfig.slotName) return null
-  const slotName = renderConfig.slotName
-  return (context: FormTableCellSlotContext) => parentSlots[slotName]?.(context) ?? null
-})
+const { slotFn: cellSlotFn } = useForwardedSlot<FormTableCellSlotContext>(
+  parentSlots,
+  () => {
+    const renderConfig = columnRender.value
+    return renderConfig.kind === 'cell-slot' ? renderConfig.slotName : undefined
+  }
+)
 
 /** 为当前单元格构造无字段语义的精简 Slot 上下文。 */
 const createCellSlotContext = (
@@ -169,17 +170,9 @@ const createCellSlotContext = (
   }
 }
 
-/** 包装函数保持稳定，但每次渲染都按名称调用父组件最新的表头插槽。 */
-const headerSlotFn = computed(() => {
-  const slotName = props.column.headerSlot
-  if (!slotName) return null
-  return (context: FormTableHeaderSlotContext) => parentSlots[slotName]?.(context) ?? null
-})
-
-/** 插槽集合由 Vue 2 在父级渲染时原位同步，因此显式活查找实际函数。 */
-const hasHeaderSlot = () => Boolean(
-  props.column.headerSlot && parentSlots[props.column.headerSlot]
-)
+const { slotFn: headerSlotFn, hasSlot: hasHeaderSlot } = useForwardedSlot<
+  FormTableHeaderSlotContext
+>(parentSlots, () => props.column.headerSlot)
 
 /** 仅在没有原生 renderHeader 且确有自定义内容或属性时接管普通列表头。 */
 const shouldRenderHeader = () => {

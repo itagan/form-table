@@ -39,6 +39,7 @@
 import { computed, inject } from 'vue'
 import FieldRenderer from './FieldRenderer'
 import SlotRenderer from './SlotRenderer'
+import { useForwardedSlot } from './composables/useForwardedSlot'
 import { useFormTableFieldContext } from './composables/useFormTableFieldContext'
 import { useFormTableFieldPresentation } from './composables/useFormTableFieldPresentation'
 import { useResolvedFieldComponent } from './composables/useResolvedFieldComponent'
@@ -69,23 +70,12 @@ const fieldTypes = inject<FormTableFieldTypesRef>(
   true
 )
 
-/** 包装函数随配置更新，调用时再解析父组件最新的 Label/Error Slot。 */
-const labelSlotFn = computed(() => {
-  const slotName = props.config.labelSlot
-  if (!slotName) return null
-  return (context: FormTableFormItemSlotContext) => parentSlots[slotName]?.(context) ?? null
-})
-const errorSlotFn = computed(() => {
-  const slotName = props.config.errorSlot
-  if (!slotName) return null
-  return (context: FormTableFormItemErrorSlotContext) => parentSlots[slotName]?.(context) ?? null
-})
-const hasLabelSlot = () => Boolean(
-  props.config.labelSlot && parentSlots[props.config.labelSlot]
-)
-const hasErrorSlot = () => Boolean(
-  props.config.errorSlot && parentSlots[props.config.errorSlot]
-)
+const { slotFn: labelSlotFn, hasSlot: hasLabelSlot } = useForwardedSlot<
+  FormTableFormItemSlotContext
+>(parentSlots, () => props.config.labelSlot)
+const { slotFn: errorSlotFn, hasSlot: hasErrorSlot } = useForwardedSlot<
+  FormTableFormItemErrorSlotContext
+>(parentSlots, () => props.config.errorSlot)
 
 /** 字段定位、校验路径和安全写回由上下文组合式 API 统一维护。 */
 const {
@@ -122,14 +112,10 @@ const { resolvedComponent } = useResolvedFieldComponent({
   fieldTypes
 })
 
-/** 字段内容 Slot 同样只缓存稳定包装函数，避免持有父级旧闭包。 */
-const slotFn = computed(() => {
-  if (props.config.type !== 'slot') return null
-  const slotName = props.config.component.slot
-  return (context: FormTableSlotContext) => parentSlots[slotName]?.(context) ?? null
-})
-const hasFieldSlot = () => props.config.type === 'slot'
-  && Boolean(parentSlots[props.config.component.slot])
+const { slotFn, hasSlot: hasFieldSlot } = useForwardedSlot<FormTableSlotContext>(
+  parentSlots,
+  () => props.config.type === 'slot' ? props.config.component.slot : undefined
+)
 
 /** Label/Error 共用字段更新能力和当前响应式校验路径。 */
 const formItemSlotContext = computed<FormTableFormItemSlotContext>(() => {
