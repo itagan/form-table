@@ -11,6 +11,10 @@ const defaultPlaygroundUrl = process.env.VITE_SITE_BASE
   : localPlaygroundUrl
 const playgroundSiteUrl = (process.env.VITE_PLAYGROUND_SITE_URL || defaultPlaygroundUrl)
   .replace(/\/+$/, '')
+const isEmbeddedPlayground = playgroundSiteUrl.startsWith('/')
+const markdownPlaygroundUrl = isEmbeddedPlayground
+  ? `${siteBase}${playgroundSiteUrl.replace(/^\/+/, '')}`
+  : playgroundSiteUrl
 const playgroundPathPattern = playgroundSiteUrl.startsWith('/')
   ? new RegExp(`^${playgroundSiteUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:/|$)`)
   : /^\/playground(?:\/|$)/
@@ -35,7 +39,11 @@ export default defineConfig({
         if (hrefIndex >= 0) {
           const href = tokens[index].attrs?.[hrefIndex]?.[1]
           if (href?.startsWith(localPlaygroundUrl)) {
-            tokens[index].attrSet('href', `${playgroundSiteUrl}${href.slice(localPlaygroundUrl.length)}`)
+            tokens[index].attrSet(
+              'href',
+              `${markdownPlaygroundUrl}${href.slice(localPlaygroundUrl.length)}`
+            )
+            if (isEmbeddedPlayground) tokens[index].attrSet('target', '_self')
           }
         }
 
@@ -52,7 +60,11 @@ export default defineConfig({
       { text: '架构', link: '/architecture/overview' },
       { text: 'API', link: '/api/configuration' },
       { text: '示例', link: '/examples/' },
-      { text: 'Playground', link: `${playgroundSiteUrl}/` },
+      {
+        text: 'Playground',
+        link: `${playgroundSiteUrl}/`,
+        ...(isEmbeddedPlayground ? { target: '_self' } : {})
+      },
       { text: 'npm', link: 'https://www.npmjs.com/package/@itagan/form-table' },
       { text: '源码', link: 'https://github.com/itagan/form-table' }
     ],
