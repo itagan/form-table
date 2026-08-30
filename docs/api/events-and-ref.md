@@ -252,6 +252,8 @@ tableRef?.sort?.('amount', 'descending')
 tableRef?.doLayout?.()
 ```
 
+列数较多时，可以从 `getTableRef().$el` 获取 Element Table 主表体滚动容器，在页面提供首列、末列或指定字段快捷定位。完整实现和固定列边界见[宽表横向滚动与字段定位](../features/horizontal-scroll.md)。
+
 其他属性与版本新增方法直接继承当前项目安装的 Element UI 类型，因此会与实际依赖版本保持一致。测试或 mock 不完整实例时，应使用 `Partial<FormTableElementFormRef>` 或 `Partial<FormTableElementTableRef<TRow>>`。
 
 FormTable 不公开数据重置方法。受控场景由调用方明确保存和恢复业务初始数据，再清除校验状态：

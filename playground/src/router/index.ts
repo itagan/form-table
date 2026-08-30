@@ -10,6 +10,7 @@ const viewLoaders: Record<string, () => Promise<unknown>> = {
   FormWorkflowView: () => import('../views/FormWorkflowView.vue'),
   HintScenariosView: () => import('../views/HintScenariosView.vue'),
   ElementColumnsView: () => import('../views/ElementColumnsView.vue'),
+  HorizontalScrollView: () => import('../views/HorizontalScrollView.vue'),
   CellSlotView: () => import('../views/CellSlotView.vue'),
   PerformanceView: () => import('../views/PerformanceView.vue'),
   RemoteSchemaView: () => import('../views/RemoteSchemaView.vue'),
