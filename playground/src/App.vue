@@ -1,6 +1,8 @@
 <script setup lang="ts">
-// 可通过环境变量覆盖部署后的文档地址；本地开发默认使用固定的 VitePress 端口。
-const docsSiteUrl = import.meta.env.VITE_DOCS_SITE_URL || 'http://localhost:5174/'
+// 可覆盖文档地址；同站部署复用统一基址，本地开发默认使用固定的 VitePress 端口。
+const docsSiteUrl = import.meta.env.VITE_DOCS_SITE_URL
+  || import.meta.env.VITE_SITE_BASE
+  || 'http://localhost:5174/'
 </script>
 
 <template>
