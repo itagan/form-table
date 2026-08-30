@@ -2,7 +2,7 @@
 
 > 可运行实验：[打开 Performance Lab ↗](http://localhost:5173/performance)
 
-需要直接选择业务优化方案时，参阅[性能优化建议](./performance-optimization.md)。本页聚焦如何测量、记录和解释性能数据。
+本页只负责如何测量、记录和解释性能数据，以及说明当前复杂度边界。已经确认瓶颈、需要选择业务优化措施时，直接参阅[性能优化建议](./performance-optimization.md)。
 
 FormTable 基于 Element UI Table 和 Form，不包含虚拟滚动。数据规模应按实际渲染单元估算，而不只看行数：
 

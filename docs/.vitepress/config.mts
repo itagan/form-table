@@ -74,10 +74,10 @@ export default defineConfig({
         items: [
           { text: '快速开始', link: '/guide/quick-start' },
           { text: '开发任务导航', link: '/guide/development-workflows' },
+          { text: '排错指南', link: '/guide/troubleshooting' },
           { text: '完整配置指南', link: '/guide/configuration-guide' },
           { text: '业务配置最佳实践', link: '/guide/business-configuration-best-practices' },
-          { text: '业务配置测试指南', link: '/guide/business-testing' },
-          { text: '排错指南', link: '/guide/troubleshooting' }
+          { text: '业务配置测试指南', link: '/guide/business-testing' }
         ]
       },
       {

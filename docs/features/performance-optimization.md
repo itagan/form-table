@@ -2,7 +2,7 @@
 
 > 配套工具：[Performance Lab](http://localhost:5173/performance) · [测量方法与性能边界](./performance.md)
 
-FormTable 基于 Element UI 2 的 `el-table` 与 `el-form`。优化时首先减少实际挂载的行、FormItem 和字段组件，其次才是优化数组更新或动态配置函数。
+本页用于已经通过数据确认瓶颈后选择优化措施，不展开基准环境、指标定义或记录方法。FormTable 基于 Element UI 2 的 `el-table` 与 `el-form`；优化时首先减少实际挂载的行、FormItem 和字段组件，其次才是优化数组更新或动态配置函数。
 
 ## 先判断属于哪类问题
 
@@ -15,7 +15,7 @@ FormTable 基于 Element UI 2 的 `el-table` 与 `el-form`。优化时首先减�
 | 校验时卡顿 | 全表复杂 validator 同时执行 | 分批校验、提交时校验、只校验当前编辑批次 |
 | 固定高度仍占用大量内存 | 误把滚动容器当成虚拟滚动 | 分页或更换虚拟表格渲染方案 |
 
-不要先用开发模式下的一次毫秒数决定方案。先在 [Performance Lab](http://localhost:5173/performance) 中复现相近的行数、列数和渲染模式，再使用 production build 重复测量。
+尚未稳定复现问题时，先按[测量方法与性能边界](./performance.md)建立基线，再回到本页选择措施。
 
 ## 优化优先级
 

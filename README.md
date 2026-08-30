@@ -70,13 +70,7 @@ pnpm release:check
 
 ## npm 包使用
 
-公开包主页：[`@itagan/form-table` on npm](https://www.npmjs.com/package/@itagan/form-table)。
-
-```bash
-pnpm add @itagan/form-table@latest
-```
-
-安装、兼容范围和最小示例见[组件包说明](./packages/form-table/README.md)；完整行为说明以[快速开始](./docs/guide/quick-start.md)和 [API 总览](./docs/api/configuration.md)为准。
+安装、兼容范围和最小示例统一见[组件包说明](./packages/form-table/README.md)与[快速开始](./docs/guide/quick-start.md)；属性和行为以 [API 总览](./docs/api/configuration.md)为准。
 
 ## 调试页面
 
@@ -89,12 +83,10 @@ pnpm add @itagan/form-table@latest
 ## 文档
 
 - [VitePress 文档总站](./docs/index.md)
-- [功能专题](./docs/features/index.md)
-- [示例索引](./docs/examples/index.md)
+- [开发任务导航](./docs/guide/development-workflows.md)
+- [API 总览](./docs/api/configuration.md)
 - [更新记录](./CHANGELOG.md)
-- [组件包说明](./packages/form-table/README.md)
 - [维护与发布](./docs/migration/npm-package.md)
-- [GitHub Pages 部署](./docs/migration/github-pages.md)
 
 ## 发布前检查
 
