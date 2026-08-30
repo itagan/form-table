@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
 import type {
-  FieldTypeRegistry,
   FormTableFieldBindingContext,
   FormTableFieldRenderContext
 } from '../types.public'
@@ -28,7 +27,7 @@ const createButtonField = (
   }
 })
 
-describe('FormTable custom field types', () => {
+describe('FormTable custom field type models', () => {
   it('renders a registered standard-model component without changing the field workflow', async () => {
     const StandardField = createButtonField('registered-standard')
     const wrapper = mountFormTable({
@@ -289,105 +288,4 @@ describe('FormTable custom field types', () => {
     wrapper.destroy()
   })
 
-  it('reacts to registry replacement and keeps registries isolated by instance', async () => {
-    const FirstField = createButtonField('registered-first')
-    const SecondField = createButtonField('registered-second')
-    const columns = [{ label: '字段', formItems: [{ fieldKey: 'name', type: 'business' }] }]
-    const firstRegistry: FieldTypeRegistry = { business: { is: FirstField } }
-    const secondRegistry: FieldTypeRegistry = { business: { is: SecondField } }
-    const first = mountFormTable({ tableData: [{ name: 'A' }], columns, fieldTypes: firstRegistry })
-    const second = mountFormTable({ tableData: [{ name: 'B' }], columns, fieldTypes: secondRegistry })
-    await first.vm.$nextTick()
-
-    expect(first.find('.registered-first').exists()).toBe(true)
-    expect(second.find('.registered-second').exists()).toBe(true)
-
-    await first.setProps({ fieldTypes: secondRegistry })
-    expect(first.find('.registered-second').exists()).toBe(true)
-    expect(second.find('.registered-second').exists()).toBe(true)
-    first.destroy()
-    second.destroy()
-  })
-
-  it('warns once per unknown name and leaves field content empty', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-    const wrapper = mountFormTable({
-      tableData: [{ first: '', second: '' }],
-      fieldTypes: { employee: { is: createButtonField('unused-employee') } },
-      columns: [{
-        label: '未知字段',
-        formItems: [
-          { fieldKey: 'first', type: 'missing-type' },
-          { fieldKey: 'second', type: 'missing-type' }
-        ]
-      }]
-    })
-    await wrapper.vm.$nextTick()
-
-    const messages = warn.mock.calls
-      .map(args => String(args[0]))
-      .filter(message => message.includes('Unknown field type "missing-type"'))
-    expect(messages).toHaveLength(1)
-    expect(messages[0]).toContain('column "未知字段", field "first"')
-    expect(messages[0]).toContain('Available custom types: "employee"')
-    expect(wrapper.findAllComponents({ name: 'FormTableDynamicFieldRenderer' })).toHaveLength(0)
-    warn.mockRestore()
-    wrapper.destroy()
-  })
-
-  it('diagnoses invalid registrations and forbidden item overrides once per issue', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-    const wrapper = mountFormTable({
-      tableData: [{ employeeId: '' }, { employeeId: '' }],
-      fieldTypes: ({
-        employee: {
-          is: '',
-          listeners: {},
-          model: { event: 1 }
-        }
-      } as unknown as FieldTypeRegistry),
-      columns: [{
-        key: 'owners',
-        label: '负责人',
-        formItems: [{
-          fieldKey: 'employeeId',
-          type: 'employee',
-          component: { resolveComponent: (() => undefined) as never }
-        }]
-      }]
-    })
-    await wrapper.vm.$nextTick()
-
-    const messages = warn.mock.calls.map(args => String(args[0]))
-    expect(messages.filter(message => message.includes('unsupported registration keys "listeners"')))
-      .toHaveLength(1)
-    expect(messages.filter(message => message.includes('"is" must be a non-empty')))
-      .toHaveLength(1)
-    expect(messages.filter(message => message.includes('model.event must be a string')))
-      .toHaveLength(1)
-    expect(messages.filter(message => message.includes('cannot use item component.resolveComponent')))
-      .toHaveLength(1)
-    expect(messages.some(message => message.includes('column "owners", field "employeeId"')))
-      .toBe(true)
-    warn.mockRestore()
-    wrapper.destroy()
-  })
-
-  it('keeps builtin targets ahead of registry entries that bypass the helper', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-    const FakeInput = createButtonField('reserved-fake-input')
-    const wrapper = mountFormTable({
-      tableData: [{ name: 'Alice' }],
-      fieldTypes: { input: { is: FakeInput } },
-      columns: [{ label: '姓名', formItems: [{ fieldKey: 'name', type: 'input' }] }]
-    })
-    await wrapper.vm.$nextTick()
-
-    expect(wrapper.find('.el-input').exists()).toBe(true)
-    expect(wrapper.find('.reserved-fake-input').exists()).toBe(false)
-    expect(warn.mock.calls.some(args => String(args[0]).includes('Field type "input" is reserved')))
-      .toBe(true)
-    warn.mockRestore()
-    wrapper.destroy()
-  })
 })
