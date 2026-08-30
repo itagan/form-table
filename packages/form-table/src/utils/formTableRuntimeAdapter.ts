@@ -23,10 +23,11 @@ export function getVue2ComponentListeners(proxy: unknown): FormTableListenerMap 
 
 /** FormTable 自身事件在根组件处理，其余监听器原样交给 el-table。 */
 export function resolveTableListeners(listeners: FormTableListenerMap): FormTableListenerMap {
-  return Object.keys(listeners).reduce<FormTableListenerMap>((result, name) => {
-    if (!MANAGED_TABLE_LISTENERS.has(name)) result[name] = listeners[name]
-    return result
-  }, {})
+  const resolvedListeners: FormTableListenerMap = {}
+  for (const name of Object.keys(listeners)) {
+    if (!MANAGED_TABLE_LISTENERS.has(name)) resolvedListeners[name] = listeners[name]
+  }
+  return resolvedListeners
 }
 
 /** data/rowKey 由根组件协议管理，不继续透传 tableProps 中的同名配置。 */
@@ -41,10 +42,10 @@ export function resolveTableProps(tableProps: ComponentProps): ComponentProps {
 
 /** 归一化单例 Tooltip 属性，并保护 FormTable 自身管理的显隐和引用协议。 */
 export function resolveHintTooltipProps(tooltipProps: ComponentProps): ComponentProps {
-  const passthrough = Object.keys(tooltipProps).reduce<ComponentProps>((result, key) => {
-    if (!MANAGED_TOOLTIP_PROPS.has(key)) result[key] = tooltipProps[key]
-    return result
-  }, {})
+  const passthrough: ComponentProps = {}
+  for (const key of Object.keys(tooltipProps)) {
+    if (!MANAGED_TOOLTIP_PROPS.has(key)) passthrough[key] = tooltipProps[key]
+  }
   const customPopperClass = typeof passthrough.popperClass === 'string'
     ? passthrough.popperClass
     : ''
