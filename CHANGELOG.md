@@ -16,6 +16,7 @@
 - 将组件布局样式收敛到独立 CSS 源码和稳定类名，并补充加载、覆盖及跨环境边界文档。
 - 补充 Row、Col、FormItem 与字段组件的 class/style 定位、动态透传和 scoped CSS 使用指南。
 - 补充宽表通过外部按钮滚动到首列、末列或指定字段的文档与 Playground 示例。
+- 内置 `number/date/time/time-select` 默认填满字段列宽，并保留 `component.props.style` 覆盖能力。
 
 ## 1.1.0 - 2026-08-29
 

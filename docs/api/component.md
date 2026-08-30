@@ -47,6 +47,8 @@ columns[].formItems[].component
 
 `component.props` 中的普通键按实际组件 Prop/attribute 透传；`class/style` 会按 Vue 2 VNode 原生语义应用到实际组件根节点，不会作为同名普通业务 Prop 传入，也不会影响 model、其他 Props 或 listeners。需要控制自定义组件内部节点时，请为组件设计 `panelClass/contentStyle` 等明确 Prop。完整示例和 scoped CSS 边界见[样式定位与属性透传](../features/style-props.md)。
 
+Element UI 自带固定像素宽度的内置 `number/date/time/time-select` 在 FormTable 中默认宽度为 `100%`；其他 Type 不参与宽度重置。需要固定宽度时通过 `component.props.style.width` 覆盖。
+
 `type: 'component'` 和注册的自定义 Type 在 TypeScript 配置中不接受 `component.options/optionProps`。FormTable 不知道业务组件采用 Prop、Slot、远程加载还是其他选项协议，也不会把同级 `options` 自动注入实际组件；JavaScript 绕过类型传入时该配置同样不会生效。需要组件接收选项数组时使用 `component.props.options`。字段 Slot 不创建实际组件，但会在 Slot 上下文的 `component.options/optionProps` 中暴露动态解析结果，供模板自行渲染。
 
 Item 级 `binding.map` 位于 `columns[].formItems[].binding`，不属于组件协议。读取顺序是先将多个行字段组合为 `bindingValue`，再由 `valueToProp` 转换为组件 model prop；写回顺序是 `valueFromEvent` 提取组件值，再由映射生成一个行 patch。每个映射项还可通过 `fallbackValue` 声明组件值路径缺失时的静态写回值。对象、数组、Slot、清空和校验规则见[复合字段映射](../features/composite-binding.md)。

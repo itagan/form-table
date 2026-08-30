@@ -37,7 +37,7 @@ import '@itagan/form-table/style.css'
 import './form-table-overrides.css'
 ```
 
-FormTable 样式只负责多字段换行和表格内 FormItem 间距，不包含 Element UI 主题、颜色、字体或全局 reset。业务可以在后加载的 CSS 中覆盖 `.form-table-field-layout` 和 `.form-table-container .form-table-form-item`，也可以通过 `rowProps.style/formItemProps.style` 进行局部覆盖。完整边界见[样式加载与覆盖](https://gitee.com/itagan/form-table/blob/master/docs/architecture/style-loading.md)。
+FormTable 样式只负责多字段换行、表格内 FormItem 间距，以及内置 `number/date/time/time-select` 的列宽适配，不包含 Element UI 主题、颜色、字体或全局 reset。业务可以在后加载的 CSS 中覆盖稳定类，也可以通过 `rowProps.style/formItemProps.style/component.props.style` 进行局部覆盖。完整边界见[样式加载与覆盖](https://gitee.com/itagan/form-table/blob/master/docs/architecture/style-loading.md)。
 
 需要精确调整单元格内 `el-row`、`el-col`、`el-form-item` 或实际字段组件时，分别使用 `rowProps`、`colProps`、`formItemProps` 和 `component.props`。class/style、自定义组件根节点及 scoped CSS 示例见[样式定位与属性透传](https://gitee.com/itagan/form-table/blob/master/docs/features/style-props.md)。
 

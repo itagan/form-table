@@ -137,6 +137,33 @@ component: {
 
 其中根节点 class 由 Vue 应用，`panelClass/panelStyle` 由 `EmployeePicker` 自己接收并绑定到内部节点。
 
+## 固定宽度内置组件的默认适配
+
+Element UI 为 InputNumber 和 DateEditor 系列声明了固定像素宽度。FormTable 只对对应的内置 `number`、`date`、`time`、`time-select` 增加 `.form-table-field-control--full`，默认使用当前字段列的完整宽度：
+
+```css
+.form-table-form-item .form-table-field-control--full {
+  width: 100%;
+}
+```
+
+其他内置 Type、自定义组件和字段 Slot 保持原组件宽度，不做通配重置。单个字段确实需要固定宽度时，内联 style 可以直接覆盖默认类：
+
+```ts
+{
+  fieldKey: 'quantity',
+  type: 'number',
+  component: {
+    props: {
+      class: 'quantity-input',
+      style: { width: '160px' }
+    }
+  }
+}
+```
+
+调用方 class 会与 `.form-table-field-control--full` 合并，不会替换内部标记。
+
 ## scoped 样式为什么可能匹配不到
 
 `rowProps/colProps/formItemProps` 添加的节点由 FormTable 内部渲染。调用页面的 `<style scoped>` 会附加页面自己的 scope 属性，普通选择器不一定能进入这些内部节点。

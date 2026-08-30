@@ -86,6 +86,65 @@ describe('FormTable standalone styles', () => {
     style.remove()
   })
 
+  it('fills only built-in controls that Element UI gives a fixed width', async () => {
+    const style = document.createElement('style')
+    style.textContent = `${styleSource}
+      .form-table-form-item .business-number { width: 140px; }
+    `
+    document.head.appendChild(style)
+    const CustomField = localVue.extend({
+      render(createElement) {
+        return createElement('div', { class: 'custom-field-root' })
+      }
+    })
+    const wrapper = mountFormTable({
+      tableData: [{ number: 1, date: '', time: '', timeSelect: '', input: '', custom: '' }],
+      columns: [{
+        label: '字段宽度',
+        formItems: [
+          {
+            fieldKey: 'number',
+            type: 'number',
+            component: { props: { class: 'business-number' } }
+          },
+          { fieldKey: 'date', type: 'date' },
+          { fieldKey: 'time', type: 'time' },
+          {
+            fieldKey: 'timeSelect',
+            type: 'time-select',
+            component: { props: { style: { width: '160px' } } }
+          },
+          { fieldKey: 'input', type: 'input' },
+          {
+            fieldKey: 'custom',
+            type: 'component',
+            component: { is: CustomField }
+          }
+        ]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    const fullWidthControls = wrapper.findAll('.form-table-field-control--full')
+    expect(fullWidthControls).toHaveLength(4)
+    expect(wrapper.find('.el-input-number').classes()).toEqual(expect.arrayContaining([
+      'form-table-field-control--full',
+      'business-number'
+    ]))
+    expect(getComputedStyle(wrapper.find('.el-input-number').element).width).toBe('140px')
+    expect(getComputedStyle(fullWidthControls.at(1).element).width).toBe('100%')
+    expect(getComputedStyle(fullWidthControls.at(3).element).width).toBe('160px')
+    expect(wrapper
+      .find('[data-form-table-field-prop="tableData.0.input"]')
+      .find('.el-input')
+      .classes()).not.toContain('form-table-field-control--full')
+    expect(wrapper.find('.custom-field-root').classes()).not.toContain('form-table-field-control--full')
+    expect(styleSource).toContain('.form-table-form-item .form-table-field-control--full')
+    expect(styleSource).toContain('width: 100%')
+    wrapper.destroy()
+    style.remove()
+  })
+
   it('keeps nested tables independently marked without styling unrelated FormItems', async () => {
     const style = document.createElement('style')
     style.textContent = styleSource

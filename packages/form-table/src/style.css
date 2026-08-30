@@ -6,3 +6,8 @@
 .form-table-container .form-table-form-item {
   margin-bottom: 0;
 }
+
+/* 覆盖 Element UI 为 InputNumber 与 DateEditor 系列声明的固定像素宽度。 */
+.form-table-form-item .form-table-field-control--full {
+  width: 100%;
+}
