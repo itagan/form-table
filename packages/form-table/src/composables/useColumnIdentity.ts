@@ -15,10 +15,10 @@ export function useColumnIdentity<TRow extends TableRow = TableRow>(
    */
   const columnIdentities = computed(() => {
     const columns = getColumns()
-    const keyCounts = columns.reduce<Map<string, number>>((counts, column) => {
-      if (column.key) counts.set(column.key, (counts.get(column.key) || 0) + 1)
-      return counts
-    }, new Map())
+    const keyCounts = new Map<string, number>()
+    for (const column of columns) {
+      if (column.key) keyCounts.set(column.key, (keyCounts.get(column.key) || 0) + 1)
+    }
 
     return columns.map((column, sourceIndex) => (
       column.key && keyCounts.get(column.key) === 1
@@ -46,18 +46,21 @@ export function useColumnIdentity<TRow extends TableRow = TableRow>(
    * Element Table 会缓存列布局；仅在已有列发生相对重排时提升版本，
    * 让共享列以新 renderKey 重建。单纯显隐或末尾增删不触发整组重建。
    */
-  const visibleColumns = computed(() => getColumns().reduce<Array<{
-    column: ColumnConfig<TRow>
-    renderKey: string
-  }>>((result, column, sourceIndex) => {
-    if (resolveVisible(column.visible, createColumnContext(tableContext, column))) {
-      result.push({
-        column,
-        renderKey: `${columnIdentities.value[sourceIndex]}:order:${columnOrderVersion.value}`
-      })
-    }
+  const visibleColumns = computed(() => {
+    const result: Array<{ column: ColumnConfig<TRow>, renderKey: string }> = []
+    const columns = getColumns()
+
+    columns.forEach((column, sourceIndex) => {
+      if (resolveVisible(column.visible, createColumnContext(tableContext, column))) {
+        result.push({
+          column,
+          renderKey: `${columnIdentities.value[sourceIndex]}:order:${columnOrderVersion.value}`
+        })
+      }
+    })
+
     return result
-  }, []))
+  })
 
   return { visibleColumns }
 }
