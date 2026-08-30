@@ -1,0 +1,8 @@
+/* FormTable 只提供布局修正；Element UI 主题继续由使用方加载。 */
+.form-table-field-layout {
+  flex-wrap: wrap;
+}
+
+.form-table-container .form-table-form-item {
+  margin-bottom: 0;
+}

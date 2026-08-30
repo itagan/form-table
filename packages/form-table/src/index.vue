@@ -253,15 +253,3 @@ defineExpose({
   getTableRef: () => tableRef.value
 })
 </script>
-
-<style lang="less" scoped>
-.form-table-container {
-  :deep(.form-table-field-layout) {
-    flex-wrap: wrap;
-  }
-
-  :deep(.el-table__cell .el-form-item) {
-    margin-bottom: 0;
-  }
-}
-</style>

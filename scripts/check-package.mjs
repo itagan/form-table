@@ -88,6 +88,34 @@ if (!publicTypes.includes('FormTableComponent<TableRow>')) {
 }
 if (publicTypes.includes('FormTablePlugin')) errors.push('公开声明仍包含已移除的 FormTablePlugin')
 
+const stylePath = path.join(packageRoot, manifest.exports['./style.css'])
+const styleSource = fs.readFileSync(stylePath, 'utf8')
+if (!styleSource.includes('.form-table-field-layout') || !styleSource.includes('flex-wrap:wrap')) {
+  errors.push('style.css 缺少稳定的字段换行布局规则')
+}
+if (!styleSource.includes('.form-table-container .form-table-form-item') || !styleSource.includes('margin-bottom:0')) {
+  errors.push('style.css 缺少稳定的 FormItem 间距规则')
+}
+if (/data-v-[\da-f]+/.test(styleSource)) {
+  errors.push('style.css 仍包含 Vue scoped 编译选择器')
+}
+if (/\.el-[\w-]+/.test(styleSource)) {
+  errors.push('style.css 不应依赖 Element UI 内部类名')
+}
+
+for (const [format, entryPath] of [
+  ['ESM', manifest.module],
+  ['CommonJS', manifest.main]
+]) {
+  const entrySource = fs.readFileSync(path.join(packageRoot, entryPath), 'utf8')
+  if (entrySource.includes('style.css')) {
+    errors.push(`${format} 入口不应隐式加载 style.css`)
+  }
+  if (/createElement\(["']style["']\)/.test(entrySource)) {
+    errors.push(`${format} 入口不应在运行时注入 style 标签`)
+  }
+}
+
 if (errors.length > 0) {
   console.error(`npm 包检查失败（${errors.length} 项）：`)
   for (const error of errors) console.error(`- ${error}`)

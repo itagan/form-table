@@ -57,6 +57,24 @@ new Vue({
 }).$mount('#app')
 ```
 
+### 样式入口与覆盖
+
+`@itagan/form-table/style.css` 需要在整个应用中显式引入一次。它只包含字段换行和 FormItem 间距两项 FormTable 布局修正，不包含 Element UI 主题、颜色、字体或全局 reset。
+
+推荐顺序是 Element UI → FormTable → 业务覆盖样式。需要统一调整布局时，在后引入的业务 CSS 中覆盖稳定类名：
+
+```css
+.form-table-field-layout {
+  flex-wrap: nowrap;
+}
+
+.form-table-container .form-table-form-item {
+  margin-bottom: 8px;
+}
+```
+
+单个列或字段使用 `rowProps.style`、`formItemProps.style` 覆盖。完整的构建、SSR、UMD 和嵌套表边界见[样式加载与覆盖契约](../architecture/style-loading.md)。
+
 然后在页面中直接引入并使用 FormTable：
 
 ```vue
