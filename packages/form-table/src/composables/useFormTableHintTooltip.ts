@@ -17,6 +17,26 @@ interface UseFormTableHintTooltipOptions {
   content: Ref<string>
 }
 
+interface HintInteractionState {
+  /** 指针目标优先于键盘焦点目标。 */
+  hoveredTarget: HTMLElement | null
+  focusedTarget: HTMLElement | null
+  /** 实际接收 aria-describedby 的焦点元素，可能是 FormItem 内部控件。 */
+  focusAriaTarget: HTMLElement | null
+  /** Escape 只压制当前目标，切换目标后恢复展示。 */
+  escapeSuppressed: boolean
+  /** 指针主动离开后，不因控件仍保有焦点而立即回弹。 */
+  focusSuppressedByPointer: boolean
+}
+
+const createInteractionState = (): HintInteractionState => ({
+  hoveredTarget: null,
+  focusedTarget: null,
+  focusAriaTarget: null,
+  escapeSuppressed: false,
+  focusSuppressedByPointer: false
+})
+
 /** 在当前 FormTable 根节点委托提示事件，并协调目标、展示与生命周期模块。 */
 export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions) {
   const tooltip = createElementTooltipAdapter(options.tooltipRef)
@@ -26,97 +46,110 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
     content: options.content,
     resolveReferenceTarget: targetResolver.resolveReferenceTarget
   })
-  /** 当前指针命中的 Hint 业务目标，优先级高于焦点目标。 */
-  let hoveredTarget: HTMLElement | null = null
-  /** 当前键盘焦点所属的 Hint 业务目标。 */
-  let focusedTarget: HTMLElement | null = null
-  /** 实际接收 aria-describedby 的焦点元素，可能是 FormItem 内部输入控件。 */
-  let focusAriaTarget: HTMLElement | null = null
-  /** Escape 只压制当前目标；切换鼠标或焦点目标后允许重新展示。 */
-  let escapeSuppressed = false
-  /** 指针主动离开后，即使输入控件仍保有焦点，也不让 Tooltip 立即回弹。 */
-  let focusSuppressedByPointer = false
+  const state = createInteractionState()
   let observedContainer: HTMLElement | null = null
   let observer: MutationObserver | null = null
+  let positionRefreshPending = false
+  let positionRefreshVersion = 0
+
+  const resetInteractionState = () => {
+    Object.assign(state, createInteractionState())
+  }
+
+  const clearDetachedTargets = () => {
+    if (!targetResolver.isOwnedByContainer(state.hoveredTarget)) state.hoveredTarget = null
+    if (!targetResolver.isOwnedByContainer(state.focusedTarget)) {
+      state.focusedTarget = null
+      state.focusAriaTarget = null
+    }
+  }
+
+  const resolveActiveTarget = () => (
+    state.hoveredTarget
+    || (state.focusSuppressedByPointer ? null : state.focusedTarget)
+  )
 
   const syncActiveTarget = (forcePositionUpdate = false) => {
-    if (escapeSuppressed) {
+    if (state.escapeSuppressed) {
       presenter.hide()
       return
     }
 
-    // 动态显隐或重渲染可能移除旧节点，每次同步前先清理失效引用。
-    if (!targetResolver.isOwnedByContainer(hoveredTarget)) hoveredTarget = null
-    if (!targetResolver.isOwnedByContainer(focusedTarget)) {
-      focusedTarget = null
-      focusAriaTarget = null
-    }
-
-    // 鼠标当前指向的目标优先；焦点只作为键盘兜底。
-    // 指针主动离开 Hint 区域后，不因输入框仍保有焦点而让 Tooltip 常驻。
-    const target = hoveredTarget || (focusSuppressedByPointer ? null : focusedTarget)
+    clearDetachedTargets()
+    const target = resolveActiveTarget()
     const content = target?.getAttribute(FORM_TABLE_HINT_ATTRIBUTE) || ''
     if (!target || !content) {
       presenter.hide()
       return
     }
 
-    const ariaTarget = !hoveredTarget
-      && target === focusedTarget
-      && targetResolver.isOwnedByContainer(focusAriaTarget)
-      ? focusAriaTarget
+    const ariaTarget = !state.hoveredTarget
+      && target === state.focusedTarget
+      && targetResolver.isOwnedByContainer(state.focusAriaTarget)
+      ? state.focusAriaTarget
       : target
     presenter.show(target, content, ariaTarget, forcePositionUpdate)
   }
 
+  const schedulePositionRefresh = () => {
+    if (positionRefreshPending) return
+    positionRefreshPending = true
+    const scheduledVersion = positionRefreshVersion
+    void Promise.resolve().then(() => {
+      if (scheduledVersion !== positionRefreshVersion) return
+      positionRefreshPending = false
+      if (state.hoveredTarget || state.focusedTarget) syncActiveTarget(true)
+    })
+  }
+
   const handleMouseOver = (event: MouseEvent) => {
     const nextTarget = targetResolver.findHintTarget(event.target)
-    if (nextTarget !== hoveredTarget) escapeSuppressed = false
-    hoveredTarget = nextTarget
+    if (nextTarget !== state.hoveredTarget) state.escapeSuppressed = false
+    state.hoveredTarget = nextTarget
     syncActiveTarget()
   }
 
   const handleMouseOut = (event: MouseEvent) => {
     const sourceTarget = targetResolver.findHintTarget(event.target)
-    if (!sourceTarget || sourceTarget !== hoveredTarget) return
+    if (!sourceTarget || sourceTarget !== state.hoveredTarget) return
     const nextTarget = targetResolver.findHintTarget(event.relatedTarget)
     // FormItem 内部子节点之间移动不算真正离开当前 Hint 区域。
     if (nextTarget === sourceTarget) return
 
-    hoveredTarget = null
+    state.hoveredTarget = null
     if (nextTarget) {
-      hoveredTarget = nextTarget
+      state.hoveredTarget = nextTarget
       syncActiveTarget()
       return
     }
-    if (focusedTarget) focusSuppressedByPointer = true
+    if (state.focusedTarget) state.focusSuppressedByPointer = true
     syncActiveTarget()
   }
 
   const handleFocusIn = (event: FocusEvent) => {
     const nextTarget = targetResolver.findHintTarget(event.target)
-    if (nextTarget !== focusedTarget) escapeSuppressed = false
-    focusSuppressedByPointer = false
-    focusedTarget = nextTarget
-    focusAriaTarget = event.target instanceof HTMLElement ? event.target : focusedTarget
+    if (nextTarget !== state.focusedTarget) state.escapeSuppressed = false
+    state.focusSuppressedByPointer = false
+    state.focusedTarget = nextTarget
+    state.focusAriaTarget = event.target instanceof HTMLElement ? event.target : state.focusedTarget
     syncActiveTarget()
   }
 
   const handleFocusOut = (event: FocusEvent) => {
     const sourceTarget = targetResolver.findHintTarget(event.target)
-    if (!sourceTarget || sourceTarget !== focusedTarget) return
+    if (!sourceTarget || sourceTarget !== state.focusedTarget) return
     const nextTarget = targetResolver.findHintTarget(event.relatedTarget)
-    if (nextTarget !== focusedTarget) escapeSuppressed = false
-    focusedTarget = nextTarget
-    focusAriaTarget = focusedTarget && event.relatedTarget instanceof HTMLElement
+    if (nextTarget !== state.focusedTarget) state.escapeSuppressed = false
+    state.focusedTarget = nextTarget
+    state.focusAriaTarget = state.focusedTarget && event.relatedTarget instanceof HTMLElement
       ? event.relatedTarget
-      : focusedTarget
+      : state.focusedTarget
     syncActiveTarget()
   }
 
   const handleKeyDown = (event: KeyboardEvent) => {
     if (event.key !== 'Escape' || !presenter.hasActiveTarget()) return
-    escapeSuppressed = true
+    state.escapeSuppressed = true
     presenter.hide()
   }
 
@@ -130,6 +163,8 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
     observedContainer = null
     observer?.disconnect()
     observer = null
+    positionRefreshVersion += 1
+    positionRefreshPending = false
   }
 
   const addListeners = (container: HTMLElement) => {
@@ -140,9 +175,7 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
     container.addEventListener('focusout', handleFocusOut)
     container.addEventListener('keydown', handleKeyDown)
     // Hint 内容、可见性或子树变化时，复用当前目标并在下一次 DOM 更新后刷新定位。
-    observer = new MutationObserver(() => {
-      if (hoveredTarget || focusedTarget) syncActiveTarget(true)
-    })
+    observer = new MutationObserver(schedulePositionRefresh)
     observer.observe(container, {
       attributes: true,
       attributeFilter: [
@@ -160,11 +193,7 @@ export function useFormTableHintTooltip(options: UseFormTableHintTooltipOptions)
   watch(options.containerRef, (container) => {
     // 根节点替换时旧 DOM 引用全部失效，Presenter 与交互状态必须一起清空。
     removeListeners()
-    hoveredTarget = null
-    focusedTarget = null
-    focusAriaTarget = null
-    escapeSuppressed = false
-    focusSuppressedByPointer = false
+    resetInteractionState()
     presenter.hide()
     if (container) addListeners(container)
   }, { immediate: true, flush: 'post' })
