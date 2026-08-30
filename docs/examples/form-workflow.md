@@ -61,7 +61,11 @@ Demo 的“模拟过期响应”会先发起慢请求，再发起快请求；慢
 
 ## 新行身份
 
-页面配置 `row-key="id"`，服务端行使用真实 ID，新行使用不会重复的临时 ID：
+`rowKey` 只负责页面中的稳定行身份。FormTable 不会发起保存请求，也不会在 `tableData` 中自动删除该字段；如果页面把 `tableData` 原样提交，新增时生成的临时身份也会进入请求。根据后端 ID 协议，可以选择以下两种方案。
+
+### 方案一：复用后端 id
+
+当前 Demo 配置 `row-key="id"`，服务端行使用真实 ID，新行使用带固定前缀且不会重复的临时 ID：
 
 ```ts
 const createEmptyRow = () => ({
@@ -73,7 +77,59 @@ const createEmptyRow = () => ({
 })
 ```
 
-提交 DTO 时去掉临时 ID，而不是在编辑过程中修改 `rowKey`。服务端保存成功并返回真实 ID 后，应整体替换对应行。
+提交前必须显式构造 DTO，不能直接发送 `tableData`：
+
+```ts
+const toSubmitDto = ({ id, ...fields }: OrderRow) => (
+  id.startsWith('draft-') ? fields : { id, ...fields }
+)
+
+const payload = tableData.value.map(toSubmitDto)
+```
+
+这种方案的数据结构较简单，适合后端 ID 本身是字符串，并且临时前缀可以保证不与真实 ID 冲突的页面。编辑期间不要通过 `setValue/updateRow` 修改 `id`；服务端保存成功并返回真实 ID 后，由页面使用新的数组和行对象替换对应草稿行。
+
+### 方案二：分离页面 rowKey 与后端 id
+
+如果后端根据 `id` 是否存在区分新增和更新，推荐单独使用 `_rowKey`：
+
+```ts
+interface EditableOrderRow {
+  _rowKey: string
+  id?: string
+  productName: string
+  quantity: number
+}
+
+const createEmptyRow = (): EditableOrderRow => ({
+  _rowKey: createClientRowKey(),
+  productName: '',
+  quantity: 1
+})
+```
+
+```vue
+<FormTable
+  v-model="tableData"
+  :columns="columns"
+  row-key="_rowKey"
+/>
+```
+
+提交时统一剔除页面身份，已有行保留后端 `id`，新行自然没有 `id`：
+
+```ts
+const payload = tableData.value.map(({ _rowKey, ...dto }) => dto)
+```
+
+保存成功后可以保留原 `_rowKey`，只把接口返回的真实 `id` 写入新的行对象。这样不会在同一次编辑会话中改变 FormTable 的行身份，也避免后端把前端临时值误判为需要更新的数据 ID。
+
+| 选择 | 优点 | 需要注意 |
+| --- | --- | --- |
+| 复用 `id` | 页面模型字段更少 | 提交时必须识别并删除临时 ID，保存成功后需要替换行身份 |
+| 分离 `_rowKey` 与 `id` | 前端定位和后端持久化语义清晰，新增/更新容易分流 | 加载和新增时都要生成唯一、稳定的 `_rowKey` |
+
+两种方案都要求 rowKey 在当前表格内唯一且编辑期间保持不变。不要把数组下标或每次渲染重新生成的随机值作为 rowKey；完整身份规则见[稳定身份与异步安全](../features/stable-identity.md)。
 
 ## 派生值与操作列
 
