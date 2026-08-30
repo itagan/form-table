@@ -45,6 +45,12 @@ const FULL_WIDTH_BUILTIN_TYPES = new Set<FormItemType>([
   'time-select'
 ])
 
+const OPTION_COMPONENTS: Partial<Record<FormItemType, string>> = {
+  select: 'el-option',
+  radio: 'el-radio',
+  checkbox: 'el-checkbox'
+}
+
 /** 将 class/style 从普通 attrs 中分离，保持模板 v-bind 在组件上的原生语义。 */
 function createRenderData(
   componentProps: ComponentProps,
@@ -65,21 +71,17 @@ function createOptionChildren(
   options: FormItemOption[],
   optionProps?: OptionPropsConfig
 ): VNode[] | undefined {
-  if (type !== 'select' && type !== 'radio' && type !== 'checkbox') return undefined
-
-  const optionComponent = type === 'select'
-    ? 'el-option'
-    : type === 'radio'
-      ? 'el-radio'
-      : 'el-checkbox'
+  const optionComponent = OPTION_COMPONENTS[type]
+  if (!optionComponent) return undefined
+  const isSelect = type === 'select'
 
   return options.map((option, optionIndex) => {
     const label = getOptionLabel(option, optionProps)
     const data: VNodeData = {
       key: getOptionKey(option, optionIndex, optionProps),
       attrs: {
-        label: type === 'select' ? label : getOptionValue(option, optionProps),
-        value: type === 'select' ? getOptionValue(option, optionProps) : undefined,
+        label: isSelect ? label : getOptionValue(option, optionProps),
+        value: isSelect ? getOptionValue(option, optionProps) : undefined,
         disabled: getOptionDisabled(option, optionProps)
       }
     }
@@ -87,9 +89,46 @@ function createOptionChildren(
     return createElement(
       optionComponent,
       data,
-      type === 'select' ? undefined : [String(label ?? '')]
+      isSelect ? undefined : [String(label ?? '')]
     )
   })
+}
+
+function applyModelBinding(
+  data: ModelVNodeData,
+  component: ResolvedComponentConfig,
+  modelContext: FormTableFieldRenderContext,
+  value: FormTableValue,
+  onModelInput: (value: FormTableValue) => void
+) {
+  const model = component.model
+  const modelValue = model && model.valueToProp
+    ? model.valueToProp(modelContext, value)
+    : value
+
+  if (model === undefined) {
+    // 交给 Vue 在运行时识别组件声明的 model.prop/model.event。
+    data.model = { value: modelValue, callback: onModelInput }
+    return
+  }
+  if (model === false) return
+
+  const prop = model.prop || 'value'
+  const event = model.event || 'input'
+  const configuredListener = component.listeners[event]
+
+  data.attrs = { ...data.attrs, [prop]: modelValue }
+  data.on = {
+    ...data.on,
+    // 与 Vue 原生 v-model 一致：先写回模型，再执行调用方配置的同名监听器。
+    [event]: (...args: unknown[]) => {
+      const nextValue = model.valueFromEvent
+        ? model.valueFromEvent(modelContext, ...args)
+        : args[0]
+      onModelInput(nextValue)
+      configuredListener?.(...args)
+    }
+  }
 }
 
 /**
@@ -128,36 +167,11 @@ export default {
 
     if (!component.is) return createElement('span')
 
-    const model = component.model
-    const modelValue = model && model.valueToProp
-      ? model.valueToProp(modelContext, value)
-      : value
     const data = createRenderData(component.props, component.listeners)
     if (FULL_WIDTH_BUILTIN_TYPES.has(type)) {
       data.class = ['form-table-field-control--full', data.class]
     }
-
-    if (model === undefined) {
-      // 交给 Vue 在运行时识别组件声明的 model.prop/model.event。
-      data.model = { value: modelValue, callback: onModelInput }
-    } else if (model !== false) {
-      const prop = model.prop || 'value'
-      const event = model.event || 'input'
-      const configuredListener = component.listeners[event]
-
-      data.attrs = { ...data.attrs, [prop]: modelValue }
-      data.on = {
-        ...data.on,
-        // 与 Vue 原生 v-model 一致：先写回模型，再执行调用方配置的同名监听器。
-        [event]: (...args: unknown[]) => {
-          const nextValue = model.valueFromEvent
-            ? model.valueFromEvent(modelContext, ...args)
-            : args[0]
-          onModelInput(nextValue)
-          configuredListener?.(...args)
-        }
-      }
-    }
+    applyModelBinding(data, component, modelContext, value, onModelInput)
 
     return createElement(
       component.is as string | Component,
