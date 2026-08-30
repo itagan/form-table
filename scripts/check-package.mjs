@@ -96,6 +96,9 @@ if (!styleSource.includes('.form-table-field-layout') || !styleSource.includes('
 if (!styleSource.includes('.form-table-container .form-table-form-item') || !styleSource.includes('margin-bottom:0')) {
   errors.push('style.css 缺少稳定的 FormItem 间距规则')
 }
+if (!styleSource.includes('.form-table-form-item .form-table-field-control--full') || !styleSource.includes('width:100%')) {
+  errors.push('style.css 缺少固定宽度内置字段的自适应规则')
+}
 if (/data-v-[\da-f]+/.test(styleSource)) {
   errors.push('style.css 仍包含 Vue scoped 编译选择器')
 }

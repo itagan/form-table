@@ -33,8 +33,9 @@ import '@itagan/form-table/style.css'
 | --- | --- | --- |
 | `.form-table-field-layout` | `flex-wrap: wrap` | 同一单元格存在多个字段时允许 Element Row 换行 |
 | `.form-table-container .form-table-form-item` | `margin-bottom: 0` | 去除 Element FormItem 默认底部间距，避免表格行被额外撑高；两级稳定类用于覆盖 Element UI 的尺寸规则 |
+| `.form-table-form-item .form-table-field-control--full` | `width: 100%` | 仅让 Element UI 原本声明固定像素宽度的内置 `number/date/time/time-select` 适配字段列宽 |
 
-这两个类名直接标记对应组件节点，不使用 Vue scoped 生成的 `data-v-*` 选择器，也不会匹配 FormTable 之外的普通 `.el-form-item`。
+这些类名直接标记对应组件节点，不使用 Vue scoped 生成的 `data-v-*` 选择器，也不会匹配 FormTable 之外的普通 `.el-form-item`。宽度规则不覆盖 select、cascader、autocomplete、自定义组件或字段 Slot；业务通过 `component.props.style/class` 仍可恢复固定宽度。
 
 ## 覆盖方式
 
@@ -91,16 +92,17 @@ import '@itagan/form-table/style.css'
 
 这一边界让样式文件可以随组件能力增长，同时保留加载顺序、SSR 行为和业务覆盖的可预测性。
 
-## 迁移验证对比
+## 迁移与当前产物对比
 
-独立 CSS 方案保持规则值不变，只替换选择器来源和覆盖契约：
+独立 CSS 迁移保持原有两条规则值不变，并在后续仅为 Element UI 固定像素宽度字段增加受控适配：
 
 | 对比项 | `1.2.0` scoped 产物 | 独立 CSS 方案 |
 | --- | --- | --- |
 | 字段布局 | `.form-table-container[data-v-*] .form-table-field-layout` | `.form-table-field-layout` |
 | FormItem 间距 | `.form-table-container[data-v-*] .el-table__cell .el-form-item` | `.form-table-container .form-table-form-item` |
+| 固定宽度字段 | 无 | `.form-table-form-item .form-table-field-control--full` |
 | 选择器特异性 | 分别为 `(0,3,0)`、`(0,4,0)` | 分别为 `(0,1,0)`、`(0,2,0)` |
-| 压缩后 CSS | 约 `0.16 KiB` | 约 `0.10 KiB` |
+| 压缩后 CSS | 约 `0.16 KiB` | 约 `0.16 KiB` |
 | JS 入口 CSS 依赖 | 无 | 无 |
 
-在推荐加载顺序下视觉结果等价。FormItem 使用两个稳定类，是因为 Element UI 的 small/mini 间距规则本身具有两级类特异性；若仅使用一个类，即使加载顺序正确也无法覆盖该规则。整体特异性仍低于原 scoped 产物，业务样式在 FormTable CSS 之后使用相同选择器即可覆盖，因此加载顺序属于公开使用约定。
+在推荐加载顺序下，字段换行和 FormItem 间距视觉等价；固定宽度内置字段新增填满列宽行为。FormItem 使用两个稳定类，是因为 Element UI 的 small/mini 间距及 InputNumber 尺寸规则本身具有两级类特异性；若仅使用一个类，即使加载顺序正确也无法覆盖。整体特异性仍低于原 scoped 产物，业务样式在 FormTable CSS 之后使用同级选择器即可覆盖，因此加载顺序属于公开使用约定。

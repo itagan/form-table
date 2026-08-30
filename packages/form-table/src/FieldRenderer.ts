@@ -37,6 +37,14 @@ interface ModelVNodeData extends VNodeData {
   }
 }
 
+/** Element UI 为这些内置字段根节点声明了固定像素宽度，表格内统一适配可用列宽。 */
+const FULL_WIDTH_BUILTIN_TYPES = new Set<FormItemType>([
+  'number',
+  'date',
+  'time',
+  'time-select'
+])
+
 /** 将 class/style 从普通 attrs 中分离，保持模板 v-bind 在组件上的原生语义。 */
 function createRenderData(
   componentProps: ComponentProps,
@@ -125,6 +133,9 @@ export default {
       ? model.valueToProp(modelContext, value)
       : value
     const data = createRenderData(component.props, component.listeners)
+    if (FULL_WIDTH_BUILTIN_TYPES.has(type)) {
+      data.class = ['form-table-field-control--full', data.class]
+    }
 
     if (model === undefined) {
       // 交给 Vue 在运行时识别组件声明的 model.prop/model.event。
