@@ -1,6 +1,12 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
+import {
+  collectMarkdownHeadingIds,
+  decodeAnchor,
+  markdownFileToRoute,
+  validateSidebarRoutes
+} from './docs-check-utils.mjs'
 
 const repositoryRoot = process.cwd()
 const ignoredDirectories = new Set(['node_modules', 'dist', '.vitepress'])
@@ -29,6 +35,7 @@ markdownFiles.push(path.join(repositoryRoot, 'packages/form-table/README.md'))
 const uniqueMarkdownFiles = [...new Set(markdownFiles)]
 const errors = []
 const markdownLinkPattern = /!?\[[^\]]*\]\(([^)]+)\)/g
+const headingIdsByFile = new Map()
 const deprecatedReferences = [
   'guide/row-column-operations',
   'docs/README.md',
@@ -73,6 +80,16 @@ const allowedExampleStatuses = new Set([
   'tool'
 ])
 
+function getHeadingIds(file) {
+  if (!headingIdsByFile.has(file)) {
+    headingIdsByFile.set(
+      file,
+      collectMarkdownHeadingIds(fs.readFileSync(file, 'utf8'))
+    )
+  }
+  return headingIdsByFile.get(file)
+}
+
 for (const file of uniqueMarkdownFiles) {
   const source = fs.readFileSync(file, 'utf8')
   const relativeFile = path.relative(repositoryRoot, file)
@@ -100,18 +117,64 @@ for (const file of uniqueMarkdownFiles) {
       continue
     }
 
-    if (/^(?:https?:|mailto:|#)/.test(rawUrl)) continue
+    if (/^(?:https?:|mailto:)/.test(rawUrl)) continue
 
-    const urlWithoutAnchor = rawUrl.split('#')[0].split('?')[0]
-    if (!urlWithoutAnchor) continue
+    const [urlWithQuery, rawAnchor] = rawUrl.split('#', 2)
+    const urlWithoutAnchor = urlWithQuery.split('?')[0]
 
-    let target = path.resolve(path.dirname(file), decodeURIComponent(urlWithoutAnchor))
-    if (urlWithoutAnchor.endsWith('/')) target = path.join(target, 'index.md')
-    else if (!path.extname(target)) target += '.md'
+    let target = file
+    if (urlWithoutAnchor) {
+      target = path.resolve(path.dirname(file), decodeURIComponent(urlWithoutAnchor))
+      if (urlWithoutAnchor.endsWith('/')) target = path.join(target, 'index.md')
+      else if (!path.extname(target)) target += '.md'
+    }
 
     if (!fs.existsSync(target)) {
       errors.push(`${relativeFile}: 相对链接不存在 ${rawUrl}`)
+      continue
     }
+
+    if (rawAnchor) {
+      const anchor = decodeAnchor(rawAnchor)
+      if (!getHeadingIds(target).has(anchor)) {
+        errors.push(`${relativeFile}: 页面锚点不存在 ${rawUrl}`)
+      }
+    }
+  }
+}
+
+const docsRoot = path.join(repositoryRoot, 'docs')
+const formalDocRoutes = uniqueMarkdownFiles
+  .filter(file => file.startsWith(`${docsRoot}${path.sep}`))
+  .map(file => markdownFileToRoute(path.relative(docsRoot, file)))
+const vitePressConfigSource = fs.readFileSync(
+  path.join(docsRoot, '.vitepress/config.mts'),
+  'utf8'
+)
+const sidebarSource = vitePressConfigSource.match(
+  /sidebar:\s*\[([\s\S]*?)\n\s*\],\n\s*search:/
+)?.[1] || ''
+const sidebarRoutes = [...sidebarSource.matchAll(/\blink:\s*['"](\/[^'"]*)['"]/g)]
+  .map(match => match[1])
+
+if (!sidebarSource) errors.push('docs/.vitepress/config.mts: 无法读取侧边栏配置')
+for (const sidebarError of validateSidebarRoutes(sidebarRoutes, formalDocRoutes)) {
+  errors.push(`docs/.vitepress/config.mts: ${sidebarError}`)
+}
+
+const sharedSetupFacts = [
+  'pnpm add @itagan/form-table@latest',
+  'Vue `>=2.7.1 <3.0.0`',
+  'Element UI `>=2.4.9 <3.0.0`',
+  "import '@itagan/form-table/style.css'"
+]
+for (const relativeFile of [
+  'docs/guide/quick-start.md',
+  'packages/form-table/README.md'
+]) {
+  const source = fs.readFileSync(path.join(repositoryRoot, relativeFile), 'utf8')
+  for (const fact of sharedSetupFacts) {
+    if (!source.includes(fact)) errors.push(`${relativeFile}: 安装与兼容信息缺少 ${fact}`)
   }
 }
 
