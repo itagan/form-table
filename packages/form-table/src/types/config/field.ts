@@ -6,178 +6,38 @@ import type {
   FormTableHintTrigger,
   FormTableHintValue,
   FormTableRecord,
-  FormTableValue,
   TableRow
 } from '../base'
+import type { FormTableFieldRenderContext } from '../context'
 import type {
-  FormTableFieldBindingContext,
-  FormTableFieldContext,
-  FormTableFieldRenderContext
-} from '../context'
+  FieldBindingConfig,
+  FieldComponentConfig,
+  FieldComponentResolver
+} from './field-component'
+import type {
+  EmptyFieldTypeRegistry,
+  FieldTypeRegistry,
+  RegisteredFieldComponentConfig
+} from './field-model'
 
-/** 字段组件事件监听器签名，第一个参数固定为字段上下文。 */
-export type FormTableFieldListener<TRow extends TableRow = TableRow> = (
-  context: FormTableFieldContext<TRow>,
-  ...args: unknown[]
-) => void
-
-/** select、radio、checkbox 等选项型组件的单个选项。 */
-export interface FormItemOption {
-  /** 默认展示文本；可通过 optionProps.label 映射其他字段。 */
-  label?: FormTableValue
-  /** 默认受控值；可通过 optionProps.value 映射其他字段。 */
-  value?: FormTableValue
-  /** 是否禁用当前选项；可通过 optionProps.disabled 映射其他字段。 */
-  disabled?: boolean
-  [key: string]: FormTableValue
-}
-
-/** 将自定义选项对象字段映射到组件所需的标准语义。 */
-export interface OptionPropsConfig {
-  /** 业务选项对象中作为展示文本的字段名。 */
-  label?: string
-  /** 业务选项对象中作为受控值的字段名。 */
-  value?: string
-  /** 业务选项对象中作为禁用状态的字段名。 */
-  disabled?: string
-  /** 业务选项对象中作为渲染 key 的字段名。 */
-  key?: string
-}
-
-interface BaseFieldModelConfig<TRow extends TableRow> {
-  prop?: string
-  /** 将行字段或 binding.map 组合值同步转换为组件 model prop。 */
-  valueToProp?: (
-    context: FormTableFieldRenderContext<TRow>,
-    bindingValue: FormTableValue
-  ) => FormTableValue
-}
-
-/** 严格事件回调仍可存入运行时使用的宽松字段注册表。 */
-type FieldModelValueFromEvent<
-  TRow extends TableRow,
-  TArgs extends unknown[]
-> = {
-  bivarianceHack(
-    context: FormTableFieldRenderContext<TRow>,
-    ...args: TArgs
-  ): FormTableValue
-}['bivarianceHack']
-
-/** 自定义字段 type 可选的事件名到原始参数元组协议。 */
-export type FieldTypeEventMap = Record<string, unknown[]>
-
-type FieldModelForEvent<
-  TRow extends TableRow,
-  TEvents extends Record<keyof TEvents, unknown[]>,
-  TEvent extends Extract<keyof TEvents, string>
-> = BaseFieldModelConfig<TRow> & {
-  event: TEvent
-  /** 从只读字段上下文和当前 model 事件参数同步生成新的绑定值。 */
-  valueFromEvent?: FieldModelValueFromEvent<TRow, TEvents[TEvent]>
-}
-
-/**
- * 自定义字段组件的受控值协议；未配置时使用组件原生 Vue 2 v-model。
- * 显式传入事件表时，event 与 valueFromEvent 参数元组保持关联。
- */
-export type FieldModelConfig<
-  TRow extends TableRow = TableRow,
-  TEvents extends Record<keyof TEvents, unknown[]> = FieldTypeEventMap
-> = string extends keyof TEvents
-  ? BaseFieldModelConfig<TRow> & {
-      event?: string
-      valueFromEvent?: FieldModelValueFromEvent<TRow, unknown[]>
-    }
-  : {
-      [TEvent in Extract<keyof TEvents, string>]: FieldModelForEvent<TRow, TEvents, TEvent>
-    }[Extract<keyof TEvents, string>]
-
-/** 只用于在结构类型中保留 Props/事件协议泛型，不产生运行时代码。 */
-declare const FIELD_TYPE_PROTOCOL: unique symbol
-
-export type FieldTypeListeners<
-  TRow extends TableRow,
-  TEvents extends Record<keyof TEvents, unknown[]>
-> = {
-  [TEvent in Extract<keyof TEvents, string>]?: (
-    context: FormTableFieldContext<TRow>,
-    ...args: TEvents[TEvent]
-  ) => void
-}
-
-/** 使用方注册的轻量字段类型，只描述稳定组件目标、model 和默认属性。 */
-export interface FieldTypeDefinition<
-  TRow extends TableRow = TableRow,
-  TProps extends object = ComponentProps,
-  TEvents extends Record<keyof TEvents, unknown[]> = FieldTypeEventMap
-> {
-  is: string | Component
-  model?: FieldModelConfig<TRow, TEvents> | false
-  props?: DynamicValue<Partial<TProps>, FormTableFieldBindingContext<TRow>>
-}
-
-/** defineFormTableType 返回的协议化定义；品牌仅存在于类型系统。 */
-export type TypedFieldTypeDefinition<
-  TRow extends TableRow = TableRow,
-  TProps extends object = ComponentProps,
-  TEvents extends Record<keyof TEvents, unknown[]> = FieldTypeEventMap
-> = FieldTypeDefinition<TRow, TProps, TEvents> & {
-  readonly [FIELD_TYPE_PROTOCOL]: {
-    props: TProps
-    events: TEvents
-    listeners: FieldTypeListeners<TRow, TEvents>
-  }
-}
-
-/** 自定义字段类型名称到组件协议的实例级注册表。 */
-export type FieldTypeRegistry<TRow extends TableRow = TableRow> = Record<
-  string,
-  FieldTypeDefinition<TRow, any, any>
->
-
-/** 未声明自定义字段类型时使用的严格空注册表。 */
-export type EmptyFieldTypeRegistry = Record<never, never>
-
-/** 在行字段路径与组件受控值路径之间建立可序列化的双向映射。 */
-export interface FieldBindingMapEntry {
-  /** 当前行中需要读取和写回的字段路径。 */
-  fieldPath: string
-  /** 复合组件值中与 fieldPath 对应的字段路径。 */
-  valuePath: string
-  /** 组件值中无法解析 valuePath 时写入 fieldPath 的兜底值。 */
-  fallbackValue?: FormTableValue
-}
-
-/** 一个字段渲染项所使用的复合值映射。 */
-export interface FieldBindingConfig {
-  /** 行字段路径与组件值路径的一对一映射；路径之间不可重复或重叠。 */
-  map: FieldBindingMapEntry[]
-}
-
-/** 根据当前字段所在行同步选择实际渲染组件。 */
-export type FieldComponentResolver<TRow extends TableRow = TableRow> = (
-  context: FormTableFieldRenderContext<TRow>
-) => string | Component | undefined
-
-export interface FieldComponentConfig<TRow extends TableRow = TableRow> {
-  /** 静态 Vue 组件或已注册的组件名称。 */
-  is?: string | Component
-  /** 根据当前字段上下文同步选择组件；返回 undefined 时回退到 is。 */
-  resolveComponent?: FieldComponentResolver<TRow>
-  /** slot 字段在根 FormTable 上对应的具名 Slot。 */
-  slot?: string
-  /** 透传给实际字段组件的属性。 */
-  props?: DynamicValue<ComponentProps, FormTableFieldBindingContext<TRow>>
-  /** 字段组件事件监听器；回调首参固定为可更新的字段上下文。 */
-  listeners?: Record<string, FormTableFieldListener<TRow>>
-  /** select、radio、checkbox 等选项型组件的数据源。 */
-  options?: DynamicValue<FormItemOption[], FormTableFieldRenderContext<TRow>>
-  /** 将业务选项对象字段映射到 label、value、disabled 和 key。 */
-  optionProps?: DynamicValue<OptionPropsConfig, FormTableFieldRenderContext<TRow>>
-  /** 自定义受控值协议；undefined 使用组件原生 Vue 2 v-model，false 禁用写回。 */
-  model?: FieldModelConfig<TRow> | false
-}
+export type {
+  FieldBindingConfig,
+  FieldBindingMapEntry,
+  FieldComponentConfig,
+  FieldComponentResolver,
+  FormItemOption,
+  OptionPropsConfig
+} from './field-component'
+export type {
+  EmptyFieldTypeRegistry,
+  FieldModelConfig,
+  FieldTypeDefinition,
+  FieldTypeEventMap,
+  FieldTypeListeners,
+  FieldTypeRegistry,
+  FormTableFieldListener,
+  TypedFieldTypeDefinition
+} from './field-model'
 
 export type BuiltinFormItemType =
   | 'input' | 'select' | 'date' | 'time' | 'time-select'
@@ -250,57 +110,13 @@ export interface SlotFormItemConfig<TRow extends TableRow = TableRow> extends Ba
   component: FieldComponentConfig<TRow> & { slot: string, is?: never, resolveComponent?: never }
 }
 
-type RegisteredFieldTypeProps<TDefinition> = TDefinition extends {
-  readonly [FIELD_TYPE_PROTOCOL]: { props: object }
-} ? TDefinition[typeof FIELD_TYPE_PROTOCOL]['props'] : ComponentProps
-
-type RegisteredFieldTypeListeners<TRow extends TableRow, TDefinition> =
-  TDefinition extends {
-    readonly [FIELD_TYPE_PROTOCOL]: { listeners: object }
-  }
-    ? TDefinition[typeof FIELD_TYPE_PROTOCOL]['listeners']
-    : Record<string, FormTableFieldListener<TRow>>
-
-type RegisteredFieldTypeEvents<TDefinition> = TDefinition extends {
-  readonly [FIELD_TYPE_PROTOCOL]: { events: infer TEvents }
-}
-  ? TEvents extends Record<keyof TEvents, unknown[]>
-    ? TEvents
-    : FieldTypeEventMap
-  : FieldTypeEventMap
-
-type RegisteredFieldTypeDefinition<TFieldTypes, TType extends PropertyKey> =
-  TFieldTypes extends Record<TType, infer TDefinition>
-    ? TDefinition
-    : never
-
-type CustomFieldComponentConfig<
-  TRow extends TableRow,
-  TDefinition
-> = {
-  props?: DynamicValue<
-    Partial<RegisteredFieldTypeProps<TDefinition>>,
-    FormTableFieldBindingContext<TRow>
-  >
-  listeners?: RegisteredFieldTypeListeners<TRow, TDefinition>
-  model?: FieldModelConfig<TRow, RegisteredFieldTypeEvents<TDefinition>> | false
-  is?: never
-  resolveComponent?: never
-  slot?: never
-  options?: never
-  optionProps?: never
-}
-
 type CustomFormItemConfig<
   TRow extends TableRow,
   TFieldTypes extends FieldTypeRegistry<TRow>
 > = {
   [TType in RegisteredFormItemType<TFieldTypes>]: BaseFormItemConfig<TRow> & {
     type: TType
-    component?: CustomFieldComponentConfig<
-      TRow,
-      RegisteredFieldTypeDefinition<TFieldTypes, TType>
-    >
+    component?: RegisteredFieldComponentConfig<TRow, TFieldTypes, TType>
   }
 }[RegisteredFormItemType<TFieldTypes>]
 
