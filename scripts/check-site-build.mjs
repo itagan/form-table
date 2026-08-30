@@ -79,8 +79,8 @@ if (fs.existsSync(path.join(playgroundDist, 'index.html'))) {
 
 const playgroundAssets = path.join(playgroundDist, 'assets')
 if (fs.existsSync(playgroundAssets)) {
-  const vueVendorEntry = fs
-    .readdirSync(playgroundAssets)
+  const playgroundAssetEntries = fs.readdirSync(playgroundAssets)
+  const vueVendorEntry = playgroundAssetEntries
     .find(file => /^vue-vendor\.[^.]+\.js$/.test(file))
 
   if (!vueVendorEntry) {
@@ -89,6 +89,24 @@ if (fs.existsSync(playgroundAssets)) {
     const vueVendorSource = fs.readFileSync(path.join(playgroundAssets, vueVendorEntry), 'utf8')
     if (/from["']\.\/element-ui\./.test(vueVendorSource)) {
       errors.push('Playground 的 Vue 与 Element UI 分包形成循环依赖，生产页面可能无法启动。')
+    }
+  }
+
+  const playgroundAppEntry = playgroundAssetEntries.find(file => {
+    if (!/\.js$/.test(file) || /-legacy\./.test(file)) return false
+    return fs.readFileSync(path.join(playgroundAssets, file), 'utf8').includes('docsSiteUrl')
+  })
+  if (!playgroundAppEntry) {
+    errors.push('Playground 缺少包含文档返回入口的现代浏览器脚本。')
+  } else {
+    const playgroundAppSource = fs.readFileSync(
+      path.join(playgroundAssets, playgroundAppEntry),
+      'utf8'
+    )
+    const docsSiteUrlIndex = playgroundAppSource.indexOf('docsSiteUrl:')
+    const docsSiteUrlSource = playgroundAppSource.slice(docsSiteUrlIndex, docsSiteUrlIndex + 160)
+    if (!docsSiteUrlSource.includes(JSON.stringify(siteBase))) {
+      errors.push(`Playground 返回文档总站的地址没有使用 ${siteBase} 基址。`)
     }
   }
 }

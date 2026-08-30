@@ -2,7 +2,9 @@
 import examples from '../../examples.json'
 
 // 与 App.vue 的全局返回入口保持一致，可在不同部署环境覆盖文档站地址。
-const docsSiteUrl = import.meta.env.VITE_DOCS_SITE_URL || 'http://localhost:5174/'
+const docsSiteUrl = import.meta.env.VITE_DOCS_SITE_URL
+  || import.meta.env.VITE_SITE_BASE
+  || 'http://localhost:5174/'
 const architectureUrl = `${docsSiteUrl.replace(/\/+$/, '')}/architecture/overview`
 
 const categoryDefinitions = [
