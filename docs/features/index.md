@@ -17,6 +17,7 @@
 | [权限与字段可编辑性](./permissions-and-editing.md) | `visible`、动态组件 Props、Item `meta`、操作 Slot | 页面或 Store 权限策略 | 隐藏、禁用、审批和行锁定边界 |
 | [稳定身份与异步安全](./stable-identity.md) | `rowKey`、Column/Row/Item `key` | 异步 `setValue/updateRow` | 正确定位数据与渲染节点 |
 | [Enter 字段导航](./keyboard-navigation.md) | 根 `navigationOptions` | Enter / Shift+Enter、字段 Ref | 当前挂载字段间前进、后退；[`Demo ↗`](http://localhost:5173/row-column-operations) |
+| [样式定位与属性透传](./style-props.md) | `rowProps/colProps/formItemProps/component.props` | class、style、动态配置和 scoped CSS | 精确调整 Row、Col、FormItem 与字段组件 |
 | [Element UI 能力边界与处理方案](./element-ui-boundaries.md) | `tableProps`、`formProps`、Column props | 排序筛选、树形数据、Form Ref 与 Slot | 透传边界和当前可用替代方案 |
 | [Hint 提示体系](./hint.md) | `hintOptions`、`columns[].headerHint`、Item `hint` | 全局默认、字段覆盖、title/Tooltip 与自定义展示 | [`/hint-scenarios`](http://localhost:5173/hint-scenarios) |
 

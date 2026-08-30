@@ -73,7 +73,7 @@ new Vue({
 }
 ```
 
-单个列或字段使用 `rowProps.style`、`formItemProps.style` 覆盖。完整的构建、SSR、UMD 和嵌套表边界见[样式加载与覆盖契约](../architecture/style-loading.md)。
+单个列或字段可以通过 `rowProps`、`colProps`、`formItemProps` 和 `component.props` 精确传递 class/style。四层节点对应关系、自定义组件根节点和 scoped CSS 写法见[样式定位与属性透传](../features/style-props.md)；构建、SSR、UMD 和嵌套表边界见[样式加载与覆盖契约](../architecture/style-loading.md)。
 
 然后在页面中直接引入并使用 FormTable：
 

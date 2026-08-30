@@ -81,6 +81,8 @@ columns[]                                  ColumnConfig
 
 每个字段单元格固定只渲染一个 `el-row`，其 `type` 默认为 `flex`。可通过 `rowProps.type` 显式覆盖，例如 `{ type: undefined }` 使用 Element UI 普通 Row。每个 Item 对应一个 `el-col`，`span` 默认为 24；多个 Item 可按 24 栅格总和自然换行。非规则的多 Row 布局使用 [`cellSlot`](../features/cell-slot.md) 手写。
 
+`rowProps`、`colProps` 和 `formItemProps` 都接受 Element UI 对应组件支持的 class/style，并与 FormTable 内部稳定类名合并。需要判断样式应该落在哪一层、使用动态 class 或处理 scoped CSS 时，参见[样式定位与属性透传](../features/style-props.md)。
+
 ## 校验路径
 
 Item 的 `fieldKey` 会自动转换为 Element UI 表单路径：
@@ -107,3 +109,4 @@ propPath: tableData.0.profile.city
 | 各层 `visible` 与动态 props | [动态显隐与配置更新](../features/dynamic-configuration.md) |
 | Column / Item `key` | [稳定身份与异步安全](../features/stable-identity.md) |
 | `formItemProps.rules` | [校验、清理与重置](../features/validation-reset.md) |
+| Row / Col / FormItem class、style | [样式定位与属性透传](../features/style-props.md) |
