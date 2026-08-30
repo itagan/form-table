@@ -1,10 +1,9 @@
 import type { FormTableRowPatch, FormTableRowUpdate, TableRow } from '../types/base'
 import type { FormTableFieldChangePayload } from '../types/config/events'
 import type { FormTableUpdateApi } from '../types/context'
-import { applyRowPatch } from '../utils/rowPatch'
+import { buildControlledTableTransaction } from '../utils/controlledTableTransaction'
 import {
   createRowIdentityIndex,
-  getRowIdentity,
   isConfiguredRowKey,
   resolveRowIdentityIndex
 } from '../utils/rowIdentity'
@@ -79,54 +78,23 @@ export function useControlledTableUpdate<TRow extends TableRow = TableRow>(
   const updateRows = (updates: FormTableRowUpdate<TRow>[]) => {
     if (updates.length === 0) return false
 
-    // 整批事务严格按：全部定位 -> 顺序计算 -> 身份校验 -> 单次提交 -> 发事件执行。
     const sourceTableData = synchronousUpdateBase || options.getTableData()
     const rowKey = options.getRowKey()
-    const workingRows = new Map<number, TRow>()
-    const referencedRows = new Map<TRow, number>()
-    const pendingChanges: Array<{
-      index: number
-      fieldKey: string
-      value: unknown
-      previousValue: unknown
-    }> = []
-
-    for (const update of updates) {
-      const rowIndex = resolveUpdateRowIndex(sourceTableData, update.row, rowKey)
-      const currentRow = workingRows.get(rowIndex) || sourceTableData[rowIndex]
-      if (rowIndex < 0 || !currentRow) {
-        if (import.meta.env.DEV && updates.length > 1) {
-          console.warn('[FormTable] updateRows rejected the batch because a target row could not be resolved uniquely.')
-        }
-        return false
-      }
-
-      const { nextRow, changes } = applyRowPatch(currentRow, update.patch)
-      if (
-        isConfiguredRowKey(rowKey)
-        && !Object.is(getRowIdentity(currentRow, rowKey), getRowIdentity(nextRow, rowKey))
-      ) {
-        if (import.meta.env.DEV) {
-          console.warn('[FormTable] rowKey is an immutable row identity; updateRows rejected a patch that changes it.')
-        }
-        return false
-      }
-
-      referencedRows.set(update.row, rowIndex)
-      referencedRows.set(currentRow, rowIndex)
-      if (changes.length === 0) continue
-      workingRows.set(rowIndex, nextRow)
-      referencedRows.set(nextRow, rowIndex)
-      changes.forEach(change => pendingChanges.push({ index: rowIndex, ...change }))
-    }
-
-    if (pendingChanges.length === 0) return false
-
-    // 到这里整批事务已通过全部拒绝条件，只复制一次顶层数组。
-    const nextTableData = [...sourceTableData]
-    workingRows.forEach((row, index) => {
-      nextTableData[index] = row
+    const transaction = buildControlledTableTransaction({
+      sourceTableData,
+      updates,
+      rowKey,
+      resolveRowIndex: row => resolveUpdateRowIndex(sourceTableData, row, rowKey)
     })
+    if (!transaction.ok) {
+      if (import.meta.env.DEV && transaction.reason === 'unresolved-row' && updates.length > 1) {
+        console.warn('[FormTable] updateRows rejected the batch because a target row could not be resolved uniquely.')
+      }
+      if (import.meta.env.DEV && transaction.reason === 'row-identity-changed') {
+        console.warn('[FormTable] rowKey is an immutable row identity; updateRows rejected a patch that changes it.')
+      }
+      return false
+    }
 
     if (
       synchronousIdentityIndex?.source === sourceTableData
@@ -134,21 +102,21 @@ export function useControlledTableUpdate<TRow extends TableRow = TableRow>(
       && isConfiguredRowKey(rowKey)
     ) {
       // rowKey 不可变，因此行内容替换后原索引仍有效，只需推进其数组快照引用。
-      synchronousIdentityIndex.source = nextTableData
+      synchronousIdentityIndex.source = transaction.nextTableData
     } else {
       synchronousIdentityIndex = null
     }
 
-    synchronousUpdateBase = nextTableData
+    synchronousUpdateBase = transaction.nextTableData
     // 同步调用方可能持有事务前后的任意行引用，全部映射到最新位置。
-    referencedRows.forEach((index, row) => synchronousRowIndexes.set(row, index))
+    transaction.referencedRows.forEach((index, row) => synchronousRowIndexes.set(row, index))
     scheduleUpdateBaseReset()
-    options.emitUpdate(nextTableData)
+    options.emitUpdate(transaction.nextTableData)
 
     // 所有字段事件都在唯一一次数组更新后派发，row 指向该行的最终事务结果。
-    pendingChanges.forEach(change => {
+    transaction.changes.forEach(change => {
       options.emitFieldChange({
-        row: nextTableData[change.index],
+        row: transaction.nextTableData[change.index],
         ...change
       })
     })
