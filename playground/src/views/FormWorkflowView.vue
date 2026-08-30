@@ -451,9 +451,18 @@ const confirmDiscardChanges = async () => {
   }
 }
 
-const leavePage = async () => {
-  if (await confirmDiscardChanges()) await router.push('/')
-}
+const leavePage = () => router.push('/')
+
+// 示例站的全局侧栏也会触发路由切换，因此离开保护必须覆盖所有站内入口。
+const removeRouteGuard = router.beforeEach(async (to, from, next) => {
+  if (from.name !== 'form-workflow' || to.path === from.path) {
+    next()
+    return
+  }
+
+  if (await confirmDiscardChanges()) next()
+  else next(false)
+})
 
 const handleBeforeUnload = (event: BeforeUnloadEvent) => {
   if (!dirty.value) return
@@ -468,6 +477,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('beforeunload', handleBeforeUnload)
+  removeRouteGuard()
 })
 </script>
 
