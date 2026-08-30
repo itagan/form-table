@@ -7,9 +7,12 @@ import vue2 from '@vitejs/plugin-vue2'
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const isSiteBuild = mode === 'site'
+  const rawSiteBase = process.env.VITE_SITE_BASE || '/'
+  const sitePath = rawSiteBase.replace(/^\/+|\/+$/g, '')
+  const siteBase = sitePath ? `/${sitePath}/` : '/'
 
   return {
-    base: isSiteBuild ? '/playground/' : '/',
+    base: isSiteBuild ? `${siteBase}playground/` : '/',
     plugins: [
       vue2(),
       legacy({

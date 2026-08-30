@@ -1,9 +1,22 @@
 import { defineConfig } from 'vitepress'
 
 const localPlaygroundUrl = 'http://localhost:5173'
-const playgroundSiteUrl = (process.env.VITE_PLAYGROUND_SITE_URL || localPlaygroundUrl).replace(/\/+$/, '')
+const normalizeSiteBase = (value: string) => {
+  const path = value.replace(/^\/+|\/+$/g, '')
+  return path ? `/${path}/` : '/'
+}
+const siteBase = normalizeSiteBase(process.env.VITE_SITE_BASE || '/')
+const defaultPlaygroundUrl = process.env.VITE_SITE_BASE
+  ? `${siteBase}playground`
+  : localPlaygroundUrl
+const playgroundSiteUrl = (process.env.VITE_PLAYGROUND_SITE_URL || defaultPlaygroundUrl)
+  .replace(/\/+$/, '')
+const playgroundPathPattern = playgroundSiteUrl.startsWith('/')
+  ? new RegExp(`^${playgroundSiteUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:/|$)`)
+  : /^\/playground(?:\/|$)/
 
 export default defineConfig({
+  base: siteBase,
   title: 'FormTable',
   description: 'Vue 2.7 + Element UI editable form table component.',
   lang: 'zh-CN',
@@ -11,7 +24,7 @@ export default defineConfig({
   // Playground 在 VitePress 完成后写入同一 dist，交由 site:check 校验全部实际路由。
   ignoreDeadLinks: [
     /^http:\/\/localhost:517[34](?:\/|$)/,
-    /^\/playground(?:\/|$)/
+    playgroundPathPattern
   ],
   markdown: {
     config(md) {
@@ -41,7 +54,7 @@ export default defineConfig({
       { text: '示例', link: '/examples/' },
       { text: 'Playground', link: `${playgroundSiteUrl}/` },
       { text: 'npm', link: 'https://www.npmjs.com/package/@itagan/form-table' },
-      { text: '源码', link: 'https://gitee.com/itagan/form-table' }
+      { text: '源码', link: 'https://github.com/itagan/form-table' }
     ],
     sidebar: [
       {
@@ -168,6 +181,7 @@ export default defineConfig({
       {
         text: '发布',
         items: [
+          { text: 'GitHub Pages 部署', link: '/migration/github-pages' },
           { text: 'npm 包发布准备', link: '/migration/npm-package' }
         ]
       }
