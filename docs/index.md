@@ -1,30 +1,30 @@
 # FormTable
 
-Vue 2.7 + Element UI 的轻量表格内表单组件。
-
-> 已发布到 npm：[`@itagan/form-table` ↗](https://www.npmjs.com/package/@itagan/form-table) · 可运行示例：[打开 Playground ↗](http://localhost:5173/)
+Vue 2.7 + Element UI 的轻量表格内表单组件，负责字段布局、校验路径和受控数据更新。
 
 ```bash
 pnpm add @itagan/form-table@latest
 ```
 
-## 从这里开始
+[打开 Playground ↗](http://localhost:5173/) · [`@itagan/form-table` on npm ↗](https://www.npmjs.com/package/@itagan/form-table)
 
-| 目标 | 入口 |
+## 选择你的入口
+
+| 当前目标 | 推荐入口 |
 | --- | --- |
-| 从 npm 安装公开包 | [`@itagan/form-table` ↗](https://www.npmjs.com/package/@itagan/form-table) |
-| 第一次接入 | [快速开始](./guide/quick-start.md) |
-| 按当前开发任务找最短路径 | [开发任务导航](./guide/development-workflows.md) |
-| 完成接口加载、编辑、保存和撤销 | [完整编辑提交流程](./examples/form-workflow.md) |
-| 理解组件边界和数据流 | [架构总览](./architecture/overview.md) |
-| 选择内置 Type、组件或 Slot | [扩展模型](./architecture/extension-model.md) |
-| 按完整属性路径查配置 | [API 总览](./api/configuration.md) |
-| 连续理解布局和渲染模式 | [完整配置指南](./guide/configuration-guide.md) |
-| 复用业务组件和高级字段协议 | [业务配置最佳实践](./guide/business-configuration-best-practices.md) |
-| 查动态回调与 Slot 参数 | [Slot 与上下文](./api/contexts.md) |
-| 查事件、Ref 和公开类型 | [事件与 Ref](./api/events-and-ref.md) · [公开类型](./api/types.md) |
-| 查看独立功能和业务示例 | [功能专题](./features/) · [演示索引](./examples/) |
-| 按症状排查渲染、更新和校验问题 | [排错指南](./guide/troubleshooting.md) |
-| 直接运行示例 | [打开 Playground 示例中心 ↗](http://localhost:5173/) |
+| 第一次安装并完成可编辑表格 | [快速开始](./guide/quick-start.md) |
+| 正在开发具体业务功能 | [开发任务导航](./guide/development-workflows.md) |
+| 查询属性、事件、Slot 或 Ref | [API 总览](./api/configuration.md) |
+| 理解受控更新和渲染边界 | [架构总览](./architecture/overview.md) |
+| 接入自定义组件或复杂字段 | [扩展模型](./architecture/extension-model.md) |
+| 查看完整业务组合 | [示例索引](./examples/index.md) |
+| 排查渲染、更新或校验异常 | [排错指南](./guide/troubleshooting.md) |
 
-核心原则：`formItems` 负责字段布局，`type/component/slot` 负责渲染，Element UI 负责组件行为，业务层负责行操作和字段联动。自定义 Type 用于治理已经稳定且重复的业务字段协议，属于高级扩展，不是基础接入的前置步骤。
+## 核心边界
+
+- `formItems` 负责字段布局，`type/component/slot` 负责字段渲染。
+- `tableData` 由页面或 Store 维护，FormTable 通过受控事件写回新数组。
+- Element UI 继续负责具体组件行为；行操作、接口请求和业务联动由页面负责。
+- 自定义字段 Type 用于复用已经稳定的业务组件协议，不是基础接入的前置步骤。
+
+需要连续了解完整配置时阅读[配置指南](./guide/configuration-guide.md)；需要按独立能力查询时进入[功能专题](./features/)。
