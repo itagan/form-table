@@ -2,8 +2,6 @@
 
 ## Unreleased
 
-## 1.3.3 - 2026-09-01
-
 ### Added
 
 - 新增可复用的公共自定义表头 Playground 示例，支持必填标识、图标、Tooltip 和多列共享同一 `headerSlot`。
