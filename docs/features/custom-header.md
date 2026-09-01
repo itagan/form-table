@@ -39,6 +39,79 @@ const columns: ColumnConfig[] = [{
 
 FormTable 会在 Slot 外创建 `.form-table-column-header`。当 `targets` 为 `header` 或 `all` 时，`headerHint` 自动应用于该节点，并作为 title 或表级单实例 Tooltip 的锚点。`headerProps` 也由此外层节点统一应用。
 
+## 必填标识
+
+FormTable 暂不根据 `formItemProps.rules` 自动在表头添加必填标识。一列可能包含多个字段或动态校验规则，表头是否标记为必填应由业务页面决定。
+
+只有星号、颜色等简单展示时，可以通过 `headerProps` 添加 class，再由页面样式实现：
+
+```ts
+{
+  label: '联系人',
+  headerProps: { class: 'is-required' },
+  formItems: [/* Item 配置 */]
+}
+```
+
+```css
+.form-table-column-header.is-required::before {
+  margin-right: 4px;
+  color: #f56c6c;
+  content: '*';
+}
+```
+
+需要根据字段状态动态展示、增加图标或提示等复杂内容时，推荐使用 `headerSlot`，由 Slot 完整控制表头内容。
+
+### 封装公共表头组件
+
+多个列需要统一展示必填标识、图标和说明时，可以让它们复用同一个 `headerSlot`，再按列 `key` 维护展示配置。可运行实现见 [Hint 展示策略与自定义渲染 ↗](http://localhost:5173/hint-scenarios)。
+
+示例中的 `CommonTableHeader` 提供以下业务级 Prop：
+
+| Prop | 用途 |
+| --- | --- |
+| `label` | 最终解析后的表头文本 |
+| `required` | 展示必填星号和读屏文本 |
+| `icon` | Element UI 图标 class |
+| `tooltip` | 图标聚焦或悬停时展示的说明 |
+
+```vue
+<FormTable v-model="tableData" :columns="columns">
+  <template #common-header="{ label, columnConfig }">
+    <CommonTableHeader
+      :label="label"
+      v-bind="headerConfigByKey[columnConfig.key] || {}"
+    />
+  </template>
+</FormTable>
+```
+
+```ts
+const columns: ColumnConfig[] = [{
+  key: 'name-column',
+  label: '姓名',
+  headerSlot: 'common-header',
+  formItems: [{
+    fieldKey: 'name',
+    type: 'input',
+    formItemProps: {
+      rules: [{ required: true, message: '请输入姓名' }]
+    }
+  }]
+}]
+
+const headerConfigByKey = {
+  'name-column': {
+    required: true,
+    icon: 'el-icon-user',
+    tooltip: '必填，填写联系人姓名'
+  }
+}
+```
+
+这里的 `formItemProps.rules.required` 负责真实校验，公共表头组件的 `required` 只负责表头展示和无障碍语义。两者都由业务配置显式声明；FormTable 不会从动态规则中自动推断表头状态。
+
 ## Slot scope
 
 ```ts

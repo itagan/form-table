@@ -22,7 +22,7 @@
     </section>
 
     <section class="hint-card">
-      <h2>表头使用不同参数：headerSlot 自定义</h2>
+      <h2>公共自定义表头：图标、提示与必填标识</h2>
       <FormTable
         v-model="rows"
         :columns="customHeaderColumns"
@@ -30,10 +30,11 @@
         :table-props="tableProps"
         :hint-options="tooltipOptions"
       >
-        <template #amount-header="{ label }">
-          <el-tooltip content="表头独立使用 top 位置" placement="top">
-            <span class="custom-header">{{ label }} <i class="el-icon-question" /></span>
-          </el-tooltip>
+        <template #common-header="{ label, columnConfig }">
+          <CommonTableHeader
+            :label="label"
+            v-bind="getHeaderConfig(columnConfig)"
+          />
         </template>
       </FormTable>
     </section>
@@ -82,6 +83,7 @@ import type {
   FormTableHintOptions,
   TableRow
 } from '@itagan/form-table'
+import CommonTableHeader from '../components/CommonTableHeader.vue'
 import DemoCollapsiblePanel from '../components/DemoCollapsiblePanel.vue'
 
 const rows = ref<TableRow[]>([{ id: 1, name: 'Alice', amount: 128.5 }])
@@ -100,11 +102,48 @@ const columns: ColumnConfig[] = [{
   }]
 }]
 
-const customHeaderColumns: ColumnConfig[] = [{
-  label: '金额',
-  headerSlot: 'amount-header',
-  formItems: [{ fieldKey: 'amount', type: 'number' }]
-}]
+interface CommonHeaderConfig {
+  required?: boolean
+  icon?: string
+  tooltip?: string
+}
+
+const customHeaderColumns: ColumnConfig[] = [
+  {
+    key: 'name-column',
+    label: '姓名',
+    headerSlot: 'common-header',
+    formItems: [{
+      fieldKey: 'name',
+      type: 'input',
+      formItemProps: {
+        rules: [{ required: true, message: '请输入姓名', trigger: 'blur' }]
+      }
+    }]
+  },
+  {
+    key: 'amount-column',
+    label: '金额',
+    headerSlot: 'common-header',
+    formItems: [{ fieldKey: 'amount', type: 'number' }]
+  }
+]
+
+const headerConfigByKey: Record<string, CommonHeaderConfig> = {
+  'name-column': {
+    required: true,
+    icon: 'el-icon-user',
+    tooltip: '必填，填写联系人姓名'
+  },
+  'amount-column': {
+    icon: 'el-icon-money',
+    tooltip: '选填，金额单位为元'
+  }
+}
+
+const getHeaderConfig = (column: ColumnConfig): CommonHeaderConfig => (
+  headerConfigByKey[column.key ?? ''] ?? {}
+)
 
 const slotRows = ref<TableRow[]>([{ id: 2, name: '' }])
 const slotTableRef = ref<FormTableExpose | null>(null)
@@ -150,7 +189,6 @@ const configuration = `hintOptions: {
 .hint-page p { color: #606266; }
 .hint-card { margin-bottom: 20px; padding: 20px; border: 1px solid #ebeef5; border-radius: 8px; background: #fff; }
 .hint-card h2 { margin: 0 0 16px; font-size: 18px; }
-.custom-header { cursor: help; }
 .slot-actions { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; color: #606266; }
 .custom-item-label { display: inline-flex; align-items: center; gap: 4px; }
 .custom-item-error { display: inline-flex; align-items: center; gap: 4px; color: #f56c6c; }
