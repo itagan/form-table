@@ -1,9 +1,30 @@
 ---
 name: release
-description: 为 FormTable 准备、发布和验证新版本。用户要求发布、发版、推送一版、升级版本或同步 GitHub/Gitee/npm 时使用。
+description: 为 FormTable 推送代码、部署文档站，或在满足条件时准备并验证 npm 新版本。用户要求推送、部署、发布、发版、升级版本或同步 GitHub/Gitee/npm 时使用。
 ---
 
-完成一次可验证的双平台版本发布，不要把 Git Tag 、平台“发行版”和 npm 包混为同一个状态。
+先根据变更范围和用户授权选择模式，不要把代码推送、站点部署、Git Tag、平台“发行版”和 npm 包混为同一个状态。
+
+## 代码与文档站部署
+
+仅修改文档、Playground、示例、测试或仓库工程配置，或者用户只要求“推送”“部署”时：
+
+1. 不升级 `packages/form-table/package.json` 版本，不创建版本 Tag 或平台发行版，不发布 npm。
+2. 文档与示例变更可记录在 `CHANGELOG.md` 的 `Unreleased`，但不得据此生成新版本。
+3. 运行与改动相称的检查；部署前至少确保文档、Playground 与站点构建检查通过。
+4. 将最终 `master` 同步到 GitHub `origin` 与 Gitee `gitee`，由 GitHub Pages 工作流部署站点。
+5. 验证两个远端 `master`、GitHub Pages 部署和线上页面；本地工作区保持干净。
+
+## npm 版本发布
+
+只有同时满足以下条件时才进入完整 npm 版本发布：
+
+- 发布包的组件源码、公开 API、样式或构建产物确有需要交付给 npm 用户的变化；
+- 用户明确要求发布 npm、新版本或执行完整发版。
+
+仅有文档或 Playground 示例调整时，即使用户说“推送并部署”，也不得推断为 npm 发布授权。发布包源码发生变化但用户只要求推送或部署时，同样不自动升级版本或发布 npm，应先完成代码与站点部署；是否发 npm 由用户另行明确。
+
+进入 npm 版本发布后，完成一次可验证的双平台版本发布：
 
 1. 检查 `git status`、`git diff`、当前分支、`origin`、`gitee` 和已有 Tag，保留用户变更。读取 npm 官方 Registry 的已发布版本，避免版本冲突。
 2. 根据改动选择语义化版本，同步 `packages/form-table/package.json` 与 `CHANGELOG.md`。将变更按职责拆成清晰提交；如从任务分支发布，按仓库规则合并到 `master`。
