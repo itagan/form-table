@@ -38,8 +38,8 @@ export interface FormTableRowUpdate<TRow extends TableRow = TableRow> {
 /** 支持直接值或根据运行时上下文计算的动态值。 */
 export type DynamicValue<T, Context> = T | ((context: Context) => T)
 
-/** 字段和表头 Hint 的唯一内容协议；false 显式关闭当前目标。 */
-export type FormTableHintValue = string | false | null | undefined
+/** 字段和表头 Hint 的文本内容协议；数字会自动转换为字符串，false 显式关闭当前目标。 */
+export type FormTableHintValue = string | number | false | null | undefined
 /** 整个 FormTable 采用的提示展示方式；false 完全关闭 Hint。 */
 export type FormTableHintMode = false | 'title' | 'tooltip'
 /** 自动提示作用范围；默认仅处理字段。 */
