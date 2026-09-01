@@ -1,6 +1,6 @@
 {
   "name": "@itagan/form-table",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "Vue 2.7 + Element UI editable form table component.",
   "type": "module",
   "main": "./dist/formtable.umd.cjs",

@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 1.3.3 - 2026-09-01
+
+### Added
+
+- 新增可复用的公共自定义表头 Playground 示例，支持必填标识、图标、Tooltip 和多列共享同一 `headerSlot`。
+
+### Changed
+
+- 文档明确 FormTable 不会根据字段校验规则自动推断表头必填状态；简单标识可使用 `headerProps` 配合样式，复杂展示推荐封装业务表头组件并通过 `headerSlot` 渲染。
+
 ## 1.3.2 - 2026-09-01
 
 ### Fixed
