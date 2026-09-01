@@ -13,3 +13,5 @@
 只读分析、代码审查和问题诊断不触发分支、提交或合并。用户明确指定其他分支、提交、合并或推送方式时，以用户指令为准。
 
 用户调用 `$develop` 或要求“开发模式”“标准开发流程”时，读取并执行 `.agents/skills/develop/SKILL.md`。
+
+用户要求“发布”“发版”“推送一版”“升级版本”或同步 GitHub/Gitee/npm 时，读取并执行 `.agents/skills/release/SKILL.md`，不得遗漏 Gitee 代码、Tag 与“发行版”同步。
