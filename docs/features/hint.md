@@ -56,11 +56,12 @@ interface FormTableHintOptions<TRow> {
 
 ## 字段内容规则
 
-Item `hint` 接受静态值或字段上下文回调，结果为 `string | false | null | undefined`：
+Item `hint` 接受静态值或字段上下文回调，结果为 `string | number | false | null | undefined`：
 
 | 结果 | 行为 |
 | --- | --- |
 | 非空字符串 | 覆盖全局字段默认内容 |
+| 数字（包括 `0`） | 转换为字符串并覆盖全局字段默认内容 |
 | `false` | 明确关闭当前字段 Hint |
 | `null` / `undefined` / `''` | 回退到 `hintOptions.field` |
 

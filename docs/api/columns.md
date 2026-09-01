@@ -71,7 +71,7 @@ columns[]                                  ColumnConfig
 | `columns[].formItems[].colProps` | `DynamicValue<ComponentProps, ItemContext>` | `{ span: 24 }` | ItemContext | 透传 `el-col` |
 | `columns[].formItems[].formItemProps` | `DynamicValue<FormTableFormItemProps, ItemContext>` | `{}` | ItemContext | 透传 `el-form-item`；不接受内部管理的 `prop` |
 | `columns[].formItems[].formItemProps.rules` | Element UI Rule(s) | 可选 | Element UI | 字段校验规则 |
-| `columns[].formItems[].hint` | `DynamicValue<FormTableHintValue, ItemContext>` | 可选 | ItemContext | 未声明或空值继承全局，`false` 关闭，非空字符串覆盖 |
+| `columns[].formItems[].hint` | `DynamicValue<FormTableHintValue, ItemContext>` | 可选 | ItemContext | 未声明或空值继承全局，`false` 关闭，非空字符串或数字覆盖 |
 | `columns[].formItems[].hintTrigger` | `'item' \| 'content'` | `'item'` | — | 使用整个 FormItem 或唯一可见内容根节点触发 Hint |
 | `columns[].formItems[].component` | `FieldComponentConfig` | 按 `type` 决定 | ItemContext | 字段组件、Slot 和绑定配置 |
 

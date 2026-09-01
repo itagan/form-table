@@ -18,8 +18,10 @@ const createFieldContext = (value: unknown) => ({
 }) as FormTableFieldRenderContext
 
 describe('FormTable hint utilities', () => {
-  it('normalizes only non-empty strings', () => {
+  it('normalizes non-empty strings and numbers', () => {
     expect(resolveFormTableHint('说明')).toBe('说明')
+    expect(resolveFormTableHint(12)).toBe('12')
+    expect(resolveFormTableHint(0)).toBe('0')
     expect(resolveFormTableHint('')).toBeNull()
     expect(resolveFormTableHint(false)).toBeNull()
     expect(resolveFormTableHint(null)).toBeNull()
@@ -71,6 +73,7 @@ describe('FormTable hint utilities', () => {
     expect(resolveFormTableFieldHint(undefined, createFieldContext(0), true)).toBe('0')
     expect(resolveFormTableFieldHint(undefined, createFieldContext(false), true)).toBe('false')
     expect(resolveFormTableFieldHint(undefined, createFieldContext(null), true)).toBeNull()
+    expect(resolveFormTableFieldHint(0, createFieldContext(0), true)).toBe('0')
     expect(resolveFormTableFieldHint(undefined, context, () => false)).toBeNull()
   })
 })

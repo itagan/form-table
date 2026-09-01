@@ -19,6 +19,7 @@ export const FORM_TABLE_HINT_FIELD_ATTRIBUTE = 'data-form-table-hint-field'
 
 /** 将公开 Hint 值归一化为自动展示使用的字符串。 */
 export function resolveFormTableHint(hint: FormTableHintValue): string | null {
+  if (typeof hint === 'number') return String(hint)
   return typeof hint === 'string' && hint !== '' ? hint : null
 }
 

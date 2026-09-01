@@ -193,4 +193,22 @@ describe('FormTable lightweight hint behavior', () => {
     expect(formatter).toHaveBeenCalledTimes(2)
     wrapper.destroy()
   })
+
+  it('shows a dynamic numeric hint for the initial number value', async () => {
+    const wrapper = mountFormTable({
+      hintOptions: { mode: 'title' },
+      tableData: [{ amount: 0 }],
+      columns: [{
+        label: '金额',
+        formItems: [{ fieldKey: 'amount', type: 'number', hint: ({ value }) => value }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.el-form-item').attributes('title')).toBe('0')
+
+    await wrapper.setProps({ tableData: [{ amount: 12 }] })
+    expect(wrapper.find('.el-form-item').attributes('title')).toBe('12')
+    wrapper.destroy()
+  })
 })

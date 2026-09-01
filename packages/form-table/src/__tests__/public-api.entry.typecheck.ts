@@ -63,6 +63,8 @@ void unsupportedUploadBuiltin
 
 const disabledFieldHint: FormTableHintValue = false
 void disabledFieldHint
+const numericFieldHint: FormTableHintValue = 0
+void numericFieldHint
 const disabledHintMode: FormTableHintMode = false
 const contentHintTrigger: FormTableHintTrigger = 'content'
 const fieldHintTargets: FormTableHintTargets = 'field'
