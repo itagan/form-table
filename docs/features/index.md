@@ -29,7 +29,7 @@
 | [Element 功能列透传](./native-columns.md) | 纯 `columns[].props` | 列事件、`empty/append`、Element Column props | [`/element-columns`](http://localhost:5173/element-columns) |
 | [自定义表头](./custom-header.md) | `columns[].headerSlot` | 父组件同名 scoped Slot | [`/hint-scenarios`](http://localhost:5173/hint-scenarios) |
 | [`cellSlot` 列级单元格](./cell-slot.md) | `columns[].cellSlot` | 父组件同名 scoped Slot | [`/cell-slot`](http://localhost:5173/cell-slot) |
-| [自定义字段组件](./custom-component.md) | Item `type: 'component'` | `component.is/model/props/listeners` | [`/enterprise-components`](http://localhost:5173/enterprise-components) |
+| [自定义字段组件](./custom-component.md) | Item `type: 'component'` | `component.is/model/props/listeners/nativeListeners` | [`/enterprise-components`](http://localhost:5173/enterprise-components) |
 
 这些入口适合单个页面或少量字段。只有组件协议已经跨页面稳定重复时，才升级到下方的自定义 Type。
 

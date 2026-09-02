@@ -14,6 +14,7 @@ columns[].formItems[].component
 │  └─ valueFromEvent
 ├─ props
 ├─ listeners
+├─ nativeListeners
 ├─ options
 └─ optionProps
    ├─ label
@@ -36,6 +37,7 @@ columns[].formItems[].component
 | `...component.model.valueFromEvent` | `(context, ...args) => FormTableValue` | 自定义 model | 只读字段上下文 + 原始事件参数 | 从事件参数提取写回值；注册 type 可关联事件参数元组 |
 | `...component.props` | `DynamicValue<ComponentProps, BindingContext>` | 全部 | ItemContext + 只读 `bindingValue` | 透传实际字段组件 |
 | `...component.listeners` | `Record<string, FormTableFieldListener>` | 全部 | ActionContext + 原始事件参数 | 配置式组件事件 |
+| `...component.nativeListeners` | `FormTableNativeFieldListeners` | 内置 / `component` / 注册 type | ActionContext + DOM Event | 字段根节点原生 DOM 事件 |
 | `...component.options` | `DynamicValue<FormItemOption[], ItemContext>` | 内置 select / radio / checkbox、字段 Slot | ItemContext | 内置模式生成选项子节点；Slot 通过解析后上下文读取 |
 | `...component.optionProps` | `DynamicValue<OptionPropsConfig, ItemContext>` | 内置 select / radio / checkbox、字段 Slot | ItemContext | 内置选项字段映射；Slot 可自行使用 |
 | `...component.optionProps.label` | `string` | 选项型 | — | 选项展示字段 |
@@ -44,6 +46,24 @@ columns[].formItems[].component
 | `...component.optionProps.key` | `string` | 选项型 | — | 选项渲染 key 字段 |
 
 `...` 在表格中缩写了共同前缀 `columns[].formItems[]`。
+
+`listeners` 监听组件通过 `$emit` 发出的事件；`nativeListeners` 监听字段组件根节点的标准 DOM 事件。后者适合只读 `el-input` 点击查看、原生键盘和鼠标交互等组件本身没有发出同名业务事件的场景：
+
+```ts
+component: {
+  props: { readonly: true },
+  nativeListeners: {
+    click({ row }, event) {
+      event.stopPropagation()
+      openDetail(row)
+    }
+  }
+}
+```
+
+事件名按标准 DOM 事件推导参数类型，例如 `click` 为 `MouseEvent`、`keydown` 为 `KeyboardEvent`。FormTable 不解析 `.stop/.prevent/.self/.once/.capture/.passive` 等模板修饰符；需要阻止传播、阻止默认行为或过滤目标时直接操作事件对象。同一事件同时出现在 `listeners` 和 `nativeListeners` 时，两者独立生效，不会去重。
+
+`type: 'text'` 的实际目标是原生 `span`，FormTable 会在内部把 `nativeListeners` 适配为普通 DOM listener；若与原有 `listeners` 配置同名事件，先执行 `listeners`，再执行 `nativeListeners`。字段 Slot 的内容由调用方创建，因此不接受 `nativeListeners`，请在 Slot 模板中显式使用 `@click.native` 等监听方式。
 
 `component.props` 中的普通键按实际组件 Prop/attribute 透传；`class/style` 会按 Vue 2 VNode 原生语义应用到实际组件根节点，不会作为同名普通业务 Prop 传入，也不会影响 model、其他 Props 或 listeners。需要控制自定义组件内部节点时，请为组件设计 `panelClass/contentStyle` 等明确 Prop。完整示例和 scoped CSS 边界见[样式定位与属性透传](../features/style-props.md)。
 
@@ -79,7 +99,7 @@ component: {
 | 内置类型 | 由 FormTable 映射，不接受 `is/resolveComponent/slot` | 默认双向绑定 |
 | `component` | 必须提供 `is` 或 `resolveComponent` | 默认 Vue 2 v-model，可自定义 |
 | `slot` | `slot` 必须是静态 Slot 名称 | FormTable 不为 Slot 内组件自动绑定 |
-| 注册 type | `is` 来自 `fieldTypes`；Item 仅允许 `props/listeners/model` | 继承注册 model，Item 可整体覆盖 |
+| 注册 type | `is` 来自 `fieldTypes`；Item 仅允许 `props/listeners/nativeListeners/model` | 继承注册 model，Item 可整体覆盖 |
 
 注册 type 的默认 props 与字段 props 浅合并，字段优先；Item 不能覆盖 `is` 或使用 `resolveComponent/slot/options/optionProps`。完整注册方式见[自定义字段 Type](../features/custom-field-types.md)。
 

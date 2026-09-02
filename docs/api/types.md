@@ -3,7 +3,7 @@
 包入口导出：
 
 - `ColumnConfig`、`LayoutColumnConfig`、`CellSlotColumnConfig`、`NativeColumnConfig`、`FormItemConfig`
-- `FieldComponentConfig`、`FieldModelConfig`、`FieldComponentResolver`、`FieldBindingConfig`、`FieldBindingMapEntry`、`BuiltinFormItemType`
+- `FieldComponentConfig`、`FieldModelConfig`、`FieldComponentResolver`、`FormTableNativeFieldListeners`、`FieldBindingConfig`、`FieldBindingMapEntry`、`BuiltinFormItemType`
 - `FieldTypeDefinition`、`TypedFieldTypeDefinition`、`FieldTypeRegistry`、`EmptyFieldTypeRegistry`、`FieldTypeEventMap`、`FieldTypeListeners`
 - `FormItemOption`、`OptionPropsConfig`
 - `FormTableHintValue`、`FormTableHintMode`、`FormTableHintTargets`、`FormTableHintTrigger`、`FormTableFieldHintFormatter`、`FormTableHintOptions`
@@ -118,7 +118,7 @@ type FormItemConfig =
   | { type: BuiltinFormItemType; component?: FieldComponentConfig }
   | {
       type: keyof TFieldTypes
-      component?: Pick<FieldComponentConfig, 'props' | 'listeners' | 'model'>
+      component?: Pick<FieldComponentConfig, 'props' | 'listeners' | 'nativeListeners' | 'model'>
     }
   | {
       type: 'component'
@@ -127,10 +127,16 @@ type FormItemConfig =
         | { is?: never; resolveComponent: FieldComponentResolver }
       ) & { options?: never; optionProps?: never }
     }
-  | { type: 'slot'; component: FieldComponentConfig & { slot: string } }
+  | {
+      type: 'slot'
+      component: Omit<FieldComponentConfig, 'nativeListeners'> & {
+        slot: string
+        nativeListeners?: never
+      }
+    }
 ```
 
-所有 Item 都支持可选 `key` 作为稳定渲染身份，并要求 `fieldKey` 指向行数据路径。`key` 不参与取值、更新或表单校验路径计算。注册 type 的 Item 只允许 `component.props/listeners/model`，实际组件 `is` 由注册定义提供。Item 还可通过 `labelSlot/errorSlot` 引用 FormTable 上的具名 Slot；两者都获得字段操作上下文和 `propPath: string | undefined`，Error Slot 额外获得 `error`。
+所有 Item 都支持可选 `key` 作为稳定渲染身份，并要求 `fieldKey` 指向行数据路径。`key` 不参与取值、更新或表单校验路径计算。注册 type 的 Item 只允许 `component.props/listeners/nativeListeners/model`，实际组件 `is` 由注册定义提供。Item 还可通过 `labelSlot/errorSlot` 引用 FormTable 上的具名 Slot；两者都获得字段操作上下文和 `propPath: string | undefined`，Error Slot 额外获得 `error`。
 
 三种 Item 也共享可选的静态 `meta: FormTableRecord`。FormTable 原样保留该对象但不解析或自动透传，动态配置、listener 和 Slot 通过 `itemConfig.meta` 读取。需要动态差异时应读取当前 `row/value` 或提供另一份 Item 配置，而不是把 `meta` 配置为函数。
 
@@ -147,8 +153,9 @@ interface ComponentItemShape {
 
 interface SlotItemShape {
   type: 'slot'
-  component: FieldComponentConfig & {
+  component: Omit<FieldComponentConfig, 'nativeListeners'> & {
     slot: string
+    nativeListeners?: never
   }
 }
 ```
@@ -170,11 +177,12 @@ Field 布局与 Hint 求值   → Row 信息 + fieldKey, value, itemConfig
 resolveComponent/options/optionProps → Field 信息
 component.props          → Field 信息 + bindingValue（只读）
 component.listeners      → Props 信息 + setValue, setBindingValue, updateRow
+component.nativeListeners → 同一更新上下文 + 标准 DOM Event
 字段 slot                → Listener 信息 + propPath, component
 列级 cellSlot            → row, index, displayIndex, columnConfig, updateRow
 ```
 
-`FormTableSlotContext.itemConfig.component` 保留调用方传入的原始配置；`FormTableSlotContext.component` 包含针对当前数据行解析并归一化后的 `props/listeners/options/optionProps/model`，用于直接绑定 Slot 内组件。该解析结果不再作为独立顶层类型导出。
+`FormTableSlotContext.itemConfig.component` 保留调用方传入的原始配置；`FormTableSlotContext.component` 包含针对当前数据行解析并归一化后的 `props/listeners/options/optionProps/model`，用于直接绑定 Slot 内组件。字段 Slot 不接受 `nativeListeners`，因为实际组件和根节点由调用方创建；该解析结果不再作为独立顶层类型导出。
 
 组件 Props 使用独立的只读绑定上下文：
 
@@ -208,6 +216,8 @@ type FieldModelConfig<
 ```
 
 `FieldComponentConfig.model` 未配置时保留 Vue 2 原生 `v-model`；配置 `FieldModelConfig` 时使用指定 prop/event，并可通过 `valueToProp/valueFromEvent` 处理非对称值；配置 `false` 时不注入模型绑定。两个转换都获得只读字段渲染上下文。为 `FieldModelConfig` 或 `defineFormTableType` 提供事件表后，`event` 只能使用声明过的名称，`valueFromEvent` 的剩余参数随该事件的参数元组推导。
+
+`FormTableNativeFieldListeners<TRow>` 描述字段组件根节点的标准 DOM 事件。事件回调首参为可更新的 `FormTableFieldContext<TRow>`，第二个参数按事件名从 `GlobalEventHandlersEventMap` 推导；它独立于自定义 Type 的 `$emit` 事件表和 model 协议。
 
 ```ts
 type EmployeeModel = FieldModelConfig<PurchaseRow, {

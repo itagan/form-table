@@ -182,6 +182,7 @@ Item   → Row 信息 + fieldKey, value, itemConfig
 | `rowProps` 动态配置 | `row/index/displayIndex` | — |
 | Item 动态配置 | `fieldKey/value` | — |
 | `component.listeners` | Item 全部数据 | `setValue/updateRow` |
+| `component.nativeListeners` | Item 全部数据 + DOM Event | `setValue/updateRow` |
 | 字段 Slot | Item 全部数据与已解析组件 | `setValue/updateRow` |
 | `cellSlot` | `row/index/displayIndex/columnConfig` | `updateRow` |
 
@@ -199,6 +200,22 @@ listeners: {
   }
 }
 ```
+
+`listeners` 对应组件 `$emit`；组件没有发出所需事件时，用 `nativeListeners` 监听根节点 DOM。例如只读 `el-input` 可直接响应点击查看详情：
+
+```ts
+component: {
+  props: { readonly: true },
+  nativeListeners: {
+    click({ row }, event) {
+      event.stopPropagation()
+      openDetail(row.id)
+    }
+  }
+}
+```
+
+原生事件的阻止传播、默认行为和目标过滤直接通过事件对象完成，不在事件名中书写 Vue 模板修饰符。
 
 ### 动态显隐
 
