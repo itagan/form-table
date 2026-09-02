@@ -92,7 +92,7 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([{
 | `model` | Vue 2 model prop、事件、`valueToProp/valueFromEvent`，或 `false` |
 | `props` | 静态或按只读绑定上下文求值的默认属性 |
 
-自定义 type 的 Item `component` 只允许 `props/listeners/model`：
+自定义 type 的 Item `component` 只允许 `props/listeners/nativeListeners/model`：
 
 - 注册 props 和字段 props 分别求值后浅合并，字段 props 优先；
 - 注册默认 props 与 Item props 都可读取只读 `bindingValue`；不包含更新助手；

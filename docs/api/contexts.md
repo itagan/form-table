@@ -67,6 +67,7 @@ Slot 名称应保持稳定，不拼接行下标或当前字段值。需要区分
 | `resolveComponent/options/optionProps` | Item 数据 | Item 配置 | — | — |
 | `component.props` | Item 数据 + `bindingValue` | Item 配置 | — | — |
 | `component.listeners[event]` | Item 数据 | Item 配置 | `setValue, setBindingValue, updateRow` | — |
+| `component.nativeListeners[event]` | Item 数据 | Item 配置 | `setValue, setBindingValue, updateRow` | DOM Event |
 | 字段 Slot | Item 数据 | Item 配置 | `setValue, setBindingValue, updateRow` | `propPath, component` |
 | FormItem Label Slot | Item 数据 | Item 配置 | `setValue, setBindingValue, updateRow` | `propPath` |
 | FormItem Error Slot | Item 数据 | Item 配置 | `setValue, setBindingValue, updateRow` | `propPath, error` |
@@ -83,6 +84,7 @@ Slot 名称应保持稳定，不拼接行下标或当前字段值。需要区分
 | `...component.resolveComponent/options/optionProps` | `FormTableFieldRenderContext` |
 | `...component.props` | `FormTableFieldBindingContext` |
 | `...component.listeners[event]` | `FormTableFieldContext, ...原始事件参数` |
+| `...component.nativeListeners[event]` | `FormTableFieldContext, DOM Event` |
 
 `cellSlot` 和表头 Slot 是 Vue scoped Slot，不是 `DynamicValue` 配置回调。
 
@@ -109,7 +111,7 @@ Slot 名称应保持稳定，不拼接行下标或当前字段值。需要区分
 | 更新 | `setValue, setBindingValue, updateRow` |
 | 校验 / 解析 | `propPath, component` |
 
-`itemConfig.component` 是未解析的原始配置；`component` 是当前行已解析的 `props/listeners/options/optionProps/model`。`component.props` 使用只读 `FormTableFieldBindingContext`，比普通字段渲染上下文多一个 `bindingValue`，但不提供更新助手；listener 使用完整字段上下文，增加 `setValue/setBindingValue/updateRow`。未配置 `binding.map` 时，`bindingValue/setBindingValue` 等同于当前字段的 `value/setValue`；配置后按映射一次读写多个字段。`resolveComponent/options/optionProps` 仍使用 `FormTableFieldRenderContext`，不会收到 `bindingValue`。
+`itemConfig.component` 是未解析的原始配置；`component` 是当前行已解析的 `props/listeners/options/optionProps/model`。`component.props` 使用只读 `FormTableFieldBindingContext`，比普通字段渲染上下文多一个 `bindingValue`，但不提供更新助手；listener 使用完整字段上下文，增加 `setValue/setBindingValue/updateRow`。字段 Slot 不接受 `nativeListeners`，原生 DOM 事件应在 Slot 模板内显式监听。未配置 `binding.map` 时，`bindingValue/setBindingValue` 等同于当前字段的 `value/setValue`；配置后按映射一次读写多个字段。`resolveComponent/options/optionProps` 仍使用 `FormTableFieldRenderContext`，不会收到 `bindingValue`。
 
 `itemConfig.meta` 是使用方声明的静态业务元数据，所有字段上下文都会保留同一个原始对象。多个字段可以复用同一个 Slot，并用 `meta` 表达业务角色而不是判断数据路径：
 

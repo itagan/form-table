@@ -36,6 +36,7 @@ export type {
   FieldTypeListeners,
   FieldTypeRegistry,
   FormTableFieldListener,
+  FormTableNativeFieldListeners,
   TypedFieldTypeDefinition
 } from './field-model'
 
@@ -107,7 +108,12 @@ export interface ComponentFormItemConfig<TRow extends TableRow = TableRow> exten
 export interface SlotFormItemConfig<TRow extends TableRow = TableRow> extends BaseFormItemConfig<TRow> {
   type: 'slot'
   /** 必须通过 slot 指定具名 Slot，不创建实际字段组件。 */
-  component: FieldComponentConfig<TRow> & { slot: string, is?: never, resolveComponent?: never }
+  component: Omit<FieldComponentConfig<TRow>, 'nativeListeners'> & {
+    slot: string
+    is?: never
+    resolveComponent?: never
+    nativeListeners?: never
+  }
 }
 
 type CustomFormItemConfig<

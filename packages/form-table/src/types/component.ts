@@ -26,6 +26,8 @@ export interface ResolvedComponentConfig<TRow extends TableRow = TableRow> {
   props: ComponentProps
   /** 已注入字段更新上下文的组件监听器。 */
   listeners: Record<string, (...args: unknown[]) => void>
+  /** 已注入字段更新上下文的组件根节点原生监听器。 */
+  nativeListeners: Record<string, (event: Event) => void>
   /** 已解析的选项型组件数据。 */
   options: FormItemOption[]
   /** 选项对象字段映射。 */

@@ -9,7 +9,11 @@ import type {
   FormTableFieldBindingContext,
   FormTableFieldRenderContext
 } from '../context'
-import type { FieldModelConfig, FormTableFieldListener } from './field-model'
+import type {
+  FieldModelConfig,
+  FormTableFieldListener,
+  FormTableNativeFieldListeners
+} from './field-model'
 
 /** select、radio、checkbox 等选项型组件的单个选项。 */
 export interface FormItemOption {
@@ -59,6 +63,8 @@ export interface FieldComponentConfig<TRow extends TableRow = TableRow> {
   props?: DynamicValue<ComponentProps, FormTableFieldBindingContext<TRow>>
   /** 字段组件事件监听器；回调首参固定为可更新的字段上下文。 */
   listeners?: Record<string, FormTableFieldListener<TRow>>
+  /** 字段组件根节点的原生 DOM 事件监听器；回调首参固定为可更新的字段上下文。 */
+  nativeListeners?: FormTableNativeFieldListeners<TRow>
   /** select、radio、checkbox 等选项型组件的数据源。 */
   options?: DynamicValue<FormItemOption[], FormTableFieldRenderContext<TRow>>
   /** 将业务选项对象字段映射到 label、value、disabled 和 key。 */

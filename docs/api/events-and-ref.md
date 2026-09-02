@@ -68,6 +68,7 @@ function handleHeaderClick(column: FormTableElementColumn, event: MouseEvent) {
 | `@field-change="handler"` | `{ row, index, fieldKey, value, previousValue }` | 否 |
 | `@form-validate="handler"` | `propPath, valid, message` | 否 |
 | `component.listeners[event]` | `ActionContext, ...组件原始事件参数` | 是 |
+| `component.nativeListeners[event]` | `ActionContext, DOM Event` | 是 |
 | `cellSlot` scoped Slot | `{ row, index, displayIndex, columnConfig, updateRow }` | 是 |
 | Element Table 原生事件 | Element UI 原始事件参数 | 否 |
 
@@ -163,6 +164,22 @@ component: {
 ```
 
 如果组件执行 `$emit('xx', arg1, arg2)`，回调即收到 `fieldContext, arg1, arg2`。上下文不会包含 Column/Row 层不存在的占位字段。
+
+组件没有 `$emit` 对应事件时，可通过 `nativeListeners` 监听其根节点 DOM。下面的只读 Input 点击后打开当前行详情，不需要用 focus 模拟点击：
+
+```ts
+component: {
+  props: { readonly: true },
+  nativeListeners: {
+    click({ row }, event) {
+      event.stopPropagation()
+      openDetail(row)
+    }
+  }
+}
+```
+
+原生监听器同样在触发时取得当前字段上下文。事件目标是组件根节点；前后缀、清除按钮等内部节点的冒泡事件也可能到达监听器，需要时通过 `event.target` 判断。声明式事件修饰符不属于配置 API。
 
 上下文中的 `value` 是事件回调执行时的当前字段值，不等同于组件刚刚发出的新值；新值仍按组件原始事件参数传入。
 

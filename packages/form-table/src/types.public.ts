@@ -41,6 +41,7 @@ export type {
   FormTableFieldHintFormatter,
   FormTableHintOptions,
   FormTableNavigationOptions,
+  FormTableNativeFieldListeners,
   FormTableProps,
   FormTableRecord,
   FormTableRowPatch,
