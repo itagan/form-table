@@ -9,6 +9,7 @@ import type {
   FormItemConfig,
   FieldComponentConfig,
   FormTableFieldListener,
+  FormTableNativeFieldListeners,
   FieldTypeDefinition,
   FieldTypeRegistry,
   FormTableFieldBindingContext,
@@ -78,6 +79,20 @@ const resolveComponentListeners = <TRow extends TableRow>(
   return resolved
 }
 
+const resolveComponentNativeListeners = <TRow extends TableRow>(
+  listeners: FormTableNativeFieldListeners<TRow>,
+  getFieldContext: () => FormTableFieldContext<TRow>
+) => {
+  const resolved: Record<string, (event: Event) => void> = {}
+  for (const name of Object.keys(listeners)) {
+    const listener = listeners[name as keyof GlobalEventHandlersEventMap] as (
+      (context: FormTableFieldContext<TRow>, event: Event) => void
+    ) | undefined
+    resolved[name] = event => listener?.(getFieldContext(), event)
+  }
+  return resolved
+}
+
 /**
  * 将公开的字段配置归一化为函数式字段渲染器可直接消费的渲染配置。
  * 动态组件、props 和 options 都集中在同一个 computed 中求值一次。
@@ -92,6 +107,7 @@ export function useResolvedFieldComponent<TRow extends TableRow = TableRow>(
     const component = config.component
     const typeDefinition = resolveTypeDefinition(config.type, options.fieldTypes.value)
     const listeners = component?.listeners || {}
+    const nativeListeners = component?.nativeListeners || {}
 
     return {
       is: resolveComponentTarget(config, context, typeDefinition),
@@ -105,6 +121,10 @@ export function useResolvedFieldComponent<TRow extends TableRow = TableRow>(
         options.hintTrigger.value
       ),
       listeners: resolveComponentListeners(listeners, () => options.fieldContext.value),
+      nativeListeners: resolveComponentNativeListeners(
+        nativeListeners,
+        () => options.fieldContext.value
+      ),
       options: resolveDynamicValue(component?.options, context) || [],
       optionProps: resolveDynamicValue(component?.optionProps, context),
       model: component?.model ?? typeDefinition?.model

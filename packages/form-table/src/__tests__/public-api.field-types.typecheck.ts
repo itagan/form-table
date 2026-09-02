@@ -193,6 +193,12 @@ const businessColumns = defineFormTableColumns<BusinessRow, typeof businessField
           keyword.toLowerCase()
         }
       },
+      nativeListeners: {
+        click({ row }, event) {
+          row.departmentId.toLowerCase()
+          event.clientX.toFixed(0)
+        }
+      },
       model: { prop: 'selectedId', event: 'user-confirm' }
     }
   }, {

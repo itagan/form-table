@@ -17,6 +17,14 @@ export type FormTableFieldListener<TRow extends TableRow = TableRow> = (
   ...args: unknown[]
 ) => void
 
+/** 字段组件根节点支持的标准 DOM 事件监听器。 */
+export type FormTableNativeFieldListeners<TRow extends TableRow = TableRow> = {
+  [TEvent in keyof GlobalEventHandlersEventMap]?: (
+    context: FormTableFieldContext<TRow>,
+    event: GlobalEventHandlersEventMap[TEvent]
+  ) => void
+}
+
 interface BaseFieldModelConfig<TRow extends TableRow> {
   prop?: string
   /** 将行字段或 binding.map 组合值同步转换为组件 model prop。 */
@@ -145,6 +153,7 @@ export type RegisteredFieldComponentConfig<
     TRow,
     RegisteredFieldTypeDefinition<TFieldTypes, TType>
   >
+  nativeListeners?: FormTableNativeFieldListeners<TRow>
   model?: FieldModelConfig<
     TRow,
     RegisteredFieldTypeEvents<RegisteredFieldTypeDefinition<TFieldTypes, TType>>

@@ -54,15 +54,32 @@ const OPTION_COMPONENTS: Partial<Record<FormItemType, string>> = {
 /** 将 class/style 从普通 attrs 中分离，保持模板 v-bind 在组件上的原生语义。 */
 function createRenderData(
   componentProps: ComponentProps,
-  componentListeners: Record<string, (...args: unknown[]) => void>
+  componentListeners: Record<string, (...args: unknown[]) => void>,
+  nativeListeners: Record<string, (event: Event) => void>,
+  isNativeElement = false
 ): ModelVNodeData {
   const { class: className, style, ...attrs } = componentProps
-  return {
+  const data: ModelVNodeData = {
     attrs,
     class: className,
     style,
     on: { ...componentListeners }
   }
+  if (isNativeElement) {
+    for (const name of Object.keys(nativeListeners)) {
+      const componentListener = componentListeners[name]
+      const nativeListener = nativeListeners[name]
+      data.on![name] = componentListener
+        ? (...args: unknown[]) => {
+            componentListener(...args)
+            nativeListener(args[0] as Event)
+          }
+        : nativeListener
+    }
+  } else {
+    data.nativeOn = { ...nativeListeners }
+  }
+  return data
 }
 
 function createOptionChildren(
@@ -160,14 +177,23 @@ export default {
     if (type === 'text') {
       return createElement(
         'span',
-        createRenderData(component.props, component.listeners),
+        createRenderData(
+          component.props,
+          component.listeners,
+          component.nativeListeners,
+          true
+        ),
         [String(value ?? '')]
       )
     }
 
     if (!component.is) return createElement('span')
 
-    const data = createRenderData(component.props, component.listeners)
+    const data = createRenderData(
+      component.props,
+      component.listeners,
+      component.nativeListeners
+    )
     if (FULL_WIDTH_BUILTIN_TYPES.has(type)) {
       data.class = ['form-table-field-control--full', data.class]
     }

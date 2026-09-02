@@ -6,6 +6,7 @@ import {
   type FormTableEmits,
   type FormTableFilterChangePayload,
   type FormTableNavigationOptions,
+  type FormTableNativeFieldListeners,
   type FormTableRowPatch,
   type FormTableRowUpdate,
   type FormTableSortChangePayload
@@ -22,6 +23,19 @@ interface PurchaseRow {
   }>
 }
 
+const nativeFieldListeners: FormTableNativeFieldListeners<PurchaseRow> = {
+  click(context, event) {
+    context.row.amount.toFixed(2)
+    event.clientX.toFixed(0)
+    // @ts-expect-error click is inferred as MouseEvent, not KeyboardEvent.
+    event.key.toLowerCase()
+  },
+  keydown(context, event) {
+    context.updateRow({ amount: 100 })
+    event.key.toLowerCase()
+  }
+}
+
 export const typedColumns = defineFormTableColumns<PurchaseRow>([{
   label: '采购信息',
   visible: ({ tableData }) => {
@@ -35,6 +49,7 @@ export const typedColumns = defineFormTableColumns<PurchaseRow>([{
       type: 'input',
       component: {
         props: ({ row }) => ({ placeholder: row.name }),
+        nativeListeners: nativeFieldListeners,
         listeners: {
           change(context) {
             context.updateRow({ amount: 100 })

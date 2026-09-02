@@ -6,6 +6,7 @@ import type {
   FieldComponentConfig,
   FieldComponentResolver,
   FieldModelConfig,
+  FormItemConfig,
   LayoutColumnConfig,
   NativeColumnConfig
 } from '../index'
@@ -43,6 +44,17 @@ export const columns: ColumnConfig[] = [{
       }
   ]
 }]
+
+const invalidSlotNativeListeners: Extract<FormItemConfig, { type: 'slot' }> = {
+  fieldKey: 'actions',
+  type: 'slot',
+  component: {
+    slot: 'actions',
+    // @ts-expect-error Slot 内容由调用方渲染，不接受 nativeListeners。
+    nativeListeners: { click: () => undefined }
+  }
+}
+void invalidSlotNativeListeners
 
 const cellSlotColumn: CellSlotColumnConfig = {
   key: 'actions-column',
