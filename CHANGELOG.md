@@ -6,6 +6,7 @@
 
 - 新增可复用的公共自定义表头 Playground 示例，支持必填标识、图标、Tooltip 和多列共享同一 `headerSlot`。
 - 新增字段组件 `nativeListeners` 配置，可携带字段更新上下文监听 Element UI、直接组件、注册 Type 和 `text` 根节点的标准 DOM 事件。
+- 新增字段组件事件专题，集中说明 model、组件 `$emit`、根节点 DOM 事件、`text` 和 Slot 的选择及执行边界。
 
 ### Changed
 

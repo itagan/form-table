@@ -130,7 +130,8 @@ export default defineConfig({
               { text: 'Element 功能列透传', link: '/features/native-columns' },
               { text: '自定义表头', link: '/features/custom-header' },
               { text: 'cellSlot 列级单元格', link: '/features/cell-slot' },
-              { text: '自定义字段组件', link: '/features/custom-component' }
+              { text: '自定义字段组件', link: '/features/custom-component' },
+              { text: '字段组件事件与原生事件', link: '/features/component-events' }
             ]
           },
           {
