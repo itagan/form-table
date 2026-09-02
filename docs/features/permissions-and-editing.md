@@ -36,6 +36,8 @@ const columns: ColumnConfig[] = [{
 
 Select、日期选择器和上传等组件通常使用 `disabled`。如果详情不应继续挂载编辑组件，不要把权限逻辑和渲染模式混成一个布尔值；由页面先决定用户是否能进入编辑，再按[详情与编辑模式](./detail-and-editing-modes.md)生成对应 columns。
 
+整张表在详情模式下仍复用字段组件时，也可以设置 `formProps.disabled`，让实现了 Element UI 表单协议的标准组件读取根 Form 的禁用状态。该机制对非标准或自定义交互组件没有强制约束，完整边界及业务 `provide`、组合式状态和 class 兜底方案见[根 Form 的全局禁用边界](./detail-and-editing-modes.md#根-form-的全局禁用边界)。
+
 ## 行状态控制
 
 已提交、审批中或被其他用户锁定的行，应从当前 `row` 计算组件状态：
