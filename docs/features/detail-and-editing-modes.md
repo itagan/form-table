@@ -40,6 +40,71 @@ const columns: ColumnConfig[] = [{
 
 这种方式适合弹窗或抽屉内即时切换，但详情仍会挂载业务组件和校验链路。自定义组件必须真正支持只读或禁用协议，不能只隐藏按钮却继续发出 model 事件。
 
+## 根 Form 的全局禁用边界
+
+FormTable 始终在根节点内挂载 `el-form`。详情模式仍复用整套字段组件时，可以直接通过 `formProps.disabled` 禁用整张表，而不必为每个标准 Element UI 组件重复配置：
+
+```vue
+<FormTable
+  v-model="tableData"
+  :columns="columns"
+  :form-props="{ disabled: mode === 'detail' }"
+/>
+```
+
+Element UI 2.x 的 `el-form` 会通过 `provide/inject` 向后代暴露表单实例；`el-input`、`el-select` 等标准组件会读取其中的 `disabled`，因此中间经过 FormTable 的 Row、Col、FormItem 或普通包装组件也能自动生效。这个机制只覆盖实现了 Element UI 表单协议的组件，并不是通用的 DOM 禁用能力：自定义按钮、第三方编辑器以及未读取该上下文的业务组件仍可能响应交互或继续发出 model 事件。
+
+`el-form` 没有表单级 `readonly` Prop。需要保留可聚焦、可复制的只读外观时，仍应通过 Item 的动态 `component.props` 将 `readonly` 显式传给支持该协议的组件；Select、日期选择器等没有只读语义的组件通常继续使用 `disabled`。
+
+### 自定义组件如何同步状态
+
+按组件复用范围选择一种明确的状态来源：
+
+| 方式 | 适用场景 | 注意事项 |
+| --- | --- | --- |
+| 显式 `readonly/disabled` Prop | 可复用组件、组件数量有限 | 最清晰；组件内部同时限制交互和 model 事件 |
+| 业务自己的 `provide/inject` | 多层业务组件都属于同一表单区域 | 使用业务 Injection Key，不依赖 Element UI 内部的 `elForm` 名称 |
+| 组合式 Ref 或 Store | 状态需要跨越当前组件树或由多个区域共享 | 保持单一响应式来源，避免再复制一个详情状态 |
+| 根 class | 只需快速统一视觉或屏蔽简单鼠标操作 | 只能作为界面兜底，不能替代组件协议和提交校验 |
+
+业务级 `provide` 可以直接提供响应式 Ref，后代组件通过组合式函数读取：
+
+```ts
+// formReadonly.ts
+export const formReadonlyKey: InjectionKey<ComputedRef<boolean>>
+  = Symbol('formReadonly')
+
+export function useFormReadonly() {
+  return inject(formReadonlyKey, computed(() => false))
+}
+
+// 详情页面
+const formReadonly = computed(() => mode.value === 'detail')
+provide(formReadonlyKey, formReadonly)
+
+// 自定义字段组件
+const readonly = useFormReadonly()
+```
+
+自定义组件应在点击、键盘、弹层和上传等入口检查该状态，并在只读时停止发出更新事件。若组件本来就有 `readonly/disabled` Prop，优先显式传递 Prop；`provide` 更适合作为同一业务组件族的共享协议。
+
+简单页面也可以给 `el-form` 增加状态 class，再限制指定的自定义控件：
+
+```ts
+const formProps = computed(() => ({
+  disabled: mode.value === 'detail',
+  class: { 'is-detail-mode': mode.value === 'detail' }
+}))
+```
+
+```css
+.is-detail-mode .custom-editor {
+  pointer-events: none;
+}
+```
+
+`pointer-events: none` 不会阻止键盘操作、程序调用或组件自行发出的事件，也不会形成无障碍或安全语义。class 方案只用于已知组件的视觉和鼠标交互补充；保存时仍应由页面构造允许提交的 DTO，并由服务端校验权限。
+
 ## text 保留字段语义
 
 `type: 'text'` 使用 `String(bindingValue ?? '')` 渲染 `span`。它不挂载输入组件，也不进入自动 model，但仍保留：
