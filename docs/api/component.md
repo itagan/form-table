@@ -61,7 +61,7 @@ component: {
 }
 ```
 
-事件名按标准 DOM 事件推导参数类型，例如 `click` 为 `MouseEvent`、`keydown` 为 `KeyboardEvent`。`listeners` 不支持通过 `click.native` 等键名监听根节点；`nativeListeners` 已经对应 Vue 的 `.native`，其中只写 `click`。FormTable 也不解析 `.stop/.prevent/.self/.once/.capture/.passive` 等模板修饰符；需要阻止传播、阻止默认行为或过滤目标时直接操作事件对象。同一事件同时出现在 `listeners` 和 `nativeListeners` 时，两者独立生效，不会去重。完整选择规则、原生事件限制和执行关系见[字段组件事件与原生事件](../features/component-events.md)。
+事件名按标准 DOM 事件推导参数类型，例如 `click` 为 `MouseEvent`、`keydown` 为 `KeyboardEvent`。`listeners` 不支持通过 `click.native` 等键名监听根节点；如果组件确实 `$emit('click.native')`，则会把它作为完整的字面事件名正常匹配。`nativeListeners` 已经对应 Vue 的 `.native`，其中只写 `click`。FormTable 也不解析 `.stop/.prevent/.self/.once/.capture/.passive` 等模板修饰符；需要阻止传播、阻止默认行为或过滤目标时直接操作事件对象。同一事件同时出现在 `listeners` 和 `nativeListeners` 时，两者独立生效，不会去重。完整选择规则、带点组件事件、原生事件限制和执行关系见[字段组件事件与原生事件](../features/component-events.md)。
 
 `type: 'text'` 的实际目标是原生 `span`，FormTable 会在内部把 `nativeListeners` 适配为普通 DOM listener；若与原有 `listeners` 配置同名事件，先执行 `listeners`，再执行 `nativeListeners`。字段 Slot 的内容由调用方创建，因此不接受 `nativeListeners`，请在 Slot 模板中显式使用 `@click.native` 等监听方式。
 
