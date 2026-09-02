@@ -14,6 +14,26 @@
 
 `listeners` 和 `nativeListeners` 都不是 `update:tableData`、`field-change` 等 FormTable 根事件。根事件及 Ref 见[事件与 Ref API](../api/events-and-ref.md)。
 
+## 配置名与 Vue `.native`
+
+配置对象不会解析 Vue 模板事件语法：
+
+```ts
+component: {
+  listeners: {
+    click: handleComponentClick
+  },
+  nativeListeners: {
+    click: handleRootClick
+  }
+}
+```
+
+- `listeners.click` 对应模板中的 `@click`，只监听组件 `$emit('click')`。
+- `listeners` 不支持用 `click.native` 监听根节点；这样写只会监听名为 `click.native` 的组件事件。
+- `nativeListeners.click` 已经对应模板中的 `@click.native`，事件名不再附加 `.native`。
+- `nativeListeners['click.native']` 不会响应普通 `click` DOM 事件。
+
 ## 组件事件
 
 组件通过 `$emit('confirm', user, meta)` 发出业务事件时，在 `listeners` 中使用相同事件名。FormTable 会在原始参数前注入当前字段上下文：
@@ -71,6 +91,16 @@ component: {
 
 原生事件绑定在组件根节点。输入框前后缀、清除按钮或组件内部其他元素产生的冒泡事件也可能到达监听器；需要区分来源时检查 `event.target` 或封装业务组件。
 
+## 原生事件限制
+
+- TypeScript 接受 `GlobalEventHandlersEventMap` 中的标准 DOM 事件名，并按名称推导事件对象；实际可用性仍取决于浏览器。
+- 监听目标是字段组件根节点，不会直接绑定组件内部的 `input`、按钮或其他子节点。
+- `click`、`keydown` 等可冒泡事件能够从内部节点到达根节点。`focus`、`blur` 等非冒泡事件若发生在内部节点，根节点监听器通常收不到。
+- `el-input` 已主动 `$emit` `focus/blur`，应使用 `listeners.focus/blur`；确实需要 DOM 冒泡语义时可评估 `nativeListeners.focusin/focusout`。
+- `nativeListeners` 不提供 `.stop/.prevent/.self/.once/.capture/.passive` 或按键修饰符，常用判断和阻止行为直接操作事件对象。
+- 字段 Slot 不接受 `nativeListeners`；复杂内部节点监听、捕获、被动监听或单次监听应放在 Slot 模板或 Adapter 组件中。
+- `type: 'component'` 使用原生 HTML 标签字符串仍受现有低层边界约束；`nativeListeners` 不会补齐 DOM Property、子内容或原生 `v-model`。
+
 ## 与 model 的关系
 
 三条事件链职责独立：
@@ -121,7 +151,7 @@ component: {
 
 ## 修饰行为
 
-配置 API 不解析 `click.native.stop` 等模板语法，也不单独提供 `stop/prevent/self/once/capture/passive` 字段。直接使用事件对象表达行为：
+配置 API 不解析 `click.native.stop` 等模板语法，也不单独提供 `stop/prevent/self/once/capture/passive` 字段。`nativeListeners` 已经包含 `.native` 语义，事件键只写 `click`。直接使用事件对象表达行为：
 
 ```ts
 nativeListeners: {

@@ -215,7 +215,7 @@ component: {
 }
 ```
 
-原生事件的阻止传播、默认行为和目标过滤直接通过事件对象完成，不在事件名中书写 Vue 模板修饰符。
+`listeners` 不支持把 `click.native` 解析成 Vue 原生监听；`nativeListeners` 已包含 `.native` 语义，事件名只写 `click`。原生事件的阻止传播、默认行为和目标过滤直接通过事件对象完成，不在事件名中书写 Vue 模板修饰符。根节点、事件冒泡和非冒泡事件限制见[字段组件事件与原生事件](../features/component-events.md#原生事件限制)。
 
 ### 动态显隐
 
