@@ -16,6 +16,7 @@
 | 使用 Enter 连续录入 | [Enter 字段导航](../features/keyboard-navigation.md) | [`/row-column-operations`](http://localhost:5173/row-column-operations) |
 | 宽表快速滚到首尾或指定字段 | [宽表横向滚动与字段定位](../features/horizontal-scroll.md) | [`/horizontal-scroll`](http://localhost:5173/horizontal-scroll) |
 | 接入公司或第三方组件 | [自定义字段组件](../features/custom-component.md) | [`/enterprise-components`](http://localhost:5173/enterprise-components) |
+| 监听字段组件业务事件或根节点 DOM | [字段组件事件与原生事件](../features/component-events.md) | — |
 | 一个组件同时编辑多个字段 | [复合字段映射](../features/composite-binding.md) | [`/composite-binding`](http://localhost:5173/composite-binding) |
 | 自定义整格展示或操作区 | [`cellSlot`](../features/cell-slot.md) | [`/cell-slot`](http://localhost:5173/cell-slot) |
 | 动态显示列、行或字段 | [动态显隐与配置更新](../features/dynamic-configuration.md) | [`/dynamic-slot-test`](http://localhost:5173/dynamic-slot-test) |

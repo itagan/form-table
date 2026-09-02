@@ -83,6 +83,8 @@ component: {
 
 同一个事件同时承担 model 写回和业务 listener 时，FormTable 先更新 `ownerId`，再把 `ActionContext, user` 传给 listener。
 
+组件没有 `$emit` 所需的点击或键盘事件时，使用 `component.nativeListeners` 监听根节点 DOM。组件事件、原生事件、model 顺序和 Slot 边界见[字段组件事件与原生事件](./component-events.md)。
+
 如果行字段只保存 ID，但组件 model prop 需要完整用户对象，可以增加同步输入转换：
 
 ```ts
@@ -181,4 +183,4 @@ component: {
 
 ## 相关 API
 
-[Component 配置](../api/component.md) · [复杂 Option 接入](../api/component.md#复杂-option-接入) · [Slot 与上下文](../api/contexts.md)
+[Component 配置](../api/component.md) · [字段组件事件与原生事件](./component-events.md) · [复杂 Option 接入](../api/component.md#复杂-option-接入) · [Slot 与上下文](../api/contexts.md)

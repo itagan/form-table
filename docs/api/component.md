@@ -61,7 +61,7 @@ component: {
 }
 ```
 
-事件名按标准 DOM 事件推导参数类型，例如 `click` 为 `MouseEvent`、`keydown` 为 `KeyboardEvent`。FormTable 不解析 `.stop/.prevent/.self/.once/.capture/.passive` 等模板修饰符；需要阻止传播、阻止默认行为或过滤目标时直接操作事件对象。同一事件同时出现在 `listeners` 和 `nativeListeners` 时，两者独立生效，不会去重。
+事件名按标准 DOM 事件推导参数类型，例如 `click` 为 `MouseEvent`、`keydown` 为 `KeyboardEvent`。FormTable 不解析 `.stop/.prevent/.self/.once/.capture/.passive` 等模板修饰符；需要阻止传播、阻止默认行为或过滤目标时直接操作事件对象。同一事件同时出现在 `listeners` 和 `nativeListeners` 时，两者独立生效，不会去重。完整选择规则和执行关系见[字段组件事件与原生事件](../features/component-events.md)。
 
 `type: 'text'` 的实际目标是原生 `span`，FormTable 会在内部把 `nativeListeners` 适配为普通 DOM listener；若与原有 `listeners` 配置同名事件，先执行 `listeners`，再执行 `nativeListeners`。字段 Slot 的内容由调用方创建，因此不接受 `nativeListeners`，请在 Slot 模板中显式使用 `@click.native` 等监听方式。
 
@@ -280,4 +280,4 @@ component: { is: 'corp-user-selector' }
 
 完整业务上传组件可参考[企业复杂组件接入示例](../examples/enterprise-components.md)。
 
-从最小配置到页面使用的独立示例见[自定义字段组件](../features/custom-component.md)。Render Function 和更多组合方式见[完整配置指南](../guide/configuration-guide.md)，完整企业组件 Mock 与 columns 工厂见[企业复杂组件接入示例](../examples/enterprise-components.md)。
+从最小配置到页面使用的独立示例见[自定义字段组件](../features/custom-component.md)，事件监听方式见[字段组件事件与原生事件](../features/component-events.md)。Render Function 和更多组合方式见[完整配置指南](../guide/configuration-guide.md)，完整企业组件 Mock 与 columns 工厂见[企业复杂组件接入示例](../examples/enterprise-components.md)。
