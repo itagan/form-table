@@ -34,6 +34,27 @@ component: {
 - `nativeListeners.click` 已经对应模板中的 `@click.native`，事件名不再附加 `.native`。
 - `nativeListeners['click.native']` 不会响应普通 `click` DOM 事件。
 
+如果已有组件确实执行 `$emit('click.native', payload)`，`listeners` 可以按完整字符串精确监听：
+
+```ts
+component: {
+  listeners: {
+    'click.native'(context, payload) {
+      handleLegacyEvent(context.row, payload)
+    }
+  },
+  nativeListeners: {
+    click(context, event) {
+      handleRootClick(context.row, event)
+    }
+  }
+}
+```
+
+上面两个 `click` 来源彼此独立：前者只响应字面名称为 `click.native` 的 `$emit`，后者只响应根节点 DOM `click`。注册自定义 Type 时，也可以在事件表中用引号声明 `'click.native': [payload: Payload]` 并获得参数类型。
+
+兼容已有带点事件没有运行时问题，但新组件不建议使用 `.native/.stop/.prevent/.once/.capture/.passive` 等类似 Vue 修饰符的事件名。普通 Vue 模板可能把点号后的内容解释为修饰符；新事件优先使用 `user-confirm`、`detail-open` 或 `update:value` 等无歧义名称。
+
 ## 组件事件
 
 组件通过 `$emit('confirm', user, meta)` 发出业务事件时，在 `listeners` 中使用相同事件名。FormTable 会在原始参数前注入当前字段上下文：

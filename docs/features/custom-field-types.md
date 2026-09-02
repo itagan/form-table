@@ -140,6 +140,8 @@ const columns = defineFormTableColumns<PurchaseRow, typeof fieldTypes>([{
 
 `valueToProp` 的首参是只读字段渲染上下文，第二个参数是当前 `bindingValue`；`valueFromEvent` 的首参使用同一种上下文，后续参数来自所选 model 事件。其中 `context.value` 始终保留主字段原值。员工 ID 转对象、ISO 字符串转 `Date`、枚举 code 转 Option 等同步转换也适用。异步查询、跨字段副作用或带内部状态的复杂转换继续使用 Adapter、listener 或 Slot。
 
+事件表键按组件 `$emit` 的完整名称匹配，因此已有组件的 `'click.native'` 等带点事件也可以用引号声明。它仍是组件事件，不会转换为根节点原生监听；新组件应优先使用 `user-confirm`、`detail-open` 等无修饰符歧义的名称。完整边界见[字段组件事件与原生事件](./component-events.md#配置名与-vue-native)。
+
 ## 与 binding.map 组合
 
 当组件 model 是对象或数组时，Item 可以继续使用现有 `binding.map` 读写多个行字段：
