@@ -98,6 +98,8 @@ item.key → Vue 渲染身份
 - 认为 `fieldKey` 总能替代 Item key：重复字段和动态布局中不成立。
 - 异步结束后执行 `tableData[index] = ...`：旧 index 可能对应其他行。
 
+未提供 Item `key` 时，回退身份使用 `fieldKey` 与过滤前的配置下标；隐藏前面的字段不会使后续字段重建。插入、删除或重排字段配置时，仍应提供显式稳定的 `key`。
+
 ## 相关 API
 
 [Column / Item](../api/columns.md) · [Slot 与上下文](../api/contexts.md)
