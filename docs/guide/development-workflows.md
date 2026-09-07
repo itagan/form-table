@@ -55,3 +55,21 @@
 4. 协议已跨页面稳定重复：再注册自定义 Type。
 
 完整取舍见[扩展模型](../architecture/extension-model.md)。页面生命周期、接口 DTO、保存和撤销由[完整编辑提交流程](../examples/form-workflow.md)统一说明；业务项目的配置测试方法见[业务配置测试指南](./business-testing.md)。
+
+## 真实浏览器回归
+
+首次运行先安装 Chromium：
+
+```bash
+pnpm exec playwright install chromium
+```
+
+然后运行构建产物 E2E：
+
+```bash
+pnpm test:e2e
+```
+
+该命令先构建组件包，再让 Playground 引用 `dist/formtable.es.js` 与 `dist/style.css`，最后在生产预览中验证受控编辑、校验聚焦、键盘导航、稳定行身份、Hint、横向滚动和复合绑定。交互式排查使用 `pnpm test:e2e:ui`；已有构建可使用 `pnpm test:e2e:built`。失败报告位于 `playwright-report`，截图和 trace 位于 `test-results`。
+
+GitHub Actions 中的 `browser-e2e` 与常规 `release-check` 独立运行。仓库分支规则应将两项都设为必需检查；发布前确认目标提交的两项检查均通过。

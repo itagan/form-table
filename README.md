@@ -43,6 +43,8 @@ pnpm lint
 pnpm type-check
 pnpm test
 pnpm test:coverage
+pnpm test:e2e
+pnpm test:e2e:ui
 pnpm build
 pnpm compat:check
 pnpm pack:check
@@ -61,6 +63,8 @@ pnpm release:check
 - `pnpm type-check`：检查组件包和 playground。
 - `pnpm test`：运行组件包核心逻辑单测。
 - `pnpm test:coverage`：运行组件测试并校验覆盖率阈值。
+- `pnpm test:e2e`：构建 npm 包与 E2E Playground，并在真实 Chromium 中验证关键交互。
+- `pnpm test:e2e:ui`：使用 Playwright UI 调试真实浏览器测试。
 - `pnpm build`：先构建 npm 包，再构建 playground。
 - `pnpm compat:check`：使用最低 peer dependency 组合验证构建后的包入口。
 - `pnpm pack:check`：检查 npm tarball 内容、声明文件和 ESM/CommonJS 导出。
@@ -76,7 +80,7 @@ pnpm release:check
 
 完整路由和用途统一维护在[示例索引](./docs/examples/index.md)。本地运行 `pnpm site:dev` 可同时启动 Playground 和 VitePress 文档站。
 
-`playground` 通过 workspace alias 直接引用 `packages/form-table/src/index.ts`，开发时无需先构建组件包。
+`playground` 日常开发通过 workspace alias 直接引用 `packages/form-table/src/index.ts`，无需先构建组件包；E2E 构建则显式引用 `dist` 的 ESM 与 CSS，验证发布产物接入。
 
 文档和示例保留独立源码目录，避免 Vue 2.7 与 VitePress 的 Vue 3 依赖混用；发布时由 `pnpm site:build` 合并为 `docs/.vitepress/dist`，只需部署一个静态目录和一个域名。
 

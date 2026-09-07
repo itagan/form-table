@@ -25,10 +25,13 @@ docs                  # Vue 3 / VitePress 文档站，独立 pnpm lockfile
 ```bash
 pnpm install
 pnpm docs:install
+pnpm exec playwright install chromium
 pnpm release:check
+pnpm test:e2e
 ```
 
 `pnpm install` 安装根 workspace、组件包和 playground 依赖；`pnpm docs:install` 根据 `docs/pnpm-lock.yaml` 安装文档站依赖。
+Playwright 浏览器单独保存在系统缓存中，不进入 npm 包或前端构建；首次执行 E2E 前安装一次 Chromium。
 
 ## 发布前检查
 
@@ -105,19 +108,25 @@ npm config get registry
 pnpm release:check
 ```
 
-3. 确认发布包清单和入口：
+3. 执行构建产物真实浏览器测试，并确认目标提交的 GitHub `browser-e2e` 检查通过：
+
+```bash
+pnpm test:e2e
+```
+
+4. 确认发布包清单和入口：
 
 ```bash
 pnpm pack:check
 ```
 
-4. 登录 npm：
+5. 登录 npm：
 
 ```bash
 npm login
 ```
 
-5. 确认版本号未在 Registry 中使用，然后发布作用域包：
+6. 确认版本号未在 Registry 中使用，然后发布作用域包：
 
 ```bash
 node -p "require('./packages/form-table/package.json').version"
