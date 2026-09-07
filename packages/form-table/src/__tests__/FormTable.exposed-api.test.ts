@@ -3,6 +3,18 @@ import type { FormTableExpose } from '../types.public'
 import { mountFormTable } from './test-utils'
 
 describe('FormTable exposed native API', () => {
+  it('does not retry a throwing validation callback as a validation failure', async () => {
+    const wrapper = mountFormTable()
+    await wrapper.vm.$nextTick()
+    const expose = wrapper.vm as unknown as FormTableExpose
+    const error = new Error('business callback failed')
+    const callback = vi.fn(() => { throw error })
+    await expect(expose.validate(callback)).rejects.toBe(error)
+    expect(callback).toHaveBeenCalledOnce()
+    expect(callback).toHaveBeenCalledWith(true, undefined)
+    wrapper.destroy()
+  })
+
   it('forwards native table events once with their original arguments and exposes native refs', async () => {
     const rowClick = vi.fn()
     const sortChange = vi.fn()
