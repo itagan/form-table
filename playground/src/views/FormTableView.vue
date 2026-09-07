@@ -9,6 +9,7 @@
     <section class="demo-card">
       <FormTable
         ref="formTableRef"
+        data-testid="basic-form-table"
         v-model="tableData"
         :columns="columns"
         :form-props="{ size: 'small' }"
@@ -28,7 +29,7 @@
     </DemoCollapsiblePanel>
 
     <DemoCollapsiblePanel class="demo-card" title="当前数据">
-      <pre>{{ JSON.stringify(tableData, null, 2) }}</pre>
+      <pre data-testid="basic-table-data">{{ JSON.stringify(tableData, null, 2) }}</pre>
     </DemoCollapsiblePanel>
   </main>
 </template>

@@ -5,12 +5,12 @@
       <p>字符串内容、作用范围，以及按需挂载的单实例 Tooltip。</p>
     </header>
 
-    <section class="hint-card">
+    <section class="hint-card" data-testid="native-hints">
       <h2>默认：字段原生 title</h2>
       <FormTable v-model="rows" :columns="columns" :form-props="formProps" :table-props="tableProps" />
     </section>
 
-    <section class="hint-card">
+    <section class="hint-card" data-testid="tooltip-hints">
       <h2>单实例 Tooltip · 字段与表头</h2>
       <FormTable
         v-model="rows"

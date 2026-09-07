@@ -23,7 +23,7 @@
         row-key="id"
         :table-props="{ border: true }"
       />
-      <p class="scroll-status">{{ scrollStatus }}</p>
+      <p class="scroll-status" data-testid="scroll-status">{{ scrollStatus }}</p>
     </section>
 
     <DemoCollapsiblePanel class="code-card" title="外部滚动助手">

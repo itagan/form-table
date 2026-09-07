@@ -7,9 +7,16 @@ import vue2 from '@vitejs/plugin-vue2'
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const isSiteBuild = mode === 'site'
+  const isE2eBuild = mode === 'e2e'
   const rawSiteBase = process.env.VITE_SITE_BASE || '/'
   const sitePath = rawSiteBase.replace(/^\/+|\/+$/g, '')
   const siteBase = sitePath ? `/${sitePath}/` : '/'
+  const formTableRoot = isE2eBuild
+    ? '../packages/form-table/dist/formtable.es.js'
+    : '../packages/form-table/src/index.ts'
+  const formTableStyle = isE2eBuild
+    ? '../packages/form-table/dist/style.css'
+    : '../packages/form-table/src/style.css'
 
   return {
     base: isSiteBuild ? `${siteBase}playground/` : '/',
@@ -21,10 +28,20 @@ export default defineConfig(({ mode }) => {
       })
     ],
     resolve: {
-      alias: {
-        '@': fileURLToPath(new URL('./src', import.meta.url)),
-        '@itagan/form-table': fileURLToPath(new URL('../packages/form-table/src/index.ts', import.meta.url))
-      }
+      alias: [
+        {
+          find: /^@itagan\/form-table\/style\.css$/,
+          replacement: fileURLToPath(new URL(formTableStyle, import.meta.url))
+        },
+        {
+          find: /^@itagan\/form-table$/,
+          replacement: fileURLToPath(new URL(formTableRoot, import.meta.url))
+        },
+        {
+          find: '@',
+          replacement: fileURLToPath(new URL('./src', import.meta.url))
+        }
+      ]
     },
     build: {
       ...(isSiteBuild
