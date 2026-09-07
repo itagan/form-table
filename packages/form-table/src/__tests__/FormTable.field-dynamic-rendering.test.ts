@@ -9,6 +9,26 @@ import type {
 import { mountFormTable } from './test-utils'
 
 describe('FormTable dynamic field rendering', () => {
+  it('preserves following editors when an earlier unkeyed field is hidden', async () => {
+    const wrapper = mountFormTable({
+      tableData: [{ first: '', second: '', show: true }],
+      columns: [{
+        label: '编辑',
+        formItems: [
+          { fieldKey: 'first', type: 'input', visible: ({ row }) => row.show },
+          { fieldKey: 'second', type: 'input' }
+        ]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+    const second = wrapper.findAll('input').at(1).element as HTMLInputElement
+    second.focus()
+    await wrapper.setProps({ tableData: [{ first: '', second: '', show: false }] })
+    expect(wrapper.find('input').element).toBe(second)
+    expect(document.activeElement).toBe(second)
+    wrapper.destroy()
+  })
+
   it('keeps radio and checkbox option children through the functional renderer', async () => {
     const options = [
       { label: '选项 A', value: 'a' },

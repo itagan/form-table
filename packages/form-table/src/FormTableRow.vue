@@ -4,8 +4,8 @@
     v-bind="resolvedRowProps"
   >
     <el-col
-      v-for="(item, itemIndex) in visibleItems"
-      :key="item.config.key || `${item.config.fieldKey}:${itemIndex}`"
+      v-for="item in visibleItems"
+      :key="item.config.key || `${item.config.fieldKey}:${item.sourceIndex}`"
       v-bind="item.colProps"
     >
       <FormTableItem
@@ -35,6 +35,7 @@ import {
 } from './utils/dynamic'
 
 interface VisibleFormTableItem {
+  sourceIndex: number
   config: FormItemConfig
   colProps: Record<string, unknown>
 }
@@ -65,11 +66,12 @@ const resolvedRowProps = computed(() => ({
 
 const visibleItems = computed(() => {
   const items: VisibleFormTableItem[] = []
-  for (const config of props.items) {
+  for (const [sourceIndex, config] of props.items.entries()) {
     const itemContext = createFieldRenderContext(rowContext.value, config)
     if (!resolveVisible(config.visible, itemContext)) continue
 
     items.push({
+      sourceIndex,
       config,
       colProps: {
         span: 24,
