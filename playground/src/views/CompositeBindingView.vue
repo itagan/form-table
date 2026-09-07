@@ -37,7 +37,7 @@
     </FormTable>
 
     <DemoCollapsiblePanel title="当前业务数据">
-      <pre>{{ JSON.stringify(tableData, null, 2) }}</pre>
+      <pre data-testid="composite-binding-data">{{ JSON.stringify(tableData, null, 2) }}</pre>
     </DemoCollapsiblePanel>
   </main>
 </template>

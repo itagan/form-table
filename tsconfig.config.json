@@ -3,6 +3,7 @@
   "include": [
     "packages/*/vite.config.*",
     "playground/vite.config.*",
+    "playwright.config.*",
     "vitest.config.*",
     "cypress.config.*"
   ],

@@ -27,6 +27,7 @@
 
       <FormTable
         ref="formTableRef"
+        data-testid="row-operations-table"
         :table-data="tableData"
         :columns="columns"
         :form-props="{ size: 'small' }"
@@ -74,7 +75,7 @@
 
     <section class="demo-card two-column">
       <DemoCollapsiblePanel class="data-panel" title="当前数据">
-        <pre>{{ JSON.stringify(tableData, null, 2) }}</pre>
+        <pre data-testid="row-operations-data">{{ JSON.stringify(tableData, null, 2) }}</pre>
       </DemoCollapsiblePanel>
       <div>
         <h2>关键边界</h2>

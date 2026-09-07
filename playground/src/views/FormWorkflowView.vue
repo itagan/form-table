@@ -42,6 +42,7 @@
 
       <FormTable
         ref="formTableRef"
+        data-testid="workflow-form-table"
         v-model="tableData"
         v-loading="loading"
         :columns="columns"
@@ -60,7 +61,7 @@
         </template>
       </FormTable>
 
-      <div v-if="serverErrors.length" class="server-errors">
+      <div v-if="serverErrors.length" class="server-errors" data-testid="server-errors">
         <strong>服务端校验未通过</strong>
         <ul>
           <li v-for="error in serverErrors" :key="`${error.rowId}:${error.fieldKey}`">

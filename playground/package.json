@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 5173 --strictPort",
     "build": "run-p type-check build-only",
+    "build:e2e": "run-p type-check build:e2e-only",
+    "build:e2e-only": "vite build --mode e2e",
     "build:site": "vite build --mode site",
     "preview": "vite preview --port 4173",
     "build-only": "vite build",

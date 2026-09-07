@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
+import '@itagan/form-table/style.css'
 import './assets/main.css'
 
 import App from './App.vue'
