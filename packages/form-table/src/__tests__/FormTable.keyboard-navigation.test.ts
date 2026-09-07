@@ -45,6 +45,32 @@ describe('FormTable keyboard navigation', () => {
     wrapper.destroy()
   })
 
+  it('respects Enter consumed by Select and custom editors', async () => {
+    const wrapper = mountFormTable({
+      navigationOptions: {},
+      tableData: [{ choice: '', custom: '', next: '' }],
+      columns: [{
+        label: '编辑',
+        formItems: [
+          { fieldKey: 'choice', type: 'select', component: { options: [{ label: 'A', value: 'a' }] } },
+          { fieldKey: 'custom', type: 'component', component: { is: CustomEditor } },
+          { fieldKey: 'next', type: 'input' }
+        ]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+    const selectInput = wrapper.find('.el-select input').element as HTMLInputElement
+    selectInput.focus()
+    expect(dispatchEnter(selectInput).defaultPrevented).toBe(true)
+    expect(document.activeElement).toBe(selectInput)
+    const custom = wrapper.find('.custom-editor').element as HTMLInputElement
+    custom.addEventListener('keydown', event => event.preventDefault())
+    custom.focus()
+    dispatchEnter(custom)
+    expect(document.activeElement).toBe(custom)
+    wrapper.destroy()
+  })
+
   it('moves forward and backward without wrapping at boundaries', async () => {
     const wrapper = mountFormTable({
       navigationOptions: {},

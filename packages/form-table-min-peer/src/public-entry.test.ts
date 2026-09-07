@@ -126,6 +126,7 @@ describe('minimum peer package consumer', () => {
     await Vue.nextTick()
     const formTable = host.$refs.formTable as any
     expect(await formTable.validate()).toBe(false)
+    expect(await formTable.validateField(host.rows[0], 'name')).toBe(false)
     await Vue.nextTick()
     expect(host.$el.textContent).toContain('请输入姓名')
     host.$destroy()

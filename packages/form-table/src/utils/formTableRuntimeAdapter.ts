@@ -58,3 +58,9 @@ export function resolveHintTooltipProps(tooltipProps: ComponentProps): Component
     popperClass: ['form-table-hint-tooltip', customPopperClass].filter(Boolean).join(' ')
   }
 }
+
+/** Element Form 对同 prop 的每个注册 FormItem 分别回调；集中隔离其内部注册表。 */
+export function getElementFormFieldCount(form: unknown, propPath: string): number {
+  const fields = (form as { fields?: Array<{ prop?: string }> } | null)?.fields
+  return fields?.filter(field => field.prop === propPath).length ?? 0
+}

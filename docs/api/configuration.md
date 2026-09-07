@@ -11,6 +11,8 @@ columns[].formItems[].component.props
 ```text
 FormTable
 ├─ tableData
+├─ rowKey
+├─ navigationOptions
 ├─ formProps
 ├─ tableProps
 ├─ fieldTypes                           实例级自定义字段 type 注册表

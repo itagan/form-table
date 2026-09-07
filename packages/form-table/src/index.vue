@@ -201,7 +201,7 @@ const fieldLocator = useFormTableFieldLocator({
   formRef
 })
 
-/** 键盘导航只消费 P1 的挂载字段注册和聚焦能力，不维护第二份字段顺序。 */
+/** 键盘导航只消费当前挂载字段查询和聚焦能力，不维护第二份字段顺序。 */
 const { handleNavigationKeydown } = useFormTableKeyboardNavigation({
   getOptions: () => props.navigationOptions,
   getMountedFields: fieldLocator.getMountedFields,
@@ -225,14 +225,15 @@ provide<FormTableHintContext>(FORM_TABLE_HINT_CONTEXT_KEY, {
  * 校验失败时保留 fields 并传给可选回调。
  */
 const validate = async (callback?: (valid: boolean, fields?: FormTableValue) => void) => {
+  let valid = false
+  let invalidFields: FormTableValue
   try {
-    const valid = Boolean(await formRef.value?.validate?.())
-    callback?.(valid)
-    return valid
+    valid = Boolean(await formRef.value?.validate?.())
   } catch (fields) {
-    callback?.(false, fields)
-    return false
+    invalidFields = fields
   }
+  callback?.(valid, invalidFields)
+  return valid
 }
 
 defineExpose({

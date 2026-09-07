@@ -10,6 +10,7 @@ import {
   isConfiguredRowKey,
   resolveRowIdentityIndex
 } from '../utils/rowIdentity'
+import { getElementFormFieldCount } from '../utils/formTableRuntimeAdapter'
 import { FORM_TABLE_HINT_ROOT_ATTRIBUTE } from '../utils/hint'
 
 export const FORM_TABLE_FIELD_PROP_ATTRIBUTE = 'data-form-table-field-prop'
@@ -97,16 +98,28 @@ export function useFormTableFieldLocator<TRow extends TableRow = TableRow>(
     return { propPath, element }
   }
 
-  const findFocusable = (element: HTMLElement) => {
-    if (element.matches(FOCUSABLE_SELECTOR)) return element
-    return element.querySelector<HTMLElement>(FOCUSABLE_SELECTOR) || undefined
-  }
-
   const focusElement = (element: HTMLElement) => {
-    const target = findFocusable(element)
-    if (!target) return false
-    target.focus()
-    return document.activeElement === target
+    const candidates = [
+      ...(element.matches(FOCUSABLE_SELECTOR) ? [element] : []),
+      ...Array.from(element.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR))
+    ]
+    for (const target of candidates) {
+      if (target.matches(':disabled, [disabled], [readonly], [aria-disabled="true"], input[type="hidden"]')) continue
+      let ancestor: HTMLElement | null = target
+      let hidden = false
+      while (ancestor) {
+        const style = window.getComputedStyle(ancestor)
+        if (ancestor.hidden || ancestor.hasAttribute('inert') || style.display === 'none' || style.visibility === 'hidden') {
+          hidden = true
+          break
+        }
+        ancestor = ancestor.parentElement
+      }
+      if (hidden) continue
+      target.focus()
+      if (document.activeElement === target) return true
+    }
+    return false
   }
 
   const getFieldProp = (row: TRow, fieldKey: string) => (
@@ -117,9 +130,15 @@ export function useFormTableFieldLocator<TRow extends TableRow = TableRow>(
     const propPath = getFieldProp(row, fieldKey)
     const validate = options.formRef.value?.validateField
     if (!propPath || !validate) return false
+    let remaining = getElementFormFieldCount(options.formRef.value, propPath)
+    if (!remaining) return false
+    let valid = true
     return new Promise<boolean>((resolve) => {
       try {
-        validate.call(options.formRef.value, propPath, message => resolve(!message))
+        validate.call(options.formRef.value, propPath, message => {
+          valid = valid && !message
+          if (--remaining === 0) resolve(valid)
+        })
       } catch {
         resolve(false)
       }
@@ -134,7 +153,9 @@ export function useFormTableFieldLocator<TRow extends TableRow = TableRow>(
   const focusField = async (row: TRow, fieldKey: string) => {
     await nextTick()
     const target = resolveMountedField(row, fieldKey)
-    return target ? focusElement(target.element) : false
+    return target ? getMountedFields().some(element => (
+      element.getAttribute(FORM_TABLE_FIELD_PROP_ATTRIBUTE) === target.propPath && focusElement(element)
+    )) : false
   }
 
   const scrollToFirstError = async () => {

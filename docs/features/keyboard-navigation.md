@@ -40,6 +40,8 @@ FormTable 默认不接管键盘。传入 `navigationOptions` 后，普通单行�
 
 当前能力不提供 Tab 网格模式、循环导航、复制粘贴或向下填充。跨行批量写回使用 Ref `updateRows`，复杂表格快捷键由业务页面或字段组件实现。
 
+子组件已通过 `preventDefault()` 处理的 Enter 不触发字段导航，例如 Select 确认选项。聚焦时会依次尝试可交互节点，跳过隐藏、禁用和只读控件。
+
 ## 相关 API
 
 [FormTable Props](../api/form-table.md) · [校验、清理与重置](./validation-reset.md) · [数据更新与受控回写](./data-updates.md)

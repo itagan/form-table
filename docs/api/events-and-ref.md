@@ -239,11 +239,15 @@ formTableRef.value?.getTableRef()
 | 方法 | 结果 |
 | --- | --- |
 | `getFieldProp(row, fieldKey)` | 返回当前已挂载字段的完整校验路径；无法定位时为 `undefined` |
-| `validateField(row, fieldKey)` | 校验字段并返回 `Promise<boolean>` |
+| `validateField(row, fieldKey)` | 返回 `Promise<boolean>`；等待同路径所有已注册 FormItem 完成，全部通过才为 `true` |
 | `clearFieldValidate(row, fieldKey)` | 清除字段校验状态 |
 | `focusField(row, fieldKey)` | 聚焦字段内首个可交互元素并返回是否成功 |
 | `scrollToFirstError()` | 滚动到首个错误字段、尽可能聚焦并返回是否找到 |
 | `updateRows(updates)` | 原子更新多行；有实际变化时返回 `true` |
+
+同一字段在多个位置渲染（包括固定列副本）时，`validateField(row, fieldKey)` 聚合所有匹配 FormItem 的校验结果。自定义异步 validator 必须按 Element UI 协议完成回调。
+
+`validate(callback)` 的业务回调只执行一次；回调自身抛出的异常会使返回的 Promise 拒绝，不会被当作表单校验失败。
 
 配置 `rowKey` 后，这些方法可以使用数据替换前保存的旧行引用重新定位最新行。目标身份缺失或重复、字段因显隐或筛选未挂载时，查询返回 `undefined`，操作返回 `false` 或安全跳过。字段被 Element Table 本地排序后仍按数据源下标生成校验路径。
 

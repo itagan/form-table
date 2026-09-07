@@ -134,7 +134,7 @@ await formTableRef.value?.validate()
 formTableRef.value?.clearValidate()
 ```
 
-单字段校验和其他原生 Form 方法通过 `getFormRef()` 调用：
+单字段校验优先使用 `validateField(row, fieldKey)`，它会聚合同路径所有已注册 FormItem 的结果。已知完整路径时，原生 Form 方法仍可通过 `getFormRef()` 调用：
 
 ```ts
 formTableRef.value
@@ -164,7 +164,7 @@ function handleFieldValidate(propPath, valid, message) {
 
 这里保留完整 `propPath`，例如 `tableData.0.profile.name`。组件不额外推导 `row/fieldKey`，避免动态行移动、嵌套路径和重复字段配置产生歧义。
 
-顶层也不新增 `validateField(fieldKey)`：Element 原生方法要求完整 `propPath`，而 FormTable 的路径包含动态行下标。明确知道当前完整路径时，仍可通过 `getFormRef().validateField(propPath)` 调用；常规提交优先使用 `validate()`。
+顶层 `validateField(row, fieldKey)` 按业务行定位当前路径，避免缓存动态下标。需要 Element 原生逐项回调时，仍可通过 `getFormRef().validateField(propPath, callback)` 调用。
 
 ### 受控重置
 

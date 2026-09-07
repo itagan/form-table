@@ -23,6 +23,7 @@ export function useFormTableKeyboardNavigation(options: FormTableKeyboardNavigat
       !navigationOptions
       || navigationOptions.enabled === false
       || event.key !== 'Enter'
+      || event.defaultPrevented
       || event.isComposing
       || event.keyCode === 229
       || isModifiedEnter(event)
