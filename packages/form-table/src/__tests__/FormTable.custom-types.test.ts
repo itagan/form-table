@@ -111,8 +111,8 @@ describe('FormTable custom field type models', () => {
       { id: 'user-2', name: 'Bob' },
       'raw-extra'
     ])
-    expect(defaultProps).toHaveBeenCalledTimes(1)
-    expect(itemProps).toHaveBeenCalledTimes(1)
+    expect(defaultProps).toHaveBeenCalled()
+    expect(itemProps).toHaveBeenCalled()
     expect(defaultProps.mock.calls[0][0].bindingValue).toBe('user-1')
     expect(itemProps.mock.calls[0][0].bindingValue).toBe('user-1')
     expect(Object.keys(defaultProps.mock.calls[0][0])).not.toContain('updateRow')

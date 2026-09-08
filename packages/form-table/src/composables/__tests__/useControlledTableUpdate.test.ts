@@ -147,6 +147,26 @@ describe('useControlledTableUpdate row identity', () => {
     expect(updateApi.updateRows([])).toBe(false)
     expect(updateApi.updateRows([{ row, patch: { name: 'Alice' } }])).toBe(false)
     expect(emitUpdate).not.toHaveBeenCalled()
+    expect(updateApi.getRevision()).toBe(0)
+  })
+
+  it('exposes the latest row snapshot and revision during synchronous updates', () => {
+    const original = { id: 1, start: '09:00', end: '18:00' }
+    const updateApi = useControlledTableUpdate({
+      getTableData: () => [original],
+      getRowKey: () => 'id',
+      emitUpdate: vi.fn(),
+      emitFieldChange: vi.fn()
+    })
+
+    updateApi.updateRow(original, { start: '10:00' })
+
+    expect(updateApi.getRevision()).toBe(1)
+    expect(updateApi.getCurrentRow(original)).toEqual({
+      id: 1,
+      start: '10:00',
+      end: '18:00'
+    })
   })
 
   it('updates a large batch with one array emission while preserving untouched references', () => {

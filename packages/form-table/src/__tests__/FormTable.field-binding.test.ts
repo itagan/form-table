@@ -3,6 +3,54 @@ import type { FormTableFieldBindingContext } from '../types.public'
 import { mountFormTable } from './test-utils'
 
 describe('FormTable composite field binding', () => {
+  it('refreshes a composite model from the synchronous update snapshot before controlled props write back', async () => {
+    const TimeRangeEditor = {
+      props: ['value'],
+      render(this: any, h: any) {
+        return h('div', { class: 'time-range-editor' }, [
+          h('button', {
+            class: 'update-start',
+            attrs: { type: 'button', 'data-value': this.value.start },
+            on: { click: () => this.$emit('input', { ...this.value, start: '10:00' }) }
+          }),
+          h('button', {
+            class: 'update-end',
+            attrs: { type: 'button', 'data-value': this.value.end },
+            on: { click: () => this.$emit('input', { ...this.value, end: '18:30' }) }
+          })
+        ])
+      }
+    }
+    const wrapper = mountFormTable({
+      tableData: [{ start: '09:00', end: '18:00' }],
+      columns: [{
+        label: '时间',
+        formItems: [{
+          fieldKey: 'start',
+          type: 'component',
+          component: { is: TimeRangeEditor },
+          binding: {
+            map: [
+              { fieldPath: 'start', valuePath: 'start' },
+              { fieldPath: 'end', valuePath: 'end' }
+            ]
+          }
+        }]
+      }]
+    })
+    await wrapper.vm.$nextTick()
+
+    await wrapper.find('.update-start').trigger('click')
+    expect(wrapper.find('.update-start').attributes('data-value')).toBe('10:00')
+
+    await wrapper.find('.update-end').trigger('click')
+    expect(wrapper.emitted('update:tableData')?.[1]?.[0]).toEqual([{
+      start: '10:00',
+      end: '18:30'
+    }])
+    wrapper.destroy()
+  })
+
   it('maps one component model value to multiple row fields in one update', async () => {
     const selectionListener = vi.fn()
     const UserSelector = {
