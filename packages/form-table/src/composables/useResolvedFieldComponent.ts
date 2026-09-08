@@ -70,25 +70,25 @@ const resolveComponentProps = <TRow extends TableRow>(
 
 const resolveComponentListeners = <TRow extends TableRow>(
   listeners: Record<string, FormTableFieldListener<TRow>>,
-  getFieldContext: () => FormTableFieldContext<TRow>
+  fieldContext: FormTableFieldContext<TRow>
 ) => {
   const resolved: Record<string, (...args: unknown[]) => void> = {}
   for (const name of Object.keys(listeners)) {
-    resolved[name] = (...args) => listeners[name]?.(getFieldContext(), ...args)
+    resolved[name] = (...args) => listeners[name]?.(fieldContext, ...args)
   }
   return resolved
 }
 
 const resolveComponentNativeListeners = <TRow extends TableRow>(
   listeners: FormTableNativeFieldListeners<TRow>,
-  getFieldContext: () => FormTableFieldContext<TRow>
+  fieldContext: FormTableFieldContext<TRow>
 ) => {
   const resolved: Record<string, (event: Event) => void> = {}
   for (const name of Object.keys(listeners)) {
     const listener = listeners[name as keyof GlobalEventHandlersEventMap] as (
       (context: FormTableFieldContext<TRow>, event: Event) => void
     ) | undefined
-    resolved[name] = event => listener?.(getFieldContext(), event)
+    resolved[name] = event => listener?.(fieldContext, event)
   }
   return resolved
 }
@@ -104,6 +104,7 @@ export function useResolvedFieldComponent<TRow extends TableRow = TableRow>(
     const config = options.getConfig()
     const context = options.runtimeContext.value
     const propsContext = options.bindingContext.value
+    const fieldContext = options.fieldContext.value
     const component = config.component
     const typeDefinition = resolveTypeDefinition(config.type, options.fieldTypes.value)
     const listeners = component?.listeners || {}
@@ -120,10 +121,10 @@ export function useResolvedFieldComponent<TRow extends TableRow = TableRow>(
         options.hintMode.value,
         options.hintTrigger.value
       ),
-      listeners: resolveComponentListeners(listeners, () => options.fieldContext.value),
+      listeners: resolveComponentListeners(listeners, fieldContext),
       nativeListeners: resolveComponentNativeListeners(
         nativeListeners,
-        () => options.fieldContext.value
+        fieldContext
       ),
       options: resolveDynamicValue(component?.options, context) || [],
       optionProps: resolveDynamicValue(component?.optionProps, context),

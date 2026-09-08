@@ -48,6 +48,10 @@ export interface FormTableFieldContext<TRow extends TableRow = TableRow> extends
 }
 
 export interface FormTableUpdateApi<TRow extends TableRow = TableRow> {
+  /** 当前同步更新版本，供内部字段绑定建立响应式依赖。 */
+  getRevision: () => number
+  /** 从当前受控数据或本轮同步快照中解析指定行。 */
+  getCurrentRow: (row: TRow) => TRow
   /** 组件内部更新入口；通过行身份重新定位，不依赖可能过期的渲染下标。 */
   setValue: (row: TRow, fieldKey: string, value: FormTableValue) => void
   /** 不可变地批量更新指定行，patch 的 key 支持字段路径。 */

@@ -1,6 +1,7 @@
 import type { FormTableRowPatch, FormTableRowUpdate, TableRow } from '../types/base'
 import type { FormTableFieldChangePayload } from '../types/config/events'
 import type { FormTableUpdateApi } from '../types/context'
+import { ref } from 'vue'
 import { buildControlledTableTransaction } from '../utils/controlledTableTransaction'
 import {
   createRowIdentityIndex,
@@ -25,6 +26,8 @@ export function useControlledTableUpdate<TRow extends TableRow = TableRow>(
    * 让同一调用栈或同一微任务内的多次 setValue/updateRow 能基于最新结果继续组合。
    */
   let synchronousUpdateBase: TRow[] | null = null
+  /** 让字段绑定在父组件回写 props 前也能观察到本轮同步快照。 */
+  const revision = ref(0)
   /** 无 rowKey 时，旧上下文仍可通过本轮出现过的行引用定位到最新行。 */
   const synchronousRowIndexes = new Map<TRow, number>()
   /** rowKey 索引只绑定到特定数组引用和 rowKey，避免每次同步更新都扫描整表。 */
@@ -110,6 +113,8 @@ export function useControlledTableUpdate<TRow extends TableRow = TableRow>(
     synchronousUpdateBase = transaction.nextTableData
     // 同步调用方可能持有事务前后的任意行引用，全部映射到最新位置。
     transaction.referencedRows.forEach((index, row) => synchronousRowIndexes.set(row, index))
+    // 先触发字段响应式刷新，再安排快照清理，确保下一轮渲染能读取本次事务结果。
+    revision.value++
     scheduleUpdateBaseReset()
     options.emitUpdate(transaction.nextTableData)
 
@@ -127,7 +132,16 @@ export function useControlledTableUpdate<TRow extends TableRow = TableRow>(
     updateRows([{ row: targetRow, patch }])
   }
 
+  const getCurrentRow = (targetRow: TRow) => {
+    const sourceTableData = synchronousUpdateBase || options.getTableData()
+    const rowKey = options.getRowKey()
+    const rowIndex = resolveUpdateRowIndex(sourceTableData, targetRow, rowKey)
+    return rowIndex >= 0 ? sourceTableData[rowIndex] : targetRow
+  }
+
   return {
+    getRevision: () => revision.value,
+    getCurrentRow,
     setValue: (row, fieldKey, value) => updateRow(
       row,
       { [fieldKey]: value } as FormTableRowPatch<TRow>

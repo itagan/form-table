@@ -45,7 +45,8 @@ export function useFormTableFieldContext<TRow extends TableRow = TableRow>(
    */
   const bindingContext = computed<FormTableFieldBindingContext<TRow>>(() => {
     const context = runtimeContext.value
-    const targetRow = context.row as TRow
+    updateApi?.getRevision()
+    const targetRow = updateApi?.getCurrentRow(context.row as TRow) || context.row as TRow
     const binding = options.getConfig().binding
     let hasResolvedBindingValue = false
     let resolvedBindingValue: FormTableValue
