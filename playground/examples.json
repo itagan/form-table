@@ -168,6 +168,20 @@
     "tags": ["row operations", "selection", "batch update", "columns", "delayed commit"]
   },
   {
+    "title": "按行编辑与保存",
+    "description": "演示逐行切换文本与输入控件、按行校验、差异提交、取消恢复和失败重试。",
+    "path": "/row-edit-save",
+    "name": "row-edit-save",
+    "view": "RowEditSaveView",
+    "category": "business",
+    "level": "intermediate",
+    "status": "featured",
+    "relatedDocs": ["/features/detail-and-editing-modes", "/features/data-updates", "/features/validation-reset"],
+    "source": "playground/src/views/RowEditSaveView.vue",
+    "type": "warning",
+    "tags": ["row editing", "validateField", "dirty fields", "cancel", "retry"]
+  },
+  {
     "title": "多需求共享固定操作列",
     "description": "父页面接收独立组件的勾选结果，通过 props 传给表单列表组件循环渲染 FormTable 并验证行增删隔离。",
     "path": "/shared-operation-column",

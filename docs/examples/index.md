@@ -51,6 +51,7 @@ Playground 直接引用组件源码。示例名称、路由、分类、难度、
 | --- | --- | --- |
 | [完整编辑提交流程 ↗](http://localhost:5173/form-workflow) | 进阶 | 加载保存、异常重试、字段错误、版本冲突和未保存离开 |
 | [行列操作与异步提交 ↗](http://localhost:5173/row-column-operations) | 进阶 | 行增删复制移动、批量选择、动态列和成功后提交 |
+| [按行编辑与保存 ↗](http://localhost:5173/row-edit-save) | 进阶 | 逐行编辑、按行校验、差异提交、取消恢复和失败重试 |
 | [多需求共享固定操作列 ↗](http://localhost:5173/shared-operation-column) | 进阶 | 父组件通过 props 下发勾选结果、循环渲染、共享固定操作列和数据隔离 |
 | [共享插槽与循环表格 ↗](http://localhost:5173/shared-slot-loop) | 进阶 | 共享列和 cellSlot、稳定 key 复用，以及整体重建板块对象后的插槽刷新 |
 | [单元格合并 ↗](http://localhost:5173/cell-merge) | 高级 | 纵横合并、稳定列定位、共享字段和校验 |
