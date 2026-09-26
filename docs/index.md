@@ -14,6 +14,7 @@ pnpm add @itagan/form-table@latest
 | --- | --- |
 | 第一次安装并完成可编辑表格 | [快速开始](./guide/quick-start.md) |
 | 正在开发具体业务功能 | [开发任务导航](./guide/development-workflows.md) |
+| 使用 AI Agent 开发表格 | [AI 开发辅助](#ai-开发辅助) |
 | 查询属性、事件、Slot 或 Ref | [API 总览](./api/configuration.md) |
 | 理解受控更新和渲染边界 | [架构总览](./architecture/overview.md) |
 | 接入自定义组件或复杂字段 | [扩展模型](./architecture/extension-model.md) |
@@ -28,3 +29,9 @@ pnpm add @itagan/form-table@latest
 - 自定义字段 Type 用于复用已经稳定的业务组件协议，不是基础接入的前置步骤。
 
 需要连续了解完整配置时阅读[配置指南](./guide/configuration-guide.md)；需要按独立能力查询时进入[功能专题](./features/)。
+
+## AI 开发辅助
+
+仓库提供可选的 [FormTable Skill](https://github.com/itagan/form-table/tree/master/skills/form-table)，帮助 Agent 根据真实 API 选择字段配置、渲染方式和数据更新入口。将整个 `skills/form-table` 目录复制到业务项目的 `.agents/skills/form-table`，或复制到个人的 `~/.codex/skills/form-table`，然后在新会话中使用 `$form-table`。
+
+Skill 不包含在 `@itagan/form-table` 的 npm 包中；安装组件依赖不会自动启用它。
