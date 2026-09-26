@@ -64,6 +64,12 @@ const columns: ColumnConfig[] = [{
 
 根组件 `v-model` 对应 `tableData/update:tableData`。FormTable 不直接修改传入数组；字段输入和更新助手都会生成新数组交给父组件。
 
+## AI 开发辅助
+
+需要让 Codex 按 FormTable 的真实 API 实现业务表格时，可选用仓库中的 [FormTable Skill](https://github.com/itagan/form-table/tree/master/skills/form-table)。将整个 `skills/form-table` 目录复制到业务项目的 `.agents/skills/form-table`，或复制到个人的 `~/.codex/skills/form-table`，然后在新会话中使用 `$form-table`。其他支持 Agent Skills 的工具可按各自的 Skill 目录规则安装同一目录。
+
+Skill 由源码仓库维护，不包含在 `@itagan/form-table` 的 npm 包内；仅安装组件依赖不会自动启用它。
+
 ## 能力入口
 
 | 目标 | 文档 |

@@ -20,6 +20,7 @@ packages/
   form-table/        # 已发布到 npm 的组件包
 playground/          # Vue 2.7 调试和示例应用
 docs/                # Vue 3 / VitePress 文档站与统一站点产物
+skills/form-table/    # 供组件使用者单独安装的 Agent Skill
 ```
 
 核心入口：
@@ -75,6 +76,10 @@ pnpm release:check
 ## npm 包使用
 
 安装、兼容范围和最小示例统一见[组件包说明](./packages/form-table/README.md)与[快速开始](./docs/guide/quick-start.md)；属性和行为以 [API 总览](./docs/api/configuration.md)为准。
+
+## AI 开发辅助
+
+面向业务项目的 [FormTable Skill](./skills/form-table/SKILL.md) 以本仓库为维护来源，帮助 Agent 按真实 API 选择字段配置、渲染方式和数据更新入口。它独立于 npm 包分发；使用方式见[组件包说明](./packages/form-table/README.md#ai-开发辅助)。
 
 ## 调试页面
 
